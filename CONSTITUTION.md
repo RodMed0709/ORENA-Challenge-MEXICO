@@ -122,4 +122,12 @@ Repo privado: `RodMed0709/ORENA-Challenge-MEXICO`. Sincroniza **local + RunPod +
 
 ---
 
-*Constitución v1 — grounded en repo oficial clonado + PDFs. Se actualiza si cambia el repo o abre la pre-evaluación (15 jul).*
+## VII. Reglas de evidencia y literatura
+
+1. **Corpus:** la literatura vive en `literature/` — `INDEX.md` rankeado por tiers (versionado), PDFs en `literature/pdfs/` (local, gitignored). ~30 papers indexados; los paywalled los provee el usuario.
+2. **Recomendaciones = con cita.** Cuando se pida una recomendación técnica/de método, NO opinar al aire: buscar en el **corpus + web**, citar qué hizo cada investigación y si funcionó, y marcar confianza. Motor: MCP **`RAG-Research`** (`verify_claim_against_corpus`, `tier_papers`, `build_bibliography`, `draft_methods`, `draft_section`, `export_docx`).
+3. **Paper writing** es entregable del proyecto. Mínimo obligatorio: la **descripción de método** del submission (`SUB-01`). Opcional: paper de método propio (autores a discreción del lead), redactado con el MCP RAG-Research contra el corpus.
+4. **Trazabilidad:** toda afirmación que entre al paper debe verificarse contra el corpus (`verify_claim_against_corpus`) antes de incluirse.
+
+---
+*Constitución v1 — grounded en repo oficial clonado + PDFs + corpus de literatura. Se actualiza si cambia el repo o abre la pre-evaluación (15 jul).*
