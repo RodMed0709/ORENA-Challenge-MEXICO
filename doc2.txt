@@ -1,0 +1,1232 @@
+                                                                                                                                 or-arena.org
+
+ORena -- SAVE FOCUS
+challenge ­ frame track
+
+The FRAME Track evaluates a model's ability to answer clinically relevant ques=ons from a single
+image. This track targets core surgical scene understanding skills such as foreign object
+iden=fica=on, coun=ng, aDribute recogni=on, and spa=al localiza=on within a single moment in
+=me. It serves as an accessible entry point while establishing a strong baseline for visual
+percep=on and surgical-domain image interpreta=on.
+
+Title
+
+Use the .tle to convey the essen.al informa.on on the challenge mission.
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual Understanding for Safe Surgical AI
+
+FRAME Track
+
+Challenge acronym
+
+Preferable, provide a short acronym of the challenge (if any).
+
+ORena ­ FOCUS FRAME Track
+
+CHALLENGE ORGANIZATION
+
+Challenge abstract
+
+Provide a summary of the challenge purpose. This should include a general introduc.on in the topic from both a
+biomedical as well as from a technical point of view and clearly state the envisioned technical and/or biomedical
+impact of the challenge.
+
+Recent progress in general-domain Vision Language Models (VLMs) has enabled increasingly strong temporal
+reasoning over extended video streams. However, the surgical AI community has so far lacked a dedicated,
+standardized challenge that evaluates whether these emerging capabili.es translate to real clinical workflows, where
+cri.cal events unfold over tens of minutes to hours. This gap is important: many clinically meaningful ques.ons in
+minimally invasive surgery require persistent memory, temporal consistency, and reasoning across long .me horizons.
+
+The ORena SAVE FOCUS challenge addresses this unmet need by providing a structured benchmark that targets an
+urgent pa.ent-safety problem in minimally invasive procedures: ensuring the retrieval of foreign objects, such as
+sponges and needles, from the abdomen at the end of the opera.on. Uninten.onally leaving foreign objects in the
+abdomen is a rare but consequen.al incident in minimally invasive surgery, as they can cause serious complica.ons.
+
+Specifically, FOCUS aims to generate scien.fic progress by tackling two fundamental research ques.ons (RQs):
+
+RQ1 (Clinical u.lity): Can VLMs generate clinically meaningful and safety-relevant informa.on about surgical foreign
+objects? This ques.on targets the clinical value of VLMs for intraopera.ve quality assurance, focusing on ac.onable
+insights related to foreign objects such as sponges, needles, and clips.
+
+RQ2 (Technical limits): What are the current limita.ons of VLMs in surgical scene reasoning? To answer this ques.on,
+FOCUS encompasses three tracks that progressively increase the temporal and contextual demands on the model: a
+FRAME Track (single-image understanding) to assess founda.onal visual percep.on and surgical-domain
+interpreta.on; a SEGMENT Track (short video segments) to evaluate short-term temporal reasoning, local tracking, and
+ac.on understanding; and a PROCEDURE Track (long-context up to full procedures reflec.ng real intraopera.ve and
+postopera.ve query scenarios) to probe long-horizon memory, persistent object tracking across occlusions and scene
+changes, aggrega.on over .me (e.g., coun.ng and retrieval status), and global reasoning across events. Together,
+these tracks enable a systema.c characteriza.on of where current VLMs succeed and fail as task complexity transi.ons
+from instantaneous percep.on to long-context intraopera.ve reasoning.
+Cri.cally, FOCUS is enabled by a unique dataset that, to the best of our knowledge, is the first challenge resource to
+provide full-length laparoscopic videos with fine-grained foreign-object annota.ons at scale. Importantly, the mul.-
+center dataset includes instance-consistent labels, making it possible to evaluate models not only on short-term
+detec.on, but also on long-horizon tracking, coun.ng, and retrieval verifica.on across extended procedures. With a
+total of over 100,000 Visual Ques.on Answering (VQA) pairs obtained from 400 surgical videos acquired from all over
+the world, FOCUS establishes a standardized benchmark that simultaneously (i) probes the technical limits of long-
+context VLMs in real-world surgical video and (ii) addresses a concrete quality-assurance objec.ve with direct
+relevance to intraopera.ve pa.ent safety.
+
+FOCUS is hosted within ORena, a new umbrella framework for surgical AI compe..ons inspired by the "Arena"
+paradigm, but adapted to the specific constraints and opportuni.es of the Opera.ng Room (OR).
+
+Keywords
+
+List the primary keywords that characterize the challenge. (Separate your inputs with comma like Keyword 1,
+Keyword 2)
+
+Surgical AI, Surgical Data Science, Vision-Language Model, Long-context Reasoning, Surgical Foreign Objects,
+Laparoscopy, Endoscopy, Surgical Video Understanding
+
+Year
+
+Please indicate the year of the challenge. If you are applying for next years conference, please write the year of that
+conference.
+
+2026
+
+Novelty of the challenge
+
+Briefly describe the novelty of the challenge.
+
+FOCUS is the first surgical VLM challenge to explicitly benchmark long-context, understanding of full-length
+laparoscopic procedures, rather than only short, curated segments. It introduces a structured evalua.on framework
+that jointly measures (i) clinically relevant foreign-object safety ques.ons and (ii) technical limits of modern VLMs. By
+aligning long-context video reasoning with a concrete pa.ent-safety use case FOCUS provides the first standardized
+testbed that connects emerging long-context VLM capabili.es to real intraopera.ve quality assurance needs.
+
+Task descrip=on and applica=on scenarios
+
+Briefly describe the applica.on scenarios for the tasks in the challenge.
+
+In minimally invasive surgical procedures, surgical sponges, sutures and other foreign objects are inserted into the
+abdomen via trocar sites to carry out steps of the procedure. These objects frequently remain intra-abdominally for
+extended periods of the procedure, as objects, such as sponges, may contribute to exposure of the surgical field or
+may be reused. Uninten.onally leaving foreign objects in the abdomen is a rare but consequen.al incident in
+minimally invasive surgery, as they can cause serious complica.ons [1]. To avoid such incidents, coun.ng of all foreign
+objects at the beginning and the end of every procedure has been established as a standard quality control measure to
+ensure that all used objects are removed from the abdomen by the end of the procedure. However, due to the
+con.nuously changing and closed-up view in laparoscopic surgery, localizing remaining objects intra-abdominally at
+the end of surgical procedures can be .me-consuming and represents a prac.cal nuisance that surgeons rou.nely
+encounter.
+
+The challenge tasks reflect intraopera.ve quality-assurance scenarios in minimally invasive surgery where surgeons
+must ensure foreign objects are safely managed. Example applica.ons include con.nuous coun.ng and tracking of
+sponges, needles, clips, sutures, and specimen bags, real-.me localiza.on of the last known posi.on of an object that
+is unaccounted for, and verifica.on that all introduced items requiring removal have been retrieved before closure.
+
+FOCUS benchmarks vision­language models on clinically relevant Visual Ques.on Answering (VQA) tasks for foreign
+object understanding in minimally invasive surgery, with the goal of advancing AI methods that can support
+intraopera.ve quality assurance and pa.ent safety. In this context, VQA refers to the task of answering structured,
+clinically grounded ques.ons based on surgical video content and associated metadata.
+
+In the context of this challenge, a foreign object refers to an object that is fully introduced into the pa.ent's body
+cavity during a surgical procedure and is expected to be retrieved or accounted for. This includes items such as surgical
+sponges, compresses, needles, clips, drains, specimen bags, elas.c straps, and similar objects that are temporarily
+placed intra-abdominally.
+In addi.on, isolated biological material that is detached during the procedure and must be retrieved - such as an
+excised appendix, a gallstone, or resected .ssue fragments - are also considered foreign objects under this defini.on,
+as they require removal from the body cavity before comple.on of the opera.on.
+
+Importantly, standard surgical instruments that remain connected to the external environment (e.g., graspers, scissors,
+trocars, staplers, cameras) are not considered foreign objects. Furthermore, we exclude detachable parts of surgical
+instruments, par.cularly anvil components of staplers.
+
+FOCUS is organized in three tasks, here referred to as tracks.
+
+The FRAME Track evaluates a model's ability to answer clinically relevant ques.ons from a single image. This track
+targets core surgical scene understanding skills such as foreign object iden.fica.on, ajribute recogni.on, and spa.al
+localiza.on within a single moment in .me. It serves as an accessible entry point while establishing a strong baseline
+for visual percep.on and surgical-domain image interpreta.on.
+
+The SEGMENT Track focuses on short video segments (up to 5 min), requiring models to incorporate local temporal
+context to answer ques.ons about foreign objects and their interac.ons with anatomy and instruments. Tasks
+emphasize mo.on-aware percep.on, short-term tracking, and understanding of brief ac.on sequences, such as
+inser.on, manipula.on, or removal of sponges, needles, or clips. This track bridges sta.c recogni.on and longer-
+horizon reasoning by tes.ng whether models can integrate events across .me within a bounded context.
+
+The PROCEDURE Track challenges models with long videos (procedures from beginning up to a certain point reflec.ng
+real intraopera.ve and postopera.ve query scenarios), to assess their capacity for long-term memory, persistent
+tracking, and global reasoning. Ques.ons may require recalling when an object was last seen, aggrega.ng object
+counts across long intervals, or determining whether all introduced foreign objects requiring retrieval have been
+removed. This track targets the key technical fron.er of long-context VLMs and directly reflects real-world
+intraopera.ve quality assurance needs, where cri.cal safety ques.ons depend on understanding events that occurred
+much earlier in the opera.on.
+
+[1]: Badiee, Barzin, et al. "Retained foreign bodies amer major opera.ons: Trends, risk factors, and associated
+outcomes." Surgery 2025
+
+Further information for
+conference organizers
+
+Workshop
+
+If the challenge is part of a workshop, please indicate the workshop.
+
+N/A
+
+Expected number of par=cipants
+
+Please explain the basis of your es.mate (e.g., numbers from previous challenges) and/or provide a list of poten.al
+par.cipants and indicate if they have already confirmed their willingness to contribute.
+
+As this challenge is unprecedented, reliable es.mates based on prior par.cipa.on numbers are not available. We
+therefore es.mate 50­100 par.cipa.ng teams based on the following considera.ons:
+
+     1. The challenge targets a .mely and high-impact fron.er - long-context vision-language understanding in
+          surgical video - which is of strong interest not only to the surgical AI community but also to the broader
+          computer vision and mul.modal learning communi.es.
+
+     2. The challenge offers $50k+ in prize money, providing a substan.al incen.ve for par.cipa.on (unprecedented
+          in the field of surgical AI). Comparable high-incen.ve ini.a.ves, such as the RSNA Breast Cancer Detec.on
+          Challenge (> 1,000 par.cipants), demonstrate that significant prize funding can ajract large and diverse
+          par.cipa.on beyond the core medical imaging community [1].
+
+[1]: hjps://www.kaggle.com/compe..ons/rsna-breast-cancer-detec.on/leaderboard
+
+Dura=on
+
+How long does the challenge take? Possible values: half day, full day, 2 hours, etc.
+
+Half day
+Longer dura=on explana=on
+
+In case you selected half or full day, please explain why you need a long slot for your challenge.
+     · Unprecedented prize money and expected ajen.on: FOCUS offers unusually high prize incen.ves for MICCAI
+          challenges, which is expected to draw broader par.cipa.on and visibility, including teams from outside
+          tradi.onal medical imaging. A longer slot ensures we can accommodate the increased interest, highlight top
+          contribu.ons, and provide appropriate recogni.on and discussion.
+     · Mul.ple tracks and audiences: We inten.onally include both short-context ("entry") tracks and long-context
+          ("fron.er") tracks to be inclusive while s.ll pushing technical limits. This creates more results to present and
+          compare, and it ajracts both clinical and technical stakeholders who benefit from dedicated discussion .me.
+
+Publica=on and future plans
+
+Please indicate if you plan to coordinate a publica.on of the challenge results.
+Yes. We aim to submit the challenge to Nature Biomedical Engineering.
+
+MICCAI LNCS proceedings
+
+Indicate if you want to offer MICCAI Springer LNCS proceedings to the par.cipants. Publishing a proceedings volume is
+op.onal and at the discre.on of each challenge's organizers. At a minimum, organizers must ensure that a descrip.on
+of each par.cipant's submission is publicly available. Organizers who wish to publish MICCAI Springer LNCS
+proceedings must adhere to the MICCAI Satellite events publica.on process.
+No
+
+Space and hardware requirements
+
+Please describe the platorm used for any online challenge. For on-site challenges, indicate how you plan to provide a
+fair compu.ng environment. Please list any technical equipment or support needed (e.g., projectors, computers,
+monitors, loud speakers, microphones).
+We will use a derived version of the open source grand-challenges platorm for online valida.on. For the on-site part
+we will need standard conference equipment (projector, loud speakers, microphones, WiFi).
+
+FRAME Track
+(Single-Frame Understanding)
+
+Summary
+
+Abstract
+
+Provide a summary of the challenge purpose. This should include a general introduc.on in the topic from both a
+biomedical as well as from a technical point of view and clearly state the envisioned technical and/or biomedical
+impact of the challenge.
+FOCUS benchmarks vision­language models on clinically relevant ques.on answering for foreign object understanding
+in minimally invasive surgery, with the goal of advancing AI methods that can support intraopera.ve quality assurance
+and pa.ent safety. Across all tracks, tasks evaluate a model's ability to interpret laparoscopic scenes and provide
+ac.onable informa.on about foreign objects, such as detec.on, iden.fica.on, localiza.on, tracking, coun.ng, and
+retrieval status at increasing levels of temporal and contextual complexity.
+The FRAME Track evaluates a model's ability to answer clinically relevant ques.ons from a single image. This track
+targets core surgical scene understanding skills such as foreign object iden.fica.on, coun.ng, ajribute recogni.on,
+and spa.al localiza.on within a single moment in .me. It serves as an accessible entry point while establishing a
+strong baseline for visual percep.on and surgical-domain image interpreta.on.
+
+Keywords
+
+List the primary keywords that characterize the challenge. (Separate your inputs with comma like Keyword 1, Keyword
+2)
+Surgical AI, Surgical Data Science, Vision-Language Model, Surgical Foreign Objects, Laparoscopy, Endoscopy, Surgical
+Scene Understanding
+
+ORGANIZATION
+
+Organizing team
+
+Provide informa.on on the organizing team (names and affilia.ons).
+Coordinators:
+Lena Maier-Hein (German Cancer Research Center (DKFZ))
+Thomas G. Weiser (Wellcome Leap, Stanford University)
+
+Clinical Chairs:
+Daniel Hashimoto (University of Pennsylvania)
+Fiona Kolbinger (Purdue University)
+Thomas Pausch (University of Heidelberg)
+Thomas G. Weiser (Wellcome Leap, Stanford University)
+
+Technical Chairs:
+Salman Khan (Mohamed bin Zayed University of Ar.ficial Intelligence)
+Lena Maier-Hein (DKFZ)
+Stefanie Speidel (Na.onal Center for Tumor Diseases)
+Danail Stoyanov (University College London)
+
+Execu.ve commijee:
+Lucas Lujner (DKFZ) - PhD lead
+Patrick Godau (DKFZ) - Postdoc lead
+Jule Brandt (DKFZ)
+Evangelia Christodoulou (DKFZ)
+Janne Heinecke (DKFZ)
+Doreen Heckmann-Nötzel (DKFZ)
+Niklas Holzwarth (DKFZ)
+Michelle Karadeema (Wellcome Leap)
+Marcel Knopp (DKFZ)
+Leon Mayer (DKFZ)
+Annika Reinke (DKFZ)
+
+Contact Person
+
+Provide informa.on on the primary contact person.
+Prof. Dr. Lena Maier-Hein
+German Cancer Research Center (DKFZ)
+l.maier-hein@dkfz.de
+
+Are clinicians part of the organizing team?
+
+Indicate whether clinicians are part of the organizing team. If yes, describe their role.
+Yes, the following members of the organiza.on team are clinicians:
+Jule Brandt (DKFZ)
+Thomas G. Weiser (Wellcome Leap, Stanford University)
+Fiona Kolbinger (Purdue University)
+Daniel Hashimoto (University of Pennsylvania)
+Janne Heinecke (DKFZ)
+Thomas Pausch (University of Heidelberg)
+Thomas G. Weiser is a surgeon and the program director of the SAVE program at Wellcome Leap. Wellcome Leap
+funded parts of the work that led to the organiza.on of the challenge.
+
+The clinicians were involved in designing the challenge, adjus.ng annota.ons protocols, as well as conduc.ng and
+reviewing annota.ons on surgical videos.
+
+Life cycle type
+
+Define the intended submission cycle of the challenge. Include informa.on on whether/how the challenge will be
+con.nued amer the challenge has taken place. Not every challenge closes amer the submission deadline (one-.me
+event). Some.mes it is possible to submit results amer the deadline (open call) or the challenge is repeated with some
+modifica.ons (repeated event).
+Examples:
+
+     · One-.me event with fixed conference submission deadline
+     · Open call (challenge opens for new submissions amer conference deadline)
+     · Repeated event with annual fixed conference submission deadline
+     · Repeated event as open call challenge
+
+FOCUS is hosted within ORena, a new umbrella framework for surgical AI compe..ons inspired by the "Arena"
+paradigm, but adapted to the specific constraints and opportuni.es of the Opera.ng Room (OR). The inaugural ORena
+compe..on FOCUS, sponsored by Wellcome Leap SAVE, Helmholtz Imaging and the DKFZ Division of Intelligent
+Medical Systems (IMSY), is dedicated to foreign object understanding in minimally invasive surgery. As the first edi.on
+under the ORena framework, FOCUS sets a founda.on for future challenges that expand beyond foreign-object safety
+to broader long-context surgical scene understanding, procedure monitoring, and next-genera.on decision support in
+the opera.ng room.
+
+Event
+
+Report the event (e.g., conference) that is associated with the challenge (if any).
+
+Interna.onal Conference on Medical Image Compu.ng and Computer-Assisted Interven.on (MICCAI) 2026
+
+Report the plaWorm used to run the challenge
+
+Report the platorm (e.g., grand-challenge.org, synapse, Kaggle, ...) used to run the challenge.
+
+We will host a customized clone of hjps://grand-challenge.org/, which is an open source Apache licensed project
+(hjps://github.com/DIAGNijmegen/rse-grand-challenge) and tailor it to the needs of our challenge.
+
+Do you agree that your submission is shared with the plaWorm (e.g., grand-challenge, synapse...)
+that you indicated?
+
+Please note: 1) this purpose of such sharing is that the challenge chairs and the platorm can communicate smoothly,
+your answer will not impact the review of your proposal; 2) regardless of your response to this ques.on, it is your
+responsibility to perform all ac.ons required by the platorm (e.g., filling their submission request).
+
+yes
+
+Website
+
+Provide the URL for the challenge website (if any).
+
+hjps://or-arena.org/
+
+Allowed user interac=on
+
+Define the allowed user interac.on of the algorithms assessed. This includes the policy regarding any cura.on, (pre-
+)processing and (pre-)training steps.
+
+Examples:
+
+     · No user interac.on is allowed at any step
+     · User interac.on is allowed for cura.ng training data (i.e. excluding some training samples).
+
+Algorithms should be fully automa.c
+Training data policy
+
+Define the policy on the usage of training data. The data used to train algorithms may, for example, be restricted to the
+data provided by the challenge or may also include publicly available data including (open) pre-trained nets. Clarify
+whether such addi.onal data needs to be publicly available at the .me of the challenge launch. Clarify whether adding
+(private) annota.ons of the public data is allowed.
+
+Par.cipants may train models using the challenge-provided training set and may addi.onally use publicly available
+datasets and publicly released pre-trained models (e.g., open VLM backbones, language models, or vision encoders).
+Use of addi.onal manually or automa.cally generated annota.ons based on public data is allowed provided that
+annota.ons are made publically available amer the challenge. All training/fine-tuning data must be specified. Any
+external data or pre-trained model must be publicly accessible at the .me of the launch of the pre-evalua.on phase to
+ensure fairness and reproducibility. Par.cipants may create addi.onal annota.ons for such public datasets (including
+private annota.ons) and use them for training, provided that they make them publicly available with the submission of
+their solu.on.
+
+Organizer policy
+
+Define the par.cipa.on policy for members of the organizers' ins.tutes. For example, members of the organizers'
+ins.tutes may par.cipate in the challenge but are not eligible for awards.
+
+Examples:
+
+     · May not par.cipate.
+     · May par.cipate but not eligible for awards and not listed in leaderboard.
+
+Members of the organizers' labs are not eligible for awards. The organizers will provide baseline models that serve as
+reference points for par.cipants and will be clearly iden.fied as such on the leaderboard.
+
+Award policy
+
+Define the award policy. In par.cular, provide details with respect to challenge prizes.
+
+We have already secured $50k prize money and are nego.a.ng with several companies to raise $100k+.
+
+About 20% of the prize money will be provided to the FRAME track.
+
+The prize money will be distributed to the top three teams that meet the following criteria:
+
+     1) The team will make their model and any addi.onally created annota.ons public.
+     2) The submission outperforms the baselines.
+     3) Team members are eligible to receive prize money (see below).
+     4) The submission descrip.on provides sufficient methodological details to allow for a meaningful
+
+          interpreta.on.
+
+The prize money will be awarded to the top three teams in a 50% / 30% / 20% split. Adjustments may be made to
+ensure rounded and prac.cal prize amounts and to deal with .es.
+
+Two baseline models will be provided:
+
+     · A state-of-the-art fron.er VLM (e.g., ChatGPT, Gemini), selected based on the best performance on the
+          valida.on dataset and applied without task-specific fine-tuning.
+
+     · A state-of-the-art open-source VLM, fine-tuned by the organizers to provide a strong and accessible baseline.
+
+Due to funding restric.ons imposed by the U.S.-based funding agency, teams from countries subject to U.S. restric.ons
+(e.g., Russia, North Korea, Iran) are not permijed to par.cipate. All par.cipa.ng teams, including those ineligible for
+awards, will be listed on the public leaderboard to ensure transparency and fair benchmarking.
+
+Result announcement policy
+
+Define the policy for result announcement.
+
+Examples:
+
+     · Top 3 performing methods will be announced publicly.
+     · Par.cipa.ng teams can choose whether the performance results will be made public.
+
+The top performing teams that meet the the following criteria will be announced publicly:
+     (1) The team will make their model and any addi.onally created annota.ons public.
+     (2) The solu.on beat the baselines.
+     (3) The submission descrip.on provides sufficient methodological details to allow for a meaningful
+
+          interpreta.on.
+
+Publica=on policy
+
+Define the publica.on policy. In par.cular, provide details on ...
+
+     · ... who of the par.cipa.ng teams/the par.cipa.ng teams' members qualifies as author
+     · ... whether the par.cipa.ng teams may publish their own results separately, and (if so)
+     · ... whether an embargo .me is defined (so that challenge organizers can publish a challenge paper first).
+
+All teams that have beaten the baselines will be invited as co-authors on the planned publica.on. Each team can name
+up to three co-authors. Excep.ons may be made upon reasonable request.
+
+Submission method
+
+Describe the method used for result submission. Preferably, provide a link to the submission instruc.ons.
+
+Examples:
+
+     · Docker container on the Synapse platorm. Link to submission instruc.ons:
+     · Algorithm output was sent to organizers via e-mail. Submission instruc.ons were sent by e-mail.
+     · Algorithm container submission (type 2) on Grand Challenge.
+
+All submissions must be made through the challenge website, which will be based on grand-challenge. Algorithm
+submissions will be via Docker containers. Precise instruc.ons will be provided alongside a template repository before
+the pre-evalua.on phase starts. Docker containers must work without internet access. Inference will be limited to a
+single GPU and must be completed within a maximum .me budget per ques.on. If the answering of a ques.on takes
+longer than the budget, the respec.ve ques.on will be treated as answered incorrectly. The budget will be depending
+on the track:
+
+FRAME track: 5 seconds* on a 48GB VRAM GPU
+
+SEGMENT track: 15 seconds* on an 80GB VRAM GPU
+
+PROCEDURE track: 30 seconds* on an 80 GB VRAM GPU
+
+*Note: Although we are confident with the provided numbers, constraints with the compute costs for the inference
+might imply slight adapta.ons for the exact inference resources. Updates will be made public on the official challenge
+website.
+
+Teams must also submit a submission descrip.on with sufficient methodological details to allow for a meaningful
+interpreta.on of the results and to be eligible to receive the prize money. Details on the exact format will be made
+available at least four weeks before the final submission deadline.
+
+Pre-evalua=on
+
+Provide informa.on on the possibility for par.cipa.ng teams to evaluate their evaluate their algorithms before
+submi·ng final results. For example, many challenges allow submission of mul.ple results, and only the last run is
+officially counted to compute challenge results.
+
+A leaderboard will be set up to which each team can make up to 10 submissions*. Evalua.on will be performed on a
+sample of 20 representa.ve videos. Only teams that beat both baselines on the leaderboard will proceed to the final
+test stage.
+
+*Note: Although we are confident with the numbers provided, constraints with the compute costs for the inference
+might imply slight adapta.ons for the exact number of submissions if we encounter a very large or very small number
+of par.cipants. Updates will be made public on the official challenge website.
+
+Crea.ng mul.ple accounts per person or mul.ple teams per ins.tu.on/lab to exploit the submission budget during
+pre-evalua.on or final submission may result in a permanent exclusion from the challenge.
+
+Schedule
+
+Provide a .metable for the challenge. Preferably, this should include
+     · the release date(s) of the training cases (if any) URL
+     · the registra.on date/period
+     · the release date(s) of the test cases and valida.on cases (if any)
+     · the submission date(s)
+     · associated workshop days (if any)
+     · the release date(s) of the results
+
+Un.l 15 May: challenge website launches, registra.on opens, release of training data (first batch), release of code for
+data loading and valida.on
+
+15 June: release of remaining training data (second batch), release of minimal working example to dockerize and
+submit
+
+15 July: launch of pre-evalua.on phase with public leaderboard
+
+15 August: final submissions are possible for teams that beat the baselines on the valida.on leaderboard
+
+September 1st: registra.on and pre-evalua.on closes
+
+September 8th: final submission deadline (docker + method descrip.on)
+
+October 4th or 8th: result announcements at MICCAI
+
+Ethics approval
+
+Indicate whether ethics approval is necessary for the data. If yes, provide details on the ethics approval, preferably
+ins.tu.onal review board, loca.on, date and number of the ethics approval (if applicable). Add the URL or a reference
+to the document of the ethics approval (if available).
+
+All videos have been deiden.fied using automated and manual deiden.fica.on techniques, and as they only display
+intraabdominal views, do not include informa.on iden.fying the pa.ent. Ethical approval for using the videos as part
+of the FOCUS Challenge will not be required. However, all par.cipants in the challenge must agree to terms of use, in
+par.cular to use the videos as intended for the purposes of compe.ng in this Challenge, and to not ajempt to re-
+iden.fy any informa.on within the videos in order to determine its provenance or clinicians/facili.es involved.
+
+Data usage agreement
+
+Clarify how the data can be used and distributed by the teams that par.cipate in the challenge and by others during
+and amer the challenge. This should include the explicit lis.ng of the license applied (click here for more informa.on).
+
+Please note that the data license should not differ among sources. In case a license has to be changed, it has to be
+reported to the MICCAI challenges team and changed in the proposal.
+
+The 30 HEICO videos have already been publicly released under a CC BY-NC-SA license [1, 2].
+
+The remaining 170 training videos will be available under the following data usage agreement:
+
+By registering for the FOCUS Challenge, each team agrees:
+
+(1) to use the data and videos provided only within the scope of the challenge and for the purposes of par.cipa.ng in
+the challenge,
+
+(2) to neither pass it on to a third party nor share it beyond members of the team,
+
+(3) to not publish the data or underlying annota.ons, or otherwise make them publicly available, and
+
+(4) to refrain from any ajempt to reiden.fy informa.on that has been deiden.fied, such as individual surgeons or
+facili.es, or the provenance of the video,
+
+(5) to maintain the data within a protected/secure environment compliant with HIPAA, GDPR, or similar regula.on,
+and ensure access to the videos are restricted to members of the challenge team only.
+
+Algorithms and models generated by individual teams may be used for noncommercial or commercial purposes.
+
+All ques.on answer pairs for the training data will be publicly available under a CC BY license, except for the
+addi.onally annotated ques.ons and answers on the HEICO data, which will be released under the CC BY-NC-SA
+license to comply with the license of the original video data.
+
+[1] Maier-Hein, L., Wagner, M., Ross, T., Reinke, A., Bodenstedt, S., Full, P. M., ... & Müller-S.ch, B. P. (2021). Heidelberg
+colorectal data set for surgical data science in the sensor opera.ng room. Scien.fic data, 8(1), 1-11.
+[2] Roß, T., Reinke, A., Full, P. M., Wagner, M., Kenngoj, H., Apitz, M., ... & Maier-Hein, L. (2021). Compara.ve
+valida.on of mul.-instance instrument segmenta.on in endoscopy: results of the ROBUST-MIS 2019 challenge.
+Medical image analysis, 70, 101920.
+
+Code availability of the organizers
+
+Provide informa.on on the accessibility of the organizers' evalua.on somware (e.g., code to produce rankings).
+Preferably, provide a link to the code and add informa.on on the supported platorms.
+
+The evalua.on code will be made publicly available via a public GitHub repository upon launch of the challenge,
+though certain details, including the exact judge models for evalua.on will remain undisclosed un.l the end of the
+challenge, to prevent tuning towards the LLM judges. The code to produce rankings based on metric results will be
+released along with the training data.
+
+Code availability of the par=cipa=ng teams
+
+In an analogous manner, provide informa.on on the accessibility of the par.cipa.ng teams' code.
+
+Model publica.on is mandatory to be eligible for awards (see above). This includes a way to load the model locally for
+inference and instruc.ons on how to do so. Par.cipants are further strongly encouraged to make their training scripts,
+hyperparameter configura.ons, and detailed documenta.on available to promote transparency, reproducibility, and
+scien.fic exchange within the community. Teams choosing not to release their training code are s.ll required to
+provide sufficient methodological details in their submission descrip.ons to allow for a meaningful interpreta.on of
+the results and to be eligible to receive the prize money. This balanced policy aims to foster open research while
+maintaining inclusivity for industrial and applied contribu.ons.
+
+Conflicts of interest
+
+Provide informa.on related to conflicts of interest. In par.cular provide informa.on related to sponsoring/funding of
+the challenge. Also, state explicitly who had/will have access to the test case labels and when.
+
+Access to the test labels: All annota.ons are hosted at DKFZ. Clinicians of the organizing team have access to all labels.
+Involved annota.on companies had access to raw videos and the bounding boxes they created.
+
+The FOCUS Challenge is sponsored in large part by the Wellcome Leap SAVE program, led by program director Thomas
+G. Weiser. Wellcome Leap is a 501c3 charitable organiza.on based in the United States with a mission to accelerate
+health breakthroughs on a global scale.
+
+It is further sponsored by the ORena ini.a.ve of the DKFZ Intelligent Medical Systems (IMSY) lab as well as Helmholtz
+Imaging.
+
+Funding for compute infrastructure will be provided by Amazon Web Services (AWS).
+
+MISSION OF THE CHALLENGE
+
+Field(s) of applica.on
+
+State the main field(s) of applica.on that the par.cipa.ng algorithms target.
+
+Examples:
+
+     · Diagnosis
+     · Educa.on
+     · Interven.on assistance
+     · Interven.on follow-up
+     · Interven.on planning
+     · Prognosis
+     · Research
+     · Screening
+     · Training
+     · Cross-phase
+
+Interven.on assistance
+
+Task category(ies)
+
+State the task category(ies).
+Examples:
+
+     · Classifica.on
+     · Detec.on
+     · Localiza.on
+     · Modeling
+     · Predic.on
+     · Reconstruc.on
+     · Registra.on
+     · Retrieval
+     · Segmenta.on
+     · Tracking
+
+Visual Ques.on Answering (VQA)
+
+Target cohort
+
+We dis.nguish between the target cohort and the challenge cohort. For example, a challenge could be designed
+around the task of medical instrument tracking in robo.c kidney surgery. While the challenge could be based on ex
+vivo data obtained from a laparoscopic training environment with porcine organs (challenge cohort), the final
+biomedical applica.on (i.e. robo.c kidney surgery) would be targeted on real pa.ents with certain characteris.cs
+defined by inclusion criteria such as restric.ons regarding sex or age (target cohort)
+
+Describe the target cohort of task, i.e. the subjects/objects from whom/which the data would be acquired in the final
+biomedical applica.on.
+
+Pa.ents undergoing minimally-invasive body cavity (thorax, abdomen, pelvis, retroperitoneum) surgery involving
+foreign objects anywhere in the world.
+
+Challenge cohort
+
+Describe the challenge cohort, i.e. the subject(s)/object(s) from whom/which the challenge data was acquired.
+
+The challenge cohort consists of pa.ents that underwent minimally invasive surgical interven.on at one of mul.ple
+sites across the globe and encompasses a diverse range of surgical procedures and pa.ent popula.ons. Part of the
+training videos (30 videos) were taken from the exis.ng HeiCo dataset [1] and annotated with ques.ons and answers.
+Most of the remaining data were acquired as part of the SAVE project funded by Wellcome Leap [2] and are not yet
+publicly available.
+
+Training data include the following laparoscopic surgical procedures:
+
+     · 170 cholecystectomies
+     · 10 proctocolectomies
+     · 10 rectal resec.ons
+     · 10 sigmoid resec.ons
+
+Test data will include 200 videos from a broad range of procedures (cholecystectomies and addi.onal procedure types
+not to be conveyed to the par.cipants). Leaderboard valida.on data will include 20 videos representa.ve of the test
+data.
+
+[1]: Maier-Hein, L., Wagner, M., Ross, T. et al. Heidelberg colorectal data set for surgical data science in the sensor
+opera.ng room. Sci Data 8, 101 (2021). hjps://doi.org/10.1038/s41597-021-00882-2
+
+[2]: hjps://wellcomeleap.org/save/
+
+Imaging technique(s)
+
+Specify the imaging technique(s) applied in the challenge.
+
+Surgical endoscopy; Diverse systems applied
+
+Context informa=on: Image data
+
+Provide addi.onal informa.on given along with the images. The informa.on may correspond directly to the imaging
+data (e.g., tumor volume).
+
+We will provide the following metadata corresponding to each VQA-pair: procedure name, .mestamp of the frame.
+Context informa=on: Pa=ent
+
+Provide addi.onal informa.on given along with the images. The informa.on may correspond to the pa.ent in general
+(e.g., gender, medical history).
+none
+
+Data origin
+
+Describe the data origin, i.e. the region(s)/part(s) of subject(s)/object(s) from whom/which the image data would be
+acquired in the final biomedical applica.on (e.g., brain shown in computed tomography (CT) data, abdomen shown in
+laparoscopic video data, opera.ng room shown in video data, thorax shown in fluoroscopy video). If necessary,
+differen.ate between target and challenge cohort.
+Internal anatomy during minimally-invasive surgery
+
+Algorithm Target
+
+Describe the algorithm target, i.e. the structure(s)/subject(s)/object(s)/component(s) that the par.cipa.ng algorithms
+have been designed to focus on (e.g., tumor in the brain, .p of a medical instrument, nurse in an opera.ng theater,
+catheter in a fluoroscopy scan). If necessary, differen.ate between target and challenge cohort.
+Foreign objects in rela.on to pa.ent anatomy
+
+Assessment aim(s)
+
+Iden.fy the property(ies) of the algorithms to be op.mized to perform well in the challenge. If mul.ple proper.es are
+assessed, priori.ze them (if appropriate). The proper.es should then be reflected in the metrics applied (parameter
+26), and the priori.es should be reflected in the ranking when combining mul.ple metrics that assess different
+proper.es.
+
+     · Example 1: Find highly accurate liver segmenta.on algorithm for CT images.
+     · Example 2: Find lung tumor detec.on algorithm with high sensi.vity and specificity for mammography
+
+          images.
+Corresponding metrics are listed below (parameter 26):
+Accuracy, Applicability, Complexity, Consistency, Ergonomics, Feasibility, Hardware requirements, Interac.on,
+Integra.on in workflow, Precision, Reliability, Robustness, Run.me, Sensi.vity, Specificity, Usability, User sa.sfac.on
+Accuracy, Reliability, Robustness
+
+DATA SETS
+
+Data acquisi=on device(s)
+
+Specify the device(s) used to acquire the challenge data. This includes details on the device(s) used to acquire the
+imaging data (e.g., manufacturer) as well as informa.on on addi.onal devices used for performance assessment (e.g.,
+tracking system used in a surgical se·ng).
+The 30 HeiCo videos were acquired in the integrated opera.ng room KARL STORZ OR1 FUSION® (KARL STORZ SE & Co
+KG, Tujlingen, Germany). The remaining cases were recorded with diverse surgical endoscopy systems.
+
+Data acquisi=on details
+
+Describe relevant details on the imaging process/data acquisi.on for each acquisi.on device (e.g., image acquisi.on
+protocol(s)).
+N/A - different protocols from systems used around the globe
+
+Center(s)/ins=tute(s)
+
+Specify the center(s)/ins.tute(s) in which the data was acquired and/or the ata providing platorm/source (e.g.,
+previous challenge). If this informa.on is not provided (e.g., for deiden.fica.on reasons), specify why.
+The 30 HeiCo videos were recorded at Heidelberg University Hospital. The test data was acquired from more than 5
+centers not represented in the training data.
+Characteris=cs of the subjects
+
+Describe relevant characteris.cs (e.g., level of exper.se) of the subjects (e.g., surgeon)/objects (e.g., robot) involved in
+the data acquisi.on process (if any).
+N/A for regulatory reasons
+
+Case defini=on
+
+State what is meant by one case in this challenge. A case encompasses all data that is processed to produce one result
+that is compared to the corresponding reference result (i.e. the desired algorithm output).
+Examples:
+
+     · Training and test cases both represent a CT image of a human brain. Training cases have a weak annota.on
+          (tumor present or not and tumor volume (if any)) while the test cases are annotated with the tumor contour
+          (if any).
+
+     · A case refers to all informa.on that is available for one par.cular pa.ent in a specific study. This informa.on
+          always includes the image informa.on as specified in data source(s) (parameter 21) and may include context
+          informa.on (parameter 18). Both training and test cases are annotated with survival (binary) 5 years amer
+          (first) image was taken.
+
+In this track, one case corresponds to a single VQA instance derived for one frame of a laparoscopic surgical video. A
+case consists of: (1) a frame, (2) a ques.on, (3) categoriza.on of the ques.on according to the challenge taxonomy
+(shared with the par.cipants only for the training data) (4) meta informa.on about the procedure type and the .me-
+point/-frame, and (5) a reference answer provided by an expert surgeon or extracted automa.cally from the expert
+annota.ons.
+
+Number of cases
+
+State individually total number of training, valida.on and test cases.
+Training: 20,000 ques.ons obtained from 200 videos
+Valida.on: 2,000 ques.ons obtained from 20 videos
+Test: 20,000 ques.ons obtained from 200 videos
+
+Quan=ty of data which is already annotated
+
+How much of the data are already annotated (stra.fied by train test in percentage)?
+The annota.on process comprises 5 stages (see below "Instruc.ons given to the annotators"). We have completed
+stage 1-3 for all the data and are in the process of comple.ng stage 4.
+
+Explana=on of data propor=on
+
+Explain why a total number of cases and the specific propor.on of training, valida.on and test cases was chosen.
+The test data was selected to rigorously stress-test robustness across diverse procedure types, foreign object classes,
+and ques.on formula.ons. We reserved 20 videos for the online leaderboard and split the remaining videos 50/50 in a
+training and test set. Since par.cipants are encouraged to leverage data beyond the challenge dataset for training, we
+can afford this spli·ng without restric.ng par.cipants too much.
+
+Further important characteris=cs of the cases
+
+Challenge organizers are encouraged to (partly) use unseen, unpublished data for their challenges. Describe if new
+data will be used for the challenge and state the number of cases along with the propor.on of new data.
+The majority of the videos (390) and all labels are new. The test data will not be released.
+
+Further important characteris=cs of the cases
+
+Men.on further important characteris.cs of the training, valida.on and test cases (e.g., class distribu.on in
+classifica.on tasks chosen according to real-world distribu.on vs. equal class distribu.on) and jus.fy the choice.
+N/A
+Method for determining the reference annota=on
+
+Describe the method for determining the reference annota.on i.e. the desired algorithm output. Provide the
+informa.on separately for the training, valida.on and test cases if necessary. Possible methods include manual image
+annota.on, in silico ground truth genera.on and annota.on by automa.c methods.
+If human annota.on was involved, state the number of annotators.
+The scope for the ques.ons in FOCUS ranges from percep.on-level ques.ons in single frames (FRAME Track; this one)
+to long-horizon reasoning across en.re procedures (PROCEDURE Track), while maintaining a consistent focus on
+foreign objects. Ques.ons in the FRAME Track are constructed such that they require analysis of the provided frame
+and that they can be unambiguously answered based on the image as well as surgical textbook knowledge. This
+ensures that the benchmark evaluates mul.modal reasoning grounded in visual evidence rather than external medical
+knowledge alone. Ques.ons unrelated to foreign objects or requiring specula.ve clinical judgment beyond the
+observable context are deliberately excluded.
+The annota.ons were performed in five stages. For each Stage, a detailed annota.on protocol was provided to the
+annotators.
+
+STAGE 1 - Foreign object presence screening (5s clips).
+Purpose: Iden.fica.on of video segments with foreign objects
+Input: 5 sec clips
+Output: Presence flag for each class of foreign objects on each clip
+Annotators: QualityMatch Crowdsourcing company [1]
+
+STAGE 2 - Frame-level localiza.on (bounding boxes at 1 fps).
+Purpose: Iden.fica.on and localiza.on of foreign objects in individual frames
+Input: Frames (sampled at 1 fps) corresponding to clips with foreign objects
+Output: Frames (sampled at 1 fps) with bounding boxes and class assignment for all foreign objects
+Annotators: QualityMatch and iMerit Crowdsourcing companies [1, 2]
+
+STAGE 3 - Automated bounding box comple.on/correc.on.
+Purpose: Automa.c refinement of crowd-based foreign object iden.fica.on and localiza.on
+Input: Frames (sampled at 1 fps) with bounding boxes and class assignment for all foreign objects.
+Output: Automa.cally corrected frames (sampled at 1 fps) with bounding boxes and class assignment for all foreign
+objects
+
+STAGE 4 - Manual refinement, instance assignment, and expert verifica.on.
+Purpose: Instance assignment to individual objects and final correc.on of bounding boxes and class assignments
+Input: Frames (sampled at 1 fps) with bounding boxes and class assignment for all foreign objects.
+Output: Frames (sampled at 1 fps) with class and instance assignments and bounding boxes around all foreign objects
+Annotators: Ini.al annota.on genera.on by a team of medical students. Verifica.on and correc.on by a team of four
+expert surgeons and two highly experienced medical students. In this stage, missing objects can s.ll be added.
+
+STAGE 5 - VQA genera.on and clinical ques.on design.
+Purpose: Genera.on of ques.ons and answers based on foreign object informa.on. Part of the ques.ons are
+automa.cally generated based on the available instance informa.on. Further ques.ons are added by a team of expert
+surgeons
+Input: Videos with class and instance assignments and bounding boxes around all foreign objects at 1 fps
+Output: N ques.ons per video Annotators: A team of > 10 expert surgeons and medical students.
+
+To avoid biases towards specific capabili.es and enable stra.fied valida.on, Stage 5 comprises a task mapping step
+that maps each ques.on onto a structured taxonomy.
+
+For the FRAME track, the ques.ons are categorized as follows (poten.ally with mul.ple labels):
+
+     · Object recogni.on (Which object (type)? In which state? Where?): Recogni.on of object instances, their
+          seman.c type, ajributes, spa.al context,
+
+     · Aggrega.on (How many?): Combina.on of informa.on on foreign objects and events across mul.ple objects
+          and instances.
+
+The complete taxonomy will be released with the first batch of training data.
+
+[1] hjps://www.quality-match.com/product
+
+[2] hjps://imerit.net/domains/medical-ai/
+
+Instruc=ons given to the annotators
+
+Provide the instruc.ons given to the annotators (if any) prior to the annota.on. This may include descrip.on of a
+training phase with the somware. Provide the informa.on separately for the training, valida.on and test cases if
+necessary. Preferably, provide a link to the annota.on protocol.
+
+The annota.on process was executed in five stages, u.lizing specific somware frameworks and training protocols for
+each:
+
+     · Stages 1 & 2 (Foreign object presence screening and frame-level localiza.on): These stages u.lized the
+          QualityMatch [1] and iMerit [2] annota.on frameworks. All crowd-sourced annotators underwent rigorous
+          vendor-led training specific to the selected tools and the annota.on tasks prior to commencing work.
+
+     · Stage 3 (Automated bounding box comple.on/correc.on): A semi-automated quality control phase was
+          implemented using a Python-based YOLO object detec.on model. This model performed cross-valida.on on
+          the data generated in the previous stages to iden.fy and flag inconsistencies.
+
+     · Stage 4 (Manual refinement and instance assignment): A customized version of the CVAT (Computer Vision
+          Annota.on Tool) [3] was adapted specifically for the FOCUS challenge. For this cri.cal stage, annotators
+          received direct training from the challenge execu.ve commijee regarding both the adapted tool and the
+          specific refinement objec.ves.
+
+     · Stage 5 (Annota.on enrichment): This stage involved the crea.on of a VQA dataset centered on expert clinical
+          reasoning and the iden.fica.on of "moments of importance" (e.g., specific points of foreign object inser.on
+          and retrieval) from the temporal data generated in Stage 4. Prior to annota.on, clinicians, who were ac.vely
+          involved in the co-design of the enrichment protocol, underwent a specialized training on CVAT. The training
+          provided instruc.ons for two primary tasks: the expert verifica.on of exis.ng instance annota.ons from
+          previous stages and the manual enrichment with complex ques.on-answer pairs. Following the established
+          protocol, clinicians were guided to derive both open- and closed-ended ques.ons that addressed medical
+          reasoning and seman.c surgical understanding specifically tailored to the type of foreign object iden.fied.
+
+Documenta.on: Comprehensive annota.on instruc.ons were provided to annotators at every stage. These detailed
+protocols will be made available alongside the dataset.
+
+[1] hjps://www.quality-match.com/product
+
+[2] hjps://imerit.net/domains/medical-ai/
+
+[3] hjps://github.com/cvat-ai/cvat
+
+Details on the subject(s)/algorithm(s) that annotated the cases
+
+Provide details on the subject(s)/algorithm(s) that annotated the cases (e.g., informa.on on level of exper.se such as
+number of years of professional experience, medically-trained or not). Provide the informa.on separately for the
+training, valida.on and test cases if necessary.
+
+Stage 1-2: Crowd workers with exper.se with the tool and basic knowledge with medical tasks from previous
+annota.on projects.
+Stage 3: Object detec.on models (YOLO) have been used to enrich the crowd annota.ons with further bounding boxes
+by iden.fying possible missing objects.
+
+Stage 4: Medical students (11 at the .me of the submission of the challenge) with up to 3 years of annota.on
+experience. These are all students from the University of Heidelberg with exper.se within the surgical domain.
+
+Stage 5: 4 Expert surgeons including the clinical PIs of the project with more than 10 years of experience in surgical
+video analysis and highly experienced medical students.
+
+Method(s) used to merge mul=ple annota=ons
+
+Describe the method(s) used to merge mul.ple annota.ons for one case (if any). Provide the informa.on separately
+for the training, valida.on and test cases if necessary.
+
+Mul.-stage annota.on process with mul.ple verifica.on steps as detailed above.
+
+Data pre-processing method(s)
+
+Describe the method(s) used for pre-processing the raw training data before it is provided to the par.cipa.ng teams.
+Provide the informa.on separately for the training, valida.on and test cases if necessary.
+
+The HeiCo dataset [1] was used as is, without further pre-processing. New videos have been de-iden.fied by out-of-
+body detec.on and blurring respec.ve parts. These videos have also been trimmed accordingly.
+
+[1]: Maier-Hein, L., Wagner, M., Ross, T. et al. Heidelberg colorectal data set for surgical data science in the sensor
+opera.ng room. Sci Data 8, 101 (2021). hjps://doi.org/10.1038/s41597-021-00882-2
+
+Sources of error related to the image annota=on
+
+Describe the most relevant possible error sources related to the image annota.on. If possible, es.mate the magnitude
+(range) of these errors, using inter- and intra-annotator variability, for example. Provide the informa.on separately for
+the training, valida.on and test cases, if necessary.
+
+There are mul.ple sources of error related to the annota.on process. To ensure high-quality annota.ons, we
+conducted a mul.-stage annota.on process with the following correc.on/verifica.on steps:
+
+     1) Correc.on of crowd object detec.on annota.ons with an automa.c method to minimize missed foreign
+          object instances
+
+     2) Correc.on of automa.c annota.ons by medical students to ensure a high level of consistency, set up as a two
+          stage process, based on a four-eyes principle and assisted by automa.c flagging
+
+     3) Verifica.on (and possible correc.on) of student annota.ons by senior surgeons
+
+Other sources of error
+
+In an analogous manner, describe and quan.fy other relevant sources of error.
+
+N/A
+
+ASSESSMENT METHODS
+
+Metric(s)
+
+Define the metric(s) to assess a property of an algorithm. These metrics should reflect the desired algorithm proper.es
+described in assessment aim(s) (parameter 20). State which metric(s) were used to compute the ranking(s) (if any).
+
+     · Example 1: Dice Similarity Coefficient (DSC)
+     · Example 2: Area under curve (AUC)
+
+We navigated the tradeoff between interpretability of the ranking and methodological precision by separa.ng the
+ranking metric from the detailed performance analyses. For detailed performance analyses, we apply targeted metrics
+for each ques.on type, such as set-based metrics for ques.ons asking about visible foreign-object classes, distance-
+based measures for temporal localiza.on ques.ons and Expected Cost for ordinal outputs (e.g., coun.ng ques.ons).
+To simplify the ranking scheme, we work with Accuracy as the primary metric and compensate for the main
+disadvantages - specifically the prevalence dependency and threshold sensi.vity - with appropriate data splits and
+hierarchical and stra.fied aggrega.on.
+
+Accuracy is computed as the propor.on of correctly answered ques.ons. For open-ended ques.ons, seman.c
+correctness is assessed by an LLM-as-a-judge approach. Up to three LLMs decide via majority vote whether the
+proposed answer matches the reference. We will make sure that any ajempt to manipulate the LLM-as-a-judge
+through adversarial promp.ng, "jailbreaking", or other malicious techniques designed to unfairly influence the
+evalua.on will result in immediate disqualifica.on of the team. In cases where annota.on uncertainty exists, for
+example with respect to a specific temporal reference, an applica.on-dependent variant of Accuracy is employed [1].
+In this se·ng, predic.ons are considered correct (TP) if they fall within a specific tolerance range (e.g., a temporal
+window). Tolerance ranges are defined based on inter-rater variability and/or clinical input.
+
+[1] Dergachyova, O., Bouget, D., Huaulmé, A., Morandi, X., & Jannin, P. (2016). Automa.c data-driven real-.me
+segmenta.on and recogni.on of surgical workflow. Interna.onal journal of computer assisted radiology and surgery,
+11(6), 1081-1089.
+
+Jus=fica=on of metric(s)
+
+Jus.fy why the metric(s) was/were chosen, preferably with reference to the biomedical applica.on.
+
+For detailed performance analyses, metrics are chosen in a customized manner depending on the specific ques.on, as
+suggested by the Metrics Reloaded framework [1]. For the ranking scheme, Accuracy was selected to reflect our
+primary assessment goal of correctness, i.e., whether a model provides correct answers to clinically meaningful
+ques.ons. Accordingly, Accuracy, as it directly opera.onalizes correctness in a transparent manner and represents the
+state-of-the-art standard for valida.ng VQA tasks. It further enables consistent comparison across categorical and
+open-ended ques.ons.
+
+For open-ended ques.ons, an LLM-as-a-judge paradigm is employed, which has become a common and effec.ve
+approach in modern VQA and VLM benchmarks to assess seman.c correctness while allowing for clinically meaningful
+linguis.c variability. Preliminary experiments demonstrated only very minor discrepancies when using different state-
+of-the-art large language models as judges.
+
+Reliability aspects are addressed through the overall challenge design rather than through addi.onal metrics.
+Specifically, the test set comprises unseen procedures, unseen centers and unseen ques.ons compared to the training
+data. A stra.fica.on approach enables the tes.ng of generaliza.on capabili.es.
+
+[1] Maier-Hein, L., Reinke, A., Godau, P., Tizabi, M. D., Buejner, F., Christodoulou, E., ... & Jäger, P. F. (2024). Metrics
+reloaded: recommenda.ons for image analysis valida.on. Nature methods, 21(2), 195-212.
+
+Method used to compute a performance rank
+
+Describe the method used to compute a performance rank for all submijed algorithms based on the generated metric
+results on the test cases. Typically the text will describe how results obtained per case and metric are aggregated to
+arrive at a final score/ranking. Ideally, provide the ranking scheme as a concrete pseudo code.
+
+Key design goals
+
+     · Interpretability: while we take a complex approach to the detailed performance analysis of methods (see
+          sta.s.cs sec.on below), our aim was to have an easy-to-understand ranking scheme. For this reason, we
+          based the ranking on a single metric.
+
+     · Fairness across categories: avoid bias from uneven ques.on counts (e.g., many iden.fica.on ques.ons)
+     · Noise resistance: irrelevant performance differences within a category should not be rewarded
+     · Robustness-first: emphasize generaliza.on, e.g., procedure types that have not been present in the training
+
+          data
+     · Theore.cal guarantees: although no merging mechanism can check all boxes of desirable proper.es ("Arrow's
+
+          impossibility theorem"), we prefer one with overall more desirable proper.es
+     · Reproducibility: determinis.c and transparent aggrega.on rules
+
+Overview
+
+The ranking happens in three steps:
+
+     1. Capability-level ranking: For different capabili.es individual rankings are created. Irrelevant performance
+          differences result in iden.cal ranks.
+
+     2. Merging through Copeland method: The individual rankings are combined to determine the overall ranking.
+          We use the Copeland method to do so [1].
+
+     3. Resolving .es: For the top 3 places we will resolve .es by looking at the mean win rate of .ed models using
+          bootstrapping within all capabili.es.
+Proposed ranking scheme
+
+Each test case is annotated with the following meta informa.on:
+
+   i. Robustness level: In-distribu.on (ID) vs Out-of-distribu.on (OOD) tag with respect to procedure type and
+          ques.on
+
+   ii. Primary capability: Given the primary ques.on intent, the test case is mapped to one primary capability using
+          the proposed taxonomy (Main capabili.es: Object Recogni.on and Instance Matching, Temporal Grounding,
+          Aggrega.on, Event and Scene Understanding, Reasoning)
+
+Using these ajributes we split all ques.ons into buckets: For each model, and each primary category, model scores are
+computed for the ID and OOD ques.ons. They represent the mean Accuracy over all ques.ons belonging to the
+respec.ve primary category and distribu.on split.
+
+The ini.al ranking for each bucket is based on this Accuracy score. Then we will perform significance tests between
+pairs of models to determine whether a performance delta truly jus.fies different ranks and adjust the ranking so that
+non-significant differences result in the same rank posi.on.
+
+The merged ranking is then computed from the Copeland rule over all rankings. We say model A dominates model B in
+case A is ranked higher than B more omen than B is ranked higher than A. The score of each model is given by the
+number of models it dominates minus the number of models it is dominated by. The higher the score, the bejer.
+
+In case of .es within the first three posi.ons, we will resolve them by directly comparing all .ed models. Within each
+bucket we perform bootstrapping and compute the respec.ve Accuracies of any bootstrap sample. The win rate is the
+frac.on of bootstrap samples that result in a model to have the highest Accuracy of all models. Tied models are then
+sorted by their mean win rate over all buckets.
+
+To outperform a baseline model during the pre-evalua.on phase it suffices to have a higher mean Accuracy over the
+buckets. We will also make mean accuracy performances of the final phase public.
+
+[1]: Rofin, Mark, et al. "Vote'n'rank: Revision of benchmarking with social choice theory." Proceedings of the 17th
+Conference of the European Chapter of the Associa.on for Computa.onal Linguis.cs. 2023.
+
+Submissions with missing results
+
+Describe the method(s) used to manage submissions with missing results on test cases.
+
+Test cases with missing response data will be handled like false answers.
+
+Jus=fica=on of ranking
+
+Jus.fy why the described ranking scheme(s) was/were used.
+
+We designed the ranking scheme according to the above-summarized requirements. To reward robustness, we give
+equal weight to ID and OOD ques.ons. We evaluate each primary capability separately before combining them with
+equal weight. Before combining the scores across all buckets, we use the significance tes.ng to ensure only meaningful
+performance deltas result in different ranks. We favor Copeland over other ranking schemes (for example the linear
+ranking, also known as the Borda rule [1]) because it has more desirable proper.es [1], par.cularly it is more robust
+against irrelevant alterna.ves. As a measure to resolve .es between models amer the Copeland method, we use the
+head-to-head win rate with bootstrapping to determine a bejer model. The final ranking scheme focuses purely on
+the ques.on, "What is the best model?" rather than assessing the extent to which a problem is solved.
+
+[1]: Rofin, Mark, et al. "Vote'n'rank: Revision of benchmarking with social choice theory." Proceedings of the 17th
+Conference of the European Chapter of the Associa.on for Computa.onal Linguis.cs. 2023.
+
+Sta=s=cs - Overview
+
+Provide an overview of the sta.s.cal approaches used in the scope of the challenge analysis. Details can be provided
+in the parameters below. For each parameter, jus.fy why the described sta.s.cal method(s) was/were used and, if
+necessary, add a descrip.on of any method used to assess whether the data met the assump.ons required for the
+par.cular sta.s.cal approach.
+
+While we keep the ranking scheme rela.vely simple for the purpose of interpretability, the purpose of our sta.s.cal
+analyses is to provide a nuanced understanding of model capabili.es. It is based on the following principles:
+     · Taking non-independency of answers present in the data into account: Given the dependencies in our data
+          (e.g., frames and segments origina.ng from the same video, or answers retrieved from ques.ons referring to
+          the same frames, cannot be considered independent), we will account for this clustering in all inferen.al
+          analyses. Specifically, model performance variability (i.e., standard devia.on, confidence intervals) will be
+          es.mated using bootstrapping while taking data clustering into account.
+
+     · Mul.-label handling: As many ques.ons are assigned mul.ple capability labels (e.g., temporal grounding and
+          spa.al localiza.on), analyses will explicitly account for label overlap and explore its effect on model
+          performance. We will report both marginal performance per category and condi.onal performance within
+          key co-occurrence strata. Addi.onally, adjusted category effects will be es.mated using mul.variable logis.c
+          regression models.
+
+     · Stra.fied analyses: We will stra.fy analyses along mul.ple dimensions, including sub-capabili.es, context
+          length (short, medium, long), clinical impact levels, and robustness se·ng (ID/OOD). This enables systema.c
+          characteriza.on of where performance degrades as task complexity increases and where specific capability
+          combina.ons pose challenges.
+
+     · Ranking uncertainty quan.fica.on: Following our proposed ranking scheme (see above), we will in the end
+          report measures of variability of the resul.ng rankings, such as the standard devia.on and confidence
+          intervals.
+
+Sta=s=cs - Precision of the performance es=mates
+
+Provide a descrip.on of how the precision of the performance es.mates of individual algorithms is assessed (e.g.,
+confidence interval of the mean on the test set computed using percen.le bootstrap, confidence interval of the
+accuracy on the test set computed using percen.le bootstrap).
+
+To evaluate the precision of performance es.mates, we will be implemen.ng bootstrapping to compute confidence
+intervals of performance metrics on the test set. Moreover, performance repor.ng will be stra.fied per task categories
+as described in [1] and the precision es.mates will be reported alongside confidence intervals.
+
+[1] Kurpath, M. I., Kaithakkodan, J. M., Zhou, J., Mullappilly, S. S., Almansoori, M., Ahsan, N., ... & Cholakkal, H. (2025).
+A Benchmark and Agen.c Framework for Omni-Modal Reasoning and Tool Use in Long Videos.
+
+Sta=s=cs - Performance variability across cases
+
+Provide a descrip.on of how variability of the performance of individual algorithms across test cases is assessed (e.g.,
+SD across test cases, IQR, graphs, repor.ng outliers...).
+
+To describe performance variability across test cases, we will report the standard devia.on of the performance metrics
+and complement this with boxplots that visually illustrate variability for each combina.on of task and par.cipa.ng
+algorithm. Furthermore, We will stra.fy analyses along mul.ple dimensions, including sub-capabili.es, clinical impact
+levels, and robustness se·ng (ID/OOD).
+
+Sta=s=cs - Rankings variability
+
+Provide a descrip.on of how variability of rankings is assessed.
+
+To assess and visualize ranking variability, the challengeR somware [1] will be used. In addi.on, we will report
+confidence intervals for the differences in performance between par.cipa.ng algorithms for each performance metric
+considered.
+
+[1] Wiesenfarth, M., Reinke, A., Landman, B. A., Eisenmann, M., Saiz, L. A., Cardoso, M. J., ... & Kopp-Schneider, A.
+(2021). Methods and open-source toolkit for analyzing and visualizing challenge results. Scien.fic reports, 11(1), 2369.
+
+Sta=s=cs - Tests for significance
+
+Provide a descrip.on of sta.s.cal tests that are used to assess whether the differences in performance between
+algorithms are sta.s.cally significant.
+
+Our approach for determining model rankings incorporates model performance uncertainty by means of
+bootstrapping and thus offers stronger evidence for outperformance and subsequently ranking stability compared to
+tradi.onal significance tes.ng.
+
+Sta=s=cs - Missing data handling
+
+Provide a descrip.on of the missing data handling.
+Any ques.on for which results data is missing will be treated as an incorrect answer and be assigned the worst
+possible score (depending on the metric).
+
+Sta=s=cs - So`ware
+
+Indicate any somware product that is used for all data analysis methods.
+
+Our sta.s.cal analyses will be conducted in Python using relevant libraries such as scipy.stats and statsmodels.
+
+Further analyses
+
+Present further analyses to be performed (if applicable), e.g., related to
+
+     · combining algorithms via ensembling,
+     · inter-algorithm variability,
+     · common problems/biases of the submijed methods, or
+     · ranking variability.
+
+Addi.onal analyses will include subgroup performance breakdowns across technical (context length, capability) and
+clinical axes (decision impact, required knowledge), robustness gap analysis between ID and OOD, and qualita.ve
+failure mode analysis. We will also explore post-hoc ensembling of compa.ble submissions to quan.fy poten.al upper
+bounds.
+
