@@ -1,0 +1,24 @@
+# Secrets — NUNCA versionar
+.secrets.env
+*.env
+!.env.example
+
+# Docs de dinero/negocio — NO al repo compartido (el amigo hace pull y los ve)
+PROPUESTA-LEO.md
+PROPUESTA-LEO.docx
+NEGOCIO/
+
+# Datos / pesos / checkpoints (van en RunPod, no aqui)
+data/
+datasets/
+*.ckpt
+*.safetensors
+*.bin
+checkpoints/
+runs/
+wandb/
+
+# Basura
+__pycache__/
+*.pyc
+.DS_Store
