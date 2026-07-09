@@ -8,6 +8,10 @@ PROPUESTA-LEO.md
 PROPUESTA-LEO.docx
 NEGOCIO/
 
+# Literatura — PDFs pesados/copyright quedan LOCAL; el INDEX + notas SI se versionan
+literature/pdfs/
+literature/**/*.pdf
+
 # Datos / pesos / checkpoints (van en RunPod, no aqui)
 data/
 datasets/
@@ -17,6 +21,9 @@ datasets/
 checkpoints/
 runs/
 wandb/
+
+# Obsidian — config local del editor (el vault ES el repo; los .md se versionan, el workspace no)
+.obsidian/
 
 # Basura
 __pycache__/
