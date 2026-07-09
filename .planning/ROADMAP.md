@@ -39,13 +39,13 @@ The journey is a fine-tune-and-package competition run: reproduce the official `
   3. Harness reports accuracy per capability-group × {ID, OOD} bucket (not just the headline mean) and aborts on any duplicate qID
   4. Local `Qwen/Qwen3.5-4B` judge (`TransformersJudge`) returns CORRECT/INCORRECT for judge-routed formats; `heico`/`lapchole` load via the SDK loader into `Request`/`Reference`
   5. All 3 machines clone/pull/push the private repo (secrets, data, weights never committed) using the shared branch+versioned-YAML+committed-summary convention; EDA of answer_format, capability-group, and canonical answer shapes is committed
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: Pin two-env deps + `FocusConfig`/`FOCUS_ROOT_DIR`, download HeiCo, reproduce SDK example path
-- [ ] 01-02: Private-repo sync + `.gitignore` guards + experiment-tracking convention (FND-02/03/04)
-- [ ] 01-03: Eval harness wrapping `Evaluator`, ID/OOD bucket report, dup-qID assert, judge wiring (EVAL-01..04)
-- [ ] 01-04: SDK data load + EDA report of formats/capabilities/canonical shapes (DATA-01, DATA-03)
+- [ ] 01-01-PLAN.md — [wave 1] Repo + pinned Env C lockfile + two GPU-env specs + sync/experiment-tracking docs (FND-01/02/03/04)
+- [ ] 01-02-PLAN.md — [wave 1] SDK data load (`build_dataset`) + EDA report of formats/groups/canonical shapes (DATA-01/03)
+- [ ] 01-03-PLAN.md — [wave 2] Eval harness wrapping `Evaluator` (Track.FRAME): golden exact reproduction, model-free responses.json scoring, MockJudge wiring (EVAL-01/02/04)
+- [ ] 01-04-PLAN.md — [wave 3] Per capability-group × {ID,OOD} bucket report + synthetic OOD fixture + dup-qID abort (EVAL-03)
 
 ### Phase 2: Zero-Shot Inference Engine
 **Goal**: A working `InferenceEngine` that produces an honest zero-shot `pre_evaluation_score` before Jul 15 and doubles as the always-valid submission floor.
