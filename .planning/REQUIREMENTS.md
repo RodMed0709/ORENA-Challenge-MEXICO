@@ -73,13 +73,46 @@
 
 ## Traceability
 
-*Populated during roadmap creation (each requirement maps to exactly one phase).*
+Each v1 requirement maps to exactly one phase. See `.planning/ROADMAP.md` for phase detail.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| EVAL-01 | Phase 1 | Pending |
+| EVAL-02 | Phase 1 | Pending |
+| EVAL-03 | Phase 1 | Pending |
+| EVAL-04 | Phase 1 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| MODEL-01 | Phase 2 | Pending |
+| MODEL-02 | Phase 2 | Pending |
+| MODEL-03 | Phase 2 | Pending |
+| DATA-02 | Phase 3 | Pending |
+| TRAIN-01 | Phase 3 | Pending |
+| TRAIN-03 | Phase 3 | Pending |
+| TRAIN-02 | Phase 4 | Pending |
+| TRAIN-04 | Phase 4 | Pending |
+| ROB-01 | Phase 4 | Pending |
+| ROB-02 | Phase 4 | Pending |
+| FMT-01 | Phase 5 | Pending |
+| FMT-02 | Phase 5 | Pending |
+| FMT-03 | Phase 5 | Pending |
+| FMT-04 | Phase 5 | Pending |
+| PKG-01 | Phase 6 | Pending |
+| PKG-02 | Phase 6 | Pending |
+| PKG-03 | Phase 6 | Pending |
+| SUB-01 | Phase 7 | Pending |
+| SUB-02 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 27 total
-- Mapped to phases: (pending roadmap)
-- Unmapped: (pending roadmap)
+- v1 requirements: 30 total (header previously miscounted as 27; corrected)
+- Mapped to phases: 30 / 30 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-09*
-*Last updated: 2026-07-09 after initial definition*
+*Last updated: 2026-07-09 after roadmap creation (traceability populated, count corrected to 30)*
