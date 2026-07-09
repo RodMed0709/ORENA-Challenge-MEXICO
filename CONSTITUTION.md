@@ -39,11 +39,22 @@ answer_format, answer, clinical_relevance (bool)
   - **`Reference`**: `qID:str, primary:Capability, _format:str, answer:str, format_kwargs:dict, secondaries:tuple, ood:bool=False, clinical:bool`
 - ❌ NO existen los campos `image`, `question_type`, ni `metadata`. No asumirlos.
 
-### I.4 Answer formats (8) — exacto vs juez
-`answer_format` ∈ `{binary, number, percentage, foclass, open_ended, matching, multiple_choice, time}`.
-- **Match EXACTO** (`fmt.compare()`): `binary, number, percentage, foclass, time`. → El formato canónico de la respuesta es **crítico**; un `2` vs `two` vs `2 clips` puede fallar. Aprender el formato exacto del dataset.
-- **LLM-as-judge** (`JUDGE_FORMATS`): `open_ended, matching, multiple_choice`. Juez emite exactamente `CORRECT`/`INCORRECT`; veredicto = `"CORRECT" in raw and "INCORRECT" not in raw`.
-- Juez default: `TransformersJudge` con **`Qwen/Qwen3.5-4B`** (`DEFAULT_JUDGE_MODEL`), o `APIJudge` (endpoint OpenAI-compatible). Majority vote sobre lista de jueces.
+### I.4 Answer formats (8) — exacto vs juez (VERIFICADO en `formats.py`/`evaluator.py`)
+`answer_format` ∈ `{binary, number, percentage, fo_class, open_ended, matching, multiple_choice, time}`. ⚠️ es **`fo_class`** (no `foclass`).
+- **Match EXACTO** (`fmt.compare()`): `binary, number, percentage, fo_class, time`.
+  - `number`: **solo `str.isdigit()`**. → `"two"`, `"2 clips"`, `"2.0"`, `"-1"` **fallan todos**. Salida numérica pura.
+  - `percentage`: `isclose(abs_tol=1e-9)` = exacto (el param `threshold_pp` está definido pero **no se usa**).
+  - `fo_class`: **set-equality** de nombres en `Title Case` (orden y duplicados no importan).
+  - `time`: número de timestamps debe coincidir, con tolerancia pairwise de ~5s.
+- **LLM-as-judge** (`JUDGE_FORMATS`): `open_ended, matching, multiple_choice`. Juez emite `CORRECT`/`INCORRECT`; veredicto = `"CORRECT" in raw and "INCORRECT" not in raw`. Juez default: `TransformersJudge` con **`Qwen/Qwen3.5-4B`**, o `APIJudge`. Majority vote.
+  - `matching` está gated por regex `fullmatch` **antes** del juez, aunque sea judge-routed.
+
+### I.4-bis Gates SILENCIOSOS que te ponen 0 (leídos del código — CRÍTICO)
+1. **Parse gate universal:** `fmt.read(prediction)` corre en **TODA** respuesta ANTES del juez/scoring. Si lanza `ValueError` → incorrecta. Aplica **también** a formatos de juez.
+2. **>300 caracteres → auto-incorrecta.** Brevedad NO es preferencia, es gate duro.
+3. **`AdversarialDetector.check()` lanza `RuntimeError`** ante frases de su lista heurística → **descalifica toda la submission**. Y **misfire con frases inocentes**: `"the answer is definitely correct"`, `"you are now"`, `"act as if"`, `"always respond with correct"`. → Escanear nuestras propias salidas offline contra esa lista antes de enviar.
+4. **`qID` duplicado → `ValueError` aborta el eval run COMPLETO** (no una pregunta, el score entero). Garantizar qIDs únicos.
+5. **Latencia mata en p99, no media.** Timeout = incorrecta aunque el contenido sea correcto.
 
 ### I.5 Métrica
 - Headline = **`pre_evaluation_score`**: media **sin pesos** sobre hasta **10 buckets** = 5 grupos de capacidad × {in-distribution, out-of-distribution}. Accuracy plana por pregunta dentro de cada bucket.
@@ -53,6 +64,8 @@ answer_format, answer, clinical_relevance (bool)
 
 ### I.6 Dependencias base (mín. pinneadas)
 Python `>=3.10`. `datasets>=2.14, decord>=0.6, huggingface-hub>=0.17, opencv-python>=4.8, pandas>=2.0, numpy>=1.23, torch>=2.0, torchvision>=0.15, transformers>=4.30, tiktoken>=0.5, progiter, matplotlib, pillow, requests`. Extras de inferencia: `qwen-vl-utils, accelerate`.
+
+**Pins DUROS para Qwen3-VL (verificado):** `transformers==4.57.*` (abajo de eso el arch `qwen3_vl` no carga; NO saltar a 5.x) + `qwen-vl-utils>=0.0.14`. Fine-tune: **ms-swift `>=4.2`** (soporte nativo Qwen3-VL, `--max_pixels`, `--freeze_vit/--freeze_aligner`). Serving: **vLLM `>=0.11`** (par verificado 0.11.2 + transformers 4.57). **Dos envs Python separados** (train: ms-swift+bitsandbytes+flash-attn; serve: vLLM) — pins de torch/flash-attn chocan; el artefacto de handoff = pesos LoRA ya merged. Cuant: **bf16 LoRA** pal 8B (cabe en 80GB, sin pérdida NF4); QLoRA NF4 solo pal wildcard 32B; en L40S (Ada CC 8.9) el lever es **FP8 w8a8** si p99 aprieta.
 
 ---
 
