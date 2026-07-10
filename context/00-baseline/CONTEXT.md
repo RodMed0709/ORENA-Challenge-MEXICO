@@ -35,6 +35,23 @@ explicit FO taxonomy + "instrument ≠ foreign object", higher `max_pixels`, and
 windows. The `pre_evaluation_score` is fragile on FRAME (a single n=1 temporal bucket at 0
 costs ~⅓ of the headline) — track overall/raw acc alongside it.
 
+## Trust / known issues (adversarial review, 2026-07-10)
+Two adversarial agents reviewed the run. Number is correctly computed (reproduced exactly) but
+**`0.174` is a fragile local-slice figure, not leaderboard-comparable.** Report **raw 0.262 /
+overall 0.254 + per-format** as the robust signal; the real number = public leaderboard (Jul 15).
+- **C1 (critical):** pre_eval averages 3/10 buckets; `temporal_grounding` is **n=1** (`lapchole__5024415`,
+  an "end of procedure" question a single start-frame can't answer) = ⅓ of the headline. Drop it → ~0.262.
+- **C2 caveat:** local test is genuinely all-ID (`ood` column present, all False — *not* a parse bug as
+  one agent guessed); organizers' scorer may include OOD buckets → non-comparable denominator.
+- **C3:** judge = `Qwen/Qwen3-4B` (SDK default `Qwen3.5-4B` doesn't exist on HF); 759 judge-routed →
+  headline in [0.131, 0.539] under disagreement. Confirm organizers' judge before quoting oe/mc.
+- Checks that PASSED: parse-failure analysis correct, no error-swallowing, qIDs unique, 0 timeouts holds,
+  fps 25/30 verified matching decord on sampled videos.
+
+**Fix before next rung:** (1) use `decord.get_avg_fps()` not hard-coded fps (only 2/38 videos checked);
+(2) add counter/log for silent last-frame clamp (`data.py:129`); (3) multi-frame / end-of-clip sampling
+so temporal questions are answerable; (4) confirm the organizers' eval judge.
+
 ## Next
 - Rung 01 candidate (cheap, no train): prompt/taxonomy grounding A/B vs 00, same test split.
 - Rung 02: frame resolution / multi-frame A/B.
