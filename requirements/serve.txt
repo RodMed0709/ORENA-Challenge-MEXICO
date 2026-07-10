@@ -1,0 +1,12 @@
+# Phase 6 — offline inference serving (GPU, RunPod / eval container). Separate env from train.
+# Install: pip install -r requirements/serve.txt
+# vLLM pins its own torch build; keep this env SEPARATE from train.txt (conflicting torch/flash-attn pins).
+
+vllm>=0.11
+transformers==4.57.*
+qwen-vl-utils>=0.0.14
+huggingface_hub>=0.17
+pillow
+opencv-python>=4.8
+decord>=0.6
+orena-focus @ git+https://github.com/IMSY-DKFZ/orena-focus.git@v0.3.4
