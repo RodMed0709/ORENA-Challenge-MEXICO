@@ -38,6 +38,30 @@ Artifacts: `runs/00_zeroshot_qwen3vl/` (gitignored) — `report.json`, `results.
 `summary.csv`, `predictions.json`, and `qualitative/` (40 mixed cases: frame + question +
 GT + our answer, browsable `index.html`).
 
+### ⚠️ Trust caveats (adversarial review, 2026-07-10)
+
+The number is *correctly computed* from its inputs (reproduced exactly from artifacts), but
+**`0.174` is a fragile local-slice figure, NOT a leaderboard-comparable score.** Report the
+**robust signals instead: raw accuracy 0.262 / overall 0.254 + the per-answer_format table.**
+
+- **The headline swings on ONE question.** Only 3 of 10 group×ood buckets are populated and one
+  is **n=1** (`temporal_grounding`, qID `lapchole__5024415` — an "at the end of the procedure"
+  question that a single start-frame *cannot* answer). It scores 0.0 and carries ⅓ of the mean;
+  drop/populate it and the headline is ~0.262. A single 0↔1 flip moves 0.174→~0.51.
+- **Local test is all in-distribution.** Every row has `ood=False` (the parquet column exists and
+  is genuinely all-False — not a parsing bug), so our score averages 3 ID-only buckets while the
+  organizers' scorer may average up to 10 including OOD → different denominator, non-comparable.
+- **Judge substituted.** We used `Qwen/Qwen3-4B` (SDK default `Qwen3.5-4B` doesn't resolve on HF).
+  759 judge-routed questions → headline bounded in [0.131, 0.539] under judge disagreement.
+  Confirm the organizers' eval judge before quoting open_ended/multiple_choice accuracy.
+- **The authoritative number is the public leaderboard (opens Jul 15).** Treat 0.174 as an internal
+  sanity floor on our local, OOD-stripped, Qwen3-4B-judged slice — not the FRAME leaderboard score.
+
+Known issues to fix before the next rung (logged in CONTEXT): use `decord.get_avg_fps()` instead of
+hard-coded fps (verified matching on sampled videos, but only 2 of 38 checked); add a counter/log for
+the silent last-frame clamp (`data.py`); handle the n=1 unanswerable temporal question (needs
+multi-frame / end-of-clip sampling).
+
 ## What this experiment is
 
 - **One variable:** none yet — this establishes the baseline. Backbone: `Qwen/Qwen3-VL-8B-Instruct`, zero-shot (no training).
