@@ -56,12 +56,12 @@ Plans:
   2. Engine samples 1–3 frames from `sample.video_path` (+fps) and unlinks the temp clip after use, via one frame-sampling policy shared identically by train/eval/serve
   3. A committed zero-shot `pre_evaluation_score` for the open backbone on HeiCo, measured through the Phase 1 harness, exists before Jul 15
   4. The zero-shot run constitutes an always-valid submission (a packaged floor > 0 is achievable from this artifact)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Frame-sampling policy utility shared across train/eval/serve (DATA-04)
-- [ ] 02-02: `InferenceEngine` load/predict over `FocusVideoDataset`, temp-clip unlink (MODEL-01, MODEL-02)
-- [ ] 02-03: Zero-shot run through harness, commit baseline number pre-Jul 15 (MODEL-03)
+- [ ] 02-01-PLAN.md — [wave 1] Shared SamplingPolicy + frame extraction (sample_frames/from_paths) + Wave-0 StubEngine scaffold (DATA-04)
+- [ ] 02-02-PLAN.md — [wave 2] QwenInferenceEngine load/predict over FocusVideoDataset, frames-as-images, temp-clip unlink, output floor guard, 3 example bugs fixed (MODEL-01, MODEL-02)
+- [ ] 02-03-PLAN.md — [wave 3] Zero-shot baseline driver through the Phase-1 harness; committed HeiCo FRAME number pre-Jul 15 (GPU checkpoint) (MODEL-03)
 
 ### Phase 3: OOD-Safe Split & Training Pipeline
 **Goal**: A frozen, leakage-proof split and a working LoRA training pipeline that can produce a merged-weights artifact on RunPod.
