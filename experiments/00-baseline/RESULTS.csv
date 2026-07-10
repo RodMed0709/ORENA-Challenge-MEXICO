@@ -1,0 +1,2 @@
+rung,notebook,model,judge,split,n_questions,pre_evaluation_score,overall_mean_acc,raw_acc,n_timed_out,lat_p50_s,lat_p95_s,lat_p99_s,acc_binary,acc_fo_class,acc_multiple_choice,acc_number,acc_open_ended,date,notes
+00,00_zeroshot_qwen3vl.ipynb,Qwen3-VL-8B-Instruct,Qwen3-4B,frame-test,6252,0.174,0.254,0.262,0,0.30,0.49,0.59,0.597,0.182,0.534,0.127,0.590,2026-07-10,zero-shot baseline; format-clean but genuine perception gap (instrument!=FO confusion); A100 80GB
