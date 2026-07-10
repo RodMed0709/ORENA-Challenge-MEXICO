@@ -32,6 +32,30 @@ warm-start) but the spec fits both shapes:
   build→smoke→review→full, one-`src`, and notebook-provenance rules apply
   **unchanged**.
 
+## 0a. Sync discipline — GitHub is the code bus (BINDING)
+
+**Code and text move through GitHub, never by direct local→pod copy.** The flow
+is one-directional and non-negotiable:
+
+```
+   local (edit + commit)  ──push──▶  GitHub  ──pull/reset──▶  pod /workspace/repo
+```
+
+- **Code, notebooks, configs, docs, specs:** edit locally, `commit`, `push` to
+  GitHub; on the pod `git pull` (or `git fetch && git reset --hard origin/<branch>`
+  — gitignored `runs/`, `external_data/` survive a hard reset). **Never** `scp`/
+  `rsync` source onto the pod, and **never** edit source directly on the pod.
+  The pod's working tree is disposable and always reconstructable from a commit.
+- **Binary artifacts only** (frames, images, run outputs, weights, `*.parquet`):
+  a direct line is allowed — `scp` or the volume's S3 API — because they are
+  gitignored and too big/opaque for git. Pull them **down** from the pod to view;
+  do not push them into the repo.
+- **Rationale:** every experiment is reproducible from a commit hash; there is no
+  "it only exists on the pod" state; provenance stays in git history.
+- The pod holds a clone at `/workspace/repo`; treat it as a checkout, not a
+  source of truth. A cheap CPU pod is sufficient to run the `git pull` that lands
+  new code on the volume between GPU sessions.
+
 How a session uses this file:
 1. Read the whole spec once.
 2. Inventory the target repo (where source lives, how experiments are
