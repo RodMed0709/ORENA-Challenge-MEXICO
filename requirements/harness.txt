@@ -1,0 +1,17 @@
+# Phase 1 — Eval harness + data (CPU / local, GPU-free)
+# Install: pip install -r requirements/harness.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+orena-focus @ git+https://github.com/IMSY-DKFZ/orena-focus.git@v0.3.4
+transformers==4.57.*
+datasets>=2.14
+huggingface_hub>=0.17
+pandas>=2.0
+pyarrow>=15.0
+numpy>=1.23
+pillow
+opencv-python>=4.8
+decord>=0.6
+tiktoken>=0.5
+requests
+pytest>=8.0

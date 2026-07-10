@@ -1,0 +1,18 @@
+# Phases 3-4 — LoRA fine-tuning (GPU, RunPod). Install on a CUDA pod.
+# Install: pip install -r requirements/train.txt
+# NOTE: torch must match the pod's CUDA (RunPod pytorch image ships it). Do NOT pin a CPU torch here.
+
+ms-swift>=4.2
+transformers==4.57.*
+qwen-vl-utils>=0.0.14
+accelerate>=0.34
+peft>=0.13
+bitsandbytes>=0.43
+datasets>=2.14
+huggingface_hub>=0.17
+hf_transfer
+pillow
+opencv-python>=4.8
+decord>=0.6
+orena-focus @ git+https://github.com/IMSY-DKFZ/orena-focus.git@v0.3.4
+# flash-attn>=2.6   # optional speedup; needs CUDA toolchain to build (install last, can skip)
