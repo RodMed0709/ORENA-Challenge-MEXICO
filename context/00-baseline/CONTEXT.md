@@ -15,8 +15,30 @@ Establish the honest zero-shot baseline number for `Qwen3-VL-8B-Instruct` on the
 - Vendor the SDK (v0.3.4) as read-only reference; use the installed `focus` package for the run.
 - Output guard from day one: greedy, `max_new_tokens ≤ 48`, ≤300 chars, AdversarialDetector pre-scan (heavy per-format canonicalization deferred to Phase 5).
 
-## Results
-(pending — needs GPU run; fills the ladder in README.)
+## Results (2026-07-10, full 6252-Q FRAME test, 1× A100 80GB)
+- **pre_evaluation_score = 0.174** (headline). overall 0.254, raw 0.262, 0 timed out.
+- Latency p50/p95/p99 = 0.30/0.49/0.59 s vs 5.0 s cap → ~8× headroom.
+- answer_format: binary .597, open_ended .590, mc .534, fo_class .182, number .127.
+- group×ID buckets: object_recognition .279, aggregation .223, temporal_grounding .0 (n=1).
+- Judge: used real `Qwen/Qwen3-4B` (SDK-default `Qwen3.5-4B` does not exist on HF).
+- Implementation reality vs plan: FRAME data has **no pre-extracted frames** and
+  `FocusDataset` loads via HF Hub — so we read parquet directly and sample the frame from
+  the source video with decord at `round(start_time*base_fps)` (heico 25 fps, lapchole 30).
+  qID namespaced by dataset (`heico__`, `lapchole__`) — the two id ranges collide on ≥1 row.
+
+## Diagnosis (drives the next rung)
+Low fo_class/number is **not** a formatting problem: fo_class parse-fail 1.1 %, number 0.0 %.
+The model is format-clean but **genuinely wrong** — confuses instruments (LigaSure, Harmonic,
+Ethicon) with foreign objects, and miscounts. The gap is domain perception → **fine-tuning is
+the primary lever.** Cheap adjuncts worth probing first (huge latency headroom): prompt with
+explicit FO taxonomy + "instrument ≠ foreign object", higher `max_pixels`, and 2–3 frame
+windows. The `pre_evaluation_score` is fragile on FRAME (a single n=1 temporal bucket at 0
+costs ~⅓ of the headline) — track overall/raw acc alongside it.
 
 ## Next
-Depends on Phase 1 (harness in `src/frame`) + Phase 2 (inference engine). Then: build `00_zeroshot_qwen3vl.ipynb`, run on a GPU pod, record the number before Jul 15.
+- Rung 01 candidate (cheap, no train): prompt/taxonomy grounding A/B vs 00, same test split.
+- Rung 02: frame resolution / multi-frame A/B.
+- Rung 05 (primary prize): LoRA fine-tune (ms-swift, freeze ViT+merger, bf16) on the train
+  split; our 8B FT vs the org's fine-tuned 4B baseline.
+- Pod `rvfi2btzgqb92i` (A100 80GB) kept RUNNING for follow-on experiments (auto-stop watchdog
+  disabled per request — remember to stop it manually to end billing).
