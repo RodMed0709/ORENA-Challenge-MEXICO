@@ -72,12 +72,12 @@ Plans:
   2. ms-swift bf16 LoRA fine-tune of Qwen3-VL-8B runs on RunPod and produces a merged-weights artifact stored on HF Hub / RunPod volume (not git)
   3. Training data uses balanced sampling across answer_formats and capability groups (weak groups such as counting/number oversampled)
   4. The split is a committed, hashed artifact referenced by every run, giving comparable numbers across all 3 machines
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: OOD-safe split module + frozen hashed manifest + intersection assert (DATA-02)
-- [ ] 03-02: ms-swift export (JSONL chat turns → frames) + balanced sampling (TRAIN-03)
-- [ ] 03-03: LoRA bf16 launch on RunPod → merged-weights artifact (TRAIN-01)
+- [ ] 03-01-PLAN.md — [wave 1] Video-level split builder + frozen SHA-256 manifest + zero-intersection leakage guard (DATA-02)
+- [ ] 03-02-PLAN.md — [wave 2] ms-swift JSONL export reusing Phase-2 SamplingPolicy + balanced (group×format) oversampling + balance_stats (TRAIN-03)
+- [ ] 03-03-PLAN.md — [wave 3] bf16 LoRA launch + merge on RunPod → off-git merged-weights artifact (TRAIN-01, GPU checkpoint)
 
 ### Phase 4: Fine-Tune Iterate & Beat Baselines
 **Goal**: The differentiator vs zero-shot — a best checkpoint, selected on OOD accuracy, that beats both official baselines on the local harness. This is the Aug 15 gate.
