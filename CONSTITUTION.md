@@ -129,5 +129,29 @@ Repo privado: `RodMed0709/ORENA-Challenge-MEXICO`. Sincroniza **local + RunPod +
 3. **Paper writing** es entregable del proyecto. Mínimo obligatorio: la **descripción de método** del submission (`SUB-01`). Opcional: paper de método propio (autores a discreción del lead), redactado con el MCP RAG-Research contra el corpus.
 4. **Trazabilidad:** toda afirmación que entre al paper debe verificarse contra el corpus (`verify_claim_against_corpus`) antes de incluirse.
 
+## VIII. Estructura del repo y disciplina de experimentos (VINCULANTE)
+
+**El estándar completo es `EXPERIMENT_REPO_STRUCTURE_SPEC.md` (raíz del repo). Es obligatorio para todo el desarrollo de experimentos.** Resumen de los no-negociables:
+
+1. **La UNA regla:** los **notebooks generan runs**; los `.py` son **librerías importables, NUNCA launchers**. Nada de `run_*.py`/`main.py` corridos a mano, ni cadenas `.sh`, ni notebook que haga `subprocess` a un `.py`. La config va **inline en el notebook** y llama `engine.main(cfg)`. Único `.py` "corrible": `report.py` (importado desde una celda). Trabajamos en **Jupyter**.
+2. **Un solo `src/` canónico.** Hoy es `src/frame/` — esa es LA librería, todos los experimentos importan de ahí. Prohibido un segundo `src/` de primera parte. Glue específico de un experimento → `experiments/<id>/_tools/` (folder-privado).
+3. **Store en dos partes:** `experiments/<id>/` (artefactos: notebooks `NN_<slug>.ipynb`, `_models/` solo engines, `report.py`, `RESULTS.csv`, README que **abre con la ladder**) + `context/<id>/CONTEXT.md` (contexto curado, afuera del dir de artefactos: Objective/Setup-config/Decisions/Results/Next).
+4. **A/B de una sola variable:** un experimento cambia **exactamente UNA cosa** vs un baseline nombrado; cada palanca es flag **default OFF**; con todo OFF el run es byte-idéntico al baseline.
+5. **Eval honesta y leak-guarded:** el split de eval = el split del leak-guard (por `video`, no por frame — ver §IV.3); reportar el métrica primaria como **Δ vs baseline en las unidades del target** (accuracy del challenge).
+6. **build → smoke → review → full:** construir engine → smoke (toggle `SMOKE`, pasada chica) → **review read-only independiente (GO/GO-WITH-FIXES/NO-GO con file:line)** ANTES de cualquier full run → un full run limpio. Negativos fieles (no mejora/regresión) son resultados válidos, se registran en la ladder, no se re-rollean.
+7. **Gitignored:** `experiments/*/runs/` (checkpoints/predicciones/logs regenerables) y `external_data/` (datasets — verificar md5 cuando haya). `docs/` solo deliverables.
+
+## IX. Disciplina de limpieza (regla del usuario — VINCULANTE)
+
+**No crear archivos ni folders al aventón.** Consistencia > conveniencia.
+
+1. **Archivos temporales** (smoke tests, scripts de prueba, scratch): úsalos, y **en cuanto NO se necesiten, BÓRRALOS**. Loguea brevemente que se borró y por qué ya no hace falta.
+2. Temporales van al **scratchpad de sesión**, no al repo, salvo que sean un artefacto de valor permanente.
+3. **Cada archivo/folder nuevo en el repo se justifica** contra la estructura de §VIII. Si no encaja, no se crea.
+4. Limpieza **progresiva**: no dejar basura acumulándose "pa'l final" — se limpia conforme se desocupa.
+5. `_models/` = solo engines; borrar en cuanto se vean `smoke_*.py`, `run_*.py`, `.sh` chains, `resume_*.py`.
+
+> **Nota de reconciliación con los planes GSD actuales:** las Fases 1-3 definieron `scripts/run_baseline.py`, `scripts/evaluate.py`, `scripts/export_jsonl.py`. Al **ejecutar** la capa de experimentos, esos launchers se convierten en **celdas de notebook** (`experiments/<id>/NN_<slug>.ipynb` importando engines de `src/frame`), NO se corren a mano. `src/frame` (la librería + tests pytest de Fase 1) se queda como el único `src/`. Ajustar los planes en ejecución para respetar §VIII.
+
 ---
-*Constitución v1 — grounded en repo oficial clonado + PDFs + corpus de literatura. Se actualiza si cambia el repo o abre la pre-evaluación (15 jul).*
+*Constitución v1 — grounded en repo oficial + PDFs + corpus de literatura + EXPERIMENT_REPO_STRUCTURE_SPEC. Se actualiza si cambia el repo o abre la pre-evaluación (15 jul).*

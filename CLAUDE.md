@@ -72,7 +72,14 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-Conventions not yet established. Will populate as patterns emerge during development.
+**Repo structure + experiment discipline are BINDING.** Read `EXPERIMENT_REPO_STRUCTURE_SPEC.md` (repo root) and `CONSTITUTION.md` §VIII–IX before creating any file/folder or building experiments. Non-negotiables:
+
+- **Notebooks generate runs; `.py` files are importable libraries, NEVER launchers.** No `run_*.py`/`main.py`/`.sh` chains run by hand. Config goes inline in a notebook cell that calls `engine.main(cfg)`. We work in **Jupyter**. (Reconciliation: the `scripts/*.py` in the Phase 1-3 plans become notebook cells at the experiment layer.)
+- **Exactly ONE `src/` package** (`src/frame/`); everything imports from it. Experiment-specific glue → `experiments/<id>/_tools/` (folder-private).
+- **Two-part store:** `experiments/<id>/` (notebooks `NN_<slug>.ipynb`, `_models/` engines-only, `report.py`, `RESULTS.csv`, README opening with the ladder) + `context/<id>/CONTEXT.md` (curated, outside the artifact dir).
+- **Single-variable A/B** vs a named baseline; flags default OFF = byte-identical. **build → smoke → independent review (GO/NO-GO + file:line) → full.** Faithful negatives are valid.
+- **Cleanup discipline (CONSTITUTION §IX):** temp files / smoke scripts / scratch → delete the moment they're not needed, log why. No files/folders created "al aventón." Temporaries go to the session scratchpad, not the repo. Every new repo file is justified against §VIII.
+- **Gitignored:** `runs/`, `experiments/*/runs/`, `external_data/`, `.ipynb_checkpoints/`. `docs/` = deliverables only.
 <!-- GSD:conventions-end -->
 
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
