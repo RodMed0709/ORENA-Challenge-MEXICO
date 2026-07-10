@@ -1,8 +1,8 @@
 ---
 phase: 2
 slug: zero-shot-inference-engine
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-07-09
 ---
