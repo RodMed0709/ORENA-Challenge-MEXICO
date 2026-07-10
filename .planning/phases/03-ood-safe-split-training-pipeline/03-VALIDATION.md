@@ -1,8 +1,8 @@
 ---
 phase: 3
 slug: ood-safe-split-training-pipeline
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-07-09
 ---
