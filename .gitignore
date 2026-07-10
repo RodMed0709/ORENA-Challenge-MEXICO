@@ -20,7 +20,10 @@ datasets/
 *.bin
 checkpoints/
 runs/
+experiments/*/runs/
+external_data/
 wandb/
+.ipynb_checkpoints/
 
 # Obsidian — config local del editor (el vault ES el repo; los .md se versionan, el workspace no)
 .obsidian/
