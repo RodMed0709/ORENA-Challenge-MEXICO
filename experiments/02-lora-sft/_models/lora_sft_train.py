@@ -49,8 +49,8 @@ class LoRAConfig:
     learning_rate: float = 2e-5
     num_train_epochs: int = 5           # ckpt/epoch, select by acc_OOD (Sigmoid)
     max_pixels: int = 1280 * 720        # == BaselineConfig; train tokens == serve tokens
-    per_device_train_batch_size: int = 2
-    gradient_accumulation_steps: int = 8
+    per_device_train_batch_size: int = 1    # 24GB 4090: batch 2 OOMs on 8B bf16; grad-accum keeps eff batch
+    gradient_accumulation_steps: int = 16
     seed: int = 42
 
     # SMOKE: tiny fast pass to validate the whole chain before the full run
@@ -172,7 +172,8 @@ def _train(cfg: LoRAConfig) -> Path:
     ]
     if cfg.smoke:
         args += ["--max_steps", str(cfg.smoke_max_steps)]
-    env = {"MAX_PIXELS": str(cfg.max_pixels)}
+    env = {"MAX_PIXELS": str(cfg.max_pixels),
+           "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}  # reduce fragmentation on the 24GB card
     logger.info("swift sft: %s", " ".join(args))
     subprocess.run(args, check=True, env={**_os_environ(), **env})
     logger.info("training done → %s", cfg.ckpt_dir)
