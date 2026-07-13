@@ -21,7 +21,7 @@ The journey is a fine-tune-and-package competition run: reproduce the official `
 
 - [ ] **Phase 1: Foundation & Eval Harness** - Pinned SDK, repo sync, data load/EDA, and a scorer that reproduces `pre_evaluation_score` (no GPU)
 - [ ] **Phase 2: Zero-Shot Inference Engine** - `InferenceEngine` over `FocusVideoDataset` producing the Jul 15 baseline number and the always-valid floor
-- [ ] **Phase 3: OOD-Safe Split & Training Pipeline** - Frozen video-level split (HeiCo=OOD) and a working ms-swift LoRA pipeline
+- [ ] **Phase 3: OOD-Safe Split & Training Pipeline** - Frozen video-level split (train + validation only, one procedure_type held out as val_ood — CORRECTED 2026-07-13, was "HeiCo=OOD") and a working ms-swift LoRA pipeline
 - [ ] **Phase 4: Fine-Tune Iterate & Beat Baselines** - Checkpoints selected on OOD accuracy that beat both baselines locally
 - [ ] **Phase 5: Output-Format & Injection Hardening** - Canonical, brief, parseable, adversarial-clean, unique-qID generations
 - [ ] **Phase 6: Offline Docker & Latency** - vLLM container proven network-off at p99 < 5s on L40S
@@ -68,7 +68,7 @@ Plans:
 **Depends on**: Phase 2
 **Requirements**: DATA-02, TRAIN-01, TRAIN-03
 **Success Criteria** (what must be TRUE):
-  1. A frozen split manifest split by `videoID` (never per-frame) with HeiCo held out as OOD; code asserts zero `videoID` intersection between splits
+  1. A frozen split manifest split by `(dataset, videoID)` (never per-frame) with ONE whole procedure_type held out as val_ood (NOT all of HeiCo — keep the rest in train; train + validation only, no local test); code asserts zero `videoID` intersection between splits + SHA-256 verify
   2. ms-swift bf16 LoRA fine-tune of Qwen3-VL-8B runs on RunPod and produces a merged-weights artifact stored on HF Hub / RunPod volume (not git)
   3. Training data uses balanced sampling across answer_formats and capability groups (weak groups such as counting/number oversampled)
   4. The split is a committed, hashed artifact referenced by every run, giving comparable numbers across all 3 machines

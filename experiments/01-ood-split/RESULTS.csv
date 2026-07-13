@@ -1,2 +1,2 @@
-manifest,ood_procedure,ood_dataset,val_frac,seed,n_train_videos,n_val_id_videos,n_ood_test_videos,groups_covered_ood,notes
-frame_ood_v1,PENDING_POD_RUN,heico,0.15,42,,,,,"run 01_build_ood_split.ipynb on the pod (data lives on /workspace); fill from its output"
+manifest,ood_procedure,ood_dataset,val_frac,seed,n_train_videos,n_val_id_videos,n_val_ood_videos,groups_covered_ood,notes
+frame_ood_v1,PENDING_POD_RUN,heico,0.15,42,,,,,"train+val only (no local test; real test = leaderboard). run 01_build_ood_split.ipynb on the pod (data on /workspace); fill from its output"

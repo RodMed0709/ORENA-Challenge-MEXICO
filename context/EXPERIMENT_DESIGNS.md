@@ -58,15 +58,21 @@
   `summary.csv` row `pre_evaluation/SCORE`) — the guard/mirror are read-only linters over saved artifacts,
   never a rival scoring pass.
 
-## Rung 03 — OOD-safe split + leak-guard  (harness gate for all LoRA claims)
+## Rung 03 — train / validation split + leak-guard  (harness gate for all LoRA claims)
+> **Corrected 2026-07-13 (with Leo): train + validation ONLY, no local test.** The real test is the
+> leaderboard, so a reserved local test only wastes trainable data. Hold out ONE procedure_type as the
+> OOD validation slice (NOT all of HeiCo) so the other surgery types stay in train — the model must learn
+> cross-procedure since OOD is half the score. For the FINAL submission model, fold validation back into
+> train and retrain on all. (Supersedes the "HeiCo held out whole" assumption in `.planning/phases/03-*`.)
 - **Split key = `(dataset, video_id)` tuple, never a row/frame** (heico & lapchole id ranges overlap →
   qID prefixed `ds__` at `data.py:43`; `frame_index = round(start*base_fps)` at `data.py:91` is why
-  row-splitting leaks). Two held-out axes: `val_id` (held-out videos of trained procedure_types) +
-  `ood_test` (one **whole held-out procedure_type**, HeiCo Stage-3 style; keep lapchole in train).
-- **`src/frame/split.py`** (new): `SplitConfig`, `build_split` (seeded `default_rng(42)`),
-  `write_manifest`/`load_manifest` (CSV = source of truth, always reload — never re-derive),
-  `apply_split` (for `ood_test` sets `ref.ood=True` — **fixes the all-False parquet** so OOD buckets
-  actually score), `assert_no_leak`, `per_bucket_report`.
+  row-splitting leaks). Two validation slices: `val_id` (held-out videos of trained procedure_types) +
+  `val_ood` (one **whole held-out procedure_type**, HeiCo Stage-3 style; keep lapchole + the other heico
+  procedures in train).
+- **`src/frame/split.py`** (built): `SplitConfig`, `build_split` (seeded `default_rng(42)`),
+  `write_manifest`/`load_manifest` (CSV + `.sha256` sidecar = source of truth, verified reload — never
+  re-derive), `apply_split`, `assert_no_leak`, `assert_all_matched`, `per_bucket_report`. Marking
+  `ref.ood=True` for `val_ood` at EVAL time is deferred to the eval experiment (rung 05). 8 unit tests green.
 - **Report:** per capability_group × {ID,OOD} acc with `n` printed; **headline the worst bucket**, refuse
   to headline any bucket with `n<~10` (baseline n=1 temporal swung macro-mean ⅓). Optimize worst-case
   tail, not mean. Discard any checkpoint that wins ID but drops any OOD bucket.

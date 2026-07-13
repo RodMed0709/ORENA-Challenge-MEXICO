@@ -1,6 +1,7 @@
 # splits/ — frozen FRAME partitions (shared source of truth)
 
-This folder holds the **committed** train / `val_id` / `ood_test` manifests. It sits
+This folder holds the **committed** train / `val_id` / `val_ood` manifests (train +
+validation only — no local test; the real test is the leaderboard). It sits
 next to the experiments so every notebook can reload the SAME partition instead of
 re-deriving it (which would silently drift between runs / machines / teammates).
 
@@ -11,7 +12,7 @@ re-deriving it (which would silently drift between runs / machines / teammates).
   from frame import split as sp
   video_split = sp.load_manifest(REPO / "experiments" / "splits" / "frame_ood_v1.csv")
   train_items = sp.apply_split(items, video_split, "train")
-  ood_items   = sp.apply_split(items, video_split, "ood_test")
+  ood_items   = sp.apply_split(items, video_split, "val_ood")
   ```
 - **Committed, NOT gitignored** (unlike `runs/`): the manifest is small and must be
   identical for both teammates and every pod — that is the whole point.

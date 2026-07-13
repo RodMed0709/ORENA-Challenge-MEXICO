@@ -1,17 +1,25 @@
-"""FRAME OOD-safe train / val / OOD-test split + leak-guard.
+"""FRAME train / validation split + leak-guard.
+
+**Only two roles: train + validation.** There is NO local test set — the real test
+is the leaderboard submission, so reserving a local test would only waste data we
+could train on. Validation exists solely to select checkpoints (epochs / recipe)
+without fooling ourselves; keep it small to maximize training data. For the FINAL
+submission model, fold validation back into train and retrain on everything.
 
 The split key is ``(dataset, video_id)`` — NEVER a question or a frame. One video
 yields many FRAME items (``frame_index = round(start_time * base_fps)``), so
 splitting on rows leaks frames of the same surgery into both train and eval.
 
-Two held-out axes give the two numbers the challenge scores on (acc-ID vs
+The two validation slices give the two numbers the challenge scores on (acc-ID vs
 acc-OOD, OOD ≈ half the weight):
 
-- ``val_id``   — held-out *videos* of procedure_types that ARE in train
-                 (new video, same domain) → tests in-distribution generalization.
-- ``ood_test`` — every video of one **whole held-out ``procedure_type``**
-                 (HeiCo Stage-3 domain gap) → tests OOD, the surgery distribution
-                 we never trained on.
+- ``val_id``  — held-out *videos* of procedure_types that ARE in train
+                (new video, same domain) → in-distribution generalization gauge.
+- ``val_ood`` — every video of one **whole held-out ``procedure_type``**
+                (HeiCo Stage-3 domain gap) → OOD generalization gauge. NOTE: holding
+                out ONE procedure_type (not a whole dataset) keeps the other surgery
+                types IN train, so the model still learns cross-procedure — critical,
+                since OOD is half the leaderboard score.
 
 The written manifest CSV is the frozen **source of truth**: every downstream
 experiment reloads it (``load_manifest``) and never re-derives the partition.
@@ -38,14 +46,14 @@ logger = logging.getLogger(__name__)
 # can collide, so the dataset must be part of the key.
 VideoKey = tuple[str, str]
 
-_SPLITS = ("train", "val_id", "ood_test")
+_SPLITS = ("train", "val_id", "val_ood")
 
 
 @dataclass
 class SplitConfig:
-    """How to carve the FRAME items into train / val_id / ood_test."""
+    """How to carve the FRAME items into train / val_id / val_ood (no local test)."""
 
-    ood_procedure: str  # the WHOLE procedure_type held out as OOD (required)
+    ood_procedure: str  # the WHOLE procedure_type held out as the OOD validation slice (required)
     ood_dataset: str | None = "heico"  # scope the holdout to one dataset (None = any)
     val_frac: float = 0.15  # fraction of the remaining VIDEOS held out as val_id
     seed: int = 42
@@ -109,7 +117,7 @@ def build_split(items: list, cfg: SplitConfig) -> dict[VideoKey, str]:
     """Deterministic ``(dataset, video_id) -> split`` map.
 
     All videos of ``cfg.ood_procedure`` (optionally scoped to ``cfg.ood_dataset``)
-    go to ``ood_test``; the remaining videos are seeded-shuffled per stratum and
+    go to ``val_ood``; the remaining videos are seeded-shuffled per stratum and
     ~``val_frac`` land in ``val_id``, the rest in ``train``.
     """
     vids = videos_table(items)
@@ -133,7 +141,7 @@ def build_split(items: list, cfg: SplitConfig) -> dict[VideoKey, str]:
             f"No videos matched ood_procedure={cfg.ood_procedure!r} / ood_dataset={cfg.ood_dataset!r}."
         )
     for _, row in ood_vids.iterrows():
-        split[(row["dataset"], row["video_id"])] = "ood_test"
+        split[(row["dataset"], row["video_id"])] = "val_ood"
 
     remaining = vids[~vids.index.isin(ood_vids.index)]
     # stratified per (dataset, procedure_type): every domain represented in val_id.
@@ -217,7 +225,7 @@ def assert_all_matched(items: list, video_split: dict[VideoKey, str]) -> None:
 # ── use ──────────────────────────────────────────────────────────────────────
 
 def apply_split(items: list, video_split: dict[VideoKey, str], want: str) -> list:
-    """Filter items to one split. ``want`` ∈ {'train', 'val_id', 'ood_test'}."""
+    """Filter items to one split. ``want`` ∈ {'train', 'val_id', 'val_ood'}."""
     if want not in _SPLITS:
         raise ValueError(f"want must be one of {_SPLITS}, got {want!r}.")
     return [it for it in items if video_split.get(_key(it)) == want]
@@ -230,10 +238,10 @@ def assert_no_leak(video_split: dict[VideoKey, str], cfg: SplitConfig | None = N
 
     ``cfg`` is accepted for call-site symmetry but not required: the whole-OOD-
     procedure invariant is enforced at build time (only ``ood_procedure`` videos
-    are ever assigned ``ood_test``, before the stratified pass touches the rest).
+    are ever assigned ``val_ood``, before the stratified pass touches the rest).
     """
     train = {k for k, s in video_split.items() if s == "train"}
-    evals = {k for k, s in video_split.items() if s in ("val_id", "ood_test")}
+    evals = {k for k, s in video_split.items() if s in ("val_id", "val_ood")}
     overlap = train & evals
     assert not overlap, f"VIDEO LEAK: {sorted(overlap)} in train AND an eval split."
     logger.info(
@@ -245,7 +253,7 @@ def assert_no_leak(video_split: dict[VideoKey, str], cfg: SplitConfig | None = N
 def per_bucket_report(items: list, video_split: dict[VideoKey, str]) -> pd.DataFrame:
     """Coverage of the 10 scored buckets (capability_group × {ID, OOD}) per split.
 
-    ID = train ∪ val_id (trained distribution); OOD = ood_test. Use this to CONFIRM
+    ID = train ∪ val_id (trained distribution); OOD = val_ood. Use this to CONFIRM
     the split populates all 5 groups on both sides — the baseline populated only 3.
     """
     recs = []
@@ -256,7 +264,7 @@ def per_bucket_report(items: list, video_split: dict[VideoKey, str]) -> pd.DataF
         recs.append(
             {
                 "capability_group": _group(it),
-                "distribution": "OOD" if split == "ood_test" else "ID",
+                "distribution": "OOD" if split == "val_ood" else "ID",
                 "answer_format": _answer_format(it),
                 "split": split,
             }

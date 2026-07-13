@@ -1,15 +1,22 @@
 # CONTEXT — 01 OOD-safe split
 
 ## Objective
-Build the frozen, leak-guarded train / val_id / ood_test partition of the FRAME data
-(heico + lapchole) that every fine-tuning experiment trains and evaluates against.
-Without it, no LoRA number is trustworthy (OOD ≈ half the score, currently untested).
+Build the frozen, leak-guarded **train + validation** partition of the FRAME data
+(heico + lapchole) — `train`, `val_id`, `val_ood` — that every fine-tuning experiment
+trains and selects checkpoints against. Without it, no LoRA number is trustworthy
+(OOD ≈ half the score, currently untested).
+
+**No local test set** (decided with Leo 2026-07-13): the real test is the leaderboard,
+so a reserved local test would only waste trainable data. Validation is small and used
+only for selection. Hold out ONE procedure_type (not a whole dataset) so the other
+surgery types stay in train — the model must learn cross-procedure since OOD is half the
+score. For the FINAL submission model, fold validation back into train and retrain on all.
 
 ## Setup-config
 - Data: both batches — `heico` (colorectal, 3 procedure_types) + `lapchole`
   (cholecystectomy), from `data_root/<ds>/data/frame/test.parquet`.
 - Split key: `(dataset, video_id)` — never a question/frame (one video → many items).
-- The ONE lever: which whole `procedure_type` is held out as `ood_test` (HeiCo Stage-3
+- The ONE lever: which whole `procedure_type` is held out as `val_ood` (HeiCo Stage-3
   domain gap). Default scope `ood_dataset="heico"`, `val_frac=0.15`, `seed=42`.
 - Library: `src/frame/split.py`. Notebook: `experiments/01-ood-split/01_build_ood_split.ipynb`.
   Manifest: `experiments/splits/frame_ood_v1.csv` (committed, shared).
