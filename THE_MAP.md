@@ -55,27 +55,28 @@ per-bucket Copeland margin, never mean** · OOD-selected, discard any checkpoint
 - **Jul 15:** submit the **bare zero-shot floor FIRST** (prove the pipeline), then the 01+02 build. Treat the
   first leaderboard number as a **measurement instrument** to close the local-vs-real OOD-denominator gap.
 
-### Phase 1 — The 10-bucket harness + L40S truth  (Jul 15–22, wk1)  ← THE gate for every later claim
-*Resolves: Copeland+data-centric "populate all 10 buckets" + deployment "re-baseline on L40S" + floor-first "leak scrub".*
-- **Rung 03 EXPANDED:** leak-guarded OOD split (hold out a WHOLE procedure_type, split by `(dataset,video_id)`)
-  **+ Cholec80 cross-corpus scrub** (videoID-intersect + pHash frames vs challenge `test.parquet`) **+ build a
-  dev eval that POPULATES all 10 buckets** — especially event_understanding, complex_reasoning, and every OOD
-  half. Recompute the zero-shot arm on this split. *You cannot flip a bucket you cannot see.*
-- **Re-baseline p99 on the REAL L40S** (rent on RunPod) → build the budget curve every later lever is priced
-  against. Add a warm-up forward in `load()` (move CUDA-graph capture out of the timed path).
-- **Engine A online** — deterministic SSG scene-graph templates over CholecT50 triplets + HeiCo masks →
-  exact-match counting/existence/fo_class QA (judge-free, gold-derived). Directly attacks number 0.127 /
-  fo_class 0.182 — **these are a DATA problem, not a perception wall** (data-centric rebuts the ladder here).
+### Phase 1 — Split + harness  (✅ split DONE 2026-07-13)
+*Resolves: floor-first "leak scrub" + deployment "re-baseline on L40S". CORRECTED: FRAME has only 2 groups, not 10.*
+- ✅ **Split frozen** = `experiments/splits/frame_ood_v1.csv` (sha256 6fd34c2c), using the **organizers' own
+  train/test partition** (Sigmoid held out only in test = their OOD design). train 92vid/13748q · val_id
+  28/2252 (chole=ID) · val_ood 10/4000 (Sigmoid=OOD). Zero video overlap; `(dataset,video_id)` key; hash-verified.
+- ✅ **FRAME scope verified** (via `track` column): only **object_recognition + aggregation**; formats
+  **fo_class + number** (baseline-weak) + binary/open_ended/MC. **No `time`, no `percentage`, no reasoning
+  groups** (those are PROCEDURE/SEGMENT). → ~4 scored buckets, not 10. No reasoning-QA to mint.
+- **Remaining before/around training:** (a) **Cholec80 cross-corpus pHash scrub** (videoID-intersect + frame
+  fingerprints vs the challenge test) — the one leak internal splitting can't catch; (b) **re-baseline p99 on
+  the REAL L40S** + warm-up forward in `load()`; (c) *optional* Engine-A synthetic fo_class/number data
+  augmentation (we already have 13,748 train q, so this is a booster, not a prerequisite).
 
-### Phase 2 — Reasoning data + LoRA v1  (Jul 22–Aug 5, wk2–3)
-*Resolves: aggressive "decouple LoRA from the factory" + data-centric "mint the reasoning groups first".*
-- **Engine B** — LLaVA-Surg two-stage extract→reason→QA with a **local** LLM (ρ=0.94) → the ONLY source of
-  Group-4/5 (event/complex-reasoning) + open_ended QA. GP-VLS diversification on open_ended only. Judge-mirror
-  gate ≥0.9 per batch; drop failures, don't fix.
-- **LoRA v1 (S2Can recipe, bf16, 3 epochs first)** on existing labeled parquet + Engine-A data — **decoupled
-  from the full factory** (aggressive's win: LoRA v1 needs no synthetic-reasoning data to start). Select by
-  **per-bucket Copeland margin** on the 10-bucket dev, not mean-OOD.
-- Every merged checkpoint **re-enters the Docker, re-measured p99 on L40S** (deployment gate).
+### Phase 2 — LoRA fine-tune (the primary lever)  (Jul 22–Aug 5, wk2–3)
+*Resolves: aggressive "fire the primary lever" — grounded on the confirmed split.*
+- **LoRA v1 (S2Can recipe, bf16, 3 epochs first)** on the `frame_ood_v1` **train** split (13,748 q), targeting
+  the weak formats **fo_class + number**. `system` prompt + frame sampling byte-identical to rung 00 (single
+  variable = LoRA ON). Recompute the zero-shot arm on the same val for a clean Δ.
+- **Select the checkpoint by acc_OOD (val_ood = Sigmoid), never mean.** Discard any checkpoint that wins ID
+  but drops OOD (chole-overfit guard). `per_bucket_report` already tags ID/OOD from the manifest.
+- Every merged checkpoint **re-measured p99 on L40S** (deployment gate). Next experiment: `experiments/02-lora-sft/`.
+- (No Engine B / reasoning-QA — those capability groups are not in the FRAME track.)
 
 ### Phase 3 — The data flywheel + targeted bucket flips  (Aug 5–19, wk4–5)
 *Resolves: data-centric "flywheel" replaces the ladder's model-side rung-climb.*

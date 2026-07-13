@@ -82,13 +82,22 @@
   video_id)` vs challenge `test.parquet` videoIDs, drop matches; (b) **pHash** sampled frames per video
   (via `FrameProvider.get_frame` `data.py:127`), drop fingerprint collisions; record hashes in manifest.
 
-## Rung 05 — PRIMARY: LoRA instruction-tune Qwen3-VL-8B (ms-swift)  [promoted per Leo; see note]
-> The strategist ladder numbers this 05; the LoRA design agent wrote it as "rung 01" under Leo's earlier
-> "LoRA is primary" framing. **Canonical = ATTACK_LADDER rung 05**; the cheap prompt/judge/split rungs
-> (01-04) land first as its prerequisites. Recipe + integrity rules below are authoritative either way.
+## Rung 05 — PRIMARY: LoRA instruction-tune Qwen3-VL-8B (ms-swift)  [next experiment: experiments/02-lora-sft/]
+
+> ### ✅ Confirmed data foundation (2026-07-13)
+> - **Split = frozen `experiments/splits/frame_ood_v1.csv`** (organizer partition, sha256 `6fd34c2c`).
+>   Load via `sp.load_manifest(...)` + `sp.apply_split(items, vs, "train"|"val_id"|"val_ood")`.
+> - **Sizes:** train **92 vid / 13,748 q** · val_id **28 / 2,252** (chole = ID) · val_ood **10 / 4,000**
+>   (heico Sigmoid = OOD, the organizers' held-out procedure).
+> - **FRAME scope (verified via `track` col):** only 2 capability groups — **object_recognition +
+>   aggregation**. Only 2 weak formats matter: **fo_class (0.182) + number (0.127)**. NO `time`, NO
+>   `percentage`, NO reasoning groups (those are PROCEDURE/SEGMENT). → tune + eval focus = fo_class + number.
+> - **Final submission model:** retrain on ALL 20k (train + val) with the selected recipe.
+
 - **ONE variable:** `LoRA ON`. Frame/prompt/judge/gen/`max_pixels`/`max_new_tokens=64` all held identical
-  to rung 00. **Recompute the zero-shot arm on the held-out split** (can't reuse 0.174 — different
-  denominator now that train videos are excluded). Δ = FT − zeroshot, both on held-out. `mark_heico_ood=True`.
+  to rung 00. **Recompute the zero-shot arm on the SAME val split** (val_id + val_ood) so Δ = FT − zeroshot
+  is measured on identical held-out data. Report **acc_ID (val_id) and acc_OOD (val_ood = Sigmoid)
+  separately**; select the checkpoint by **acc_OOD** (per_bucket_report already tags ID/OOD from the split).
 - **Recipe (S2Can):** `swift sft --train_type lora --torch_dtype bfloat16 --freeze_vit true
   --freeze_aligner true --lora_rank 8 --lora_alpha 32 --lora_dropout 0.1 --target_modules all-linear
   --learning_rate 2e-5 --lr_scheduler_type cosine --warmup_ratio 0.03 --num_train_epochs 5
@@ -96,10 +105,11 @@
   --gradient_checkpointing true --attn_impl flash_attn --seed 42`, `MAX_PIXELS=921600` (==`config.py:32`,
   train tokens == serve tokens). **Stay plain** (Surgical-LVLM: IFT +16, exotic +2 → no DoRA/vision-unfreeze
   in the primary rung). bf16 not NF4 (fits one 80GB dev GPU). 8B not 4B (beat org's FT-4B with FT-8B).
-- **Data:** ShareGPT multimodal JSONL; `system` = `engine.SYSTEM_PROMPT` **verbatim** (reject Phase-3's
-  different string — it confounds the variable); assistant = `reference.answer` verbatim; frames via the
-  **same** `FrameProvider.get_frame` path (pixel parity). Carve the labeled parquet by video (train = a
-  subset of lapchole videos; heico never in train = OOD proxy).
+- **Data:** ShareGPT multimodal JSONL built from the **`train` split of `frame_ood_v1`** (13,748 q, 92
+  videos: procto + rectal + chole-train). `system` = `engine.SYSTEM_PROMPT` **verbatim**; assistant =
+  `reference.answer` verbatim; frames via the **same** `FrameProvider.get_frame` path (pixel parity).
+  Optionally overweight fo_class + number rows (the weak formats) — as a SEPARATE flagged rung, not the
+  clean A/B. Never train on val_id/val_ood.
 - **Engine wrapper (spec-compliant):** `experiments/<id>/_models/lora_sft_train.py` exposes `main(cfg,
   stage=...)` calling ms-swift Python API `from swift.llm import sft_main`; notebook imports it. Stages:
   build_split → export → train (headless `nbconvert` for detached full run) → merge (`swift export
