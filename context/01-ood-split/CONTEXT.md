@@ -29,9 +29,27 @@ score. For the FINAL submission model, fold validation back into train and retra
   eval experiment (THE_MAP rung 05), where it's needed — the split notebook only produces
   the partition + a coverage report.
 
-## Results
-- PENDING: run the notebook on the pod (data is on `/workspace`, not local). Fill
-  RESULTS.csv + the coverage table (which of the 5 groups are populated on the OOD side).
+## Results (2026-07-13, real data via HF `orena-dkfz/{heico,lapchole}-focus-vqa`)
+Used the **organizers' own train/test partition** (`build_official_split`) — faithful to
+their OOD design, zero video overlap. Manifest `experiments/splits/frame_ood_v1.csv`
+(sha256 `6fd34c2c…`):
+
+| split | videos | questions | % | role |
+|---|---|---|---|---|
+| train | 92 | 13748 | 69% | procto+rectal (heico) + chole train |
+| val_id | 28 | 2252 | 11% | chole test (ID) |
+| val_ood | 10 | 4000 | 20% | **Sigmoid** (heico test, unseen procedure = OOD) |
+
+**FRAME track scope (verified via the `track` column — all rows = `frame`):**
+- Capability GROUPS present: **object_recognition + aggregation** only (temporal_grounding
+  n=3 = noise). **event_understanding + complex_reasoning are ABSENT** — they live in the
+  PROCEDURE/SEGMENT tracks, NOT FRAME. So FRAME is ~4 scored buckets (2 groups × ID/OOD),
+  not 10.
+- Answer formats present: **fo_class (biggest) + number** (the baseline's weak spots
+  0.182/0.127), then binary / open_ended / multiple_choice. **No `time`, no `percentage`**
+  in FRAME (those are other tracks).
+- Implication: all effort → fo_class + number; no reasoning-QA generation, no time/percentage
+  handling needed.
 
 ## Next
 1. Run on pod; confirm zero train∩eval overlap + which buckets the OOD side populates.

@@ -85,6 +85,10 @@ def _answer_format(item) -> str:
     return str(getattr(item.reference, "_format", "unknown"))
 
 
+def _file(item) -> str:
+    return getattr(item, "file", "test")
+
+
 def manifest_hash(video_split: dict[VideoKey, str]) -> str:
     """Deterministic SHA-256 of the partition (order-independent)."""
     blob = "\n".join(f"{ds}\t{vid}\t{s}" for (ds, vid), s in sorted(video_split.items()))
@@ -155,6 +159,38 @@ def build_split(items: list, cfg: SplitConfig) -> dict[VideoKey, str]:
     assert_no_leak(split, cfg)
     counts = {s: sum(1 for v in split.values() if v == s) for s in _SPLITS}
     logger.info("Split built (videos): %s", counts)
+    return split
+
+
+def build_official_split(items: list, ood_dataset: str = "heico") -> dict[VideoKey, str]:
+    """Use the organizers' OWN train/test partition as our train/validation.
+
+    The FOCUS FRAME files already encode an OOD design: for ``heico`` the held-out
+    procedure (Sigmoid Resection) lives ONLY in ``test.parquet`` (train has
+    Proctocolectomy + Rectal), while ``lapchole`` is cholecystectomy in both. So:
+
+    - ``train``   — every video from a ``train`` file (procto + rectal + chole-train).
+    - ``val_ood`` — ``test``-file videos of ``ood_dataset`` (heico = the unseen Sigmoid
+                    procedure) → the OOD gauge, faithful to the real leaderboard's OOD.
+    - ``val_id``  — ``test``-file videos of the other datasets (chole, seen in train,
+                    different videos) → the ID gauge.
+
+    No local test set (real test = leaderboard). For the FINAL submission model, fold
+    validation back into train and retrain on everything. Requires items loaded with
+    ``load_frame_items(cfg, splits=("train", "test"))`` so ``item.file`` is populated.
+    """
+    split: dict[VideoKey, str] = {}
+    for it in items:
+        k = _key(it)
+        if _file(it) == "train":
+            split[k] = "train"
+        elif it.dataset == ood_dataset:
+            split[k] = "val_ood"
+        else:
+            split[k] = "val_id"
+    assert_no_leak(split)
+    counts = {s: sum(1 for v in split.values() if v == s) for s in _SPLITS}
+    logger.info("Official split (videos): %s", counts)
     return split
 
 
