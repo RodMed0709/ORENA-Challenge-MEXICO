@@ -1,2 +1,2 @@
-manifest,ood_procedure,ood_dataset,val_frac,seed,n_train_videos,n_val_id_videos,n_val_ood_videos,groups_covered_ood,notes
-frame_ood_v1,PENDING_POD_RUN,heico,0.15,42,,,,,"train+val only (no local test; real test = leaderboard). run 01_build_ood_split.ipynb on the pod (data on /workspace); fill from its output"
+manifest,partition,n_train_videos,n_val_id_videos,n_val_ood_videos,n_train_q,n_val_id_q,n_val_ood_q,groups_covered,sha256,notes
+frame_ood_v1,organizer train/test,92,28,10,13748,2252,4000,"object_recognition+aggregation (temporal_grounding n=3)",6fd34c2c46a2f03e,"official partition: train.parquet=train; heico test(Sigmoid)=val_ood(OOD); lapchole test=val_id(ID). zero video overlap. train+val only, no local test."

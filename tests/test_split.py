@@ -24,10 +24,11 @@ sys.modules[_spec.name] = sp  # dataclass resolution needs the module registered
 _spec.loader.exec_module(sp)
 
 
-def _item(dataset, video_id, procedure, group="object_recognition", fmt="binary"):
+def _item(dataset, video_id, procedure, group="object_recognition", fmt="binary", file="test"):
     return SimpleNamespace(
         dataset=dataset,
         video_id=video_id,
+        file=file,
         request=SimpleNamespace(procedure_type=procedure),
         reference=SimpleNamespace(primary=SimpleNamespace(group=SimpleNamespace(value=group)), _format=fmt),
     )
@@ -146,6 +147,28 @@ def test_kfold_lopo_rotates_and_wastes_nothing():
     from collections import Counter
     c = Counter(k for _, vs in folds for k, s in vs.items() if s == "val_ood")
     assert all(n == 1 for n in c.values())
+
+
+def test_build_official_split():
+    # organizer partition: heico train=procto+rectal, heico test=sigmoid(OOD);
+    # lapchole train + lapchole test (ID)
+    items = []
+    for v in ["h1", "h2"]:
+        items += [_item("heico", v, "proctocolectomy", file="train")]
+    for v in ["h3", "h4"]:
+        items += [_item("heico", v, "rectal", file="train")]
+    for v in ["h5", "h6"]:
+        items += [_item("heico", v, "sigmoid", file="test")]         # OOD
+    for v in ["l1", "l2", "l3"]:
+        items += [_item("lapchole", v, "cholecystectomy", file="train")]
+    for v in ["l4", "l5"]:
+        items += [_item("lapchole", v, "cholecystectomy", file="test")]  # ID
+    vs = sp.build_official_split(items, ood_dataset="heico")
+    assert vs[("heico", "h5")] == "val_ood" and vs[("heico", "h6")] == "val_ood"
+    assert vs[("lapchole", "l4")] == "val_id" and vs[("lapchole", "l5")] == "val_id"
+    assert vs[("heico", "h1")] == "train" and vs[("lapchole", "l1")] == "train"
+    sp.assert_no_leak(vs)
+    sp.assert_all_matched(items, vs)
 
 
 def _proc_videos(proc):

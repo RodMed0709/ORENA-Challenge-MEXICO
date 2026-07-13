@@ -7,11 +7,17 @@
 
 ## Three reframes the whole panel forced (the ladder was wrong on these)
 
-1. **We are scored on 10 buckets, and we measured only 3.** Score = unweighted mean over **5 capability
-   groups × {ID,OOD}** (`taxonomy.py:38-70`): object_recognition · temporal_grounding · aggregation ·
-   **event_understanding** · **complex_reasoning**. Rung-00 populated **3/10** (all ID). The two reasoning
-   groups (4 buckets) have **zero training signal**; the entire OOD half (5 buckets) is untested. The ladder
-   optimizes weak *formats* (fo_class/number) inside 3 ID buckets — 30% of the Copeland vote, blind to 70%.
+1. **FRAME only exercises ~2 capability groups — CORRECTED 2026-07-13 from real data.** The taxonomy has
+   5 groups × {ID,OOD} = 10 possible buckets, but that is the CROSS-TRACK max. Verified against the real
+   FRAME parquets (all rows carry `track == "frame"`; 20000 QA): FRAME contains **object_recognition +
+   aggregation** only (temporal_grounding n=3 = noise). **event_understanding + complex_reasoning are
+   ABSENT from FRAME** — they live in the PROCEDURE/SEGMENT tracks. FRAME formats: **fo_class + number**
+   (the dominant + weakest, baseline 0.182/0.127), then binary/open_ended/MC — **no `time`, no `percentage`**.
+   So FRAME is scored on **~4 buckets** (2 groups × ID/OOD), not 10. Earlier "measured 3 of 10, blind to
+   the reasoning groups" was WRONG — those groups don't exist in FRAME, so there's nothing to mint for them.
+   Implication: all leverage → fo_class + number; no reasoning-QA, no time/percentage handling. OOD ≈ half
+   the score still holds (via the Sigmoid-held-out partition). Detect track membership via the `track`
+   column / `data/frame/` path.
 2. **The "8× latency headroom" is an A100 illusion.** Rung-00 p99 0.59 s was on **A100**; the eval box is
    **L40S 48GB** (~½ the memory bandwidth) → decode ~2× slower → real headroom **~4×**, eroding under
    LoRA-merge + max_pixels + frames + 32B. **We have never run one question on the real eval hardware.**
@@ -106,8 +112,10 @@ per-bucket Copeland margin, never mean** · OOD-selected, discard any checkpoint
 - **Deployment** → the L40S-vs-A100 headroom truth; the 6-gate submission CI; FP8-only-on-measured-need;
   vLLM conditional (batch=1 negates its edge); warm-up forward.
 
-## The single biggest un-owned risk (flagged by 2 independent plans)
-**event_understanding + complex_reasoning are entirely unmeasured and untrained.** No plan can claim a
-Copeland lead until Phase-1's dev split populates those 2 groups + all OOD halves, and Phase-2's Engine B
-mints training data for them. This is the highest-leverage gap and the map's first structural priority after
-the floor ships.
+## ~~The single biggest un-owned risk~~ — RESOLVED 2026-07-13
+Earlier flagged as "event_understanding + complex_reasoning unmeasured/untrained." **Verified against the
+real FRAME parquets: those two groups are NOT in the FRAME track at all** (they're PROCEDURE/SEGMENT). So
+there is nothing to mint for them — the risk was a cross-track illusion. FRAME's real surface is
+**object_recognition + aggregation**, formats **fo_class + number**. The genuine remaining priority: the
+cross-corpus Cholec80 pHash leak scrub (rung 03 follow-up) before training, and populating both scored
+groups on the OOD (Sigmoid) side — which the organizer partition already does (val_ood covers both).

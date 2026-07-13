@@ -25,13 +25,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class FrameItem:
-    """One FRAME test item: SDK request/reference + how to fetch its frame."""
+    """One FRAME item: SDK request/reference + how to fetch its frame + which split file."""
 
     request: Request
     reference: Reference
     dataset: str
     video_id: str
     frame_index: int
+    file: str = "test"  # which parquet it came from: "train" | "test" (organizer partition)
 
 
 def _parse_row(row: dict, qid_prefix: str = "") -> tuple[Request, Reference]:
@@ -73,25 +74,35 @@ def _parse_row(row: dict, qid_prefix: str = "") -> tuple[Request, Reference]:
     return request, reference
 
 
-def load_frame_items(cfg) -> list[FrameItem]:
-    """Load and parse every FRAME test question across the configured datasets."""
+def load_frame_items(cfg, splits: tuple[str, ...] = ("test",)) -> list[FrameItem]:
+    """Load and parse FRAME questions across the configured datasets.
+
+    ``splits`` selects which parquet files to load, in the organizers' partition:
+    ``("test",)`` (default, backward-compatible with the baseline) or
+    ``("train", "test")`` to load everything (e.g. to build the train/val split).
+    Each item is tagged with ``file`` so a split can key on the organizer partition.
+    Note: loading both files merges id ranges — do NOT feed the merged set to the
+    Evaluator (duplicate qID aborts a run); it is for split-building, which keys on video.
+    """
     items: list[FrameItem] = []
     for ds in cfg.datasets:
-        pq = cfg.data_root / ds / "data" / "frame" / "test.parquet"
-        df = pd.read_parquet(pq)
         base_fps = cfg.base_fps[ds]
-        for row in df.to_dict("records"):
-            req, ref = _parse_row(row, qid_prefix=f"{ds}__")
-            items.append(
-                FrameItem(
-                    request=req,
-                    reference=ref,
-                    dataset=ds,
-                    video_id=row["video"],
-                    frame_index=round(req.start_time * base_fps),
+        for split_file in splits:
+            pq = cfg.data_root / ds / "data" / "frame" / f"{split_file}.parquet"
+            df = pd.read_parquet(pq)
+            for row in df.to_dict("records"):
+                req, ref = _parse_row(row, qid_prefix=f"{ds}__")
+                items.append(
+                    FrameItem(
+                        request=req,
+                        reference=ref,
+                        dataset=ds,
+                        video_id=str(row["video"]),
+                        frame_index=round(req.start_time * base_fps),
+                        file=split_file,
+                    )
                 )
-            )
-        logger.info("Loaded %d FRAME items from %s", len(df), ds)
+            logger.info("Loaded %d FRAME items from %s/%s", len(df), ds, split_file)
     logger.info("Total FRAME items: %d", len(items))
     return items
 
