@@ -280,3 +280,52 @@ def per_bucket_report(items: list, video_split: dict[VideoKey, str]) -> pd.DataF
         .reset_index(drop=True)
     )
     return cov
+
+
+def split_summary(items: list, video_split: dict[VideoKey, str]) -> pd.DataFrame:
+    """The 80/20 table: videos + questions + % per split (train / val_id / val_ood)."""
+    seen: dict[str, set] = {s: set() for s in _SPLITS}
+    q: dict[str, int] = {s: 0 for s in _SPLITS}
+    for it in items:
+        s = video_split.get(_key(it))
+        if s is None:
+            continue
+        seen[s].add(_key(it))
+        q[s] += 1
+    total_q = sum(q.values()) or 1
+    rows = [
+        {"split": s, "n_videos": len(seen[s]), "n_questions": q[s],
+         "pct_questions": round(100 * q[s] / total_q, 1)}
+        for s in _SPLITS
+    ]
+    return pd.DataFrame(rows)
+
+
+# ── k-fold (Leave-One-Procedure-Out) — the FINAL certain OOD estimate ─────────
+
+def kfold_lopo(items: list, ood_dataset: str = "heico", seed: int = 42):
+    """Leave-One-Procedure-Out cross-validation over ``ood_dataset``'s procedures.
+
+    Yields ``(procedure_name, video_split)``: each fold holds out ONE whole
+    procedure_type as ``val_ood`` and trains on EVERYTHING else. No data is ever
+    permanently wasted — each video is ``val_ood`` in exactly one fold and ``train``
+    in the others — which is exactly why this fits our small (200-video) set.
+
+    ``ood_dataset`` (default heico) is the domain we rotate; the dominant lapchole
+    (single procedure, 170 videos) is NEVER held out whole (that would strand training
+    on 30 heico videos). Reserve this for the final OOD readout — it costs one training
+    run per fold, so it does not belong in the dev iteration loop.
+    """
+    vids = videos_table(items)
+    procs = sorted(vids[vids["dataset"] == ood_dataset]["procedure_type"].unique())
+    if not procs:
+        raise ValueError(f"No procedures found for ood_dataset={ood_dataset!r}.")
+    for proc in procs:
+        split: dict[VideoKey, str] = {}
+        for _, r in vids.iterrows():
+            k = (r["dataset"], r["video_id"])
+            split[k] = "val_ood" if (r["dataset"] == ood_dataset and r["procedure_type"] == proc) else "train"
+        assert_no_leak(split)
+        logger.info("LOPO fold: OOD=%s (%d val_ood videos)", proc,
+                    sum(1 for v in split.values() if v == "val_ood"))
+        yield proc, split
