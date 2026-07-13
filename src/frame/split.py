@@ -24,6 +24,7 @@ Grounding: reads only the public ``FrameItem`` fields produced by
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -72,9 +73,14 @@ def _group(item) -> str:
 
 
 def _answer_format(item) -> str:
-    ref = item.reference
-    fmt = getattr(ref, "_format", None) or getattr(ref, "format", None)
-    return str(fmt) if fmt is not None else "unknown"
+    # ._format is a required field on Reference (data.py always populates it).
+    return str(getattr(item.reference, "_format", "unknown"))
+
+
+def manifest_hash(video_split: dict[VideoKey, str]) -> str:
+    """Deterministic SHA-256 of the partition (order-independent)."""
+    blob = "\n".join(f"{ds}\t{vid}\t{s}" for (ds, vid), s in sorted(video_split.items()))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 # ── inventory ────────────────────────────────────────────────────────────────
@@ -147,7 +153,11 @@ def build_split(items: list, cfg: SplitConfig) -> dict[VideoKey, str]:
 # ── persistence (the manifest IS the source of truth) ────────────────────────
 
 def write_manifest(split: dict[VideoKey, str], vids: pd.DataFrame, cfg: SplitConfig) -> Path:
-    """Write the frozen split manifest CSV. One row per video."""
+    """Write the frozen split manifest CSV + a ``.sha256`` sidecar. One row per video.
+
+    Every config field is persisted (full snapshot), and the sidecar hash lets
+    ``load_manifest(..., verify=True)`` reject a hand-edited / corrupt manifest.
+    """
     q_by_key = {(r["dataset"], r["video_id"]): r["n_questions"] for _, r in vids.iterrows()}
     proc_by_key = {(r["dataset"], r["video_id"]): r["procedure_type"] for _, r in vids.iterrows()}
     rows = [
@@ -159,20 +169,49 @@ def write_manifest(split: dict[VideoKey, str], vids: pd.DataFrame, cfg: SplitCon
             "n_questions": q_by_key.get(k, 0),
             "seed": cfg.seed,
             "ood_procedure": cfg.ood_procedure,
+            "ood_dataset": cfg.ood_dataset if cfg.ood_dataset is not None else "",
+            "val_frac": cfg.val_frac,
         }
         for k, s in sorted(split.items())
     ]
     out = pd.DataFrame(rows)
     cfg.manifest_path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(cfg.manifest_path, index=False)
-    logger.info("Wrote manifest: %s (%d videos)", cfg.manifest_path, len(out))
+    digest = manifest_hash(split)
+    Path(str(cfg.manifest_path) + ".sha256").write_text(digest + "\n")
+    logger.info("Wrote manifest: %s (%d videos, sha256=%s…)", cfg.manifest_path, len(out), digest[:12])
     return cfg.manifest_path
 
 
-def load_manifest(path: Path | str) -> dict[VideoKey, str]:
-    """Reload the frozen split so every experiment reads the SAME partition."""
-    df = pd.read_csv(path)
-    return {(r["dataset"], r["video_id"]): r["split"] for _, r in df.iterrows()}
+def load_manifest(path: Path | str, verify: bool = True) -> dict[VideoKey, str]:
+    """Reload the frozen split so every experiment reads the SAME partition.
+
+    ``video_id`` is forced to ``str`` (numeric-looking ids must not become int64, or
+    key lookups against ``FrameItem`` string ids would silently miss → empty splits).
+    ``verify=True`` recomputes the SHA-256 and asserts it matches the ``.sha256``
+    sidecar (rejects a hand-edited / Excel-mangled manifest).
+    """
+    df = pd.read_csv(path, dtype={"dataset": str, "video_id": str, "split": str})
+    video_split = {(r["dataset"], r["video_id"]): r["split"] for _, r in df.iterrows()}
+    if verify:
+        sidecar = Path(str(path) + ".sha256")
+        if sidecar.exists():
+            want = sidecar.read_text().strip()
+            got = manifest_hash(video_split)
+            assert got == want, f"MANIFEST HASH MISMATCH: {path} edited/corrupt (got {got[:12]}…, want {want[:12]}…)."
+        else:
+            logger.warning("No .sha256 sidecar for %s — cannot verify integrity.", path)
+    return video_split
+
+
+def assert_all_matched(items: list, video_split: dict[VideoKey, str]) -> None:
+    """Fail loudly if any item's (dataset, video_id) is absent from the split map.
+
+    Guards the silent-drop failure mode: a key-type mismatch (see load_manifest) would
+    otherwise just shrink every split with no error. Call after build/load, before use.
+    """
+    missing = {_key(it) for it in items} - set(video_split.keys())
+    assert not missing, f"{len(missing)} item videos unmatched to any split, e.g. {sorted(missing)[:5]}"
 
 
 # ── use ──────────────────────────────────────────────────────────────────────
