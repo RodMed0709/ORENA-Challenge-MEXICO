@@ -8,9 +8,8 @@ PROPUESTA-LEO.md
 PROPUESTA-LEO.docx
 NEGOCIO/
 
-# Literatura — PDFs pesados/copyright quedan LOCAL; el INDEX + notas SI se versionan
-literature/pdfs/
-literature/**/*.pdf
+# Literatura — PDFs versionados (repo PRIVADO; compa los necesita para reproducir).
+# Todos redistribuibles: 19 arXiv + 2 Nature open-access (CC). INDEX + fichas también.
 
 # Datos / pesos / checkpoints (van en RunPod, no aqui)
 data/
