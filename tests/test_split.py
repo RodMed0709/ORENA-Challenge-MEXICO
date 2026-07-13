@@ -120,3 +120,35 @@ def test_assert_all_matched_catches_missing(tmp_path):
     orphan = _item("heico", "999", "proctocolectomy")
     with pytest.raises(AssertionError):
         sp.assert_all_matched(items + [orphan], vs)
+
+
+def test_split_summary(tmp_path):
+    items = _corpus()
+    vs = sp.build_split(items, _cfg(tmp_path))
+    s = sp.split_summary(items, vs)
+    assert set(s["split"]) == {"train", "val_id", "val_ood"}
+    assert s["n_questions"].sum() == len(items)          # every question accounted for
+    assert round(s["pct_questions"].sum()) == 100
+
+
+def test_kfold_lopo_rotates_and_wastes_nothing():
+    items = _corpus()
+    folds = list(sp.kfold_lopo(items, ood_dataset="heico"))
+    # one fold per heico procedure (3), each holds out that whole procedure
+    assert [p for p, _ in folds] == ["proctocolectomy", "rectal", "sigmoid"]
+    all_keys = {(it.dataset, it.video_id) for it in items}
+    for proc, vs in folds:
+        assert set(vs.keys()) == all_keys                 # every video placed (nothing dropped)
+        ood = {k for k, s in vs.items() if s == "val_ood"}
+        assert ood == {("heico", v) for v in _proc_videos(proc)}
+        assert all(s in ("train", "val_ood") for s in vs.values())  # no val_id in LOPO
+    # each heico video is val_ood in exactly ONE fold
+    from collections import Counter
+    c = Counter(k for _, vs in folds for k, s in vs.items() if s == "val_ood")
+    assert all(n == 1 for n in c.values())
+
+
+def _proc_videos(proc):
+    return {"proctocolectomy": ["10", "11", "12", "13"],
+            "rectal": ["20", "21", "22", "23"],
+            "sigmoid": ["30", "31", "32"]}[proc]
