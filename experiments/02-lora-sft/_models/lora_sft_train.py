@@ -148,7 +148,7 @@ def _train(cfg: LoRAConfig) -> Path:
         "swift", "sft",
         "--model", str(cfg.model_path),
         "--model_type", cfg.model_type,
-        "--train_type", "lora",
+        "--tuner_type", "lora",
         "--dataset", str(cfg.train_jsonl),
         "--torch_dtype", "bfloat16",
         "--freeze_vit", "true",
