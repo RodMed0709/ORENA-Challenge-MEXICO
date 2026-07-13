@@ -33,6 +33,7 @@ class LoRAConfig:
     # paths (pod / volume layout) — mirror BaselineConfig
     data_root: Path = Path("/workspace/orena-data")
     model_path: Path = Path("/workspace/models/qwen3-vl-8b")
+    model_type: str = "qwen3_vl"        # ms-swift can't auto-match the local dir (qwen3_vl vs _emb/_reranker)
     exp_dir: Path = Path("/workspace/repo/experiments/02-lora-sft")
     manifest_path: Path = Path("/workspace/repo/experiments/splits/frame_ood_v1.csv")
     run_name: str = "02_lora_sft_v1"
@@ -146,6 +147,7 @@ def _train(cfg: LoRAConfig) -> Path:
     args = [
         "swift", "sft",
         "--model", str(cfg.model_path),
+        "--model_type", cfg.model_type,
         "--train_type", "lora",
         "--dataset", str(cfg.train_jsonl),
         "--torch_dtype", "bfloat16",
