@@ -64,15 +64,15 @@ def test_ood_procedure_is_ood_only(tmp_path):
     items = _corpus()
     vs = sp.build_split(items, _cfg(tmp_path))
     sigmoid_keys = {("heico", v) for v in ("30", "31", "32")}
-    assert all(vs[k] == "ood_test" for k in sigmoid_keys)
-    assert not any(s == "ood_test" for k, s in vs.items() if k not in sigmoid_keys)
+    assert all(vs[k] == "val_ood" for k in sigmoid_keys)
+    assert not any(s == "val_ood" for k, s in vs.items() if k not in sigmoid_keys)
 
 
 def test_no_leak(tmp_path):
     items = _corpus()
     vs = sp.build_split(items, _cfg(tmp_path))
     train = {k for k, s in vs.items() if s == "train"}
-    evals = {k for k, s in vs.items() if s in ("val_id", "ood_test")}
+    evals = {k for k, s in vs.items() if s in ("val_id", "val_ood")}
     assert not (train & evals)
     sp.assert_no_leak(vs)  # must not raise
 
@@ -80,7 +80,7 @@ def test_no_leak(tmp_path):
 def test_apply_and_coverage(tmp_path):
     items = _corpus()
     vs = sp.build_split(items, _cfg(tmp_path))
-    assert len(sp.apply_split(items, vs, "ood_test")) == 3 * 3  # 3 sigmoid videos × 3 q
+    assert len(sp.apply_split(items, vs, "val_ood")) == 3 * 3  # 3 sigmoid videos × 3 q
     cov = sp.per_bucket_report(items, vs)
     assert set(cov["distribution"]) == {"ID", "OOD"}
 

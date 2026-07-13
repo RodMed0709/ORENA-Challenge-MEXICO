@@ -1,5 +1,18 @@
 # Phase 3: OOD-Safe Split & Training Pipeline - Research
 
+> ## ⚠️ SUPERSEDED (2026-07-13) — read this first
+> The split rule below ("HeiCo held out whole = OOD") was **corrected with Leo**. New rule, implemented in
+> `src/frame/split.py` + `experiments/01-ood-split/`:
+> - **train + validation only, NO local test** — the real test is the leaderboard, so a reserved local test
+>   just wastes trainable data.
+> - **Hold out ONE whole `procedure_type` as `val_ood`** (not all of HeiCo) so the other surgery types stay
+>   in train — the model must learn cross-procedure because OOD is ~half the leaderboard score. Holding out
+>   all of HeiCo would make us *worse* at the OOD half.
+> - Split by `(dataset, video_id)`; SHA-256-verified manifest; `val_id` = small seed-shuffled fraction of
+>   remaining videos. **Final submission model retrains on train+val** to maximize data.
+> Everything below about videoID splitting / manifest hashing / leak asserts still holds; only the
+> "HeiCo=OOD / held whole" definition is replaced by "one procedure_type = val_ood".
+
 **Researched:** 2026-07-09
 **Domain:** Reproducible video-level train/val split construction (leakage-proof, HeiCo=OOD) + ms-swift LoRA (bf16) fine-tuning of Qwen3-VL-8B on in-domain surgical VQA, with balanced sampling across answer_formats/capability groups. Planned locally; the LoRA run + merge execute on RunPod GPU.
 **Confidence:** HIGH — grounded line-by-line in cloned `orena-focus` @ v0.3.4 (`base_dataset.py`, `frame_dataset.py`, `data_models.py`, `config.py`, `taxonomy.py`, `preprocessing/frame_extraction.py`, `examples/data_preparation.py`) + Phase-2 research (shared `SamplingPolicy`) + ms-swift official docs. Two facts are MEDIUM and flagged: the exact ms-swift CLI flag name (`--train_type` vs `--tuner_type`, verify on pinned 4.4.0) and the exact `MAX_PIXELS`/`IMAGE_MAX_TOKEN_NUM` value for parity (compute at export time).

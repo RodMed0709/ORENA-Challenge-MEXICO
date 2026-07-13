@@ -1,8 +1,17 @@
-# Experiment 01 — OOD-safe split + leak-guard
+# Experiment 01 — train / validation split + leak-guard
 
 > The measurement harness every fine-tuning claim depends on. Carves the FRAME data
-> (heico + lapchole) into **train / val_id / ood_test** by holding out a WHOLE
-> `procedure_type` as OOD, split by `(dataset, video_id)` — never by question/frame.
+> (heico + lapchole) into **train + validation only** — `train`, `val_id`, `val_ood` —
+> by holding out a WHOLE `procedure_type` as the OOD validation slice, split by
+> `(dataset, video_id)` — never by question/frame.
+>
+> **No local test set.** The real test is the leaderboard submission, so a reserved
+> local test would only waste data we could train on. Validation is small and used
+> only to select checkpoints (by `val_ood`, so we don't overfit to cholecystectomy).
+> Holding out ONE procedure_type (not a whole dataset) keeps the other surgery types
+> in train — the model still learns cross-procedure, which matters because OOD is half
+> the leaderboard score. For the FINAL submission model, fold validation back into
+> train and retrain on everything to maximize data.
 > Not a scored rung; it produces the frozen split every later experiment reuses.
 
 ## Ladder
