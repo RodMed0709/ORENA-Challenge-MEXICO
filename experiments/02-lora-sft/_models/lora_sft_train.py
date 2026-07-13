@@ -98,9 +98,18 @@ def _export(cfg: LoRAConfig) -> Path:
     vs = sp.load_manifest(cfg.manifest_path)                 # verifies sha256
     train_items = sp.apply_split(items, vs, "train")
     if cfg.smoke:
-        train_items = train_items[: cfg.smoke_limit]
+        # stratify across datasets so SMOKE exercises heico AND lapchole (path/fps/parquet),
+        # not just the alphabetically-first dataset's first video.
+        from collections import defaultdict
+        by_ds: dict[str, list] = defaultdict(list)
+        for it in train_items:
+            by_ds[it.dataset].append(it)
+        k = max(1, cfg.smoke_limit // max(1, len(by_ds)))
+        train_items = [it for ds in by_ds for it in by_ds[ds][:k]]
     # group by video so the decord reader cache holds one reader at a time
     train_items.sort(key=lambda it: (it.dataset, it.video_id, it.frame_index))
+    qids = [it.request.qID for it in train_items]
+    assert len(set(qids)) == len(qids), "duplicate qID in train export (would collide frames/JSONL)"
 
     cfg.frames_dir.mkdir(parents=True, exist_ok=True)
     provider = FrameProvider(bcfg)
@@ -167,26 +176,31 @@ def _train(cfg: LoRAConfig) -> Path:
     return cfg.ckpt_dir
 
 
-def _latest_checkpoint(ckpt_dir: Path) -> Path:
-    cks = sorted(ckpt_dir.glob("**/checkpoint-*"), key=lambda p: p.stat().st_mtime)
+def _epoch_num(p: Path) -> int:
+    tail = p.name.split("-")[-1]
+    return int(tail) if tail.isdigit() else 0
+
+
+def list_checkpoints(cfg: LoRAConfig) -> list[Path]:
+    """Every per-epoch adapter checkpoint, ordered by epoch. The notebook loops these
+    to pick the one that maximizes acc_OOD (Sigmoid) — CONSTITUTION §IV.2: select by
+    OOD, never the last epoch by default (past epoch 1-2 risks OOD collapse, PITFALLS #1)."""
+    cks = sorted(cfg.ckpt_dir.glob("**/checkpoint-*"), key=_epoch_num)
     if not cks:
-        raise FileNotFoundError(f"no checkpoint under {ckpt_dir}")
-    return cks[-1]
+        raise FileNotFoundError(f"no checkpoint under {cfg.ckpt_dir}")
+    return cks
 
 
-def _merge(cfg: LoRAConfig, adapter: Path | None = None) -> Path:
-    """swift export --merge_lora → standalone bf16 checkpoint for serving/eval."""
-    adapter = adapter or _latest_checkpoint(cfg.ckpt_dir)
-    args = [
-        "swift", "export",
-        "--adapters", str(adapter),
-        "--merge_lora", "true",
-        "--output_dir", str(cfg.merged_dir),
-    ]
+def merge_checkpoint(cfg: LoRAConfig, adapter: Path) -> Path:
+    """swift export --merge_lora → a standalone bf16 checkpoint, namespaced per epoch
+    (merged/<checkpoint-name>) so per-epoch merges never overwrite each other."""
+    out = cfg.run_dir / "merged" / adapter.name
+    args = ["swift", "export", "--adapters", str(adapter), "--merge_lora", "true",
+            "--output_dir", str(out)]
     logger.info("swift export (merge): %s", " ".join(args))
     subprocess.run(args, check=True, env=_os_environ())
-    logger.info("merged → %s", cfg.merged_dir)
-    return cfg.merged_dir
+    logger.info("merged %s → %s", adapter.name, out)
+    return out
 
 
 def _os_environ() -> dict:
@@ -195,13 +209,11 @@ def _os_environ() -> dict:
 
 
 def main(cfg: LoRAConfig, stage: str) -> Path:
-    """Run one stage. stage ∈ {'export', 'train', 'merge'}. Eval + Δ live in the
-    notebook (reuse frame.run.run_baseline on the merged model + frame.delta)."""
+    """Run one stage. stage ∈ {'export', 'train'}. Per-epoch merge + OOD-selection eval
+    + Δ live in the notebook (list_checkpoints → merge_checkpoint → run_baseline → delta)."""
     cfg.run_dir.mkdir(parents=True, exist_ok=True)
     if stage == "export":
         return _export(cfg)
     if stage == "train":
         return _train(cfg)
-    if stage == "merge":
-        return _merge(cfg)
-    raise ValueError(f"unknown stage {stage!r} (export|train|merge)")
+    raise ValueError(f"unknown stage {stage!r} (export|train); merge is per-epoch in the notebook")

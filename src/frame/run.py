@@ -95,14 +95,22 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
     return report
 
 
-def run_baseline(cfg) -> dict:
-    """Execute the full baseline run and return the KPI report dict."""
+def run_baseline(cfg, video_filter: set | None = None) -> dict:
+    """Execute the full run and return the KPI report dict.
+
+    ``video_filter`` (optional set of ``(dataset, video_id)``) restricts eval to those
+    videos — e.g. the ``val_ood`` (Sigmoid) videos, for cheap per-epoch OOD checkpoint
+    selection. Default None = the full test set (backward-compatible with the baseline).
+    """
     run_dir = Path(cfg.out_dir) / cfg.run_name
     run_dir.mkdir(parents=True, exist_ok=True)
     logger.info("Run dir: %s", run_dir)
 
     # ── 1. data ──────────────────────────────────────────────────────
     items = load_frame_items(cfg)
+    if video_filter is not None:
+        items = [it for it in items if (it.dataset, it.video_id) in video_filter]
+        logger.info("video_filter: kept %d items across %d videos", len(items), len(video_filter))
     if cfg.n_eval:
         items = items[: cfg.n_eval]
         logger.info("SMOKE/sample: capped to %d items", len(items))
