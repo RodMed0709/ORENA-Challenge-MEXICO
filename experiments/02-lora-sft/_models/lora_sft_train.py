@@ -47,7 +47,7 @@ class LoRAConfig:
     lora_alpha: int = 32
     lora_dropout: float = 0.1
     learning_rate: float = 2e-5
-    num_train_epochs: int = 5           # ckpt/epoch, select by acc_OOD (Sigmoid)
+    num_train_epochs: int = 3           # ckpt/epoch, select by acc_OOD (Sigmoid); OOD-optimal early (PITFALLS #1)
     max_pixels: int = 1280 * 720        # == BaselineConfig; train tokens == serve tokens
     per_device_train_batch_size: int = 1    # 24GB 4090: batch 2 OOMs on 8B bf16; grad-accum keeps eff batch
     gradient_accumulation_steps: int = 16
