@@ -34,6 +34,7 @@ class LoRAConfig:
     data_root: Path = Path("/workspace/orena-data")
     model_path: Path = Path("/workspace/models/qwen3-vl-8b")
     model_type: str = "qwen3_vl"        # ms-swift can't auto-match the local dir (qwen3_vl vs _emb/_reranker)
+    attn_impl: str = "sdpa"             # sdpa = built-in PyTorch attention (no flash-attn compile needed)
     exp_dir: Path = Path("/workspace/repo/experiments/02-lora-sft")
     manifest_path: Path = Path("/workspace/repo/experiments/splits/frame_ood_v1.csv")
     run_name: str = "02_lora_sft_v1"
@@ -165,7 +166,7 @@ def _train(cfg: LoRAConfig) -> Path:
         "--per_device_train_batch_size", str(cfg.per_device_train_batch_size),
         "--gradient_accumulation_steps", str(cfg.gradient_accumulation_steps),
         "--gradient_checkpointing", "true",
-        "--attn_impl", "flash_attn",
+        "--attn_impl", cfg.attn_impl,
         "--seed", str(cfg.seed),
         "--output_dir", str(cfg.ckpt_dir),
     ]
