@@ -66,20 +66,20 @@ multi-frame / end-of-clip sampling).
 
 - **One variable:** none yet — this establishes the baseline. Backbone: `Qwen/Qwen3-VL-8B-Instruct`, zero-shot (no training).
 - **Data:** FRAME split from `heico` + `lapchole` (`data/frame/test.parquet`), single frame per question.
-- **Engine:** `_models/` inference engine implementing `predict(sample) -> str` (samples 1–3 frames, calls the VLM), driven through our `src/frame` harness → `focus.Evaluator(track=Track.FRAME)`.
-- **Runs on GPU** (RunPod). Reference code: `orena-focus/examples/inference.py` + `evaluation.py` (vendored, see `VENDORED.md`).
+- **Engine:** all baseline logic lives in `src/frame/` (`run_baseline`), driven → `focus.Evaluator(track=Track.FRAME)`.
+- **Runs on GPU** (RunPod). Reference code: `../../vendor/orena-focus/examples/inference.py` + `evaluation.py` (vendored SDK, see `vendor/VENDORED.md`).
 
 ## Layout (per EXPERIMENT_REPO_STRUCTURE_SPEC.md)
 
 ```
 experiments/00-baseline/
 ├── README.md            # this file (opens with the ladder)
-├── VENDORED.md          # note on the vendored SDK
-├── orena-focus/         # vendored SDK v0.3.4 (read-only reference)
-├── 00_zeroshot_qwen3vl.ipynb   # (to add) the baseline run notebook
-├── _models/             # (to add) inference engine, engines-only
-├── RESULTS.csv          # (to add) scorecard, one row per rung
+├── 00_zeroshot_qwen3vl.ipynb   # the baseline run notebook
+├── RESULTS.csv          # scorecard, one row per rung
 └── runs/                # GITIGNORED — predictions + config_snapshot.yaml
 ```
+
+> The official challenge SDK is vendored at repo root `vendor/orena-focus/`
+> (read-only reference, spec §9 escape hatch) — NOT inside this experiment dir.
 
 Context lives in `context/00-baseline/CONTEXT.md`.

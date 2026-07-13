@@ -1,5 +1,8 @@
 # Vendored third-party code
 
+> Lives at repo root `vendor/` (moved out of `experiments/00-baseline/` — vendored
+> third-party code must not sit inside an experiment dir, per spec §9).
+
 `orena-focus/` is a **vendored copy** of the official challenge SDK
 (`https://github.com/IMSY-DKFZ/orena-focus`, tag **v0.3.4**), kept here as
 read-only reference for building the zero-shot baseline (see `examples/inference.py`

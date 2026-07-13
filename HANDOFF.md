@@ -19,7 +19,7 @@
 
 ## Next-session steps (baseline run)
 1. **Create a GPU pod** attached to volume `gf78k60nlt` (worked before: `gpuTypeIds` list incl. `"NVIDIA GeForce RTX 4090"`, `cloudType:"SECURE"`, image `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404`, `volumeMountPath:/workspace`, `HF_HUB_ENABLE_HF_TRANSFER:"0"`). REST: `POST https://rest.runpod.io/v1/pods`.
-2. **Build `experiments/00-baseline/00_zeroshot_qwen3vl.ipynb`** per the notebook template (EXPERIMENT_REPO_STRUCTURE_SPEC §5): title → bootstrap → inline config + `SMOKE` toggle → import a `QwenInferenceEngine` (adapt `experiments/00-baseline/orena-focus/examples/inference.py`: fix the 3 bugs — `device_map` on GPU, `Track.FRAME` not SEGMENT, `dtype=torch.bfloat16`; sample 1–3 frames as images; ≤300-char + adversarial-scan guard) → `focus.Evaluator().run(..., track=Track.FRAME)` → per-bucket report.
+2. **Build `experiments/00-baseline/00_zeroshot_qwen3vl.ipynb`** per the notebook template (EXPERIMENT_REPO_STRUCTURE_SPEC §5): title → bootstrap → inline config + `SMOKE` toggle → import a `QwenInferenceEngine` (adapt `vendor/orena-focus/examples/inference.py`: fix the 3 bugs — `device_map` on GPU, `Track.FRAME` not SEGMENT, `dtype=torch.bfloat16`; sample 1–3 frames as images; ≤300-char + adversarial-scan guard) → `focus.Evaluator().run(..., track=Track.FRAME)` → per-bucket report.
 3. Run zero-shot on `data/frame/test.parquet` (start SMOKE=True, then full). Judge = `Qwen/Qwen3.5-4B`.
 4. **Record** the number in `experiments/00-baseline/README.md` ladder + `RESULTS.csv`; update `context/00-baseline/CONTEXT.md` Results/Next. Commit (as user, NO Co-Authored-By).
 5. Stop the pod when done.
