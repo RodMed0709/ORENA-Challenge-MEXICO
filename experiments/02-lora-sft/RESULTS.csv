@@ -1,0 +1,2 @@
+run,lora_rank,lora_alpha,lr,epochs,ckpt_selected,pre_evaluation_score,acc_ID,acc_OOD,delta_vs_zeroshot,p99_s,verdict,notes
+02_lora_sft_v1,8,32,2e-5,5,PENDING,,,,,,PENDING,"run on GPU pod (A100 80GB, EU-RO-1, volume gf78k60nlt); select ckpt by acc_OOD (Sigmoid); Δ breakdown in RESULTS_delta.csv"
