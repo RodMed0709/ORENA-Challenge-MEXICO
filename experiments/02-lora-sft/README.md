@@ -9,9 +9,29 @@
 | Notebook | Rung | Metric (pre_evaluation_score) | Verdict |
 |---|---|---|---|
 | `../00-baseline/00_zeroshot_qwen3vl.ipynb` | 00 | 0.174 (raw 0.262) | baseline |
-| `02_lora_sft.ipynb` | 02 | _pending_ | _pending_ |
+| `02_lora_sft.ipynb` | 02 | **0.708** (raw 0.566) | **PASS** — crushes zero-shot |
 
 *Success = acc_OOD (val_ood/Sigmoid) up vs zero-shot, no format regressed, p99 < 5 s.*
+
+## Result — PASS (crushes the zero-shot baseline)
+
+Selected **checkpoint-1720 (epoch 2)** by acc_OOD. Per-epoch acc_OOD was **0.583 /
+0.592 / 0.583** (epoch 1/2/3) — flat, **no OOD collapse** (PITFALLS #1 risk did not
+materialize; epochs 1-3 all strong). Best full-val: **pre_evaluation_score 0.708
+(vs 0.174), raw 0.566 (vs 0.262)**.
+
+| slice | zero-shot | LoRA | Δ |
+|-------|-----------|------|---|
+| overall (6252) | 0.262 | **0.566** | **+0.305** |
+| ID (2252) | 0.249 | 0.521 | +0.272 |
+| **OOD (4000)** | 0.269 | **0.592** | **+0.323** |
+
+Per answer_format (the two target weak buckets, bolded): **fo_class 0.168→0.588
+(+0.42)**, **number 0.141→0.433 (+0.29)**, binary +0.15, multiple_choice +0.19,
+open_ended +0.05. Every format up, ID and OOD; OOD gained more than ID (generalizes
+to the held-out Sigmoid procedure, not memorizing chole). This settles the rung-03
+finding: `fo_class` and `number` are **LoRA/data** wins, not prompt wins. Full
+breakdown: `runs/RESULTS_delta.csv` + `runs/delta_by_format.png`.
 
 ## What this experiment is
 
