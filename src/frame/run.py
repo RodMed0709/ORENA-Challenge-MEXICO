@@ -168,6 +168,14 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
 
     # ── 4. KPIs ──────────────────────────────────────────────────────
     report = _kpi_report(cfg, evaluator, results_df, summary_df, responses)
+
+    # Free the judge before returning: on a 32GB GPU its ~8GB otherwise blocks the
+    # next per-epoch merge subprocess (c7-c9 loop). No effect on 48/80GB.
+    del judge, evaluator
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     (run_dir / "report.json").write_text(json.dumps(report, indent=2))
     logger.info("PRE-EVALUATION SCORE: %s", report["pre_evaluation_score"])
 
