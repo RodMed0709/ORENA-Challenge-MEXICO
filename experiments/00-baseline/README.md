@@ -35,8 +35,9 @@ domain perception, so **fine-tuning is the primary lever**; prompt/taxonomy grou
 frame resolution/multi-frame are cheaper adjuncts (enabled by the latency headroom).
 
 Artifacts: `runs/00_zeroshot_qwen3vl/` (gitignored) — `report.json`, `results.csv`,
-`summary.csv`, `predictions.json`, and `qualitative/` (40 mixed cases: frame + question +
-GT + our answer, browsable `index.html`).
+`summary.csv`, `predictions.json`, and `inspect.csv` (every question: correctness ✅/❌,
+model-vs-GT, and the `frame` column pointing to the single shared store
+`/workspace/frames_cache/`; no per-run JPEG copies).
 
 ### ⚠️ Trust caveats (adversarial review, 2026-07-10)
 
@@ -76,7 +77,7 @@ experiments/00-baseline/
 ├── README.md            # this file (opens with the ladder)
 ├── 00_zeroshot_qwen3vl.ipynb   # the baseline run notebook
 ├── RESULTS.csv          # scorecard, one row per rung
-└── runs/                # GITIGNORED — predictions + config_snapshot.yaml
+└── runs/                # GITIGNORED — small CSVs/JSON + inspect.csv (frames in /workspace/frames_cache)
 ```
 
 > The official challenge SDK is vendored at repo root `vendor/orena-focus/`
