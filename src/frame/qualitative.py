@@ -1,11 +1,11 @@
-"""Inspection export: one lightweight ``inspect.csv`` per run for error analysis.
+"""Inspection export: one ``inspect.csv`` per run, backed by a SINGLE shared frame store.
 
-Reorg (2026-07-14): we NO LONGER copy per-run JPEGs or emit an HTML gallery. Instead
-we write a single ``inspect.csv`` covering **every** evaluated question with its
-correctness (✅/❌), the model answer vs ground truth, and a pointer back to the
-*original* frame — source video + timestamp — plus the shared frames-cache path when
-that frame already exists on disk (train qIDs). Zero frame duplication; the CSV is the
-artifact you open, sort, and filter.
+Reorg (2026-07-14): every frame lives exactly ONCE, at ``/workspace/frames_cache/<qID>.jpg``
+— the same store the training export fills. We NEVER copy per-run JPEGs or emit a gallery
+that duplicates pixels. ``export_inspect`` materializes each evaluated frame into that shared
+cache *if it isn't there yet* (train frames already are), then writes ``inspect.csv`` — every
+question, correctness (✅/❌), model answer vs ground truth, and the single canonical frame path.
+Open the CSV, sort by ``correct``, view the frame straight from ``frames_cache``.
 """
 
 from __future__ import annotations
@@ -15,31 +15,41 @@ from pathlib import Path
 
 import pandas as pd
 
-from frame.data import FrameProvider  # noqa: F401  (kept importable for callers)
+from frame.data import FrameProvider
 
 logger = logging.getLogger(__name__)
 
-# Shared frames cache (mirrors experiments/02-lora-sft/_models/lora_sft_train.FRAMES_CACHE).
-# Train frames are materialized here; if a qID's frame exists we surface its path so an
-# inspector can open the exact JPEG the model was trained/served on.
+# Canonical single-source frame store (mirrors lora_sft_train.FRAMES_CACHE). Every frame —
+# train or val — is materialized here once, qID-keyed, and referenced from here everywhere.
 FRAMES_CACHE = Path("/workspace/frames_cache")
 
 
 def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -> None:
-    """Write ``out/inspect.csv`` — full per-question audit, no frame copying."""
+    """Write ``out/inspect.csv``; materialize any missing frame into the shared cache."""
     out.mkdir(parents=True, exist_ok=True)
+    FRAMES_CACHE.mkdir(parents=True, exist_ok=True)
 
     item_by_q = {it.request.qID: it for it in items}
     resp_by_q = {r.qID: r for r in responses}
 
+    provider = FrameProvider(cfg)
+    # cache reads by video (results_df order is not video-grouped): sort the work list
+    work = [res["qID"] for _, res in results_df.iterrows() if res["qID"] in item_by_q]
+    work.sort(key=lambda q: (item_by_q[q].dataset, item_by_q[q].video_id,
+                             item_by_q[q].frame_index))
+
     rows = []
-    for _, res in results_df.iterrows():
-        q = res["qID"]
-        it = item_by_q.get(q)
+    for q in work:
+        it = item_by_q[q]
         resp = resp_by_q.get(q)
-        if it is None or resp is None:
-            continue
-        cache = FRAMES_CACHE / f"{q}.jpg"
+        res = results_df[results_df["qID"] == q].iloc[0]
+        frame_path = FRAMES_CACHE / f"{q}.jpg"
+        if not frame_path.exists():                       # materialize ONCE into the shared store
+            try:
+                provider.ensure_reader(it)
+                provider.get_frame(it).save(frame_path, quality=95)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("inspect frame %s failed: %s", q, exc)
         rows.append(
             {
                 "qID": q,
@@ -48,21 +58,20 @@ def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -
                 "primary_capability": res["primary"],
                 "question": it.request.question,
                 "ground_truth": it.reference.answer,
-                "our_answer": resp.content,
+                "our_answer": resp.content if resp else "",
                 "dataset": it.dataset,
                 "video": it.video_id,
                 "timestamp_s": round(float(it.request.start_time), 2),
-                "frame_index": getattr(it, "frame_index", None),
-                "latency_s": round(float(resp.latency), 3),
-                "frame_cache": str(cache) if cache.exists() else "",
+                "latency_s": round(float(resp.latency), 3) if resp else None,
+                "frame": str(frame_path) if frame_path.exists() else "",
             }
         )
+    provider.close()
 
     df = pd.DataFrame(rows)
-    # incorrect first, grouped by format — the natural error-review order
     if not df.empty:
         df = df.sort_values(["correct", "answer_format", "qID"]).reset_index(drop=True)
     df.to_csv(out / "inspect.csv", index=False)
     n_ok = int(df["correct"].sum()) if not df.empty else 0
-    logger.info("inspect.csv: %d questions (%d ✅ / %d ❌) → %s",
-                len(df), n_ok, len(df) - n_ok, out / "inspect.csv")
+    logger.info("inspect.csv: %d questions (%d ✅ / %d ❌), frames in %s → %s",
+                len(df), n_ok, len(df) - n_ok, FRAMES_CACHE, out / "inspect.csv")
