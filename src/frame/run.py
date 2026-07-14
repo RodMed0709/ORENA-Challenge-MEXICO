@@ -69,6 +69,11 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
         "pre_evaluation_score": float(pre_row["accuracy"].iloc[0]) if len(pre_row) else None,
         "overall_mean_accuracy": float(overall_row["accuracy"].iloc[0]) if len(overall_row) else None,
         "raw_accuracy": float(results_df["correctness"].mean()),
+        "overall_ci": (
+            [float(overall_row["ci_low"].iloc[0]), float(overall_row["ci_high"].iloc[0])]
+            if len(overall_row) and "ci_low" in overall_row and pd.notna(overall_row["ci_low"].iloc[0])
+            else None
+        ),
         "n_timed_out": int(results_df["timed_out"].sum()),
         "latency_s": {
             "mean": float(lat.mean()),
@@ -78,7 +83,12 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
             "max": float(lat.max()),
         },
         "by_answer_format": {
-            r["name"]: {"accuracy": float(r["accuracy"]), "count": int(r["count"])}
+            r["name"]: {
+                "accuracy": float(r["accuracy"]),
+                "ci_low": float(r["ci_low"]) if pd.notna(r.get("ci_low")) else None,
+                "ci_high": float(r["ci_high"]) if pd.notna(r.get("ci_high")) else None,
+                "count": int(r["count"]),
+            }
             for _, r in summary_df[summary_df["level"] == "answer_format"].iterrows()
         },
         "by_group_distribution": [
@@ -125,6 +135,18 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
     provider = FrameProvider(cfg)
     responses = _infer_all(cfg, items, engine, provider)
     provider.close()
+
+    # Free the inference model before the judge loads: the 8B VLM + the Qwen3-4B
+    # judge do not co-reside on a 32 GB GPU (they do on 48/80 GB). Inference is
+    # done, so drop the engine and reclaim VRAM before TransformersJudge loads.
+    import gc
+
+    import torch
+
+    del engine
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
     requests = [it.request for it in items]
     references = [it.reference for it in items]
