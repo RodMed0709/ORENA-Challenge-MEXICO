@@ -1,7 +1,7 @@
 """Orchestrates one FRAME zero-shot baseline run end to end.
 
     load items → sample frame + infer (grouped by video) → save predictions
-    → focus.Evaluator (with a real LLM judge) → KPI report → qualitative export
+    → focus.Evaluator (with a real LLM judge) → KPI report → inspect.csv export
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from focus.evaluation.judges import TransformersJudge
 
 from frame.data import FrameProvider, load_frame_items
 from frame.engine import QwenFrameEngine
-from frame.qualitative import export_qualitative
+from frame.qualitative import export_inspect
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
     (run_dir / "report.json").write_text(json.dumps(report, indent=2))
     logger.info("PRE-EVALUATION SCORE: %s", report["pre_evaluation_score"])
 
-    # ── 5. qualitative export ────────────────────────────────────────
-    export_qualitative(cfg, items, responses, results_df, run_dir / "qualitative")
+    # ── 5. inspection export (inspect.csv — no frame copying) ─────────
+    export_inspect(cfg, items, responses, results_df, run_dir)
 
     return report
