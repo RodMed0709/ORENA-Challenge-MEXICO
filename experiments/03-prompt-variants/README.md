@@ -7,7 +7,19 @@
 | 00-baseline | Qwen3-VL-8B zero-shot | — | done (raw acc 0.262) |
 | 01-ood-split | frozen ID/OOD split (`frame_ood_v1`) | — | done |
 | 02-lora-sft | LoRA instruction fine-tune | 00 | training |
-| **03-prompt-variants** | **`SYSTEM_PROMPT` additions** | **00 (a1_v0)** | **running** |
+| **03-prompt-variants** | **`SYSTEM_PROMPT` additions** | **00 (a1_v0)** | **done — faithful negative** |
+
+## Result (faithful negative)
+
+Winner-on-`val_id` was `a4_negexem` (0.260 vs 0.242, fo_class +0.048) — but on the
+**held-out `val_ood`** it was **worse** (0.264 vs baseline 0.274, Δ −0.010, CIs
+overlap). Textbook winner's curse: the val_id lift was noise/chole-specific. The
+select→confirm protocol caught it. **No prompt arm beats the baseline beyond noise
+on OOD.** Two real measurements survive: (1) the FO-grounding lever is worth
+**+0.061** (a0_noFO drops to 0.181) and already ships in the baseline; (2) `number`
+is not fixable by prompt (a3/a5 hurt it on val_id, a4 hurt it on OOD) — it is a
+**LoRA / data** problem. Next signal: rung 02 (LoRA) + resolution + oversampling
+`number`. See `RESULTS.csv`.
 
 ## Question
 
