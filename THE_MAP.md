@@ -5,6 +5,53 @@
 > This is the north star. It **supersedes the sequencing** in ATTACK_LADDER.md (the rung recipes there
 > stay valid). Dated 2026-07-13.
 
+## 0 — Executive roadmap (v3, improved map · added 2026-07-14)
+
+> Canonical, self-contained plan with the strategy-notes improvements folded in. The sections
+> BELOW this one (reframes, invariants, THE UNIFIED PLAN, per-angle contributions, resolved risk)
+> are the **original synthesis / rationale** and are kept intact as detail + provenance.
+
+### Fundamental principles (the "why")
+1. **FRAME only has 2 capability types, not 5.** Verified on real data: only *object recognition* and *counting (aggregation)*. Complex reasoning + events live in OTHER tracks → all effort goes to the weak formats **fo_class** and **number**. No reasoning/time/percentage.
+2. **Real latency headroom is ~4×, not 8×.** 5 s limit; 0.6 s measured but on an A100. Real GPU (L40S) ~2× slower → ~4× headroom. Extra frames/resolution/bigger model eat it.
+3. **Copeland is margin-blind; format is first.** Winning 90% on an already-won bucket buys no votes; one silent-0 flips a bucket → hardening format matters MORE than improving the model.
+4. **Win "in the seam" between the two baselines.** *(Working hypothesis, NOT measured.)* B1 (frontier zero-shot) reasons well / perceives surgery poorly; B2 (their FT 4B) perceives ID well / fails OOD. A balanced 8B LoRA that keeps reasoning AND holds OOD beats both where each is weak. *First leaderboard submission validates this.*
+
+### Non-negotiable invariants
+- **Plain LoRA** (S2Can: r=8, α=32, frozen ViT). Instruction-FT = +16, exotic adapters +2 → skip them.
+- **bf16, NOT 4-bit** on the 8B (fits 48 GB; quantizing only adds latency). 4-bit reserved for the 32B wildcard.
+- **ms-swift** (native Qwen3-VL + `max_pixels`/freeze-vit). Unsloth lags on this model.
+- **1–3 frames**, no stacking. FRAME is single-image.
+- **Checkpoint selection by per-bucket OOD win, never mean.** Discard any ckpt that wins ID but drops OOD.
+- **An always-valid zero-shot floor** kept submittable as a calendar hedge.
+
+### Phases (improvements folded in)
+- **Phase 0 — Floor, format-hardening, permits (Jul 13–15):** offline Docker v0 (network-off test) · 6-gate anti-silent-0 CI · **FSM/guided decoding in serving** (force the format *during* generation) · **submit all DUAs** (CholecT50/45, Cholec80, HeiCo) · Jul 15 submit the bare floor first · **dose the 10 submissions** (pre-eval = 10 shots over 20 videos).
+- **Phase 1 — Split + harness (split ✅; 2 pending):** ✅ frozen split (Sigmoid held-out = local OOD proxy, NOT the hidden leaderboard OOD) · (a) cross-corpus pHash leak scrub · (b) measure p99 on real L40S + warm-up · **SurgCheck grounding test** on rung 00 (decides whether Phase 4 is worth it).
+- **Phase 2 — LoRA v1 (wk2–3):** S2Can recipe, bf16, 3 epochs first, targeting fo_class+number; single variable = LoRA ON; select by OOD; re-measure p99 per merged ckpt · **anti "model-collapse" guardrail** (mix some structured/open answers so reasoning survives).
+- **Phase 3 — Data flywheel + reserves (wk4–5):** error→mint-QA→retrain, cross-procedure balance · **visual-degradation slice** (blood-soaked sponge, corner occlusion, low contrast) · **[RESERVE] YOLO→ROI / visual prompts** (only if LoRA doesn't cross the gate on fo_class/number) · **32B FP8 wildcard** only if a bucket stays stuck and the offline path is green on L40S.
+- **Phase 4 — Freeze + prove the lead (wk6–7, pre-eval closes Sep 1):** network-off dress rehearsal on L40S · bootstrap self-audit vs BOTH reproduced baselines · ship only ≥6/10 buckets vs EACH, CI-clear (prefer 7/10).
+- **Phase 5 — Ship + optimal serving (Sep 1–8):** final offline Docker + method description + release annotations + open-source model · **vLLM vs SGLang RadixAttention benchmark** (reuse image cache across a frame's questions).
+
+### Calendar
+| Date | Gate | Phase |
+|---|---|---|
+| Jul 15 | Pre-eval opens (10 submissions / 20 videos); submit the floor | 0 |
+| Sep 1 | Pre-eval closes; only teams that beat both baselines advance | 4 |
+| Sep 8 | Final submission (Docker + method + model) | 5 |
+| October | MICCAI 2026 announcement | — |
+
+### Two honest caveats (must stay visible)
+- The B1/B2 strength/weakness profile is a **hypothesis**, not a measured fact.
+- Our "OOD" is a **local proxy** (Sigmoid held-out from released data), NOT the hidden leaderboard OOD.
+
+---
+
+> **Preservation note:** everything below is the original 5-plan synthesis and deeper rationale
+> from which the executive roadmap above was distilled. Kept intact.
+
+---
+
 ## Three reframes the whole panel forced (the ladder was wrong on these)
 
 1. **FRAME only exercises ~2 capability groups — CORRECTED 2026-07-13 from real data.** The taxonomy has
