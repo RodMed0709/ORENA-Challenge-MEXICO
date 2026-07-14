@@ -45,6 +45,15 @@
 - The B1/B2 strength/weakness profile is a **hypothesis**, not a measured fact.
 - Our "OOD" is a **local proxy** (Sigmoid held-out from released data), NOT the hidden leaderboard OOD.
 
+### STATUS (updated 2026-07-14) — Phase 2 DONE, Phase 3 redirected
+
+- **Phase 2 (LoRA v1) — DONE, PASS.** rung-02 (r8/α32/lr2e-5, 3 epochs, frozen ViT+aligner, 1 frame, max_pixels 1280×720). Best ckpt = **epoch 2** by acc_OOD (per-epoch 0.583/0.592/0.583 — **no OOD collapse**). Full val: **pre_eval 0.174→0.708, raw 0.262→0.566, OOD 0.269→0.592**. Per format: **fo_class 0.168→0.588 (+0.42), number 0.141→0.433 (+0.29)**, all up, OOD>ID. Merged model on volume `gf78k60nlt` at `experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720`. See `experiments/02-lora-sft/RESULTS.csv`.
+- **rung-03 (prompt engineering) — faithful negative.** Rigorous select-on-val_id / confirm-on-val_ood: no prompt arm beats baseline beyond noise on OOD (winner's curse caught). Measured: FO-grounding lever = +0.061 (already in baseline). **fo_class + number are LoRA/data wins, NOT prompt.** See `experiments/03-prompt-variants/`.
+- **`number` diagnosed — NOT a data problem.** It is already 31% of train (4262q) with a well-spread answer distribution (mean 2.74, not skewed low) → oversampling won't help; the bottleneck is **perception**.
+- **Phase 3 REDIRECT (from an adversarial strategy review).** Train loss AND acc_OOD both **plateau at epoch 1** → generalization/representation ceiling, not an optimization or data-quantity problem. Key catch: we **froze the aligner**, but Surgical-LVLM's contribution (**VP-LoRA**, arXiv 2405.10948) is LoRA on the *visual-perception path* — we froze exactly what the SOTA surgical VQA model adapts. **Next experiments (single-variable vs rung-02):** #1 **unfreeze aligner/merger** (`--freeze_aligner false`, zero latency, highest expected OOD), #2 **rank probe r=8→32** (diagnostic: capacity vs representation vs resolution), then resolution / VP-LoRA-on-ViT / multi-frame / domain-augmentation. Resolution is **demoted** to a co-lever (untested assumption feeding a frozen encoder; and headroom is ~4× not 8× per §2 above).
+- **Process fixes (do before next run):** add a `val_dataset` to swift sft (track `eval_loss` — we currently have NO val curve, only 3 OOD points), eval every half-epoch, early-stop on acc_OOD.
+- **Infra notes:** measured GPU throughput for THIS workload — RTX 5090 (7.5s/step) > RTX 4090 (11.5s) > RTX PRO 6000 (31s, Blackwell kernels immature); pick by measured s/step, not tier. `run.py` hardened for 32GB (frees the 8B before + the judge after eval, or the per-epoch merge OOMs). JupyterLab launcher at `/workspace/start_jupyter.sh` (kernel "ORENA (infer env)").
+
 ---
 
 > **Preservation note:** everything below is the original 5-plan synthesis and deeper rationale
