@@ -42,8 +42,5 @@ class BaselineConfig:
     run_name: str = "00_zeroshot_qwen3vl"
     seed: int = 42
 
-    # ── qualitative export ───────────────────────────────────────────
-    n_qualitative: int = 40  # ~half correct / half incorrect, stratified by format
-
     def video_path(self, dataset: str, video_id: str) -> Path:
         return self.data_root / dataset / "videos" / video_id

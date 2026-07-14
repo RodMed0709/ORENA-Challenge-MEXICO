@@ -25,6 +25,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# Flat storage layout (2026-07-14 reorg): heavy artifacts live NEXT TO /workspace/models,
+# out of experiments/*/runs/. Frames are a single SHARED cache (keyed by qID, deterministic
+# from source video) so successive runs never re-materialize the 13,748 train JPEGs.
+CKPT_ROOT = Path("/workspace/ckpt")        # /workspace/ckpt/<run>/{checkpoint-*, merged/, train.jsonl}
+FRAMES_CACHE = Path("/workspace/frames_cache")  # ONE dir, populate-if-missing, reused across runs
+
 
 @dataclass
 class LoRAConfig:
@@ -60,23 +66,30 @@ class LoRAConfig:
 
     @property
     def run_dir(self) -> Path:
+        """experiments/<id>/runs/<run> — small CSVs + inspect.csv ONLY (git-adjacent, gitignored)."""
         return self.exp_dir / "runs" / self.run_name
 
     @property
+    def ckpt_run_dir(self) -> Path:
+        """/workspace/ckpt/<run> — the heavy artifacts (checkpoints, merged, train JSONL)."""
+        return CKPT_ROOT / self.run_name
+
+    @property
     def train_jsonl(self) -> Path:
-        return self.run_dir / "train.jsonl"
+        return self.ckpt_run_dir / "train.jsonl"
 
     @property
     def frames_dir(self) -> Path:
-        return self.run_dir / "frames"
+        """SHARED across all runs — NOT per-run. qID-keyed, populate-if-missing."""
+        return FRAMES_CACHE
 
     @property
     def ckpt_dir(self) -> Path:
-        return self.run_dir / "ckpt"
+        return self.ckpt_run_dir
 
     @property
     def merged_dir(self) -> Path:
-        return self.run_dir / "merged"
+        return self.ckpt_run_dir / "merged"
 
 
 def _baseline_cfg(cfg: LoRAConfig):
@@ -113,7 +126,8 @@ def _export(cfg: LoRAConfig) -> Path:
     qids = [it.request.qID for it in train_items]
     assert len(set(qids)) == len(qids), "duplicate qID in train export (would collide frames/JSONL)"
 
-    cfg.frames_dir.mkdir(parents=True, exist_ok=True)
+    cfg.frames_dir.mkdir(parents=True, exist_ok=True)      # shared /workspace/frames_cache
+    cfg.ckpt_run_dir.mkdir(parents=True, exist_ok=True)    # train.jsonl lives beside the ckpts
     provider = FrameProvider(bcfg)
     n = 0
     with open(cfg.train_jsonl, "w", encoding="utf-8") as fh:
@@ -198,7 +212,7 @@ def list_checkpoints(cfg: LoRAConfig) -> list[Path]:
 def merge_checkpoint(cfg: LoRAConfig, adapter: Path) -> Path:
     """swift export --merge_lora → a standalone bf16 checkpoint, namespaced per epoch
     (merged/<checkpoint-name>) so per-epoch merges never overwrite each other."""
-    out = cfg.run_dir / "merged" / adapter.name
+    out = cfg.merged_dir / adapter.name
     args = ["swift", "export", "--adapters", str(adapter), "--merge_lora", "true",
             "--output_dir", str(out)]
     logger.info("swift export (merge): %s", " ".join(args))
