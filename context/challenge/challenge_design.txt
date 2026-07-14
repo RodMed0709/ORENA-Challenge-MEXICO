@@ -40,7 +40,8 @@ surgical-domain interpretation; a SEGMENT Track (short video segments) to evalua
 reasoning, local tracking, and action understanding; and a PROCEDURE Track (long-context up to full procedures
 
 Page 1 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 reflecting real intraoperative and postoperative query scenarios) to probe long-horizon memory, persistent object
 tracking across occlusions and scene changes, aggregation over time (e.g., counting and retrieval status), and
@@ -86,7 +87,8 @@ exposure of the surgical field or may be reused. Unintentionally leaving foreign
 but consequential incident in minimally invasive surgery, as they can cause serious complications [1]. To avoid
 
 Page 2 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 such incidents, counting of all foreign objects at the beginning and the end of every procedure has been
 established as a standard quality control measure to ensure that all used objects are removed from the abdomen
@@ -134,7 +136,8 @@ bounded context.
 - The PROCEDURE Track challenges models with long videos (procedures from beginning up to a certain point
 
 Page 3 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 reflecting real intraoperative and postoperative query scenarios), to assess their capacity for long-term memory,
 persistent tracking, and global reasoning. Questions may require recalling when an object was last seen,
@@ -179,7 +182,8 @@ the field of surgical AI). Comparable high-incentive initiatives, such as the RS
 (> 1,000 participants), demonstrate that significant prize funding can attract large and diverse participation
 
 Page 4 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 beyond the core medical imaging community [1].
 
 [1]: https://www.kaggle.com/competitions/rsna-breast-cancer-detection/leaderboard
@@ -213,7 +217,8 @@ We will use a derived version of the open source grand-challenges platform for o
 part we will need standard conference equipment (projector, loud speakers, microphones, WiFi).
 
 Page 5 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 TASK 1: FRAME Track (Single-Frame Understanding)
 
@@ -259,7 +264,8 @@ Lena Maier-Hein (DKFZ)
 Stefanie Speidel (National Center for Tumor Diseases)
 
 Page 6 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Danail Stoyanov (University College London)
 
@@ -310,7 +316,8 @@ Examples:
    � One-time event with fixed conference submission deadline
 
 Page 7 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � Open call (challenge opens for new submissions after conference deadline)
    � Repeated event with annual fixed conference submission deadline
@@ -355,7 +362,8 @@ vision encoders). Use of additional manually or automatically generated annotati
 allowed provided that annotations are made publically available after the challenge. All training/fine-tuning data
 
                                       Page 8 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 must be specified. Any external data or pre-trained model must be publicly accessible at the time of the launch of
 the pre-evaluation phase to ensure fairness and reproducibility. Participants may create additional annotations
@@ -400,7 +408,8 @@ The top performing teams that meet the the following criteria will be announced 
 2) The solution beat the baselines.
 
 Page 9 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 3) The submission description provides sufficient methodological details to allow for a meaningful interpretation.
 f) Define the publication policy. In particular, provide details on ...
@@ -445,7 +454,8 @@ on a sample of 20 representative videos. Only teams that beat both baselines on 
 the final test stage.
 
 Page 10 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 *Note: Although we are confident with the numbers provided, constraints with the compute costs for the
 inference might imply slight adaptations for the exact number of submissions if we encounter a very large or very
@@ -489,7 +499,8 @@ Clarify how the data can be used and distributed by the teams that participate i
 and after the challenge. This should include the explicit listing of the license applied.
 
 Page 11 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Examples:
 
@@ -543,7 +554,8 @@ for inference and instructions on how to do so. Participants are further strongl
 training scripts, hyperparameter configurations, and detailed documentation available to promote transparency,
 
 Page 12 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 reproducibility, and scientific exchange within the community. Teams choosing not to release their training code
 are still required to provide sufficient methodological details in their submission descriptions to allow for a
 meaningful interpretation of the results and to be eligible to receive the prize money. This balanced policy aims to
@@ -586,7 +598,8 @@ Intervention assistance
 Task category(ies)
 
 Page 13 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 State the task category(ies)
 
 Examples:
@@ -629,7 +642,8 @@ Test data will include 200 videos from a broad range of procedures (cholecystect
 types not to be conveyed to the participants). Leaderboard validation data will include 20 videos representative of
 
 Page 14 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 the test data.
 
@@ -672,7 +686,8 @@ assess different properties.
    � Example 1: Find highly accurate liver segmentation algorithm for CT images.
 
                 Page 15 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � Example 2: Find lung tumor detection algorithm with high sensitivity and specificity for mammography images.
 Corresponding metrics are listed below (parameter metric(s)).
@@ -719,7 +734,8 @@ video. A case consists of: (1) a frame, (2) a question, (3) categorization of th
 taxonomy (shared with the participants only for the training data) (4) meta information about the procedure type
 
 Page 16 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 and the time-point/-frame, and (5) a reference answer provided by an expert surgeon or extracted automatically
 from the expert annotations.
@@ -775,7 +791,8 @@ STAGE 1 - Foreign object presence screening (5s clips).
 Purpose: Identification of video segments with foreign objects
 
 Page 17 of 66                                                   Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Input: 5 sec clips
 Output: Presence flag for each class of foreign objects on each clip
@@ -821,7 +838,8 @@ type, attributes, spatial context,
 instances.
 
 Page 18 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 The complete taxonomy will be released with the first batch of training data.
 
@@ -863,7 +881,8 @@ detailed protocols will be made available alongside the dataset.
 [3] https://github.com/cvat-ai/cvat
 
 Page 19 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 c) Provide details on the subject(s)/algorithm(s) that annotated the cases (e.g. information on level of expertise such as
 number of years of professional experience, medically-trained or not). Provide the information separately for the
@@ -905,7 +924,8 @@ b) In an analogous manner, describe and quantify other relevant sources of error
 N/A
 
 Page 20 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 ASSESSMENT METHODS
 
@@ -955,7 +975,8 @@ meaningful linguistic variability. Preliminary experiments demonstrated only ver
 different state-of-the-art large language models as judges.
 
 Page 21 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Reliability aspects are addressed through the overall challenge design rather than through additional metrics.
 Specifically, the test set comprises unseen procedures, unseen centers and unseen questions compared to the
@@ -998,7 +1019,8 @@ Each test case is annotated with the following meta information:
 question
 
 Page 22 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 (ii) Primary capability: Given the primary question intent, the test case is mapped to one primary capability using
 the proposed taxonomy (Main capabilities: Object Recognition and Instance Matching, Temporal Grounding,
@@ -1041,7 +1063,8 @@ final ranking scheme focuses purely on the question, "What is the best model?" r
 to which a problem is solved.
 
 Page 23 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 [1]: Rofin, Mark, et al. "Vote'n'rank: Revision of benchmarking with social choice theory." Proceedings of the 17th
 Conference of the European Chapter of the Association for Computational Linguistics. 2023.
@@ -1093,7 +1116,8 @@ sub-capabilities, clinical impact levels, and robustness setting (ID/OOD).
 Provide a description of how variability of rankings is assessed.
 
 Page 24 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 To assess and visualize ranking variability, the challengeR software [1] will be used. In addition, we will report
 confidence intervals for the differences in performance between participating algorithms for each performance
@@ -1126,7 +1150,8 @@ qualitative failure mode analysis. We will also explore post-hoc ensembling of c
 potential upper bounds.
 
 Page 25 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 TASK 2: SEGMENT Track (Short-Context Video Understanding)
 
@@ -1172,7 +1197,8 @@ Technical Chairs:
 Salman Khan (Mohamed bin Zayed University of Artificial Intelligence)
 
 Page 26 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Lena Maier-Hein (DKFZ)
 Stefanie Speidel (National Center for Tumor Diseases)
@@ -1221,7 +1247,8 @@ event). Sometimes it is possible to submit results after the deadline (open call
 modifications (repeated event).
 
 Page 27 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Examples:
    � One-time event with fixed conference submission deadline
@@ -1264,7 +1291,8 @@ whether such additional data needs to be publicly available at the time of the c
 (private) annotations of the public data is allowed.
 
 Page 28 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Participants may train models using the challenge-provided training set and may additionally use publicly
 available datasets and publicly released pre-trained models (e.g., open VLM backbones, language models, or
@@ -1309,7 +1337,8 @@ Examples:
    � Participating teams can choose whether the performance results will be made public.
 
 Page 29 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 The top performing teams that meet the the following criteria will be announced publicly:
 
 1) The team will make their model and any additionally created annotations public.
@@ -1354,7 +1383,8 @@ results. For example, many challenges allow submission of multiple results, and 
 compute challenge results.
 
 Page 30 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 A leaderboard will be set up to which each team can make up to 10 submissions*. Evaluation will be performed
 on a sample of 20 representative videos. Only teams that beat both baselines on the leaderboard will proceed to
@@ -1400,7 +1430,8 @@ clinicians/facilities involved.
 Data usage agreement
 
 Page 31 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Clarify how the data can be used and distributed by the teams that participate in the challenge and by others during
 and after the challenge. This should include the explicit listing of the license applied.
@@ -1456,7 +1487,8 @@ Model publication is mandatory to be eligible for awards (see above). This inclu
 for inference and instructions on how to do so. Participants are further strongly encouraged to make their
 
 Page 32 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 training scripts, hyperparameter configurations, and detailed documentation available to promote transparency,
 reproducibility, and scientific exchange within the community. Teams choosing not to release their training code
 are still required to provide sufficient methodological details in their submission descriptions to allow for a
@@ -1500,7 +1532,8 @@ Intervention assistance
 Task category(ies)
 
 Page 33 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 State the task category(ies)
 
 Examples:
@@ -1543,7 +1576,8 @@ Test data will include 200 videos from a broad range of procedures (cholecystect
 types not to be conveyed to the participants). Leaderboard validation data will include 20 videos representative of
 
 Page 34 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 the test data.
 
@@ -1586,7 +1620,8 @@ assess different properties.
    � Example 1: Find highly accurate liver segmentation algorithm for CT images.
 
                 Page 35 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � Example 2: Find lung tumor detection algorithm with high sensitivity and specificity for mammography images.
 Corresponding metrics are listed below (parameter metric(s)).
@@ -1633,7 +1668,8 @@ case consists of: (1) a video segment of up to 5 min, (2) a question, (3) catego
 the challenge taxonomy (shared with the participants only for the training data) (4) meta information about the
 
 Page 36 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 procedure type and the video segment and (5) a reference answer provided by an expert surgeon or extracted
 automatically from the expert annotations.
@@ -1689,7 +1725,8 @@ the annotators.
 STAGE 1 - Foreign object presence screening (5s clips).
 
 Page 37 of 66                                            Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Purpose: Identification of video segments with foreign objects
 Input: 5 sec clips
@@ -1736,7 +1773,8 @@ including their exact temporal position and duration
 instances, and/or time points
 
 Page 38 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 - Event and procedural understanding (Which action?): Recognition and interpretation of actions, events, and their
 procedural structure over time
@@ -1778,7 +1816,8 @@ were guided to derive both open- and closed-ended questions that addressed medic
 surgical understanding specifically tailored to the type of foreign object identified.
 
 Page 39 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Documentation: Comprehensive annotation instructions were provided to annotators at every stage. These
 detailed protocols will be made available alongside the dataset.
@@ -1825,7 +1864,8 @@ conducted a multi-stage annotation process with the following correction/verific
 1) Correction of crowd object detection annotations with an automatic method to minimize missed foreign object
 
 Page 40 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 instances
 2) Correction of automatic annotations by medical students to ensure a high level of consistency, set up as a two
@@ -1870,7 +1910,8 @@ For detailed performance analyses, metrics are chosen in a customized manner dep
 question, as suggested by the Metrics Reloaded framework [1]. For the ranking scheme, Accuracy was selected to
 
 Page 41 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 reflect our primary assessment goal of correctness, i.e., whether a model provides correct answers to clinically
 meaningful questions. Accordingly, Accuracy, as it directly operationalizes correctness in a transparent manner
@@ -1916,7 +1957,8 @@ use the Copeland method to do so [1].
 3. Resolving ties: For the top 3 places we will resolve ties by looking at the mean win rate of tied models using
 
 Page 42 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 bootstrapping within all capabilities.
 
 Proposed ranking scheme
@@ -1960,7 +2002,8 @@ give equal weight to ID and OOD questions. We evaluate each primary capability s
 them with equal weight. Before combining the scores across all buckets, we use the significance testing to ensure
 
 Page 43 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 only meaningful performance deltas result in different ranks. We favor Copeland over other ranking schemes (for
 example the linear ranking, also known as the Borda rule [1]) because it has more desirable properties [1],
@@ -2011,7 +2054,8 @@ Provide a description of how variability of the performance of individual algori
 SD across test cases, IQR, graphs, reporting outliers...).
 
 Page 44 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 To describe performance variability across test cases, we will report the standard deviation of the performance
 metrics and complement this with boxplots that visually illustrate variability for each combination of task and
@@ -2049,7 +2093,8 @@ qualitative failure mode analysis. We will also explore post-hoc ensembling of c
 potential upper bounds.
 
 Page 45 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 TASK 3: PROCEDURE Track (Long-Context Video Understanding)
 
@@ -2095,7 +2140,8 @@ Technical Chairs:
 Salman Khan (Mohamed bin Zayed University of Artificial Intelligence)
 
 Page 46 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Lena Maier-Hein (DKFZ)
 Stefanie Speidel (National Center for Tumor Diseases)
@@ -2144,7 +2190,8 @@ event). Sometimes it is possible to submit results after the deadline (open call
 modifications (repeated event).
 
 Page 47 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Examples:
    � One-time event with fixed conference submission deadline
@@ -2187,7 +2234,8 @@ whether such additional data needs to be publicly available at the time of the c
 (private) annotations of the public data is allowed.
 
 Page 48 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 The PROCEDURE Track is designed as an open track to maximize innovation in long-context surgical video
 understanding. Participants may use any training data, including the challenge-provided dataset, publicly
@@ -2232,7 +2280,8 @@ The top 3 teams that beat the baseline will be announced publicly.
 f) Define the publication policy. In particular, provide details on ...
 
 Page 49 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � ... who of the participating teams/the participating teams' members qualifies as author
    � ... whether the participating teams may publish their own results separately, and (if so)
@@ -2278,7 +2327,8 @@ inference might imply slight adaptations for the exact number of submissions if 
 small number of participants. Updates will be made public on the official challenge website.
 
 Page 50 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Creating multiple accounts per person or multiple teams per institution/lab to exploit the submission budget
 during pre-evaluation or final submission may result in a permanent exclusion from the challenge.
@@ -2321,7 +2371,8 @@ Examples:
    � CC BY (Attribution)
 
 Page 51 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � CC BY-SA (Attribution-ShareAlike)
 
@@ -2375,7 +2426,8 @@ prize money. This balanced policy aims to foster open research while maintaining
 applied contributions.
 
 Page 52 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Conflicts of interest
 Provide information related to conflicts of interest. In particular provide information related to sponsoring/funding of
@@ -2419,7 +2471,8 @@ Examples:
    � Detection
 
                               Page 53 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
    � Localization
    � Modeling
@@ -2462,7 +2515,8 @@ operating room. Sci Data 8, 101 (2021). https://doi.org/10.1038/s41597-021-00882
 [2]: https://wellcomeleap.org/save/
 
 Page 54 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 Imaging modality(ies)
 Specify the imaging technique(s) applied in the challenge.
 Surgical endoscopy; Diverse systems applied
@@ -2501,7 +2555,8 @@ Accuracy,Robustness,Reliability
 DATA SETS
 
 Page 55 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Data source(s)
 a) Specify the device(s) used to acquire the challenge data. This includes details on the device(s) used to acquire the
@@ -2549,7 +2604,8 @@ Training: 10,000 questions obtained from 200 videos
 Validation: 1,000 questions obtained from 20 videos
 
 Page 56 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Test: 10,000 questions obtained from 200 videos
 c) How much of the data are already annotated (stratified by train test in percentage)?
@@ -2591,7 +2647,8 @@ Output: Presence flag for each class of foreign objects on each clip
 Annotators: QualityMatch Crowdsourcing company [1]
 
 Page 57 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 STAGE 2 - Frame-level localization (bounding boxes at 1 fps).
 Purpose: Identification and localization of foreign objects in individual frames
@@ -2638,7 +2695,8 @@ procedural structure over time
 - Complex reasoning (Why? What happens if?): Inference of functional, causal, or outcome-related information
 
 Page 58 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 beyond direct observation
 
 The complete taxonomy will be released with the first batch of training data.
@@ -2682,7 +2740,8 @@ detailed protocols will be made available alongside the dataset.
 [2] https://imerit.net/domains/medical-ai/
 
                                                                      Page 59 of 66
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 [3] https://github.com/cvat-ai/cvat
 
@@ -2729,7 +2788,8 @@ stage process, based on a four-eyes principle and assisted by automatic flagging
 b) In an analogous manner, describe and quantify other relevant sources of error.
 
 Page 60 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 N/A
 
@@ -2775,7 +2835,8 @@ across categorical and open-ended questions.
 For open-ended questions, an LLM-as-a-judge paradigm is employed, which has become a common and effective
 
 Page 61 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 approach in modern VQA and VLM benchmarks to assess semantic correctness while allowing for clinically
 meaningful linguistic variability. Preliminary experiments demonstrated only very minor discrepancies when using
@@ -2821,7 +2882,8 @@ Each test case is annotated with the following meta information:
 (i) Robustness level: In-distribution (ID) vs Out-of-distribution (OOD) tag with respect to procedure type and
 
 Page 62 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 question
 (ii) Clinical relevance: Binary variable indicating whether a question is clinically relevant (e.g., "Where is the sponge
@@ -2866,7 +2928,8 @@ Test cases with missing response data will be handled like false answers.
 c) Justify why the described ranking scheme(s) was/were used.
 
 Page 63 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 We designed the ranking scheme according to the above-summarized requirements. To reward robustness, we
 give equal weight to ID and OOD questions. We evaluate each primary capability separately before combining
@@ -2917,7 +2980,8 @@ per task categories as described in [1] and the precision estimates will be repo
 (2025). A Benchmark and Agentic Framework for Omni-Modal Reasoning and Tool Use in Long Videos.
 
 Page 64 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Provide a description of how variability of the performance of individual algorithms across tests cases is assessed (e.g.
 SD across test cases, IQR, graphs, reporting outliers...).
@@ -2961,7 +3025,8 @@ ADDITIONAL POINTS
 References
 
 Page 65 of 66  Biomedical Image Analysis ChallengeS (BIAS) Initiative
-                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
+
+                                       ORena - SAVE FOCUS challenge: Foreign Object Contextual
 
 Please include any reference important for the challenge design, for example publications on the data, the annotation
 process or the chosen metrics as well as DOIs referring to data or code.
@@ -2976,4 +3041,3 @@ N/A
             Page 66 of 66                           Biomedical Image Analysis ChallengeS (BIAS) Initiative
 
 Created at 2026-04-22T16:37:19.958013+02:00 (CEST)
-

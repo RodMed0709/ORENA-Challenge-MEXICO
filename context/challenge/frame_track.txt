@@ -1,4 +1,3 @@
-                                                                                                                                 or-arena.org
 
 ORena -- SAVE FOCUS
 challenge ­ frame track
@@ -57,7 +56,8 @@ postopera.ve query scenarios) to probe long-horizon memory, persistent object tr
 changes, aggrega.on over .me (e.g., coun.ng and retrieval status), and global reasoning across events. Together,
 these tracks enable a systema.c characteriza.on of where current VLMs succeed and fail as task complexity transi.ons
 from instantaneous percep.on to long-context intraopera.ve reasoning.
-Cri.cally, FOCUS is enabled by a unique dataset that, to the best of our knowledge, is the first challenge resource to
+
+Cri.cally, FOCUS is enabled by a unique dataset that, to the best of our knowledge, is the first challenge resource to
 provide full-length laparoscopic videos with fine-grained foreign-object annota.ons at scale. Importantly, the mul.-
 center dataset includes instance-consistent labels, making it possible to evaluate models not only on short-term
 detec.on, but also on long-horizon tracking, coun.ng, and retrieval verifica.on across extended procedures. With a
@@ -123,7 +123,8 @@ In the context of this challenge, a foreign object refers to an object that is f
 cavity during a surgical procedure and is expected to be retrieved or accounted for. This includes items such as surgical
 sponges, compresses, needles, clips, drains, specimen bags, elas.c straps, and similar objects that are temporarily
 placed intra-abdominally.
-In addi.on, isolated biological material that is detached during the procedure and must be retrieved - such as an
+
+In addi.on, isolated biological material that is detached during the procedure and must be retrieved - such as an
 excised appendix, a gallstone, or resected .ssue fragments - are also considered foreign objects under this defini.on,
 as they require removal from the body cavity before comple.on of the opera.on.
 
@@ -188,7 +189,8 @@ Dura=on
 How long does the challenge take? Possible values: half day, full day, 2 hours, etc.
 
 Half day
-Longer dura=on explana=on
+
+Longer dura=on explana=on
 
 In case you selected half or full day, please explain why you need a long slot for your challenge.
      · Unprecedented prize money and expected ajen.on: FOCUS offers unusually high prize incen.ves for MICCAI
@@ -244,7 +246,8 @@ Keywords
 
 List the primary keywords that characterize the challenge. (Separate your inputs with comma like Keyword 1, Keyword
 2)
-Surgical AI, Surgical Data Science, Vision-Language Model, Surgical Foreign Objects, Laparoscopy, Endoscopy, Surgical
+
+Surgical AI, Surgical Data Science, Vision-Language Model, Surgical Foreign Objects, Laparoscopy, Endoscopy, Surgical
 Scene Understanding
 
 ORGANIZATION
@@ -298,7 +301,8 @@ Fiona Kolbinger (Purdue University)
 Daniel Hashimoto (University of Pennsylvania)
 Janne Heinecke (DKFZ)
 Thomas Pausch (University of Heidelberg)
-Thomas G. Weiser is a surgeon and the program director of the SAVE program at Wellcome Leap. Wellcome Leap
+
+Thomas G. Weiser is a surgeon and the program director of the SAVE program at Wellcome Leap. Wellcome Leap
 funded parts of the work that led to the organiza.on of the challenge.
 
 The clinicians were involved in designing the challenge, adjus.ng annota.ons protocols, as well as conduc.ng and
@@ -364,7 +368,8 @@ Examples:
      · User interac.on is allowed for cura.ng training data (i.e. excluding some training samples).
 
 Algorithms should be fully automa.c
-Training data policy
+
+Training data policy
 
 Define the policy on the usage of training data. The data used to train algorithms may, for example, be restricted to the
 data provided by the challenge or may also include publicly available data including (open) pre-trained nets. Clarify
@@ -434,7 +439,8 @@ Examples:
      · Par.cipa.ng teams can choose whether the performance results will be made public.
 
 The top performing teams that meet the the following criteria will be announced publicly:
-     (1) The team will make their model and any addi.onally created annota.ons public.
+
+     (1) The team will make their model and any addi.onally created annota.ons public.
      (2) The solu.on beat the baselines.
      (3) The submission descrip.on provides sufficient methodological details to allow for a meaningful
 
@@ -502,7 +508,8 @@ pre-evalua.on or final submission may result in a permanent exclusion from the c
 Schedule
 
 Provide a .metable for the challenge. Preferably, this should include
-     · the release date(s) of the training cases (if any) URL
+
+     · the release date(s) of the training cases (if any) URL
      · the registra.on date/period
      · the release date(s) of the test cases and valida.on cases (if any)
      · the submission date(s)
@@ -572,7 +579,8 @@ license to comply with the license of the original video data.
 
 [1] Maier-Hein, L., Wagner, M., Ross, T., Reinke, A., Bodenstedt, S., Full, P. M., ... & Müller-S.ch, B. P. (2021). Heidelberg
 colorectal data set for surgical data science in the sensor opera.ng room. Scien.fic data, 8(1), 1-11.
-[2] Roß, T., Reinke, A., Full, P. M., Wagner, M., Kenngoj, H., Apitz, M., ... & Maier-Hein, L. (2021). Compara.ve
+
+[2] Roß, T., Reinke, A., Full, P. M., Wagner, M., Kenngoj, H., Apitz, M., ... & Maier-Hein, L. (2021). Compara.ve
 valida.on of mul.-instance instrument segmenta.on in endoscopy: results of the ROBUST-MIS 2019 challenge.
 Medical image analysis, 70, 101920.
 
@@ -639,7 +647,8 @@ Interven.on assistance
 Task category(ies)
 
 State the task category(ies).
-Examples:
+
+Examples:
 
      · Classifica.on
      · Detec.on
@@ -706,7 +715,8 @@ Provide addi.onal informa.on given along with the images. The informa.on may cor
 data (e.g., tumor volume).
 
 We will provide the following metadata corresponding to each VQA-pair: procedure name, .mestamp of the frame.
-Context informa=on: Pa=ent
+
+Context informa=on: Pa=ent
 
 Provide addi.onal informa.on given along with the images. The informa.on may correspond to the pa.ent in general
 (e.g., gender, medical history).
@@ -765,7 +775,8 @@ Specify the center(s)/ins.tute(s) in which the data was acquired and/or the ata 
 previous challenge). If this informa.on is not provided (e.g., for deiden.fica.on reasons), specify why.
 The 30 HeiCo videos were recorded at Heidelberg University Hospital. The test data was acquired from more than 5
 centers not represented in the training data.
-Characteris=cs of the subjects
+
+Characteris=cs of the subjects
 
 Describe relevant characteris.cs (e.g., level of exper.se) of the subjects (e.g., surgeon)/objects (e.g., robot) involved in
 the data acquisi.on process (if any).
@@ -824,7 +835,8 @@ Further important characteris=cs of the cases
 Men.on further important characteris.cs of the training, valida.on and test cases (e.g., class distribu.on in
 classifica.on tasks chosen according to real-world distribu.on vs. equal class distribu.on) and jus.fy the choice.
 N/A
-Method for determining the reference annota=on
+
+Method for determining the reference annota=on
 
 Describe the method for determining the reference annota.on i.e. the desired algorithm output. Provide the
 informa.on separately for the training, valida.on and test cases if necessary. Possible methods include manual image
@@ -870,7 +882,8 @@ Purpose: Genera.on of ques.ons and answers based on foreign object informa.on. P
 automa.cally generated based on the available instance informa.on. Further ques.ons are added by a team of expert
 surgeons
 Input: Videos with class and instance assignments and bounding boxes around all foreign objects at 1 fps
-Output: N ques.ons per video Annotators: A team of > 10 expert surgeons and medical students.
+
+Output: N ques.ons per video Annotators: A team of > 10 expert surgeons and medical students.
 
 To avoid biases towards specific capabili.es and enable stra.fied valida.on, Stage 5 comprises a task mapping step
 that maps each ques.on onto a structured taxonomy.
@@ -937,7 +950,8 @@ training, valida.on and test cases if necessary.
 
 Stage 1-2: Crowd workers with exper.se with the tool and basic knowledge with medical tasks from previous
 annota.on projects.
-Stage 3: Object detec.on models (YOLO) have been used to enrich the crowd annota.ons with further bounding boxes
+
+Stage 3: Object detec.on models (YOLO) have been used to enrich the crowd annota.ons with further bounding boxes
 by iden.fying possible missing objects.
 
 Stage 4: Medical students (11 at the .me of the submission of the challenge) with up to 3 years of annota.on
@@ -1007,7 +1021,8 @@ hierarchical and stra.fied aggrega.on.
 
 Accuracy is computed as the propor.on of correctly answered ques.ons. For open-ended ques.ons, seman.c
 correctness is assessed by an LLM-as-a-judge approach. Up to three LLMs decide via majority vote whether the
-proposed answer matches the reference. We will make sure that any ajempt to manipulate the LLM-as-a-judge
+
+proposed answer matches the reference. We will make sure that any ajempt to manipulate the LLM-as-a-judge
 through adversarial promp.ng, "jailbreaking", or other malicious techniques designed to unfairly influence the
 evalua.on will result in immediate disqualifica.on of the team. In cases where annota.on uncertainty exists, for
 example with respect to a specific temporal reference, an applica.on-dependent variant of Accuracy is employed [1].
@@ -1075,7 +1090,8 @@ The ranking happens in three steps:
 
      3. Resolving .es: For the top 3 places we will resolve .es by looking at the mean win rate of .ed models using
           bootstrapping within all capabili.es.
-Proposed ranking scheme
+
+Proposed ranking scheme
 
 Each test case is annotated with the following meta informa.on:
 
@@ -1140,7 +1156,8 @@ par.cular sta.s.cal approach.
 
 While we keep the ranking scheme rela.vely simple for the purpose of interpretability, the purpose of our sta.s.cal
 analyses is to provide a nuanced understanding of model capabili.es. It is based on the following principles:
-     · Taking non-independency of answers present in the data into account: Given the dependencies in our data
+
+     · Taking non-independency of answers present in the data into account: Given the dependencies in our data
           (e.g., frames and segments origina.ng from the same video, or answers retrieved from ques.ons referring to
           the same frames, cannot be considered independent), we will account for this clustering in all inferen.al
           analyses. Specifically, model performance variability (i.e., standard devia.on, confidence intervals) will be
@@ -1207,7 +1224,8 @@ tradi.onal significance tes.ng.
 Sta=s=cs - Missing data handling
 
 Provide a descrip.on of the missing data handling.
-Any ques.on for which results data is missing will be treated as an incorrect answer and be assigned the worst
+
+Any ques.on for which results data is missing will be treated as an incorrect answer and be assigned the worst
 possible score (depending on the metric).
 
 Sta=s=cs - So`ware
@@ -1229,4 +1247,3 @@ Addi.onal analyses will include subgroup performance breakdowns across technical
 clinical axes (decision impact, required knowledge), robustness gap analysis between ID and OOD, and qualita.ve
 failure mode analysis. We will also explore post-hoc ensembling of compa.ble submissions to quan.fy poten.al upper
 bounds.
-
