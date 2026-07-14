@@ -1,5 +1,9 @@
 # Experiment 01 — train / validation split + leak-guard
 
+> **What this does, in one line:** it ONLY builds the frozen train/val split manifest
+> (`experiments/splits/frame_ood_v1.csv`) that every later experiment reuses. It trains
+> nothing, scores nothing, produces no model — just the split + its leak checks. That's it.
+
 > The measurement harness every fine-tuning claim depends on. Carves the FRAME data
 > (heico + lapchole) into **train + validation only** — `train`, `val_id`, `val_ood` —
 > by holding out a WHOLE `procedure_type` as the OOD validation slice, split by
@@ -36,6 +40,8 @@
 experiments/01-ood-split/
 ├── README.md                  # this file (opens with the ladder)
 ├── 01_build_ood_split.ipynb   # builds the split, writes the shared manifest
+├── _tools/
+│   └── test_split.py          # CPU/offline unit tests for the leak-guard + determinism
 └── RESULTS.csv                # one row per manifest version
 
 experiments/splits/            # shared, committed manifests (source of truth)

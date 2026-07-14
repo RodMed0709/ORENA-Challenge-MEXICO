@@ -17,7 +17,7 @@ import pytest
 # Load split.py DIRECTLY by path — the frame package __init__ eagerly imports the
 # SDK (`focus`), which isn't installed in a bare CPU/test env. split.py itself only
 # needs pandas/numpy, so bypass the package init.
-_SPLIT_PATH = Path(__file__).resolve().parents[1] / "src" / "frame" / "split.py"
+_SPLIT_PATH = Path(__file__).resolve().parents[3] / "src" / "frame" / "split.py"
 _spec = importlib.util.spec_from_file_location("frame_split_under_test", _SPLIT_PATH)
 sp = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = sp  # dataclass resolution needs the module registered
