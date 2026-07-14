@@ -26,11 +26,10 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Flat storage layout (2026-07-14 reorg): heavy artifacts live NEXT TO /workspace/models,
-# out of experiments/*/runs/. Frames are a single SHARED cache (keyed by qID, deterministic
-# from source video) so successive runs never re-materialize the 13,748 train JPEGs.
-CKPT_ROOT = Path("/workspace/ckpt")        # /workspace/ckpt/<run>/{checkpoint-*, merged/, train.jsonl}
-FRAMES_CACHE = Path("/workspace/frames_cache")  # ONE dir, populate-if-missing, reused across runs
+# Storage layout: each run OWNS its heavy artifacts (ckpt/, merged/, train.jsonl) inside its
+# own experiments/<id>/runs/<run>/ dir. The ONLY shared thing is the frame store: a single
+# identity-keyed cache so successive runs never re-materialize frames (see frame.frame_cache_name).
+FRAMES_CACHE = Path("/workspace/frames_cache")  # ONE shared dir, populate-if-missing, reused across runs
 
 
 @dataclass
@@ -67,30 +66,25 @@ class LoRAConfig:
 
     @property
     def run_dir(self) -> Path:
-        """experiments/<id>/runs/<run> — small CSVs + inspect.csv ONLY (git-adjacent, gitignored)."""
+        """experiments/<id>/runs/<run> — this run's home: ckpt/, merged/, train.jsonl, CSVs, inspect.csv (gitignored)."""
         return self.exp_dir / "runs" / self.run_name
 
     @property
-    def ckpt_run_dir(self) -> Path:
-        """/workspace/ckpt/<run> — the heavy artifacts (checkpoints, merged, train JSONL)."""
-        return CKPT_ROOT / self.run_name
-
-    @property
     def train_jsonl(self) -> Path:
-        return self.ckpt_run_dir / "train.jsonl"
+        return self.run_dir / "train.jsonl"
 
     @property
     def frames_dir(self) -> Path:
-        """SHARED across all runs — NOT per-run. qID-keyed, populate-if-missing."""
+        """The ONE shared frame store (/workspace/frames_cache) — NOT per-run; identity-keyed, populate-if-missing."""
         return FRAMES_CACHE
 
     @property
     def ckpt_dir(self) -> Path:
-        return self.ckpt_run_dir
+        return self.run_dir / "ckpt"
 
     @property
     def merged_dir(self) -> Path:
-        return self.ckpt_run_dir / "merged"
+        return self.run_dir / "merged"
 
 
 def _baseline_cfg(cfg: LoRAConfig):
@@ -128,7 +122,7 @@ def _export(cfg: LoRAConfig) -> Path:
     assert len(set(qids)) == len(qids), "duplicate qID in train export (would collide frames/JSONL)"
 
     cfg.frames_dir.mkdir(parents=True, exist_ok=True)      # shared /workspace/frames_cache
-    cfg.ckpt_run_dir.mkdir(parents=True, exist_ok=True)    # train.jsonl lives beside the ckpts
+    cfg.run_dir.mkdir(parents=True, exist_ok=True)         # train.jsonl lives in the run dir
     provider = FrameProvider(bcfg)
     n = 0
     with open(cfg.train_jsonl, "w", encoding="utf-8") as fh:
