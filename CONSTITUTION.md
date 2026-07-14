@@ -44,7 +44,7 @@ answer_format, answer, clinical_relevance (bool)
 - **Match EXACTO** (`fmt.compare()`): `binary, number, percentage, fo_class, time`.
   - `number`: **solo `str.isdigit()`**. → `"two"`, `"2 clips"`, `"2.0"`, `"-1"` **fallan todos**. Salida numérica pura.
   - `percentage`: `isclose(abs_tol=1e-9)` = exacto (el param `threshold_pp` está definido pero **no se usa**).
-  - `fo_class`: **set-equality** de nombres en `Title Case` (orden y duplicados no importan).
+  - `fo_class`: **set-equality case-INSENSITIVE** contra los nombres válidos (`formats.py` usa `lower_map`). Son **10 clases config-driven** de `FOType.names()`: Sponge, Clip, Specimen Bag, Silicone Loop, External Drain, Needle, Gallstone, Specimen, Mesh, Absorbable Hemostatic Agent (NO 8). Orden, duplicados y mayúsculas no importan. ⚠️ Nunca hardcodear la lista en un prompt/regla: mantenerla config-driven o un `Mesh`/`Absorbable Hemostatic Agent` real puntúa 0.
   - `time`: número de timestamps debe coincidir, con tolerancia pairwise de ~5s.
 - **LLM-as-judge** (`JUDGE_FORMATS`): `open_ended, matching, multiple_choice`. Juez emite `CORRECT`/`INCORRECT`; veredicto = `"CORRECT" in raw and "INCORRECT" not in raw`. Juez default: `TransformersJudge` con **`Qwen/Qwen3.5-4B`**, o `APIJudge`. Majority vote.
   - `matching` está gated por regex `fullmatch` **antes** del juez, aunque sea judge-routed.

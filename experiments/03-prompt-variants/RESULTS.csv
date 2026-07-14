@@ -1,0 +1,8 @@
+arm,val_id_acc,val_id_fo_class,val_id_number,val_ood_acc,val_ood_fo_class,val_ood_number,note
+a0_noFO,0.1808,0.0102,0.1627,,,,strip FO defs -> FO-grounding delta = +0.0613 (val_id)
+a1_v0,0.2421,0.1823,0.1030,0.2735,0.1601,0.1851,shipped baseline (selection anchor)
+a2_decisive,0.2505,0.1863,0.1218,,,,val_id +0.008 (both fo_class+number up) but not confirmed
+a3_instrument,0.2234,0.1743,0.0659,,,,hurt (too conservative -> misses real FOs)
+a4_negexem,0.2602,0.2302,0.0942,0.2640,0.1726,0.1570,val_id winner (+0.018) but val_ood -0.0095 -> winner's curse
+a5_baredigit,0.2136,0.1633,0.0513,,,,hurt number (counting protocol backfired)
+VERDICT,,,,,,,FAITHFUL NEGATIVE: no arm beats baseline beyond noise on held-out val_ood (CIs overlap). Real signal = LoRA/data. FO-grounding (+6pt) already in baseline.
