@@ -198,9 +198,10 @@ def list_checkpoints(cfg: LoRAConfig) -> list[Path]:
     """Every per-epoch adapter checkpoint, ordered by epoch. The notebook loops these
     to pick the one that maximizes acc_OOD (Sigmoid) — CONSTITUTION §IV.2: select by
     OOD, never the last epoch by default (past epoch 1-2 risks OOD collapse, PITFALLS #1)."""
-    # Exclude merged full-model dirs: merge_checkpoint writes cfg.merged_dir/checkpoint-N
-    # which lives UNDER ckpt_dir and matches "**/checkpoint-*" — without this filter a
-    # re-glob (e.g. a resumed c7 selection loop) would mis-list merged models as adapters.
+    # Defensive: exclude any merged full-model dir (merge_checkpoint writes cfg.merged_dir/
+    # checkpoint-N). With the per-experiment layout merged_dir (run_dir/merged) is a SIBLING of
+    # ckpt_dir (run_dir/ckpt), so the glob can't reach it and this filter never fires — but it
+    # keeps list_checkpoints correct even if merged is ever nested under ckpt_dir again.
     cks = sorted(
         (c for c in cfg.ckpt_dir.glob("**/checkpoint-*") if cfg.merged_dir not in c.parents),
         key=_epoch_num,

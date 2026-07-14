@@ -58,8 +58,8 @@ experiments/02-lora-sft/
 ├── _models/
 │   └── lora_sft_train.py      # ms-swift engine (importable; main(cfg, stage=...))
 ├── RESULTS.csv                # scorecard row
-└── runs/                      # GITIGNORED — small CSVs + inspect.csv only
-                               #   (checkpoints/merged/train.jsonl live in /workspace/ckpt/<run>/;
-                               #    frames in the shared /workspace/frames_cache/)
+└── runs/<run>/                # GITIGNORED — this run OWNS: ckpt/, merged/, train.jsonl,
+                               #   small CSVs, inspect.csv. (Only frames are shared, in
+                               #   /workspace/frames_cache/ — never re-copied per experiment.)
 ```
 Context: `context/02-lora-sft/CONTEXT.md`. Shared split: `experiments/splits/`.

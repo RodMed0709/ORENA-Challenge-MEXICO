@@ -1,7 +1,8 @@
 """Inspection export: one ``inspect.csv`` per run, backed by a SINGLE shared frame store.
 
-Reorg (2026-07-14): every frame lives exactly ONCE, at ``/workspace/frames_cache/<qID>.jpg``
-— the same store the training export fills. We NEVER copy per-run JPEGs or emit a gallery
+Reorg (2026-07-14): every frame lives exactly ONCE in ``/workspace/frames_cache/``, keyed by
+frame identity (``frame.data.frame_cache_name`` = ``<dataset>__<video>__<frame_index>.jpg``, NOT
+qID) — the same store the training export fills. We NEVER copy per-run JPEGs or emit a gallery
 that duplicates pixels. ``export_inspect`` materializes each evaluated frame into that shared
 cache *if it isn't there yet* (train frames already are), then writes ``inspect.csv`` — every
 question, correctness (✅/❌), model answer vs ground truth, and the single canonical frame path.
