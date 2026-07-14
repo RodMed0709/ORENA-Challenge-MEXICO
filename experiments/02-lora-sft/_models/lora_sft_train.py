@@ -4,8 +4,9 @@ Importable engine — the notebook calls ``main(cfg, stage=...)``; nothing here 
 hand-run launcher. Stages:
 
 - ``export`` — build the ms-swift ShareGPT multimodal JSONL from the frozen
-  ``frame_ood_v1`` **train** split (materializes one frame per question, same
-  ``FrameProvider`` path the baseline serves → pixel parity).
+  ``frame_ood_v1`` **train** split (materializes one frame per question via the same
+  ``FrameProvider`` the baseline serves; near-parity — training reads a q95 JPEG while
+  eval feeds the raw decord frame, a negligible difference at quality 95).
 - ``train``  — ``swift sft`` with the S2Can LoRA recipe (subprocess: the CLI is
   version-stable; exact flag names are verified during the pod SMOKE, see NOTE).
 - ``merge``  — ``swift export --merge_lora`` → a standalone bf16 checkpoint.
@@ -104,7 +105,7 @@ def _baseline_cfg(cfg: LoRAConfig):
 
 def _export(cfg: LoRAConfig) -> Path:
     """Materialize the train-split frames + write the ShareGPT JSONL."""
-    from frame.data import load_frame_items, FrameProvider
+    from frame.data import load_frame_items, FrameProvider, frame_cache_name
     from frame.engine import SYSTEM_PROMPT
     from frame import split as sp
 
@@ -133,7 +134,7 @@ def _export(cfg: LoRAConfig) -> Path:
     with open(cfg.train_jsonl, "w", encoding="utf-8") as fh:
         for it in train_items:
             provider.ensure_reader(it)
-            img_path = cfg.frames_dir / f"{it.request.qID}.jpg"
+            img_path = cfg.frames_dir / frame_cache_name(it)   # identity-keyed shared cache
             if not img_path.exists():
                 provider.get_frame(it).save(img_path, quality=95)
             rec = {
@@ -203,9 +204,15 @@ def list_checkpoints(cfg: LoRAConfig) -> list[Path]:
     """Every per-epoch adapter checkpoint, ordered by epoch. The notebook loops these
     to pick the one that maximizes acc_OOD (Sigmoid) — CONSTITUTION §IV.2: select by
     OOD, never the last epoch by default (past epoch 1-2 risks OOD collapse, PITFALLS #1)."""
-    cks = sorted(cfg.ckpt_dir.glob("**/checkpoint-*"), key=_epoch_num)
+    # Exclude merged full-model dirs: merge_checkpoint writes cfg.merged_dir/checkpoint-N
+    # which lives UNDER ckpt_dir and matches "**/checkpoint-*" — without this filter a
+    # re-glob (e.g. a resumed c7 selection loop) would mis-list merged models as adapters.
+    cks = sorted(
+        (c for c in cfg.ckpt_dir.glob("**/checkpoint-*") if cfg.merged_dir not in c.parents),
+        key=_epoch_num,
+    )
     if not cks:
-        raise FileNotFoundError(f"no checkpoint under {cfg.ckpt_dir}")
+        raise FileNotFoundError(f"no adapter checkpoint under {cfg.ckpt_dir}")
     return cks
 
 

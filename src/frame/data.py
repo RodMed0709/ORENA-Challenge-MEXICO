@@ -9,6 +9,7 @@ sampled on-the-fly from the source videos via decord, one reader per video.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -21,6 +22,21 @@ from focus.data.formats import ts_to_seconds
 from focus.taxonomy import Capability
 
 logger = logging.getLogger(__name__)
+
+
+def frame_cache_name(item: "FrameItem") -> str:
+    """Canonical filename for the shared /workspace/frames_cache store.
+
+    Keyed on the frame's true IDENTITY — (dataset, video_id, frame_index) — NOT on
+    ``qID``. ``qID`` (``ds__row_id``) is NOT unique across the organizer train/test
+    parquets (their id ranges overlap; see ``load_frame_items``), so a qID key would
+    let a train and a test frame collide on one path and silently serve the wrong
+    image. The identity key is globally unique AND dedups genuinely-identical frames
+    (one physical frame → one file even if several qIDs reference it). video_id is
+    sanitized for a filesystem-safe name.
+    """
+    vid = re.sub(r"[^A-Za-z0-9]+", "_", str(item.video_id)).strip("_")
+    return f"{item.dataset}__{vid}__{item.frame_index}.jpg"
 
 
 @dataclass

@@ -15,12 +15,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from frame.data import FrameProvider
+from frame.data import FrameProvider, frame_cache_name
 
 logger = logging.getLogger(__name__)
 
 # Canonical single-source frame store (mirrors lora_sft_train.FRAMES_CACHE). Every frame —
-# train or val — is materialized here once, qID-keyed, and referenced from here everywhere.
+# train or val — is materialized here once, keyed by frame IDENTITY (see frame_cache_name),
+# and referenced from here everywhere. NOT qID-keyed (qID collides across train/test parquets).
 FRAMES_CACHE = Path("/workspace/frames_cache")
 
 
@@ -31,42 +32,45 @@ def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -
 
     item_by_q = {it.request.qID: it for it in items}
     resp_by_q = {r.qID: r for r in responses}
+    res_by_q = results_df.set_index("qID")            # O(1) row lookup (was O(n²) per-row rescan)
 
     provider = FrameProvider(cfg)
     # cache reads by video (results_df order is not video-grouped): sort the work list
-    work = [res["qID"] for _, res in results_df.iterrows() if res["qID"] in item_by_q]
+    work = [q for q in res_by_q.index if q in item_by_q]
     work.sort(key=lambda q: (item_by_q[q].dataset, item_by_q[q].video_id,
                              item_by_q[q].frame_index))
 
     rows = []
-    for q in work:
-        it = item_by_q[q]
-        resp = resp_by_q.get(q)
-        res = results_df[results_df["qID"] == q].iloc[0]
-        frame_path = FRAMES_CACHE / f"{q}.jpg"
-        if not frame_path.exists():                       # materialize ONCE into the shared store
-            try:
-                provider.ensure_reader(it)
-                provider.get_frame(it).save(frame_path, quality=95)
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("inspect frame %s failed: %s", q, exc)
-        rows.append(
-            {
-                "qID": q,
-                "correct": bool(res["correctness"]),
-                "answer_format": res["answer_format"],
-                "primary_capability": res["primary"],
-                "question": it.request.question,
-                "ground_truth": it.reference.answer,
-                "our_answer": resp.content if resp else "",
-                "dataset": it.dataset,
-                "video": it.video_id,
-                "timestamp_s": round(float(it.request.start_time), 2),
-                "latency_s": round(float(resp.latency), 3) if resp else None,
-                "frame": str(frame_path) if frame_path.exists() else "",
-            }
-        )
-    provider.close()
+    try:
+        for q in work:
+            it = item_by_q[q]
+            resp = resp_by_q.get(q)
+            res = res_by_q.loc[q]
+            frame_path = FRAMES_CACHE / frame_cache_name(it)   # identity-keyed shared store
+            if not frame_path.exists():                        # materialize ONCE
+                try:
+                    provider.ensure_reader(it)
+                    provider.get_frame(it).save(frame_path, quality=95)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("inspect frame %s failed: %s", q, exc)
+            rows.append(
+                {
+                    "qID": q,
+                    "correct": bool(res["correctness"]),
+                    "answer_format": res["answer_format"],
+                    "primary_capability": res["primary"],
+                    "question": it.request.question,
+                    "ground_truth": it.reference.answer,
+                    "our_answer": resp.content if resp else "",
+                    "dataset": it.dataset,
+                    "video": it.video_id,
+                    "timestamp_s": round(float(it.request.start_time), 2),
+                    "latency_s": round(float(resp.latency), 3) if resp else None,
+                    "frame": str(frame_path) if frame_path.exists() else "",
+                }
+            )
+    finally:
+        provider.close()
 
     df = pd.DataFrame(rows)
     if not df.empty:
