@@ -5,6 +5,117 @@
 > This is the north star. It **supersedes the sequencing** in ATTACK_LADDER.md (the rung recipes there
 > stay valid). Dated 2026-07-13.
 
+## The two blocks — product vs lab (added 2026-07-15)
+
+> **Read this before the phases.** Most of this repo is a measuring instrument, not the
+> deliverable. Conflating the two is why the technical picture reads as "all evaluation".
+> Sourced from the official track spec (`context/challenge/`) + the challenge overview page.
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║  BLOCK A — THE MODEL · the product · this is ALL they ever see           ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+   RGB image ──┐
+               ├─►┌─────────┐  ┌───────────────────┐  ┌───────────────┐
+   question ───┘  │ prompt  │─►│ Qwen3-VL-8B       │─►│ constrained   │─► "Sponge"
+   carries:       │ build   │  │ + LoRA (merged)   │  │ decoding      │   ≤300 ch
+   · procedure    └─────────┘  │ bf16 · 18/48 GB   │  │ ✗ NOT BUILT   │
+   · timestamp      ours       │ greedy · ≤32 tok  │  └───────────────┘
+   · expected                  └───────────────────┘  "how many" →
+     output                                            pure integer
+   · FO classes
+                    NO video · NO decode · NO frame sampling · NO judge
+
+   OBJECTIVE (exactly one)
+       max  mean Accuracy over the 4 buckets
+       └─ a malformed answer is scored incorrect → format hardening IS
+          accuracy, not a second goal
+
+   CONSTRAINTS (checked, not maximised)
+       < 5 s / question   p99 0.59 s measured → ~4.4 s unspent
+       48 GB VRAM (L40S)  18.01 GB used → do NOT quantise the 8B
+       no internet        COPY weights · pinned wheels · HF_HUB_OFFLINE=1
+
+       speed is a BUDGET TO SPEND (resolution, detector, 32B), not a goal.
+       There is no prize for answering in 0.3 s instead of 2 s.
+
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║  BLOCK B — EVALUATION · the lab · NEVER ships · ~90% of this repo        ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+   videos + parquet              released data has no loose images →
+        │                        WE must synthesise what they will hand us
+        ▼
+   data.py  load_frame_items()   offline door (the SDK's own path hits the
+        │                        gated HF Hub → DatasetNotFoundError)
+        ▼
+   FrameProvider.get_frame()     simulates Block A's input image
+        │                        ⚠ our sampling ≠ their frame choice
+        ▼
+   ╔══════════════════════════════════╗
+   ║   THE SAME BLOCK A ENGINE        ║  the only piece shared by A and B
+   ╚══════════════════════════════════╝
+        │
+        ▼
+   focus.Evaluator + local judge  OUR ruler, NOT our grade — their judges
+        │                         are secret (≤3 LLMs, majority vote).
+        ▼                         Tuning to a judge = disqualification.
+   4 buckets → mean
+
+
+              ┌──────────────────── THE LOOP ─────────────────────┐
+              │                                                   │
+   BLOCK A ───┴──► answers ──► BLOCK B ──► "you are weak HERE" ───┘──► BLOCK A
+
+   B is NOT parallel to A — B is A's controller. Only A ships.
+   Eval driving design is correct method; the bug was a MIS-CALIBRATED ruler
+   (we chased raw acc; the exam is the bucket mean).
+
+
+   THE 4 BUCKETS — equal weight. Volume ≠ weight.
+   ┌───────────────────────────┬───────┬──────────────────────────────────┐
+   │ object_recognition × ID   │  25%  │ fo_class · binary · MC ·         │
+   │ object_recognition × OOD  │  25%  │ open_ended   (all ≈0.53–0.60)    │
+   ├───────────────────────────┼───────┼──────────────────────────────────┤
+   │ aggregation × ID          │  25%  │ number → 0.433 ⚠                 │
+   │ aggregation × OOD         │  25%  │ OUR WORST, and worth HALF the    │
+   │                           │       │ exam. 1 pt here ≈ 2 pt in fo_class│
+   └───────────────────────────┴───────┴──────────────────────────────────┘
+   OOD = 2 of 4 = 50%, on TWO axes: unseen procedure AND unseen question
+   phrasing. Our Sigmoid proxy only covers the first.
+
+
+   THE TWO GATES — different rules, do not mix them
+   PRE-EVAL (→ Sep 1)   mean Accuracy over buckets > BOTH baselines
+                        └─► final phase + CO-AUTHORSHIP ★  ← the Core Value
+   FINAL   (Sep 8)      full Copeland over buckets → podium / prize money
+
+
+   ⛔ BLOCKED BY THE ORGANIZERS (not our debt)
+      "Release of submission example: Soon" · template + ranking toolkit
+      unreleased → the Docker's I/O contract does not exist yet.
+```
+
+**What this diagram corrects in the phases below** (they were written before the
+official spec was read; left intact as provenance):
+
+- **Phase 4's gate is wrong twice.** It says *"≥6/10 buckets vs EACH, Copeland"*. FRAME
+  has **4** buckets (reframe #1 below already says so — the map contradicts itself), and
+  the pre-eval gate is the **mean**, not Copeland. Copeland only rules the final phase.
+- **Principle 1's implication is wrong.** `fo_class` and `number` are not a pair:
+  `aggregation`(=number) is a **50%** of the score; `fo_class` is one slice of the other 50%.
+- **Principle 4 invents B2's size.** The spec says *"a strong open-source VLM fine-tuned by
+  the organizers"* — it never says 4B (likely bled in from the `Qwen3-4B` judge). The
+  "seam" may be far narrower than assumed.
+- **Multi-frame and frame-selection/pHash are dead as inference levers** — they hand us one
+  image. Both only affect training data and our measurement fidelity.
+- **Phase 0's *"prompt aimed at the 4 unseen reasoning buckets"* is a zombie line** — FRAME
+  has no reasoning buckets (reframe #1).
+- **Phase 5's SGLang "reuse image cache across a frame's questions"** is likely moot: the
+  contract is one image + one question per call.
+
 ## 0 — Executive roadmap (v3, improved map · added 2026-07-14)
 
 > Canonical, self-contained plan with the strategy-notes improvements folded in. The sections
