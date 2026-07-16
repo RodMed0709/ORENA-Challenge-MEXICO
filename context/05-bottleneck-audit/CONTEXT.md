@@ -53,6 +53,34 @@ Full numbers and the per-format rule application: `experiments/05-bottleneck-aud
   (0.3567 falls outside) — by luck. Recorded, not retro-patched. Same pattern as the earlier spec
   defects: **what gets measured must be defined in columns, not in prose.**
 
+### 🔴 Incidental finding — `pre_eval 0.708` is inflated by ONE question
+Found while independently recomputing the aggregates from raw predictions; not what this rung tested.
+
+- **The whole `RESULTS.csv` reproduces exactly from the per-arm raw `results.csv`** (all 3 arms:
+  `acc_overall`, `acc_ID`, `acc_OOD`, the 4 buckets, every format). The aggregation is verified,
+  not trusted.
+- **But `pre_evaluation SCORE = 0.7087132444965948` — the project's `0.708`** — is the SDK's
+  unweighted mean over **3 populated buckets**: `aggregation` 0.5170 (n=2830), `object_recognition`
+  0.6092 (n=3421), **`temporal_grounding` 1.0 (n=1)**. Formula reconstructed exactly (`MATCH=True`)
+  on all 3 arms against `focus/evaluation/evaluator.py:402-462`.
+  **Without the n=1 bucket: 0.5631. One question is worth +14.6 points.**
+- **Root cause 1 — the SDK's `ood` column is all-`False`** for all 6252 rows; never populated. The
+  evaluator sees only ID buckets → 3 of 10 → the OOD dimension vanishes from its own score.
+  **Anything trusting `results_df["ood"]` reads the entire split as in-distribution.** This rung
+  derives ID/OOD from the `qID` prefix (`heico`=OOD, `lapchole`=ID) — that is why `bucket_mean` holds
+  where `pre_eval` does not.
+- **Root cause 2 — `frame_ood_v1` carries 1 `temporal_grounding` question**, a group FRAME should not
+  have; under an unweighted bucket mean it equals a bucket of 3421.
+- **Consequence:** `pre_eval` is not a usable selection metric on our split, and `0.708` is not
+  comparable to the official baselines. `bucket_mean` (0.5503) is the honest number.
+  **The shortcut verdict is unaffected** — it was computed per format from raw per-question correctness.
+- **Not fixed here** (changing the split + the metric is its own atomic).
+- **Also observed:** `latency` is `0.0` and `timed_out` `False` for all 6252 rows — this path records no
+  timing. The deferred p99 atomic cannot be served by these artifacts; the column exists but is empty.
+- **Also observed:** `summary.csv` `group`/`answer_format` rows are **video-clustered** estimates (wide
+  CIs), *not* flat per-question means — e.g. `object_recognition` reads 0.6237 there vs 0.6092 flat.
+  **Do not mix the two.** `pre_eval` uses flat; our `bucket_mean` uses flat.
+
 ### ⚠️ Open discrepancy — do not smooth over
 The T0-era note claimed the rung-02 LoRA scored **0.597 on `binary`** (+3.8 over the 55.9% val-majority
 floor). The full run measures **`a0_real` `acc_fmt_binary` = 0.7693** (+21.0 over the same floor).
