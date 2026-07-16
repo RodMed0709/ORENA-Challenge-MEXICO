@@ -62,9 +62,15 @@ were being mixed.
 | `trivial_floor_train_prior_<fmt>` | Same, but the mode of **train**. | 🟡 Contrast only. Measuring the floor against train was a spec defect (corrected). |
 | **"visual signal"** | `acc(a0_real) − acc(a1_black)` for a format. | 🟢 How many points the image is actually worth. |
 
-> 🔴 **`results_df["ood"]` is `False` for all 6252 rows — the SDK never populates it.** Anything trusting
-> that column reads the entire split as in-distribution. **This rung derives ID/OOD from the `qID`
-> prefix** (`heico` = OOD, `lapchole` = ID). That is why its `bucket_mean` holds where `pre_eval` does not.
+> 🔴 **`results_df["ood"]` is `False` for all 6252 rows — anything trusting that column reads the entire
+> split as in-distribution.** **This rung derives ID/OOD from the `qID` prefix** (`heico` = OOD,
+> `lapchole` = ID). That is why its `bucket_mean` holds where `pre_eval` does not.
+>
+> **This is expected, not a defect.** Per `CONSTITUTION.md` §I.5, `ood` is a `Reference` field that
+> **the public data leaves `False`; the organizers populate it in the private test split**. Our OOD is a
+> *proxy we invented* (rung 01: hold out the Sigmoid procedure) and **we never stamp it onto the field** —
+> so the SDK's scorer cannot sort our questions. **The submission is unaffected**: on the leaderboard the
+> organizers sort with their own labels. Only our local instrument is.
 
 ## 4. Results
 
@@ -224,12 +230,15 @@ populated `group × ood` buckets**. On our split that resolves to three:
 exactly (`MATCH=True`) on all three arms; the ablation arms confirm the mechanism — when that one
 question is answered *wrong*, `pre_eval` collapses to 0.1872 / 0.2339.
 
-**Two defects compound:**
+**Two things compound. Only the second is ours to fix:**
 
-1. **`results_df["ood"]` is never populated** (all-`False`, 6252 rows) → the evaluator sees only ID
-   buckets → 10 candidate buckets collapse to 3 → **the OOD dimension vanishes from its own score**.
+1. **`ood` is `False` on all 6252 rows** → the evaluator sees only ID buckets → 10 candidate buckets
+   collapse to 3 → **the OOD dimension vanishes from its own score.** ⚠️ **This is by design, not a bug**
+   (`CONSTITUTION.md` §I.5): the **public** data ships without those labels and the **organizers populate
+   them in the private test split**. Our OOD is a *proxy we invented* (rung 01) that we never stamp onto
+   the field, so the SDK's scorer cannot sort our questions. **The submission is unaffected.**
 2. **`frame_ood_v1` carries 1 `temporal_grounding` question** — a group FRAME should not have — which an
-   unweighted bucket mean weighs like a bucket of 3421.
+   unweighted bucket mean weighs like a bucket of 3421. **This one is ours.**
 
 ### This was known, and it was lost
 
@@ -262,8 +271,15 @@ comparable to the official baselines**. `bucket_mean` (0.5503) is the honest num
 the selection metric of record. **The shortcut verdict is unaffected**: it was computed per format from
 raw per-question correctness, never through `pre_eval`.
 
-**Not fixed here.** Populating `ood` and dropping the stray question changes the split *and* the metric —
-that is its own atomic, not a side effect of a diagnosis rung. **The deeper fix is the ladder metric
+**There is nothing to "fix" on the `ood` side — it is avoided, not repaired.** Stamping our own labels
+onto the field would buy a `pre_eval` computed over **our invented OOD proxy** — which is exactly what
+`bucket_mean` already gives, and `bucket_mean` additionally drops the `temporal_grounding` orphan that
+the SDK's scorer cannot drop. **The answer is simply: do not use `pre_eval` locally.** *(An earlier
+version of this file called it "a one-line, no-GPU atomic — the cheapest item open". That was wrong on
+both counts.)*
+
+**What does remain, and it is small:** the stray `temporal_grounding` question in `frame_ood_v1`. It
+contaminates the SDK's metric but **not ours**. **The deeper fix is the ladder metric
 itself**: a better README does not help if the next rung still puts `pre_eval` in its headline row.
 
 ## 7. Comparison against previous rungs
@@ -358,9 +374,10 @@ GPU.
   (`05_bottleneck_audit.py:142`) instead of measuring it as `src/frame/run.py:44-49` does. It also never
   persisted `responses`, so **its predicted text is lost** — which is why the probe had to read rung 02's
   instead. *(Rung 02's own artifacts do carry real per-question latency.)*
-- 🔴 **`ood` is `false` in the saved `references.json` too** — `src/frame/data.py:87` bakes the defect
-  into every artifact, not just the score. Anything reading `ood` from these files reads the split as
-  fully in-distribution.
+- 🔴 **`ood` is `false` in the saved `references.json` too** — the field carries through from the public
+  parquet into every artifact, not just the score. **Anything reading `ood` from these files reads the
+  split as fully in-distribution.** *(Expected — see §6. `src/frame/data.py:87` is faithful to the data
+  it is given; the labels live in the organizers' private split.)*
 - **`summary.csv` `group`/`answer_format` rows are video-clustered estimates** (wide CIs), **not** flat
   per-question means — `object_recognition` reads 0.6237 there vs 0.6092 flat. **Do not mix the two.**
   `pre_eval` and `bucket_mean` both use flat.

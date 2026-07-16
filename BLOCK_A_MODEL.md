@@ -220,12 +220,17 @@ The SDK defines `pre_evaluation_score` as *"the unweighted mean over ten buckets
 groups, each scored independently for in-distribution and out-of-distribution questions"* (official
 README; confirmed in `focus/evaluation/evaluator.py:402-462`). **Correct on paper. Broken in our runs:**
 
-1. **`src/frame/data.py:87`** — `ood=bool(row.get("ood", False))`. The organizers' parquet has no `ood`
-   column and **we never inject our split's definition**, so `ood` is `False` for all **6252** rows.
-   The evaluator sees **only ID buckets** → **10 buckets collapse to 3** → the OOD axis vanishes from
-   the official metric.
+1. **`ood` is `False` for all 6252 rows** → the evaluator sees **only ID buckets** → **10 buckets
+   collapse to 3** → the OOD axis vanishes from the score it computes **on our data**.
+   ⚠️ **Expected, NOT a defect** — `CONSTITUTION.md` §I.5 already recorded it: `ood` is a `Reference`
+   field that **the public data leaves `False`; the organizers populate it in the private test split**.
+   `src/frame/data.py:87` (`ood=bool(row.get("ood", False))`) is faithful to the data it is handed. Our
+   OOD is a **proxy we invented** (rung 01: hold out the Sigmoid procedure) and **we never stamp it onto
+   the field**, so the SDK's scorer cannot sort our questions.
+   🟢 **The submission is unaffected** — on the leaderboard the organizers sort with their own labels.
+   **Only our local instrument is.**
 2. **`frame_ood_v1` carries 1 `temporal_grounding` question** — a group FRAME should not have — which an
-   unweighted bucket mean weighs **like a bucket of 3421**.
+   unweighted bucket mean weighs **like a bucket of 3421**. **This one is ours.**
 
 | Bucket | acc | n | weight |
 |---|---|---|---|
@@ -255,10 +260,19 @@ The artifact swung **both ways** — 0.0 in zero-shot, 1.0 with LoRA:
 **The fix is the ladder's headline metric, not more prose.** *(Rung 00's attribution to an "all-ID local
 slice" is also wrong: the split has 4000 OOD questions and the SDK flags none.)*
 
-**Until `ood` is populated: `pre_eval` is unusable and `bucket_mean` is the only valid metric.**
-`bucket_mean` derives ID/OOD from the `qID` prefix and excludes `temporal_grounding`, which is why it
-holds where `pre_eval` does not. **Populating `ood` is a one-line, no-GPU atomic — the cheapest and
-highest-return item open.**
+**`pre_eval` is unusable on our split; `bucket_mean` is the only valid metric.** `bucket_mean` derives
+ID/OOD from the `qID` prefix and excludes `temporal_grounding`, which is why it holds where `pre_eval`
+does not.
+
+🔴 **There is nothing to "fix" here — it is avoided, not repaired.** Stamping our own labels onto the
+`ood` field would buy a `pre_eval` computed over **our invented proxy** — which is precisely what
+`bucket_mean` already is, and `bucket_mean` additionally drops the `temporal_grounding` orphan that the
+SDK's scorer cannot drop. **The answer is: do not use `pre_eval` locally.** *(An earlier version of this
+document called it "a one-line, no-GPU atomic — the cheapest and highest-return item open". Wrong on
+both counts: it is not one line, and it buys nothing we do not already have.)*
+
+**What does remain, and it is small:** the stray `temporal_grounding` question in `frame_ood_v1`. It
+contaminates the SDK's metric but **not ours**.
 
 ### Connections to Block B
 
@@ -508,10 +522,14 @@ more than the additions.**
    (only +2)"***. **Demote "#1 unfreeze aligner".** Replace with §7.1's framing.
 
 2. 🔴 **Any headline `pre_evaluation_score` in THE_MAP is inflated.** Fold in **§5.1**. The ladder's
-   headline metric must become **`bucket_mean`** until `ood` is populated (`src/frame/data.py:87`).
+   headline metric must become **`bucket_mean`**.
    **Rung 02's `0.708` is honestly `0.563`, and the gain over zero-shot is `+0.312`, not `+0.534`.**
    **The LoRA gain is real** (`raw` 0.262 → 0.566) — say so, or the correction will read as bad news
    when it is not.
+   ⚠️ **Do not present this as a code bug to fix.** `ood` being `False` on public data is **by design**
+   (`CONSTITUTION.md` §I.5) and **does not affect the submission** — the organizers label their own test
+   split. It only breaks `pre_eval` **on our local proxy split**, and the answer is to use `bucket_mean`,
+   which we already do. **Nothing to repair; something to avoid.**
 
 3. **Add the measured bucket weights (§1)** — they replace assumptions THE_MAP made about `fo_class`
    vs `number`. **THE_MAP's original "leverage → fo_class + number" was right**; a later draft
