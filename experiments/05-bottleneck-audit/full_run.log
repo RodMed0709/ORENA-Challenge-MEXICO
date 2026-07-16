@@ -1,0 +1,524 @@
+04:27:19  INFO      frame.data  Loaded 8000 FRAME items from heico/train
+04:27:19  INFO      frame.data  Loaded 5748 FRAME items from lapchole/train
+04:27:19  INFO      frame.data  Total FRAME items: 13748
+04:27:20  INFO      frame.data  Loaded 4000 FRAME items from heico/test
+04:27:20  INFO      frame.data  Loaded 2252 FRAME items from lapchole/test
+04:27:20  INFO      frame.data  Total FRAME items: 6252
+04:27:20  INFO      frame.data  Loaded 4000 FRAME items from heico/test
+04:27:20  INFO      frame.data  Loaded 2252 FRAME items from lapchole/test
+04:27:20  INFO      frame.data  Total FRAME items: 6252
+04:43:47  INFO      frame.engine  Loading Qwen3-VL from /workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720 …
+The tokenizer you are loading from '/workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+Running T0: Crosstab and trivial floor on TRAIN and VAL...
+--- CROSSTAB (TRAIN) ---
+capability_group  aggregation  object_recognition  temporal_grounding
+answer_format                                                        
+binary                   1230                   0                   0
+fo_class                    0                6294                   0
+multiple_choice             0                 640                   0
+number                   4262                   0                   0
+open_ended                 32                1288                   2
+
+--- CROSSTAB (VAL) ---
+capability_group  aggregation  object_recognition  temporal_grounding
+answer_format                                                        
+binary                    724                   0                   0
+fo_class                    0                2675                   0
+multiple_choice             0                 202                   0
+number                   2094                   0                   0
+open_ended                 12                 544                   1
+
+--- SUELOS TRIVIALES (ACCURACY EN VAL) ---
+Format: fo_class | Majority (Val): 0.2692 | Prior (Train): 0.2692
+Format: open_ended | Majority (Val): 0.1077 | Prior (Train): 0.1077
+Format: multiple_choice | Majority (Val): 0.3218 | Prior (Train): 0.3119
+Format: number | Majority (Val): 0.3520 | Prior (Train): 0.3520
+Format: binary | Majority (Val): 0.5594 | Prior (Train): 0.4406
+Unique video_ids in eval_items: 38
+
+Caching 6252 frames to /workspace/repo/experiments/05-bottleneck-audit/runs/05_bottleneck_audit/frames ...
+  Cached 100/6252
+  Cached 200/6252
+  Cached 300/6252
+  Cached 400/6252
+  Cached 500/6252
+  Cached 600/6252
+  Cached 700/6252
+  Cached 800/6252
+  Cached 900/6252
+  Cached 1000/6252
+  Cached 1100/6252
+  Cached 1200/6252
+  Cached 1300/6252
+  Cached 1400/6252
+  Cached 1500/6252
+  Cached 1600/6252
+  Cached 1700/6252
+  Cached 1800/6252
+  Cached 1900/6252
+  Cached 2000/6252
+  Cached 2100/6252
+  Cached 2200/6252
+  Cached 2300/6252
+  Cached 2400/6252
+  Cached 2500/6252
+  Cached 2600/6252
+  Cached 2700/6252
+  Cached 2800/6252
+  Cached 2900/6252
+  Cached 3000/6252
+  Cached 3100/6252
+  Cached 3200/6252
+  Cached 3300/6252
+  Cached 3400/6252
+  Cached 3500/6252
+  Cached 3600/6252
+  Cached 3700/6252
+  Cached 3800/6252
+  Cached 3900/6252
+  Cached 4000/6252
+  Cached 4100/6252
+  Cached 4200/6252
+  Cached 4300/6252
+  Cached 4400/6252
+  Cached 4500/6252
+  Cached 4600/6252
+  Cached 4700/6252
+  Cached 4800/6252
+  Cached 4900/6252
+  Cached 5000/6252
+  Cached 5100/6252
+  Cached 5200/6252
+  Cached 5300/6252
+  Cached 5400/6252
+  Cached 5500/6252
+  Cached 5600/6252
+  Cached 5700/6252
+  Cached 5800/6252
+  Cached 5900/6252
+  Cached 6000/6252
+  Cached 6100/6252
+  Cached 6200/6252
+  Cached 6252/6252
+
+=== Running arm: a0_real ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:07<00:22,  7.33s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:15<00:15,  7.67s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:23<00:07,  7.92s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.45s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.91s/it]
+04:44:16  INFO      frame.engine  Model ready.
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+05:18:28  INFO      frame.engine  Loading Qwen3-VL from /workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720 …
+The tokenizer you are loading from '/workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+[a0_real] infer 50/6252  3.18 q/s  ETA 32 min
+[a0_real] infer 100/6252  3.30 q/s  ETA 31 min
+[a0_real] infer 150/6252  3.33 q/s  ETA 31 min
+[a0_real] infer 200/6252  3.37 q/s  ETA 30 min
+[a0_real] infer 250/6252  3.37 q/s  ETA 30 min
+[a0_real] infer 300/6252  3.38 q/s  ETA 29 min
+[a0_real] infer 350/6252  3.39 q/s  ETA 29 min
+[a0_real] infer 400/6252  3.38 q/s  ETA 29 min
+[a0_real] infer 450/6252  3.36 q/s  ETA 29 min
+[a0_real] infer 500/6252  3.37 q/s  ETA 28 min
+[a0_real] infer 550/6252  3.31 q/s  ETA 29 min
+[a0_real] infer 600/6252  3.31 q/s  ETA 28 min
+[a0_real] infer 650/6252  3.32 q/s  ETA 28 min
+[a0_real] infer 700/6252  3.31 q/s  ETA 28 min
+[a0_real] infer 750/6252  3.32 q/s  ETA 28 min
+[a0_real] infer 800/6252  3.32 q/s  ETA 27 min
+[a0_real] infer 850/6252  3.32 q/s  ETA 27 min
+[a0_real] infer 900/6252  3.32 q/s  ETA 27 min
+[a0_real] infer 950/6252  3.33 q/s  ETA 27 min
+[a0_real] infer 1000/6252  3.35 q/s  ETA 26 min
+[a0_real] infer 1050/6252  3.36 q/s  ETA 26 min
+[a0_real] infer 1100/6252  3.38 q/s  ETA 25 min
+[a0_real] infer 1150/6252  3.39 q/s  ETA 25 min
+[a0_real] infer 1200/6252  3.40 q/s  ETA 25 min
+[a0_real] infer 1250/6252  3.40 q/s  ETA 25 min
+[a0_real] infer 1300/6252  3.40 q/s  ETA 24 min
+[a0_real] infer 1350/6252  3.39 q/s  ETA 24 min
+[a0_real] infer 1400/6252  3.40 q/s  ETA 24 min
+[a0_real] infer 1450/6252  3.40 q/s  ETA 24 min
+[a0_real] infer 1500/6252  3.39 q/s  ETA 23 min
+[a0_real] infer 1550/6252  3.39 q/s  ETA 23 min
+[a0_real] infer 1600/6252  3.39 q/s  ETA 23 min
+[a0_real] infer 1650/6252  3.39 q/s  ETA 23 min
+[a0_real] infer 1700/6252  3.40 q/s  ETA 22 min
+[a0_real] infer 1750/6252  3.40 q/s  ETA 22 min
+[a0_real] infer 1800/6252  3.40 q/s  ETA 22 min
+[a0_real] infer 1850/6252  3.40 q/s  ETA 22 min
+[a0_real] infer 1900/6252  3.40 q/s  ETA 21 min
+[a0_real] infer 1950/6252  3.41 q/s  ETA 21 min
+[a0_real] infer 2000/6252  3.41 q/s  ETA 21 min
+[a0_real] infer 2050/6252  3.40 q/s  ETA 21 min
+[a0_real] infer 2100/6252  3.40 q/s  ETA 20 min
+[a0_real] infer 2150/6252  3.39 q/s  ETA 20 min
+[a0_real] infer 2200/6252  3.39 q/s  ETA 20 min
+[a0_real] infer 2250/6252  3.39 q/s  ETA 20 min
+[a0_real] infer 2300/6252  3.39 q/s  ETA 19 min
+[a0_real] infer 2350/6252  3.38 q/s  ETA 19 min
+[a0_real] infer 2400/6252  3.37 q/s  ETA 19 min
+[a0_real] infer 2450/6252  3.36 q/s  ETA 19 min
+[a0_real] infer 2500/6252  3.36 q/s  ETA 19 min
+[a0_real] infer 2550/6252  3.36 q/s  ETA 18 min
+[a0_real] infer 2600/6252  3.35 q/s  ETA 18 min
+[a0_real] infer 2650/6252  3.36 q/s  ETA 18 min
+[a0_real] infer 2700/6252  3.36 q/s  ETA 18 min
+[a0_real] infer 2750/6252  3.36 q/s  ETA 17 min
+[a0_real] infer 2800/6252  3.37 q/s  ETA 17 min
+[a0_real] infer 2850/6252  3.36 q/s  ETA 17 min
+[a0_real] infer 2900/6252  3.37 q/s  ETA 17 min
+[a0_real] infer 2950/6252  3.37 q/s  ETA 16 min
+[a0_real] infer 3000/6252  3.37 q/s  ETA 16 min
+[a0_real] infer 3050/6252  3.37 q/s  ETA 16 min
+[a0_real] infer 3100/6252  3.37 q/s  ETA 16 min
+[a0_real] infer 3150/6252  3.37 q/s  ETA 15 min
+[a0_real] infer 3200/6252  3.37 q/s  ETA 15 min
+[a0_real] infer 3250/6252  3.37 q/s  ETA 15 min
+[a0_real] infer 3300/6252  3.37 q/s  ETA 15 min
+[a0_real] infer 3350/6252  3.37 q/s  ETA 14 min
+[a0_real] infer 3400/6252  3.37 q/s  ETA 14 min
+[a0_real] infer 3450/6252  3.37 q/s  ETA 14 min
+[a0_real] infer 3500/6252  3.37 q/s  ETA 14 min
+[a0_real] infer 3550/6252  3.37 q/s  ETA 13 min
+[a0_real] infer 3600/6252  3.37 q/s  ETA 13 min
+[a0_real] infer 3650/6252  3.37 q/s  ETA 13 min
+[a0_real] infer 3700/6252  3.37 q/s  ETA 13 min
+[a0_real] infer 3750/6252  3.37 q/s  ETA 12 min
+[a0_real] infer 3800/6252  3.37 q/s  ETA 12 min
+[a0_real] infer 3850/6252  3.36 q/s  ETA 12 min
+[a0_real] infer 3900/6252  3.36 q/s  ETA 12 min
+[a0_real] infer 3950/6252  3.36 q/s  ETA 11 min
+[a0_real] infer 4000/6252  3.36 q/s  ETA 11 min
+[a0_real] infer 4050/6252  3.36 q/s  ETA 11 min
+[a0_real] infer 4100/6252  3.36 q/s  ETA 11 min
+[a0_real] infer 4150/6252  3.34 q/s  ETA 10 min
+[a0_real] infer 4200/6252  3.32 q/s  ETA 10 min
+[a0_real] infer 4250/6252  3.32 q/s  ETA 10 min
+[a0_real] infer 4300/6252  3.32 q/s  ETA 10 min
+[a0_real] infer 4350/6252  3.30 q/s  ETA 10 min
+[a0_real] infer 4400/6252  3.29 q/s  ETA 9 min
+[a0_real] infer 4450/6252  3.29 q/s  ETA 9 min
+[a0_real] infer 4500/6252  3.29 q/s  ETA 9 min
+[a0_real] infer 4550/6252  3.29 q/s  ETA 9 min
+[a0_real] infer 4600/6252  3.27 q/s  ETA 8 min
+[a0_real] infer 4650/6252  3.26 q/s  ETA 8 min
+[a0_real] infer 4700/6252  3.24 q/s  ETA 8 min
+[a0_real] infer 4750/6252  3.23 q/s  ETA 8 min
+[a0_real] infer 4800/6252  3.22 q/s  ETA 8 min
+[a0_real] infer 4850/6252  3.21 q/s  ETA 7 min
+[a0_real] infer 4900/6252  3.20 q/s  ETA 7 min
+[a0_real] infer 4950/6252  3.19 q/s  ETA 7 min
+[a0_real] infer 5000/6252  3.18 q/s  ETA 7 min
+[a0_real] infer 5050/6252  3.18 q/s  ETA 6 min
+[a0_real] infer 5100/6252  3.18 q/s  ETA 6 min
+[a0_real] infer 5150/6252  3.19 q/s  ETA 6 min
+[a0_real] infer 5200/6252  3.18 q/s  ETA 6 min
+[a0_real] infer 5250/6252  3.16 q/s  ETA 5 min
+[a0_real] infer 5300/6252  3.15 q/s  ETA 5 min
+[a0_real] infer 5350/6252  3.14 q/s  ETA 5 min
+[a0_real] infer 5400/6252  3.13 q/s  ETA 5 min
+[a0_real] infer 5450/6252  3.12 q/s  ETA 4 min
+[a0_real] infer 5500/6252  3.11 q/s  ETA 4 min
+[a0_real] infer 5550/6252  3.10 q/s  ETA 4 min
+[a0_real] infer 5600/6252  3.09 q/s  ETA 4 min
+[a0_real] infer 5650/6252  3.08 q/s  ETA 3 min
+[a0_real] infer 5700/6252  3.07 q/s  ETA 3 min
+[a0_real] infer 5750/6252  3.07 q/s  ETA 3 min
+[a0_real] infer 5800/6252  3.06 q/s  ETA 2 min
+[a0_real] infer 5850/6252  3.05 q/s  ETA 2 min
+[a0_real] infer 5900/6252  3.06 q/s  ETA 2 min
+[a0_real] infer 5950/6252  3.06 q/s  ETA 2 min
+[a0_real] infer 6000/6252  3.05 q/s  ETA 1 min
+[a0_real] infer 6050/6252  3.05 q/s  ETA 1 min
+[a0_real] infer 6100/6252  3.06 q/s  ETA 1 min
+[a0_real] infer 6150/6252  3.06 q/s  ETA 1 min
+[a0_real] infer 6200/6252  3.06 q/s  ETA 0 min
+[a0_real] infer 6250/6252  3.05 q/s  ETA 0 min
+[a0_real] infer 6252/6252  3.05 q/s  ETA 0 min
+
+=== Running arm: a1_black ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:07<00:23,  7.77s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:15<00:15,  7.91s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:23<00:07,  7.66s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.30s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:27<00:00,  6.84s/it]
+05:18:57  INFO      frame.engine  Model ready.
+05:52:40  INFO      frame.engine  Loading Qwen3-VL from /workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720 …
+The tokenizer you are loading from '/workspace/repo/experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+[a1_black] infer 50/6252  3.29 q/s  ETA 31 min
+[a1_black] infer 100/6252  3.36 q/s  ETA 31 min
+[a1_black] infer 150/6252  3.34 q/s  ETA 30 min
+[a1_black] infer 200/6252  3.36 q/s  ETA 30 min
+[a1_black] infer 250/6252  3.35 q/s  ETA 30 min
+[a1_black] infer 300/6252  3.35 q/s  ETA 30 min
+[a1_black] infer 350/6252  3.34 q/s  ETA 29 min
+[a1_black] infer 400/6252  3.33 q/s  ETA 29 min
+[a1_black] infer 450/6252  3.32 q/s  ETA 29 min
+[a1_black] infer 500/6252  3.32 q/s  ETA 29 min
+[a1_black] infer 550/6252  3.32 q/s  ETA 29 min
+[a1_black] infer 600/6252  3.32 q/s  ETA 28 min
+[a1_black] infer 650/6252  3.31 q/s  ETA 28 min
+[a1_black] infer 700/6252  3.31 q/s  ETA 28 min
+[a1_black] infer 750/6252  3.31 q/s  ETA 28 min
+[a1_black] infer 800/6252  3.31 q/s  ETA 27 min
+[a1_black] infer 850/6252  3.31 q/s  ETA 27 min
+[a1_black] infer 900/6252  3.32 q/s  ETA 27 min
+[a1_black] infer 950/6252  3.33 q/s  ETA 27 min
+[a1_black] infer 1000/6252  3.35 q/s  ETA 26 min
+[a1_black] infer 1050/6252  3.37 q/s  ETA 26 min
+[a1_black] infer 1100/6252  3.38 q/s  ETA 25 min
+[a1_black] infer 1150/6252  3.40 q/s  ETA 25 min
+[a1_black] infer 1200/6252  3.42 q/s  ETA 25 min
+[a1_black] infer 1250/6252  3.41 q/s  ETA 24 min
+[a1_black] infer 1300/6252  3.41 q/s  ETA 24 min
+[a1_black] infer 1350/6252  3.41 q/s  ETA 24 min
+[a1_black] infer 1400/6252  3.41 q/s  ETA 24 min
+[a1_black] infer 1450/6252  3.41 q/s  ETA 23 min
+[a1_black] infer 1500/6252  3.41 q/s  ETA 23 min
+[a1_black] infer 1550/6252  3.41 q/s  ETA 23 min
+[a1_black] infer 1600/6252  3.40 q/s  ETA 23 min
+[a1_black] infer 1650/6252  3.40 q/s  ETA 23 min
+[a1_black] infer 1700/6252  3.41 q/s  ETA 22 min
+[a1_black] infer 1750/6252  3.41 q/s  ETA 22 min
+[a1_black] infer 1800/6252  3.41 q/s  ETA 22 min
+[a1_black] infer 1850/6252  3.41 q/s  ETA 21 min
+[a1_black] infer 1900/6252  3.41 q/s  ETA 21 min
+[a1_black] infer 1950/6252  3.42 q/s  ETA 21 min
+[a1_black] infer 2000/6252  3.41 q/s  ETA 21 min
+[a1_black] infer 2050/6252  3.40 q/s  ETA 21 min
+[a1_black] infer 2100/6252  3.40 q/s  ETA 20 min
+[a1_black] infer 2150/6252  3.39 q/s  ETA 20 min
+[a1_black] infer 2200/6252  3.38 q/s  ETA 20 min
+[a1_black] infer 2250/6252  3.37 q/s  ETA 20 min
+[a1_black] infer 2300/6252  3.37 q/s  ETA 20 min
+[a1_black] infer 2350/6252  3.36 q/s  ETA 19 min
+[a1_black] infer 2400/6252  3.36 q/s  ETA 19 min
+[a1_black] infer 2450/6252  3.36 q/s  ETA 19 min
+[a1_black] infer 2500/6252  3.36 q/s  ETA 19 min
+[a1_black] infer 2550/6252  3.36 q/s  ETA 18 min
+[a1_black] infer 2600/6252  3.36 q/s  ETA 18 min
+[a1_black] infer 2650/6252  3.36 q/s  ETA 18 min
+[a1_black] infer 2700/6252  3.37 q/s  ETA 18 min
+[a1_black] infer 2750/6252  3.37 q/s  ETA 17 min
+[a1_black] infer 2800/6252  3.37 q/s  ETA 17 min
+[a1_black] infer 2850/6252  3.37 q/s  ETA 17 min
+[a1_black] infer 2900/6252  3.37 q/s  ETA 17 min
+[a1_black] infer 2950/6252  3.37 q/s  ETA 16 min
+[a1_black] infer 3000/6252  3.37 q/s  ETA 16 min
+[a1_black] infer 3050/6252  3.37 q/s  ETA 16 min
+[a1_black] infer 3100/6252  3.37 q/s  ETA 16 min
+[a1_black] infer 3150/6252  3.37 q/s  ETA 15 min
+[a1_black] infer 3200/6252  3.37 q/s  ETA 15 min
+[a1_black] infer 3250/6252  3.37 q/s  ETA 15 min
+[a1_black] infer 3300/6252  3.36 q/s  ETA 15 min
+[a1_black] infer 3350/6252  3.36 q/s  ETA 14 min
+[a1_black] infer 3400/6252  3.36 q/s  ETA 14 min
+[a1_black] infer 3450/6252  3.36 q/s  ETA 14 min
+[a1_black] infer 3500/6252  3.36 q/s  ETA 14 min
+[a1_black] infer 3550/6252  3.36 q/s  ETA 13 min
+[a1_black] infer 3600/6252  3.36 q/s  ETA 13 min
+[a1_black] infer 3650/6252  3.36 q/s  ETA 13 min
+[a1_black] infer 3700/6252  3.36 q/s  ETA 13 min
+[a1_black] infer 3750/6252  3.36 q/s  ETA 12 min
+[a1_black] infer 3800/6252  3.35 q/s  ETA 12 min
+[a1_black] infer 3850/6252  3.35 q/s  ETA 12 min
+[a1_black] infer 3900/6252  3.35 q/s  ETA 12 min
+[a1_black] infer 3950/6252  3.35 q/s  ETA 11 min
+[a1_black] infer 4000/6252  3.35 q/s  ETA 11 min
+[a1_black] infer 4050/6252  3.35 q/s  ETA 11 min
+[a1_black] infer 4100/6252  3.35 q/s  ETA 11 min
+[a1_black] infer 4150/6252  3.33 q/s  ETA 11 min
+[a1_black] infer 4200/6252  3.32 q/s  ETA 10 min
+[a1_black] infer 4250/6252  3.31 q/s  ETA 10 min
+[a1_black] infer 4300/6252  3.31 q/s  ETA 10 min
+[a1_black] infer 4350/6252  3.30 q/s  ETA 10 min
+[a1_black] infer 4400/6252  3.29 q/s  ETA 9 min
+[a1_black] infer 4450/6252  3.30 q/s  ETA 9 min
+[a1_black] infer 4500/6252  3.29 q/s  ETA 9 min
+[a1_black] infer 4550/6252  3.29 q/s  ETA 9 min
+[a1_black] infer 4600/6252  3.27 q/s  ETA 8 min
+[a1_black] infer 4650/6252  3.26 q/s  ETA 8 min
+[a1_black] infer 4700/6252  3.25 q/s  ETA 8 min
+[a1_black] infer 4750/6252  3.24 q/s  ETA 8 min
+[a1_black] infer 4800/6252  3.23 q/s  ETA 7 min
+[a1_black] infer 4850/6252  3.22 q/s  ETA 7 min
+[a1_black] infer 4900/6252  3.21 q/s  ETA 7 min
+[a1_black] infer 4950/6252  3.20 q/s  ETA 7 min
+[a1_black] infer 5000/6252  3.19 q/s  ETA 7 min
+[a1_black] infer 5050/6252  3.20 q/s  ETA 6 min
+[a1_black] infer 5100/6252  3.20 q/s  ETA 6 min
+[a1_black] infer 5150/6252  3.20 q/s  ETA 6 min
+[a1_black] infer 5200/6252  3.19 q/s  ETA 5 min
+[a1_black] infer 5250/6252  3.18 q/s  ETA 5 min
+[a1_black] infer 5300/6252  3.17 q/s  ETA 5 min
+[a1_black] infer 5350/6252  3.17 q/s  ETA 5 min
+[a1_black] infer 5400/6252  3.16 q/s  ETA 4 min
+[a1_black] infer 5450/6252  3.15 q/s  ETA 4 min
+[a1_black] infer 5500/6252  3.14 q/s  ETA 4 min
+[a1_black] infer 5550/6252  3.13 q/s  ETA 4 min
+[a1_black] infer 5600/6252  3.13 q/s  ETA 3 min
+[a1_black] infer 5650/6252  3.12 q/s  ETA 3 min
+[a1_black] infer 5700/6252  3.11 q/s  ETA 3 min
+[a1_black] infer 5750/6252  3.11 q/s  ETA 3 min
+[a1_black] infer 5800/6252  3.10 q/s  ETA 2 min
+[a1_black] infer 5850/6252  3.10 q/s  ETA 2 min
+[a1_black] infer 5900/6252  3.10 q/s  ETA 2 min
+[a1_black] infer 5950/6252  3.10 q/s  ETA 2 min
+[a1_black] infer 6000/6252  3.09 q/s  ETA 1 min
+[a1_black] infer 6050/6252  3.10 q/s  ETA 1 min
+[a1_black] infer 6100/6252  3.10 q/s  ETA 1 min
+[a1_black] infer 6150/6252  3.10 q/s  ETA 1 min
+[a1_black] infer 6200/6252  3.10 q/s  ETA 0 min
+[a1_black] infer 6250/6252  3.09 q/s  ETA 0 min
+[a1_black] infer 6252/6252  3.09 q/s  ETA 0 min
+
+=== Running arm: a2_shuffled ===
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:08<00:24,  8.00s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:15<00:15,  7.80s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:22<00:07,  7.47s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:26<00:00,  6.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:26<00:00,  6.70s/it]
+05:53:08  INFO      frame.engine  Model ready.
+06:27:30  INFO      focus.evaluation.judges  Loading judge model 'Qwen/Qwen3-4B' on device 'cuda'…
+[a2_shuffled] infer 50/6252  2.37 q/s  ETA 44 min
+[a2_shuffled] infer 100/6252  2.40 q/s  ETA 43 min
+[a2_shuffled] infer 150/6252  2.40 q/s  ETA 42 min
+[a2_shuffled] infer 200/6252  2.42 q/s  ETA 42 min
+[a2_shuffled] infer 250/6252  2.41 q/s  ETA 42 min
+[a2_shuffled] infer 300/6252  2.41 q/s  ETA 41 min
+[a2_shuffled] infer 350/6252  2.41 q/s  ETA 41 min
+[a2_shuffled] infer 400/6252  2.41 q/s  ETA 41 min
+[a2_shuffled] infer 450/6252  2.48 q/s  ETA 39 min
+[a2_shuffled] infer 500/6252  2.55 q/s  ETA 38 min
+[a2_shuffled] infer 550/6252  2.61 q/s  ETA 36 min
+[a2_shuffled] infer 600/6252  2.66 q/s  ETA 35 min
+[a2_shuffled] infer 650/6252  2.71 q/s  ETA 34 min
+[a2_shuffled] infer 700/6252  2.75 q/s  ETA 34 min
+[a2_shuffled] infer 750/6252  2.79 q/s  ETA 33 min
+[a2_shuffled] infer 800/6252  2.83 q/s  ETA 32 min
+[a2_shuffled] infer 850/6252  2.86 q/s  ETA 32 min
+[a2_shuffled] infer 900/6252  2.87 q/s  ETA 31 min
+[a2_shuffled] infer 950/6252  2.89 q/s  ETA 31 min
+[a2_shuffled] infer 1000/6252  2.93 q/s  ETA 30 min
+[a2_shuffled] infer 1050/6252  2.96 q/s  ETA 29 min
+[a2_shuffled] infer 1100/6252  2.98 q/s  ETA 29 min
+[a2_shuffled] infer 1150/6252  3.00 q/s  ETA 28 min
+[a2_shuffled] infer 1200/6252  3.03 q/s  ETA 28 min
+[a2_shuffled] infer 1250/6252  3.04 q/s  ETA 27 min
+[a2_shuffled] infer 1300/6252  3.05 q/s  ETA 27 min
+[a2_shuffled] infer 1350/6252  3.06 q/s  ETA 27 min
+[a2_shuffled] infer 1400/6252  3.08 q/s  ETA 26 min
+[a2_shuffled] infer 1450/6252  3.09 q/s  ETA 26 min
+[a2_shuffled] infer 1500/6252  3.10 q/s  ETA 26 min
+[a2_shuffled] infer 1550/6252  3.11 q/s  ETA 25 min
+[a2_shuffled] infer 1600/6252  3.11 q/s  ETA 25 min
+[a2_shuffled] infer 1650/6252  3.12 q/s  ETA 25 min
+[a2_shuffled] infer 1700/6252  3.13 q/s  ETA 24 min
+[a2_shuffled] infer 1750/6252  3.13 q/s  ETA 24 min
+[a2_shuffled] infer 1800/6252  3.14 q/s  ETA 24 min
+[a2_shuffled] infer 1850/6252  3.15 q/s  ETA 23 min
+[a2_shuffled] infer 1900/6252  3.16 q/s  ETA 23 min
+[a2_shuffled] infer 1950/6252  3.17 q/s  ETA 23 min
+[a2_shuffled] infer 2000/6252  3.17 q/s  ETA 22 min
+[a2_shuffled] infer 2050/6252  3.17 q/s  ETA 22 min
+[a2_shuffled] infer 2100/6252  3.18 q/s  ETA 22 min
+[a2_shuffled] infer 2150/6252  3.18 q/s  ETA 22 min
+[a2_shuffled] infer 2200/6252  3.18 q/s  ETA 21 min
+[a2_shuffled] infer 2250/6252  3.18 q/s  ETA 21 min
+[a2_shuffled] infer 2300/6252  3.18 q/s  ETA 21 min
+[a2_shuffled] infer 2350/6252  3.18 q/s  ETA 20 min
+[a2_shuffled] infer 2400/6252  3.18 q/s  ETA 20 min
+[a2_shuffled] infer 2450/6252  3.18 q/s  ETA 20 min
+[a2_shuffled] infer 2500/6252  3.18 q/s  ETA 20 min
+[a2_shuffled] infer 2550/6252  3.19 q/s  ETA 19 min
+[a2_shuffled] infer 2600/6252  3.19 q/s  ETA 19 min
+[a2_shuffled] infer 2650/6252  3.19 q/s  ETA 19 min
+[a2_shuffled] infer 2700/6252  3.20 q/s  ETA 19 min
+[a2_shuffled] infer 2750/6252  3.20 q/s  ETA 18 min
+[a2_shuffled] infer 2800/6252  3.21 q/s  ETA 18 min
+[a2_shuffled] infer 2850/6252  3.21 q/s  ETA 18 min
+[a2_shuffled] infer 2900/6252  3.22 q/s  ETA 17 min
+[a2_shuffled] infer 2950/6252  3.22 q/s  ETA 17 min
+[a2_shuffled] infer 3000/6252  3.22 q/s  ETA 17 min
+[a2_shuffled] infer 3050/6252  3.22 q/s  ETA 17 min
+[a2_shuffled] infer 3100/6252  3.23 q/s  ETA 16 min
+[a2_shuffled] infer 3150/6252  3.23 q/s  ETA 16 min
+[a2_shuffled] infer 3200/6252  3.23 q/s  ETA 16 min
+[a2_shuffled] infer 3250/6252  3.23 q/s  ETA 15 min
+[a2_shuffled] infer 3300/6252  3.23 q/s  ETA 15 min
+[a2_shuffled] infer 3350/6252  3.24 q/s  ETA 15 min
+[a2_shuffled] infer 3400/6252  3.24 q/s  ETA 15 min
+[a2_shuffled] infer 3450/6252  3.24 q/s  ETA 14 min
+[a2_shuffled] infer 3500/6252  3.24 q/s  ETA 14 min
+[a2_shuffled] infer 3550/6252  3.24 q/s  ETA 14 min
+[a2_shuffled] infer 3600/6252  3.24 q/s  ETA 14 min
+[a2_shuffled] infer 3650/6252  3.23 q/s  ETA 13 min
+[a2_shuffled] infer 3700/6252  3.22 q/s  ETA 13 min
+[a2_shuffled] infer 3750/6252  3.22 q/s  ETA 13 min
+[a2_shuffled] infer 3800/6252  3.22 q/s  ETA 13 min
+[a2_shuffled] infer 3850/6252  3.22 q/s  ETA 12 min
+[a2_shuffled] infer 3900/6252  3.23 q/s  ETA 12 min
+[a2_shuffled] infer 3950/6252  3.23 q/s  ETA 12 min
+[a2_shuffled] infer 4000/6252  3.23 q/s  ETA 12 min
+[a2_shuffled] infer 4050/6252  3.23 q/s  ETA 11 min
+[a2_shuffled] infer 4100/6252  3.23 q/s  ETA 11 min
+[a2_shuffled] infer 4150/6252  3.23 q/s  ETA 11 min
+[a2_shuffled] infer 4200/6252  3.23 q/s  ETA 11 min
+[a2_shuffled] infer 4250/6252  3.23 q/s  ETA 10 min
+[a2_shuffled] infer 4300/6252  3.23 q/s  ETA 10 min
+[a2_shuffled] infer 4350/6252  3.23 q/s  ETA 10 min
+[a2_shuffled] infer 4400/6252  3.23 q/s  ETA 10 min
+[a2_shuffled] infer 4450/6252  3.23 q/s  ETA 9 min
+[a2_shuffled] infer 4500/6252  3.23 q/s  ETA 9 min
+[a2_shuffled] infer 4550/6252  3.23 q/s  ETA 9 min
+[a2_shuffled] infer 4600/6252  3.22 q/s  ETA 9 min
+[a2_shuffled] infer 4650/6252  3.22 q/s  ETA 8 min
+[a2_shuffled] infer 4700/6252  3.23 q/s  ETA 8 min
+[a2_shuffled] infer 4750/6252  3.23 q/s  ETA 8 min
+[a2_shuffled] infer 4800/6252  3.21 q/s  ETA 8 min
+[a2_shuffled] infer 4850/6252  3.20 q/s  ETA 7 min
+[a2_shuffled] infer 4900/6252  3.19 q/s  ETA 7 min
+[a2_shuffled] infer 4950/6252  3.17 q/s  ETA 7 min
+[a2_shuffled] infer 5000/6252  3.16 q/s  ETA 7 min
+[a2_shuffled] infer 5050/6252  3.15 q/s  ETA 6 min
+[a2_shuffled] infer 5100/6252  3.14 q/s  ETA 6 min
+[a2_shuffled] infer 5150/6252  3.13 q/s  ETA 6 min
+[a2_shuffled] infer 5200/6252  3.12 q/s  ETA 6 min
+[a2_shuffled] infer 5250/6252  3.10 q/s  ETA 5 min
+[a2_shuffled] infer 5300/6252  3.09 q/s  ETA 5 min
+[a2_shuffled] infer 5350/6252  3.08 q/s  ETA 5 min
+[a2_shuffled] infer 5400/6252  3.07 q/s  ETA 5 min
+[a2_shuffled] infer 5450/6252  3.06 q/s  ETA 4 min
+[a2_shuffled] infer 5500/6252  3.07 q/s  ETA 4 min
+[a2_shuffled] infer 5550/6252  3.06 q/s  ETA 4 min
+[a2_shuffled] infer 5600/6252  3.06 q/s  ETA 4 min
+[a2_shuffled] infer 5650/6252  3.06 q/s  ETA 3 min
+[a2_shuffled] infer 5700/6252  3.06 q/s  ETA 3 min
+[a2_shuffled] infer 5750/6252  3.06 q/s  ETA 3 min
+[a2_shuffled] infer 5800/6252  3.06 q/s  ETA 2 min
+[a2_shuffled] infer 5850/6252  3.06 q/s  ETA 2 min
+[a2_shuffled] infer 5900/6252  3.06 q/s  ETA 2 min
+[a2_shuffled] infer 5950/6252  3.05 q/s  ETA 2 min
+[a2_shuffled] infer 6000/6252  3.05 q/s  ETA 1 min
+[a2_shuffled] infer 6050/6252  3.05 q/s  ETA 1 min
+[a2_shuffled] infer 6100/6252  3.05 q/s  ETA 1 min
+[a2_shuffled] infer 6150/6252  3.04 q/s  ETA 1 min
+[a2_shuffled] infer 6200/6252  3.04 q/s  ETA 0 min
+[a2_shuffled] infer 6250/6252  3.03 q/s  ETA 0 min
+[a2_shuffled] infer 6252/6252  3.03 q/s  ETA 0 min
+OK G2: los 3 brazos reciben tensores distintos
+G2b: 4281/6252 respuestas cambian al ablar la imagen
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:03<00:07,  3.83s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:07<00:03,  3.74s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:07<00:00,  2.52s/it]
+06:27:40  INFO      focus.evaluation.judges  Judge model 'Qwen/Qwen3-4B' ready.
+06:27:40  INFO      focus.evaluation.evaluator  Starting evaluation: 6252 requests, 6252 references, 6252 responses, max_latency=5.00s.
+06:34:12  WARNING   focus.evaluation.evaluator  Pre-evaluation score: only 3/10 group×distribution buckets are populated; averaging over the populated buckets.
+06:34:12  INFO      focus.evaluation.evaluator  Pre-evaluation score: 0.709 (mean over 3 group×distribution buckets).
+06:34:12  INFO      focus.evaluation.evaluator  Evaluation complete: 3548/6252 correct (56.7%).
+06:34:12  INFO      focus.evaluation.evaluator  Results saved to /workspace/repo/experiments/05-bottleneck-audit/runs/05_bottleneck_audit/a0_real.
+06:34:12  INFO      focus.evaluation.evaluator  Starting evaluation: 6252 requests, 6252 references, 6252 responses, max_latency=5.00s.
+06:40:51  WARNING   focus.evaluation.evaluator  Pre-evaluation score: only 3/10 group×distribution buckets are populated; averaging over the populated buckets.
+06:40:51  INFO      focus.evaluation.evaluator  Pre-evaluation score: 0.187 (mean over 3 group×distribution buckets).
+06:40:51  INFO      focus.evaluation.evaluator  Evaluation complete: 1676/6252 correct (26.8%).
+06:40:51  INFO      focus.evaluation.evaluator  Results saved to /workspace/repo/experiments/05-bottleneck-audit/runs/05_bottleneck_audit/a1_black.
+06:40:51  INFO      focus.evaluation.evaluator  Starting evaluation: 6252 requests, 6252 references, 6252 responses, max_latency=5.00s.
+06:47:31  WARNING   focus.evaluation.evaluator  Pre-evaluation score: only 3/10 group×distribution buckets are populated; averaging over the populated buckets.
+06:47:31  INFO      focus.evaluation.evaluator  Pre-evaluation score: 0.234 (mean over 3 group×distribution buckets).
+06:47:31  INFO      focus.evaluation.evaluator  Evaluation complete: 2151/6252 correct (34.4%).
+06:47:31  INFO      focus.evaluation.evaluator  Results saved to /workspace/repo/experiments/05-bottleneck-audit/runs/05_bottleneck_audit/a2_shuffled.
+
+Evaluating arm: a0_real
+
+Evaluating arm: a1_black
+
+Evaluating arm: a2_shuffled
+Wrote RESULTS.csv with per-bucket and per-format stats and trivial floors.
