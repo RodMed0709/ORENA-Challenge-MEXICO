@@ -64,13 +64,21 @@ Found while independently recomputing the aggregates from raw predictions; not w
   0.6092 (n=3421), **`temporal_grounding` 1.0 (n=1)**. Formula reconstructed exactly (`MATCH=True`)
   on all 3 arms against `focus/evaluation/evaluator.py:402-462`.
   **Without the n=1 bucket: 0.5631. One question is worth +14.6 points.**
-- **Root cause 1 — the SDK's `ood` column is all-`False`** for all 6252 rows; never populated. The
-  evaluator sees only ID buckets → 3 of 10 → the OOD dimension vanishes from its own score.
-  **Anything trusting `results_df["ood"]` reads the entire split as in-distribution.** This rung
-  derives ID/OOD from the `qID` prefix (`heico`=OOD, `lapchole`=ID) — that is why `bucket_mean` holds
-  where `pre_eval` does not.
-- **Root cause 2 — `frame_ood_v1` carries 1 `temporal_grounding` question**, a group FRAME should not
-  have; under an unweighted bucket mean it equals a bucket of 3421.
+- **Cause 1 — `ood` is `False` on all 6252 rows** → the evaluator sees only ID buckets → 3 of 10 → the
+  OOD dimension vanishes from its own score. **Anything trusting `results_df["ood"]` reads the entire
+  split as in-distribution.** This rung derives ID/OOD from the `qID` prefix (`heico`=OOD,
+  `lapchole`=ID) — that is why `bucket_mean` holds where `pre_eval` does not.
+  ⚠️ **Expected, NOT a defect** (`CONSTITUTION.md` §I.5): the **public** data ships without those labels;
+  the **organizers populate them in the private test split**. Our OOD is a *proxy we invented* (rung 01,
+  hold out Sigmoid) that we never stamp onto the field, so the SDK's scorer cannot sort our questions.
+  **The submission is unaffected** — on the leaderboard they sort with their own labels. Only our local
+  instrument is.
+- **Cause 2 — `frame_ood_v1` carries 1 `temporal_grounding` question**, a group FRAME should not have;
+  under an unweighted bucket mean it equals a bucket of 3421. **This one is ours.**
+- 🔴 **Nothing to fix on the `ood` side — it is avoided, not repaired.** Stamping our own labels would
+  buy a `pre_eval` over our *invented proxy* — which is what `bucket_mean` already is, and `bucket_mean`
+  additionally drops the orphan. **The answer is: do not use `pre_eval` locally.** *(An earlier version
+  of this file sold it as "a one-line, no-GPU atomic, the cheapest item open". Wrong on both counts.)*
 - **Consequence:** `pre_eval` is not a usable selection metric on our split, and `0.708` is not
   comparable to the official baselines. `bucket_mean` (0.5503) is the honest number.
   **The shortcut verdict is unaffected** — it was computed per format from raw per-question correctness.
