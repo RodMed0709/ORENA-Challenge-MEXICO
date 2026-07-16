@@ -65,6 +65,45 @@ between fires **both**. The rule is undefined when `A_real ≈ A_trivial`. It di
 (0.3567 falls outside the overlap) — but by luck, not by design. Recorded rather than patched
 after the fact.
 
+## 🔴 Incidental finding — the `0.708` headline is inflated by ONE question
+
+Not what this rung set out to test. Found while verifying the raw predictions, and it outranks the
+verdict above in consequence.
+
+The re-run control emits `pre_evaluation SCORE = 0.7087132444965948` — **this is the project's
+`0.708`**, reproduced exactly. The SDK (`focus/evaluation/evaluator.py:402-462`) defines it as the
+**unweighted mean over populated `group × ood` buckets**. For our val split that resolves to:
+
+| Bucket | acc | n | weight in the score |
+|---|---|---|---|
+| `aggregation` | 0.5170 | 2830 | **1/3** |
+| `object_recognition` | 0.6092 | 3421 | **1/3** |
+| `temporal_grounding` | **1.0000** | **1** | **1/3** |
+
+**A single question, answered correctly, carries one third of our headline number.**
+Reconstructed exactly (`MATCH=True`) on all three arms — and the ablation arms confirm the mechanism:
+when that one question is answered wrong, `pre_eval` drops to 0.1872 / 0.2339.
+
+**Drop the n=1 bucket and `0.7087` becomes `0.5631` — the single question is worth +14.6 points.**
+
+Two defects compound to produce this:
+
+1. **The SDK's `ood` column is never populated** — it is `False` for all 6252 rows. The evaluator
+   therefore sees only ID buckets and collapses 10 candidate buckets to 3, erasing the OOD dimension
+   from its own score. **Any code trusting `results_df["ood"]` reads the whole split as in-distribution.**
+   This rung derives ID/OOD from the `qID` prefix instead (`heico` = OOD, `lapchole` = ID), which is why
+   its `bucket_mean` is trustworthy where `pre_eval` is not.
+2. **`frame_ood_v1` contains 1 `temporal_grounding` question** — a group FRAME should not have at all.
+   Under an unweighted bucket mean it weighs the same as a bucket of 3421.
+
+**Consequence:** `pre_eval` on our val split is not a usable selection metric, and `0.708` is not
+comparable to the official baselines. `bucket_mean` (0.5503 for the control) is the honest number —
+already the selection metric of record. **This does not affect the shortcut verdict**, which was
+computed per format from raw per-question correctness.
+
+**Not fixed here.** The clean fix (drop the stray question, populate `ood`) changes the split and the
+metric — that is its own atomic, not a side effect of a diagnosis rung.
+
 ## Gates
 
 | Gate | Result |
