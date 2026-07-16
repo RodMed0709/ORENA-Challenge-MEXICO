@@ -65,6 +65,8 @@ answer_format, answer, clinical_relevance (bool)
 ### I.6 Dependencias base (mín. pinneadas)
 Python `>=3.10`. `datasets>=2.14, decord>=0.6, huggingface-hub>=0.17, opencv-python>=4.8, pandas>=2.0, numpy>=1.23, torch>=2.0, torchvision>=0.15, transformers>=4.30, tiktoken>=0.5, progiter, matplotlib, pillow, requests`. Extras de inferencia: `qwen-vl-utils, accelerate`.
 
+**Ejecución headless (dev, NO va al Docker):** `papermill` + **`ipykernel`** — la vía canónica para correr un notebook largo en background sin exportarlo a `.py` (ver `EXPERIMENT_REPO_STRUCTURE_SPEC.md` §5b). 🔴 **`papermill` solo no basta: necesita un kernel registrado** (`python -m ipykernel install --user --name <env>`), o falla con `NoSuchKernel`. Verificado con papermill 2.7.0 el 2026-07-16.
+
 **Pins DUROS para Qwen3-VL (verificado):** `transformers==4.57.*` (abajo de eso el arch `qwen3_vl` no carga; NO saltar a 5.x) + `qwen-vl-utils>=0.0.14`. Fine-tune: **ms-swift `>=4.2`** (soporte nativo Qwen3-VL, `--max_pixels`, `--freeze_vit/--freeze_aligner`). Serving: **vLLM `>=0.11`** (par verificado 0.11.2 + transformers 4.57). **Dos envs Python separados** (train: ms-swift+bitsandbytes+flash-attn; serve: vLLM) — pins de torch/flash-attn chocan; el artefacto de handoff = pesos LoRA ya merged. Cuant: **bf16 LoRA** pal 8B (cabe en 80GB, sin pérdida NF4); QLoRA NF4 solo pal wildcard 32B; en L40S (Ada CC 8.9) el lever es **FP8 w8a8** si p99 aprieta.
 
 ---

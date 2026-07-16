@@ -274,6 +274,72 @@ shells out to a `.py`.
 
 ---
 
+## 5b. Long / headless runs — `papermill` is the canonical path (BINDING)
+
+**The problem this closes.** "Notebooks generate runs" (§1) collides with reality when a run takes
+hours: you cannot hold a Jupyter session open for it, and the pod session ends. Rung 05 hit this and
+solved it by exporting the notebook to `05_bottleneck_audit.py`, `sed`-ing a flag, and `nohup`-ing the
+script — which violates §1 (`.py` are libraries, never launchers) and made provenance a manual
+`sha256` + diff exercise. It survived only because the export happened to differ from the notebook by
+exactly one line **and that could be proven after the fact**. **A training run gets no such second
+chance: if provenance breaks, the weights are not auditable.**
+
+**`papermill` executes the notebook itself, headless, with parameters injected — and writes an output
+notebook that IS the provenance record.** No export, no `sed`, no launcher, and the source notebook is
+never modified.
+
+### The `parameters` cell (convention)
+
+The **first code cell** of any notebook meant to run headless carries the `parameters` tag and holds
+**only** the knobs — no logic:
+
+```python
+# cell metadata: {"tags": ["parameters"]}
+SMOKE = True          # default: the cheap path
+```
+
+papermill inserts a second `# Parameters` cell immediately after it, overriding the defaults. **The
+tagged cell must stay a plain assignment block**, or the override lands in the wrong place.
+
+### Invocation
+
+```bash
+papermill  <notebook>.ipynb  runs/<tag>/executed.ipynb  -p SMOKE False  -k <kernel>
+```
+
+Run it under `nohup`/`&` for long jobs. It is a **command**, not a launcher file — no `.sh`, no
+`run_*.py`. Config still lives in the notebook (§1 holds).
+
+### What you get (measured, not assumed — verified 2026-07-16, papermill 2.7.0)
+
+| | |
+|---|---|
+| **Source notebook** | **untouched** — the flag is never edited on disk |
+| `runs/<tag>/executed.ipynb` | the exact code that ran **+ every output**, cell by cell |
+| `metadata.papermill.parameters` | **what was actually injected** (`{'SMOKE': False}`) |
+| `metadata.papermill.duration` / `.exception` / `.input_path` | run record |
+| per-cell `metadata.papermill.status` | `completed` / `failed` / `pending` |
+
+**On failure** — the case that matters for a long run: papermill **exits non-zero** (detectable by a
+monitor), records `exception: True`, marks the offending cell `failed` and everything after it
+`pending`, **and still writes the output notebook with the expensive work already done preserved**. A
+gate that fires (e.g. a trainable-parameter check) stops the run, leaves the reason on disk, and does
+not execute what follows.
+
+> **The output notebook replaces the `sha256` dance.** It carries the code, the parameters, the outputs
+> and the failure state in one artifact. **`runs/` is gitignored**, so it stays a local/pod artifact —
+> `scp` it down with the rest.
+
+### Requirements (both env and pod)
+
+```bash
+pip install papermill ipykernel
+python -m ipykernel install --user --name <env> --display-name "<env>"
+```
+
+🔴 **`papermill` alone is not enough — it needs a registered kernel** (`NoSuchKernel` otherwise).
+Installing the package and forgetting `ipykernel install` is the first way this fails.
+
 ## 6. `_models/` — engines only
 
 `_models/` contains **engines and only engines**: trainer(s) (`*_train_*.py`),
