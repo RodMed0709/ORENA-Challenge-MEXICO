@@ -1,0 +1,2 @@
+source,n,n_no_parseable,n_ambiguous_negation,mode_value,mode_rate,acc_overall,acc_mode,acc_non_mode,spearman_r,pred_mode_share,pred_entropy
+rung02_predictions,2094,0,0,1.0,0.3519579751671442,0.43314231136580705,0.8032564450474898,0.23212969786293294,0.6253765804860234,0.4680038204393505,1.8368788497933375
