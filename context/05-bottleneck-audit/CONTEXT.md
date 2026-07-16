@@ -101,11 +101,39 @@ unexplained (different denominator or parse). **Flagged, not reconciled.**
 - **Hardware**: RTX PRO 4500 Blackwell 32 GB · driver 580.126.09 · `torch 2.8.0+cu128`. No OOM.
 - **Branch/commit of the sources**: `task/bottleneck-audit` @ `6a2c69e`.
 
+## 05b — number-probe (done, zero GPU)
+
+**Verdict by the pre-registered rule: COUNTS BADLY** (`acc_non_mode` 0.232 < 0.30, Spearman `r` 0.625 > 0;
+the DOES-NOT-COUNT branch fires on neither of its two conditions). → **Test B runs as designed.**
+
+- **Source:** rung 02's `eval_best/predictions.json`, validated by reproducing `acc_OOD = 0.5917` before
+  use. All gates green; checksums reproduce rung 05. `n_ambiguous_negation = 0` — the parser's known
+  weakness never fired.
+- **The model perceives quantity** (predictions rise monotonically with truth) **but its scale saturates
+  at ~2.** 81.5% of errors are under-counts. Accuracy by truth: 1→0.803, 2→**0.459**, 3→0.192, 7→0.000.
+- 🔴 **It is not about counting — it is about multiplicity.** The identical compression appears in
+  `fo_class`, which requires no counting: at truth=2 it names **1.76** classes (vs `number` saying 1.69);
+  at truth=3 it names **1.98** (vs 2.01). **Two unrelated output formats saturate at the same place.**
+  If the output format were the bottleneck, `fo_class` would be healthy.
+- **Refined diagnosis:** the model sees the dominant object well and **fails to perceive the additional
+  ones**. That is upstream of the format → **perception** → **strengthens Test B**, and cuts against the
+  "format, not eyes" reading that `number`'s +8.0 alone suggested.
+- **Caveat kept on record:** the information could be in the encoder while the LLM ignores it; Test B
+  would not fix that. Weak counter-evidence: the language-only LoRA had 13.7k examples and never learned
+  to read it.
+- **Where the money is:** the mass is at truth 1–3 (73.6% of `number`); the 7–12 tail is ~5% and already
+  at zero. **The largest single pocket of loss in the project is truth=2: 527 questions at 0.459.**
+
 ## Next
 - **Test B — LoRA on the ViT** (not fine-tune of the ViT; the A/B of one variable is "the LoRA also
   reaches the vision path"). Verify the `ms-swift` flag semantics by **trainable-parameter count**:
   a few M = LoRA ✅ / hundreds of M = fine-tune ❌ → stop.
 - **If OOM: stop. Do not lower `max_pixels`** (second variable) — and suspect fine-tune was configured
   instead of LoRA before blaming the GPU.
-- Bifurcation: loss unblocks → **Capacity** branch. Loss does not move → the roadmap is re-planned;
-  the problem is data/labels. **The CoA branch is ruled out by pre-registered data.**
+- 🔴 **Judge Test B on accuracy at truth=2 and truth=3, in BOTH `number` and `fo_class` — not on overall
+  `number` accuracy.** The tail is ~5% and already zero; an overall number would hide the only movement
+  that matters. **Pre-registered target: mean prediction at truth=2 rises from 1.69, accuracy from
+  0.459, and `fo_class` classes-named from 1.76.**
+- Bifurcation: loss unblocks + truth=2 moves → **Capacity** branch. Truth=2 does not move in either
+  format → **the capacity branch dies** (32B, resolution) and the lever is data/labels or how the LLM
+  reads the visual tokens. **The CoA branch is ruled out by pre-registered data.**

@@ -13,6 +13,7 @@
 | 03-prompt-variants | `SYSTEM_PROMPT` additions | 00 (a1_v0) | done — faithful negative |
 | 04-vendor-baseline | External vendor baseline | 00 | done (tutorial, no results row by design) |
 | **05-bottleneck-audit** | **The image passed to the model (Real vs Black vs Shuffled)** | **02-lora-sft (checkpoint-1720)** | **done — NO SHORTCUT** |
+| **05b-number-probe** | *(probe, not a rung — no variable changed)* **reads the predicted text rung 05 discarded** | — | **done — COUNTS BADLY** |
 
 ---
 
@@ -132,9 +133,71 @@ Now compare the two heavy formats — **same model, same frozen ViT, same image*
 counting. The honest reading of `number` is neither "looks" nor "shortcut" — it is
 **"barely extracts anything"**. **That is the bottleneck, and it carries 37% of the score.**
 
-**This reframes Test B.** *"Was the ViT the ceiling?"* is now too coarse — the ViT plainly sees. The live
-question is narrower: **is the ViT the ceiling *for counting*?** Follow-up probe: `number-probe`
-(does the model count at all, or emit a near-constant?).
+**This reframes Test B.** *"Was the ViT the ceiling?"* is too coarse — the ViT plainly sees. The live
+question is narrower: **is the ViT the ceiling *for multiplicity*?** → answered in §5b.
+
+## 5b. The `number-probe` — the model counts, but its scale saturates at ~2
+
+Rung 05 discarded the predicted text (it stored only `correctness`), so it could not tell *"emits a
+constant"* from *"counts badly"*. The probe reads that text back. **Zero GPU** — rung 02's
+`eval_best/predictions.json` already held all 6252 answers; T0 validated them by reproducing
+`acc_OOD = 0.5917` before using them. Data: `RESULTS_number_probe.csv`, `runs/05b_number_probe/probe.csv`.
+
+### Pre-registered rule, applied
+
+| Reading | Condition | Our data | Fires? |
+|---|---|---|---|
+| **DOES NOT COUNT** | `acc_non_mode ≤ 0.05` **and** `acc_mode ≥ 0.95` | 0.232 · 0.803 | ❌ neither |
+| **COUNTS BADLY** | `r > 0` **and** `acc_non_mode < 0.30` | **0.625** · **0.232** | ✅ **both** |
+| **COUNTS** | strong `r` **and** `acc_non_mode ≥ 0.30` | 0.232 | ❌ |
+
+### ✅ Verdict: COUNTS BADLY
+
+**The model perceives quantity.** Spearman **0.625** is not noise, and predicted values rise
+monotonically with the truth. It is not guessing. **`n_ambiguous_negation = 0`** — the parser's known
+weakness never fired; the model always emits a bare digit. All gates green; checksums reproduce rung 05
+(`mode_rate` 0.3520, `acc_overall` 0.4331 vs 0.4317 — within judge nondeterminism).
+
+**But its scale is compressed.** 81.5% of errors are **under-counts** (n=2094, not a sample):
+
+| Truth | n | Accuracy | Mean prediction |
+|---|---|---|---|
+| **1** | 737 | **0.803** | 1.24 |
+| **2** | 527 | **0.459** | 1.69 |
+| **3** | 276 | **0.192** | 2.01 |
+| 4 | 201 | 0.070 | 2.16 |
+| 5 | 151 | 0.026 | 2.76 |
+| 7 | 50 | **0.000** | 3.68 |
+
+It predicts at most 7 where the truth reaches 12; above 5 it effectively stops (it answers "6" on 0.2%
+of questions; the truth is 6 on 4.2%).
+
+### 🔴 The finding: this is not about counting — it is about *multiplicity*
+
+**The mass is at 1–3 (73.6% of `number` questions).** Counts of 7–12, where accuracy is zero, are ~5% —
+**irrelevant**. The single largest pocket of loss in the project is **truth = 2: 527 questions at 0.459**.
+
+**And the same compression appears in `fo_class`, which requires no counting at all** — it asks *which*
+FO classes are present, answered as a comma-separated list of names:
+
+| Truth (n classes) | `fo_class` acc | classes named (mean) | | `number` acc | number said (mean) |
+|---|---|---|---|---|---|
+| **1** | 0.643 | **1.06** | | 0.803 | **1.24** |
+| **2** | 0.441 | **1.76** | | 0.459 | **1.69** |
+| **3** | 0.070 | **1.98** | | 0.192 | **2.01** |
+
+**Two formats with nothing in common — one emits a digit, the other a list of class names — saturate at
+the same place, at nearly the same value.** If the bottleneck were the counting act or the output
+format, `fo_class` would be healthy. It is not.
+
+> **Refined diagnosis: the model perceives the presence and identity of the dominant object well
+> (rung 05: `fo_class` +51.9 pts of visual signal). It fails to perceive the *additional* ones.**
+> That is upstream of the answer format — **it is perception.**
+
+**This strengthens the case for Test B**, and it cuts against the "format, not eyes" reading that
+`number`'s +8.0 alone suggested. **Caveat, and it is real:** the information might be present in the
+encoder while the LLM ignores it — Test B (LoRA on the ViT) would not fix that. Weak counter-evidence:
+the language-only LoRA had 13.7k examples and did not learn to read it.
 
 ### Known defect in the pre-registered rule
 
@@ -241,16 +304,28 @@ Per the pre-registered table, **"no shortcut" routes to Test B**:
 | **No shortcut** ✅ | Loss unblocks | **Capacity** (encoder, resolution, 32B) |
 | No shortcut | Loss does NOT move | 🔴 **Roadmap re-planned entirely** — the problem is data/labels |
 
-**But §5 changed Test B's premise**, and this is pre-registered here before running it:
+**The probe (§5b) answered the prerequisite: COUNTS BADLY → run Test B as designed.**
 
-- If the ViT is the ceiling **for counting** → `number`'s visual signal (**+8.0**) must **widen**, and
-  `eval_loss` must unblock past epoch 1.
-- If `fo_class` improves while `number` stays at ~+8 → **counting is not a perception problem** → the
-  **capacity branch dies** (32B, resolution) before we spend on it, and the lever is output
-  format / labels.
+**Pre-registered here, before running it** — Test B's target is no longer "counting", it is
+**multiplicity**:
 
-**Run `number-probe` first** (does the model count, or emit a near-constant?). It costs ~0–15 min and it
-decides whether Test B is even asking the right question.
+- **If the ViT is the ceiling for multiplicity** → the mean prediction at **truth = 2** must rise from
+  **1.69**, accuracy at truth=2 must rise from **0.459**, and `fo_class` multiplicity must rise from
+  **1.76 named at truth=2**. **`eval_loss` must unblock past epoch 1.**
+- **If truth=2 does not move in either format** → the information is not being unlocked at the encoder →
+  **the capacity branch dies** (32B, resolution) before we spend on it, and the lever is upstream
+  (data/labels) or in how the LLM reads the visual tokens.
+
+**Do not judge Test B on `number` overall accuracy.** The mass is at 1–3 and the tail (7–12) is ~5% of
+questions and already at zero — an overall number would hide the only movement that matters.
+**The metric is accuracy at truth=2 and truth=3, in both `number` and `fo_class`.**
+
+### The size of the prize
+
+If truth=2 reached 0.80 (what the model already achieves at truth=1) and truth=3 reached 0.60, `number`
+would go **0.433 → ~0.57**. On 37% of the score that is roughly **+5 points of `bucket_mean`** — larger
+than anything else currently open. The same fix would move `fo_class` (39.1%) in parallel, since it is
+the same defect.
 
 **Guardrails for Test B, already fixed:** it is **LoRA on the ViT, not fine-tune** — verify by
 **trainable-parameter count** (a few M = LoRA ✅ / hundreds of M = fine-tune ❌ → stop). **On OOM: stop.
@@ -274,11 +349,18 @@ GPU.
   the aggregation is verified, not trusted.
 - **Hardware:** RTX PRO 4500 Blackwell 32 GB · driver 580.126.09 · `torch 2.8.0+cu128` · no OOM.
   Throughput 3.03 q/s.
-- **Known artifact defects** (recorded, not fixed): `latency` is `0.0` and `timed_out` `False` for all
-  rows — the rung-05 script **hardcoded `latency=0.0`** (`05_bottleneck_audit.py:142`) instead of
-  measuring it as `src/frame/run.py:44-49` does. **These artifacts cannot serve the deferred p99 work.**
-  The script also never persisted `responses`, so **the predicted text is lost** — which is why
-  `number-probe` exists.
+- **`05b_number_probe.ipynb`** — Path A (zero GPU). Source: rung 02's
+  `runs/02_lora_sft_v1/eval_best/predictions.json` (6252 responses), validated by reproducing
+  `acc_OOD = 0.59175` against the stored `correctness` **before** being used — the artifact is
+  `checkpoint-1720`, confirmed by the number and not by its path.
+- **Known artifact defects** (recorded, not fixed): in **rung 05's** arms, `latency` is `0.0` and
+  `timed_out` `False` for all rows — the script **hardcoded `latency=0.0`**
+  (`05_bottleneck_audit.py:142`) instead of measuring it as `src/frame/run.py:44-49` does. It also never
+  persisted `responses`, so **its predicted text is lost** — which is why the probe had to read rung 02's
+  instead. *(Rung 02's own artifacts do carry real per-question latency.)*
+- 🔴 **`ood` is `false` in the saved `references.json` too** — `src/frame/data.py:87` bakes the defect
+  into every artifact, not just the score. Anything reading `ood` from these files reads the split as
+  fully in-distribution.
 - **`summary.csv` `group`/`answer_format` rows are video-clustered estimates** (wide CIs), **not** flat
   per-question means — `object_recognition` reads 0.6237 there vs 0.6092 flat. **Do not mix the two.**
   `pre_eval` and `bucket_mean` both use flat.
