@@ -1,0 +1,16 @@
+code,leaf,group
+1a,object_identification,object_recognition
+1b,instance_matching,object_recognition
+1c,object_attributes,object_recognition
+1d,spatial_localization_camera,object_recognition
+1e,spatial_localization_situs,object_recognition
+2a,temporal_localization,temporal_grounding
+2b,duration_estimation,temporal_grounding
+3a,object_aggregation,aggregation
+3b,event_aggregation,aggregation
+4a,fo_interaction_recognition,event_understanding
+4b,fo_usage_purpose,event_understanding
+4c,temporal_ordering,event_understanding
+5a,functional_reasoning,complex_reasoning
+5b,causal_consequence_reasoning,complex_reasoning
+5c,multi_step_reasoning,complex_reasoning
