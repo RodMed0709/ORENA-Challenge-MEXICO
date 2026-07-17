@@ -1,0 +1,15 @@
+column,dtype,n_distinct,example
+id,int64,13742,8455
+video,str,92,0009 - Heico - Prokto - 10.avi
+procedure_type,str,3,Proctocolectomy
+question,str,865,Which combination of foreign object clas
+answer,str,277,"Clip, Silicone loop"
+answer_format,str,5,fo_class
+track,str,1,frame
+generation,str,3,automatic
+clinical_relevance,bool,1,False
+ood,bool,1,False
+timestamp_start,str,6646,04:47:11
+timestamp_end,str,6646,04:47:11
+primary_capability,str,6,1a
+secondary_capabilities,object,65,['3a']

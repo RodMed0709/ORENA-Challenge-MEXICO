@@ -1,0 +1,5 @@
+ds,procedure_type,test,train
+heico,Proctocolectomy,0,4000
+heico,Rectal Resection,0,4000
+heico,Sigmoid Resection,4000,0
+lapchole,Laparoscopic Cholecystectomy,2252,5748

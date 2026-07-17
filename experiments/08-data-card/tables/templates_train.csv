@@ -1,0 +1,437 @@
+answer_format,n,n_distinct_answers,trivial_floor,modal_answer,template
+fo_class,2220,43,0.1873873873873874,Clip,List all foreign objects that are visible in this video frame. Please provide the class na
+number,1798,11,0.24026696329254726,1,How many different foreign object instances appear in this frame? Please provide a number.
+fo_class,1403,8,0.29294369208838206,Clip,There is one surgical foreign object visible in the frame. What surgical foreign object is
+number,1390,12,0.239568345323741,3,How many Clips appear in this frame? Please provide a number.
+fo_class,1071,37,0.12885154061624648,"Clip, Sponge",Which combination of foreign object classes is visible in this frame? Please provide the c
+number,797,4,0.5194479297365119,1,How many different foreign object classes appear in this frame? Please provide a number.
+binary,633,2,0.5797788309636651,yes,Are all visible foreign objects in this frame of the same class? Please answer with yes or
+fo_class,508,8,0.26968503937007876,Clip,Which of the visible foreign objects has its centre closest to the centre of the image? Pl
+open_ended,438,57,0.18493150684931506,1. Sponge: bottom/left,At timepoint <TS> please provide all relative central positions of foreign objects present
+fo_class,394,8,0.2614213197969543,Sponge,What class is the foreign object located in the bottom/left relative to the image center? 
+fo_class,301,8,0.4186046511627907,Clip,What class is the foreign object located in the bottom/right relative to the image center?
+fo_class,225,8,0.44,Clip,What class is the foreign object located in the top/left relative to the image center? Ple
+number,192,3,0.7864583333333334,1,How many Sponges appear in this frame? Please provide a number.
+multiple_choice,186,4,0.3655913978494624,bottom/left,Where is the center of the External drain located relative to the image center in this fra
+fo_class,172,7,0.28488372093023256,Clip,What class is the foreign object located in the top/right relative to the image center? Pl
+multiple_choice,169,4,0.3254437869822485,bottom/left,Where is the center of the Silicone loop located relative to the image center in this fram
+binary,144,2,0.5208333333333334,yes,Do Clips and Sponges co-occur in this frame? Please answer with yes or no.
+multiple_choice,131,4,0.3816793893129771,bottom/left,Where is the center of the Specimen located relative to the image center in this frame? Pl
+binary,86,2,0.6511627906976745,no,Do Clips and Specimens co-occur in this frame? Please answer with yes or no.
+multiple_choice,75,4,0.28,bottom/left,Where is the center of the Specimen bag located relative to the image center in this frame
+binary,65,2,0.6615384615384615,yes,Do Clips and Silicone loops co-occur in this frame? Please answer with yes or no.
+binary,52,2,0.9807692307692307,no,Do External drains and Sponges co-occur in this frame? Please answer with yes or no.
+open_ended,47,3,0.6170212765957447,No.,There is one specimen bag visible in this frame. Is this foreign object currently grasped 
+open_ended,47,18,0.3617021276595745,none.,Which foreign object class is partially occluded or not fully visible due to an anatomical
+binary,46,2,0.8478260869565217,no,Do Clips and Specimen bags co-occur in this frame? Please answer with yes or no.
+open_ended,45,15,0.4222222222222222,none.,Which foreign object class is partially occluded or not fully visible due to an instrument
+binary,44,2,0.9090909090909091,yes,Do Specimens and Specimen bags co-occur in this frame? Please answer with yes or no.
+multiple_choice,43,4,0.4186046511627907,top/left,Where is the center of the Needle located relative to the image center in this frame? Plea
+multiple_choice,36,4,0.5555555555555556,bottom/left,Where is the center of the Sponge located relative to the image center in this frame? Plea
+binary,35,2,0.7714285714285715,no,Do Silicone loops and Sponges co-occur in this frame? Please answer with yes or no.
+open_ended,34,2,0.5588235294117647,Yes.,There is one specimen visible in this frame. Is this foreign object currently grasped by a
+open_ended,34,8,0.23529411764705882,Silicone loop.,Which foreign object is partially occluded by an instrument in this frame? Please provide 
+binary,33,2,0.6060606060606061,no,Do Clips and External drains co-occur in this frame? Please answer with yes or no.
+open_ended,32,2,0.59375,No.,There is one specimen visible in this frame. Is this foreign object currently being graspe
+number,27,2,0.6666666666666666,1,How many External drains appear in this frame? Please provide a number.
+binary,25,2,0.84,yes,Do External drains and Silicone loops co-occur in this frame? Please answer with yes or no
+open_ended,21,8,0.3333333333333333,Silicone loop.,Which foreign object is partially occluded by an anatomical structure in this frame? Pleas
+number,20,2,0.95,1,How many Specimens appear in this frame? Please provide a number.
+open_ended,20,9,0.25,Sponge.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,20,9,0.3,Silicone loop.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,18,10,0.3333333333333333,none.,Which foreign object class is partially occluded or not fully visible because of an instru
+number,17,1,1.0,1,How many Silicone loops appear in this frame? Please provide a number.
+open_ended,17,5,0.5294117647058824,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+binary,17,2,0.9411764705882353,no,Do Needles and Sponges co-occur in this frame? Please answer with yes or no.
+binary,16,2,0.9375,no,Do Specimens and Sponges co-occur in this frame? Please answer with yes or no.
+binary,12,2,0.5833333333333334,no,Do Specimen bags and Sponges co-occur in this frame? Please answer with yes or no.
+open_ended,11,2,0.6363636363636364,No.,There is one specimen bag visible in this frame. Is this foreign object currently being gr
+open_ended,11,9,0.18181818181818182,"clip, sponge.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,10,1,1.0,No.,Is the external drain visible in this frame currently grasped by an instrument? Please ans
+binary,10,2,0.7,yes,Do Needles and Silicone loops co-occur in this frame? Please answer with yes or no.
+number,10,1,1.0,1,How many Needles appear in this frame? Please provide a number.
+open_ended,10,2,0.7,No.,There is one sponge visible in this frame. Is this foreign object currently grasped by an 
+open_ended,9,3,0.5555555555555556,No.,The specimen is visible in this frame. Is it currently grasped by an instrument? Please an
+open_ended,8,3,0.75,No.,Is the external drain currently grasped by an instrument in this frame? Please answer with
+open_ended,8,3,0.5,(Small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+number,7,1,1.0,1,How many Specimen bags appear in this frame? Please provide a number.
+open_ended,7,4,0.42857142857142855,"specimen, specimen bag.",Which foreign object classes are partially occluded or not fully visible due to an instrum
+open_ended,6,1,1.0,No.,Is the silicone loop visible in this frame currently grasped by an instrument? Please answ
+open_ended,6,3,0.6666666666666666,No.,Is the needle visible in this frame currently grasped by an instrument? Please answer with
+open_ended,6,3,0.5,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 minute? 
+binary,5,2,0.6,no,Do Clips and Needles co-occur in this frame? Please answer with yes or no.
+open_ended,5,3,0.4,3.,How many clips are radiopaque in this video? Please provide a single integer.
+open_ended,5,4,0.4,specimen.,Which foreign object class is partially occluded (not fully visible) by an instrument in t
+open_ended,5,3,0.6,none.,Which foreign object class is partially occluded or not fully visible because of an anatom
+open_ended,4,2,0.5,Rectum.,Which structure is the sponge in contact with before disappearing for >1 min? Please provi
+open_ended,4,2,0.5,No.,A specimen bag is visible in this frame. Is it currently grasped by an instrument? Please 
+number,4,3,0.5,1,How many Gallstones appear in this frame? Please provide a number.
+open_ended,4,3,0.5,Clip.,Which foreign object is not fully visible due to an anatomical structure in this frame? Pl
+open_ended,4,4,0.25,Fresh.,What is the condition of the sponge seen in this frame?
+open_ended,4,4,0.25,blood-soaked.,What is the state of the sponge seen in this frame?
+open_ended,4,2,0.75,No.,Is the visible silicone loop currently grasped by an instrument? Please answer with 'yes' 
+open_ended,4,2,0.5,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,3,2,0.6666666666666666,Rectum.,Which single structure is the sponge in contact with before being not visible for >1 min? 
+open_ended,3,2,0.6666666666666666,none.,Which foreign object class is partially occluded (not fully visible) by an anatomical stru
+open_ended,3,3,0.3333333333333333,"specimen, specimen bag.",Which foreign object classes are partially occluded or not fully visible because of an ins
+open_ended,3,2,0.6666666666666666,specimen.,Which foreign object class is partially occluded (not fully visible) due to an instrument 
+open_ended,3,2,0.6666666666666666,No.,There is one sponge visible in this frame. Is this foreign object currently being grasped 
+open_ended,3,2,0.6666666666666666,Yes.,Is the silicone loop visible in this frame grasped by an instrument? Please answer with 'y
+open_ended,3,2,0.6666666666666666,No.,Is the external drain currently grasped by an instrument? Please answer with 'yes' or 'no'
+open_ended,3,2,0.6666666666666666,No.,The specimen bag is visible in this frame. Is it currently grasped by an instrument? Pleas
+open_ended,3,2,0.6666666666666666,Yes.,There is one external drain visible in this frame. Is this foreign object currently graspe
+open_ended,3,2,0.6666666666666666,no.,There is one specimen bag visible in this frame. Is this foreign object currently grasped 
+open_ended,3,2,0.6666666666666666,No.,There is a specimen bag visible in this frame. Is this foreign object currently being gras
+open_ended,3,3,0.3333333333333333,Rectal stump.,Which structure is the sponge in contact with before disappearing for over 1 minute? Pleas
+open_ended,2,2,0.5,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for >1 min? 
+open_ended,2,1,1.0,Fully recognizable.,How clearly visible are the defining visual features of the needle in this frame? Please p
+open_ended,2,2,0.5,"specimen, clip.",Which foreign object class is partially occluded or not fully visible due to an instrument
+open_ended,2,2,0.5,Needle.,Which foreign object is not fully visible due to an instrument in this frame? Please provi
+open_ended,2,2,0.5,Mesorectum.,Which structure is the sponge in contact with before disappearing for over a minute? Pleas
+open_ended,2,2,0.5,Yes.,Is the silicone loop currently grasped by an instrument? Please answer with 'yes' or 'no'.
+open_ended,2,2,0.5,No.,Is the specimen bag currently grasped by an instrument? Please answer with 'yes' or 'no'.
+open_ended,2,1,1.0,Yes.,Is the specimen bag visible in this frame currently grasped by an instrument? Please answe
+open_ended,2,2,0.5,Silicone loop.,Which other foreign object is partially occluded by an anatomical structure in this frame?
+open_ended,2,2,0.5,Yes.,Is the specimen currently grasped by an instrument? Please answer with 'yes' or 'no'.
+open_ended,2,2,0.5,Needle.,Which foreign object is partially occluded by an instrument in this frame? Please provide 
+open_ended,2,2,0.5,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,2,2,0.5,Dorsal.,"Relative to the patient's rectum, where is the foreign object placed in this video? Please"
+open_ended,2,2,0.5,(Small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,2,2,0.5,No.,Is the needle currently grasped by an instrument in this frame? Please answer with 'yes' o
+open_ended,2,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,2,2,0.5,specimen bag.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,2,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,2,1,1.0,No.,Is the external drain in this frame grasped by an instrument? Please answer with 'yes' or 
+open_ended,2,1,1.0,specimen.,Which foreign-object class is partially occluded or not fully visible due to an anatomical
+open_ended,2,2,0.5,clip.,Which foreign-object class is partially occluded or not fully visible due to an instrument
+open_ended,2,2,0.5,Small intestine.,Which single structure is the Silicone Loop in contact with before being not visible for >
+open_ended,2,2,0.5,Yes.,Is the silicone loop currently grasped by an instrument in this frame? Please answer with 
+open_ended,2,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,2,2,0.5,"Silicone loop, external drain.",Which foreign objects are partially occluded by an anatomical structure in this frame? Ple
+open_ended,2,2,0.5,"Silicone loop, clip.",Which foreign objects are partially occluded by an instrument in this frame? Please provid
+open_ended,2,2,0.5,Right upper abdominal quadrant.,In which abdominal quadrant is the sponge located before it becomes not visible for more t
+open_ended,2,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+binary,2,1,1.0,yes,Do Clips and Gallstones co-occur in this frame? Please answer with yes or no.
+binary,2,1,1.0,yes,Do External drains and Needles co-occur in this frame? Please answer with yes or no.
+open_ended,2,1,1.0,No.,There is one specimen visible in this frame. Is this specimen currently grasped by an inst
+open_ended,2,1,1.0,No.,There is one sponge visible in this frame. Is this foreign object currently grasped by an 
+open_ended,2,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,sponge.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,clip.,Which foreign object class is partially occluded by anatomy in this frame? Please provide 
+open_ended,1,1,1.0,sponge.,Which foreign object class is partially occluded by an instrument? Please provide the clas
+open_ended,1,1,1.0,sponge.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,sponge.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,"sponge, clip.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,No; the clip is removed when the specime,Does the clip placed on the specimen remain intra-abdominal at the end of the procedure? P
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,Sponge.,Which foreign object class is partially occluded in this frame? Please provide the class n
+open_ended,1,1,1.0,Cystic duct.,Which anatomical structure is the gallstone retrieved from? Please provide a single anatom
+open_ended,1,1,1.0,specimen. Errors: Corrected awkward phra,Which foreign object class is partially occluded or not fully visible because it is blocke
+open_ended,1,1,1.0,"sponge, specimen.",Which foreign object classes are partially occluded or not fully visible behind an instrum
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded or not fully visible because of an anatom
+open_ended,1,1,1.0,"specimen, specimen bag.",Which foreign object classes are partially occluded by an instrument in this frame? Please
+open_ended,1,1,1.0,"sponge, clip.",Which foreign object classes are partially occluded by an anatomical structure in this fra
+open_ended,1,1,1.0,external drain.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,"specimen, specimen bag.",Which foreign object class is partially occluded or not fully visible because of an instru
+open_ended,1,1,1.0,sponge.,Which foreign object class is partially occluded or not fully visible because of an instru
+open_ended,1,1,1.0,"specimen, foreign object.",Which foreign object class is partially occluded or not fully visible due to an anatomical
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded or not fully visible by an anatomical str
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded or not fully visible by an anatomical str
+open_ended,1,1,1.0,specimen bag.,Which foreign object class is partially occluded (not fully visible) due to an anatomical 
+open_ended,1,1,1.0,Common bile duct.,What is the closest anatomical structure that the clips could be mistakenly applied to due
+open_ended,1,1,1.0,Blood-stained.,What is the condition of the sponge seen in this time frame?
+open_ended,1,1,1.0,No soakage is present.,What is the condition of the sponge seen in this timeframe? Please answer with a single so
+open_ended,1,1,1.0,Soaked.,What is the condition of the sponge seen in this timeframe? Please answer with one word de
+open_ended,1,1,1.0,"Polymer, white.",What is the material and color of the clip used on the nonvascular structure in this video
+open_ended,1,1,1.0,Small bowel.,What is the silicone loop encircling in this video? Please provide an anatomical structure
+open_ended,1,1,1.0,Soaked.,What is the state of the sponge seen in this time frame? Please answer with exactly one of
+open_ended,1,1,1.0,Partially soaked.,What is the state of the sponge seen in this timeframe? Only answer if a sponge is visible
+open_ended,1,1,1.0,Metal.,What material is the clip placed on the silicone loop? Please answer with one word.
+open_ended,1,1,1.0,Yes.,Does the foreign object in this video frame remain intra-abdominal at the end of the proce
+open_ended,1,1,1.0,Rectum.,What specimen has been placed in this specimen bag? Please provide the name of an organ or
+open_ended,1,1,1.0,Cystic artery.,What structure have these clips been placed on? Please provide a single anatomical structu
+open_ended,1,1,1.0,Small bowel.,What structure is being clipped in this frame? Please provide an anatomical structure.
+open_ended,1,1,1.0,Uterus.,What structure is being sutured in the video? Please provide an anatomical structure.
+open_ended,1,1,1.0,Mesorectum.,What structure is the sponge in contact with before disappearing for >1 min? Please provid
+open_ended,1,1,1.0,Small intestine.,What structure is the sponge in contact with before it becomes not visible for >1 min? Ple
+open_ended,1,1,1.0,"proximal: 2, distal: 1.","How many clips are placed proximally and distally on the non-vascular structure (proximal,"
+open_ended,1,1,1.0,"3, 1.",How many clips are placed proximally and distally on the nonvascular structure? Answer as 
+open_ended,1,1,1.0,"2,1.",How many clips are placed proximally and distally on the nonvascular structure? Answer as 
+open_ended,1,1,1.0,"2, 1.",How many clips are placed proximally and distally on the nonvascular structure? Please ans
+open_ended,1,1,1.0,Liver.,What single organ is this sponge in contact with? Please provide exactly one organ name (s
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,clip.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,specimen.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,Silicone loop.,Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,"specimen, specimen bag.",Which foreign object class is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,"None, this is a dropped clip.",What structure is this clip attached to? Please provide an anatomical structure or answer 
+open_ended,1,1,1.0,Left ureter.,What structure is this silicone vessel loop encircling? Please provide the anatomical stru
+open_ended,1,1,1.0,Small bowel.,What structure is this suture attached to? Please provide an anatomical structure.
+open_ended,1,1,1.0,Robinson drain.,What type of drainage is inserted in the video? Please provide a single word.
+open_ended,1,1,1.0,Perirectal fat.,Which additional structure does the sponge contact in this video? Please provide a single 
+open_ended,1,1,1.0,distal cystic duct.,Where is the first clip placed in this clip (structure + distal/proximal)? Please provide 
+open_ended,1,1,1.0,Proximal cystic duct.,Where is the first clip placed in this clip (structure and distal/proximal)? Please provid
+open_ended,1,1,1.0,"Cystic artery, proximal.",Where is the first clip placed in this clip (structure and distal/proximal)? Please provid
+open_ended,1,1,1.0,"Cystic artery, proximal.",Where is the first clip placed in this clip (structure and distal/proximal)? Please provid
+open_ended,1,1,1.0,Proximal cystic duct.,Where is the first clip placed in this clip (structure and proximal/distal)? Please answer
+open_ended,1,1,1.0,Proximal cystic duct.,Where is the first clip placed in this clip (structure and proximal/distal)? Please provid
+open_ended,1,1,1.0,"Cystic artery, proximal.",Where is the first clip placed in this clip (structure and proximal/distal)? Please provid
+open_ended,1,1,1.0,Proximal cystic duct.,Where is the first foreign object placed in this clip? Please answer with an anatomical st
+open_ended,1,1,1.0,inside specimen bag.,Where is the specimen in this frame? Please answer with the specimen’s containment status 
+open_ended,1,1,1.0,Lower left abdominal quadrant.,Where is the sponge located before becoming not visible for more than one minute? Please p
+open_ended,1,1,1.0,Small pelvis.,Where is the drain placed in this frame? Please provide an anatomical region.
+open_ended,1,1,1.0,Sigmoid colon.,Which single structure is the sponge in contact with before being not visible for >1 min i
+open_ended,1,1,1.0,Mesentery.,Which single structure is the sponge in contact with before being not visible for >1min? P
+open_ended,1,1,1.0,Mesentery.,Which single structure is the sponge in contact with before being not visible for more tha
+open_ended,1,1,1.0,Mesentery.,Which single structure is the sponge in contact with before being not visible for more tha
+open_ended,1,1,1.0,Sacrum.,Which single structure is the sponge in contact with before being not visible for over 1 m
+open_ended,1,1,1.0,Sacrum.,Which single structure is the sponge in contact with before it disappears for over 1 minut
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for > 
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,liver.,Which single structure is the sponge in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,External drain should not be removed.,Are there any foreign objects in this frame that should not be removed before the end of t
+open_ended,1,1,1.0,The small intestine.,Which organ is tied with a silicone loop in this video? Please provide the name of an orga
+open_ended,1,1,1.0,Sponge.,Which other foreign object is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,Silicone loop.,Which other foreign object is partially occluded by an instrument in this frame? Please pr
+open_ended,1,1,1.0,Mesorectum.,Which other structure is the sponge in contact with in this video? Please provide an anato
+open_ended,1,1,1.0,Mesorectum.,Which other structures is the sponge in contact with before disappearing for >1 min? Pleas
+open_ended,1,1,1.0,Small intestine.,Which single structure is the Silicone Loop in contact with before becoming not visible fo
+open_ended,1,1,1.0,Small intestine.,Which single structure is the Silicone Loop in contact with before being not visible for m
+open_ended,1,1,1.0,Small intestine (ileum).,Which single structure is the external drain in contact with before being not visible for 
+open_ended,1,1,1.0,No.,A specimen bag is visible in this frame. Is this foreign object currently grasped by an in
+open_ended,1,1,1.0,"Yes, an external drain and a clip.",Are there any foreign objects in this frame <TS> which should not be removed before the en
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,Cystic duct.,Which single structure is the sponge in contact with before it is no longer visible for mo
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for mo
+open_ended,1,1,1.0,Rectal stump.,Which single structure is the sponge in contact with in this video? Please provide a singl
+open_ended,1,1,1.0,Mesorectum (left posterior mesorectal pl,Which structure does the sponge contact before becoming invisible for >1 minute? Please pr
+open_ended,1,1,1.0,Ureter.,Which structure is the Silicone Loop in contact with before being not visible for >1 min? 
+open_ended,1,1,1.0,Small intestine.,Which structure is the Silicone Loop in contact with before disappearing for more than one
+open_ended,1,1,1.0,Small intestine.,Which structure is the Silicone Loop in contact with before disappearing for over 1 minute
+open_ended,1,1,1.0,Descending colon.,Which structure is the external drain in contact with before being not visible for >1 min?
+open_ended,1,1,1.0,Rectum.,Which single structure is the sponge in contact with before becoming not visible for over 
+open_ended,1,1,1.0,Small intestine.,Which structure is the silicone loop in contact with before disappearing for more than 1 m
+open_ended,1,1,1.0,Left ureter.,With which structure is the silicone loop in contact before it disappears for more than 1 
+open_ended,1,1,1.0,Mesentery.,With which structure is the sponge in contact before disappearing for over 1 minute in the
+open_ended,1,1,1.0,Sigmoid colon.,With which structure is the sponge in contact before it becomes invisible for more than 1 
+open_ended,1,1,1.0,Descending colon.,With which structure is the sponge in contact before it disappears for over 1 minute? Plea
+open_ended,1,1,1.0,Ureter.,Which single structure is the silicone loop in contact with before becoming not visible fo
+open_ended,1,1,1.0,Small bowel mesentery.,Which single structure is the silicone loop in contact with before being not visible for >
+open_ended,1,1,1.0,Cystic duct.,Which single structure is the silicone loop in contact with before it is no longer visible
+open_ended,1,1,1.0,Cystic duct.,Which single structure is the silicone loop in contact with before it is no longer visible
+open_ended,1,1,1.0,Liver.,Which single structure is the specimen bag in contact with before it is no longer visible 
+open_ended,1,1,1.0,Descending colon.,Which structure is the silicone loop in contact with before being not visible for over 1 m
+open_ended,1,1,1.0,"specimen, specimen bag.",Which foreign object classes are partially occluded or not fully visible due to an instrum
+open_ended,1,1,1.0,"sponge, clip.",Which foreign object classes are partially occluded or not fully visible due to an instrum
+open_ended,1,1,1.0,Silicone loop.,Which foreign object is not fully visible due to an instrument occlusion in this frame? Pl
+open_ended,1,1,1.0,Silicone loop.,Which foreign object is not fully visible due to anatomical structure in this frame? Pleas
+open_ended,1,1,1.0,Silicone loop.,Which foreign object is partially occluded by an anatomical structure in this frame? Pleas
+open_ended,1,1,1.0,External Drain.,Which foreign object is partially occluded by an anatomical structure in this frame? Pleas
+open_ended,1,1,1.0,Silicone loop.,Which foreign object is partially occluded in this frame? Please provide the class name(s)
+open_ended,1,1,1.0,Sponge.,Are there any foreign objects in this frame that must be removed before the end of the sur
+open_ended,1,1,1.0,"Yes, an external drain.",Are there any foreign objects in this frame that should not be removed before the end of s
+open_ended,1,1,1.0,Metal clips.,Are there any foreign objects in this frame not to be removed before surgery ends? Please 
+open_ended,1,1,1.0,"Yes, an external drain.",Are there any foreign objects in this frame that should not be removed before the end of t
+open_ended,1,1,1.0,"Yes, clip, external drain.",Are there any foreign objects in this frame that should not be removed before the end of t
+open_ended,1,1,1.0,Yes.,There is one external drain visible in this frame. Is this foreign object currently being 
+open_ended,1,1,1.0,External drain.,Are there any foreign objects in this frame that should not be removed before the end of t
+open_ended,1,1,1.0,"Yes, an external drain.",Are there any foreign objects in this frame which should not be removed before the end of 
+open_ended,1,1,1.0,External drain.,Are there foreign object(s) in this frame to be retained until surgery ends? Please provid
+open_ended,1,1,1.0,no.,"At the end of the procedure, does the foreign object visible in the frame remain intra-abd"
+open_ended,1,1,1.0,Partially deployed.,"At the introduction, is the specimen bag fully furled, partially deployed, or already open"
+open_ended,1,1,1.0,liver: inferior; gallbladder: lateral.,Describe the location of the sponge relative to the liver and gallbladder? Please provide 
+open_ended,1,1,1.0,yes.,Do the metal clips remain intra-abdominal at the end of the surgery? Please answer with 'y
+open_ended,1,1,1.0,"Yes, external drain, clip.",Are there any foreign objects in this frame that should not be removed before the end of s
+open_ended,1,1,1.0,Liver.,Which single structure is the gallstone in contact with before it is no longer visible for
+open_ended,1,1,1.0,Liver.,Which single structure is the gallstone in contact with before it is no longer visible for
+open_ended,1,1,1.0,Liver.,Which single structure is the gallstone in contact with before it is no longer visible for
+open_ended,1,1,1.0,"Silicone loop, external drain.",Which foreign objects are partially occluded by anatomy in this frame? Please provide the 
+open_ended,1,1,1.0,sponge.,Which foreign objects are partially occluded due to an anatomical structure in this frame?
+open_ended,1,1,1.0,specimen.,Which foreign-object class is partially occluded (not fully visible) by an anatomical stru
+open_ended,1,1,1.0,clip.,Which foreign-object class is partially occluded by an anatomical structure in this frame?
+open_ended,1,1,1.0,none.,Which foreign-object class is partially occluded or not fully visible because of an anatom
+open_ended,1,1,1.0,Specimen.,Which foreign-object class is partially occluded or not fully visible because of an instru
+open_ended,1,1,1.0,specimen.,Which foreign-object class is partially occluded or not fully visible due to an instrument
+open_ended,1,1,1.0,"external drain, specimen bag.",Which foreign object classes are partially occluded or not fully visible due to an instrum
+open_ended,1,1,1.0,"sponge, specimen.",Which foreign-object classes are partially occluded or not fully visible due to an instrum
+open_ended,1,1,1.0,No.,Which of the foreign object classes are partially occluded or not fully visible because of
+open_ended,1,1,1.0,specimen.,Which of the foreign object classes is partially occluded or not fully visible because of 
+open_ended,1,1,1.0,none.,Which of the foreign object classes is partially occluded or not fully visible due to an a
+open_ended,1,1,1.0,none.,Which of the foreign object classes is partially occluded or not fully visible due to an i
+open_ended,1,1,1.0,Liver.,Which organ is interposed between the sponge and the specimen bag? Please provide a single
+open_ended,1,1,1.0,"sponge, clip.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,"sponge, specimen bag.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,"clip, sponge, specimen.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,"sponge, clip.",Which foreign object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,"sponge, clip.",Which foreign-object classes are partially occluded or not fully visible due to an anatomi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is not visible for >1 min? 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is not visible for >1 min? 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is not visible for >1 min? 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is not visible for >1 min? 
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the needle located before becoming not visible for >1 min? 
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the silicone loop located before being not visible for over
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the silicone loop located before it is not visible for >1 m
+open_ended,1,1,1.0,upper right abdominal quadrant.,In which abdominal quadrant is the specimen bag located before it is no longer visible for
+open_ended,1,1,1.0,upper right abdominal quadrant.,In which abdominal quadrant is the specimen bag located before it is not visible for >1 mi
+open_ended,1,1,1.0,No.,The external drain is visible in this frame. Is it currently grasped by an instrument? Ple
+open_ended,1,1,1.0,upper right abdominal quadrant.,In which abdominal quadrant is the specimen located before it is not visible for >1 min? A
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the specimen located before it is not visible for >1 min? P
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before becoming invisible for >1 min? Pl
+open_ended,1,1,1.0,Upper left abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for >1 min? 
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for >1 min? 
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the external drain located before becoming not visible for 
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the external drain located before becoming not visible for 
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the external drain located before becoming not visible for 
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the external drain located before being not visible for >1 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the specimen bag located before it is not visible for >1 mi
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,(Small) pelvis.,In which abdominal quadrant is the sponge located before disappearing for >1 minute in the
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before disappearing for more than 1 minu
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before disappearing for over 1 min in th
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before disappearing for over 1 min? Plea
+open_ended,1,1,1.0,small pelvis.,In which abdominal quadrant is the sponge located before disappearing for over 1 minute? P
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is not visible for >1 min? 
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before becoming not visible for more tha
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for more tha
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before becoming not visible for more tha
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for more tha
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for over 1 m
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the sponge located before becoming not visible for over a m
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min in t
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before becoming not visible for more tha
+open_ended,1,1,1.0,specimen.,"In this frame, which foreign object class is partially occluded or not fully visible due t"
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the External Drain located before being not visible for >1 
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the Silicone Loop located before becoming not visible for o
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the Silicone Loop located before being not visible for >1 m
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the external drain located before becoming not visible for 
+binary,1,1,1.0,yes,Do External drains and Specimen bags co-occur in this frame? Please answer with yes or no.
+binary,1,1,1.0,yes,Do Gallstones and Specimen bags co-occur in this frame? Please answer with yes or no.
+binary,1,1,1.0,no,Do Gallstones and Specimens co-occur in this frame? Please answer with yes or no.
+open_ended,1,1,1.0,Ureter.,Which structure is the silicone loop in contact with before disappearing for over a minute
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the external drain located before being not visible for >1 
+open_ended,1,1,1.0,Liver.,Which structure is the specimen bag in contact with before it is no longer visible for >1 
+open_ended,1,1,1.0,Mesorectum.,Which structure is the sponge in contact with before becoming invisible for over 1 minute?
+open_ended,1,1,1.0,Transverse colon.,Which structure is the sponge in contact with before being not visible for >1 min? Please 
+open_ended,1,1,1.0,Rectum.,Which structure is the sponge in contact with before being not visible for more than 1 min
+open_ended,1,1,1.0,Rectal stump.,Which structure is the sponge in contact with before being not visible for over 1 minute? 
+open_ended,1,1,1.0,Rectal stump.,Which structure is the sponge in contact with before disappearing for >1 min in this video
+open_ended,1,1,1.0,Small intestine.,Which structure is the sponge in contact with before disappearing for >1 minute in the vid
+open_ended,1,1,1.0,Sacrum.,Which structure is the sponge in contact with before disappearing for >1 minute in this vi
+open_ended,1,1,1.0,Mesentery.,Which structure is the sponge in contact with before disappearing for >1 minute? Please pr
+open_ended,1,1,1.0,Cystic duct.,Which structure is the silicone loop in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the external drain located before being not visible for >1 
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the external drain located before being not visible for mor
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the external drain located before disappearing for >1 min? 
+open_ended,1,1,1.0,Lower right abdominal quadrant.,In which abdominal quadrant is the external drain located before disappearing for over a m
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it becomes not visible for >1 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,gallbladder — transection — clip.,"In frame <TS>, where should transection be performed relative to the clip and the gallblad"
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,Rectum.,Which structure is the sponge in contact with before disappearing for over 1 min? Please p
+open_ended,1,1,1.0,Mesorectum.,With which single structure is the sponge in contact before disappearing for over a minute
+open_ended,1,1,1.0,3.,How many foreign objects in frame <TS> should be removed by the end of the video? Please p
+open_ended,1,1,1.0,2.,How many foreign objects in frame <TS> should be removed from the body by the end of the v
+open_ended,1,1,1.0,4.,How many of the clips placed in this video will be present on a postoperative X-ray? Pleas
+open_ended,1,1,1.0,6.,How many radiopaque clips are visible in this video? Please provide a single integer.
+open_ended,1,1,1.0,3.,How many total clips are visible in this frame? Please provide a single integer.
+open_ended,1,1,1.0,Intestine: 1.,How many vascular clips are applied in the direction of the intestine? Please provide a si
+open_ended,1,1,1.0,2.,How many vascular clips are applied in the direction of the mesenteric root? Please provid
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the gallstone located before it is no longer visible for >1
+open_ended,1,1,1.0,Right upper quadrant.,From which quadrant of the abdomen is the sponge present in this frame? Please answer with
+open_ended,1,1,1.0,Right upper quadrant.,From which quadrant of the abdomen was the specimen retrieved immediately prior to being i
+open_ended,1,1,1.0,0.,How many blood-soaked surgical sponges are visible in this frame? Please provide a single 
+open_ended,1,1,1.0,Yes.,Is the needle in this frame currently grasped by an instrument? Please answer with 'yes' o
+open_ended,1,1,1.0,No.,Is the silicone loop in this frame grasped by an instrument? Please answer with 'yes' or '
+open_ended,1,1,1.0,No.,Is the specimen bag in this frame grasped by an instrument? Please answer with 'yes' or 'n
+open_ended,1,1,1.0,Yes.,Is the specimen currently grasped by an instrument in this frame? Please answer with 'yes'
+open_ended,1,1,1.0,Perirectal fat.,Is the sponge in contact with any additional structures before disappearing for >1 min? Pl
+open_ended,1,1,1.0,Silicone loop.,Is there another foreign object partially occluded by an anatomical structure in this fram
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for more than 1
+open_ended,1,1,1.0,"cystic artery, cystic duct.",On what structures are the clips in this frame? Please provide exactly two anatomical stru
+open_ended,1,1,1.0,No.,One specimen is visible in this frame. Is it currently grasped by an instrument? Please an
+open_ended,1,1,1.0,Yes.,One specimen is visible in this frame. Is this foreign object currently being grasped by a
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is not visible for >1 min? Ple
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is not visible for >1 min? Ple
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is not visible for >1 min? Ple
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is not visible for >1 min? Ple
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is not visible for >1 min? Ple
+open_ended,1,1,1.0,Mesorectum.,On what general anatomic structure is the clip in this frame? Please provide a general ana
+open_ended,1,1,1.0,No.,There is one external drain visible in this frame. Is this foreign object currently being 
+open_ended,1,1,1.0,Specimen bag drawstring.,There is one silicone loop visible in this frame. Is this foreign object currently grasped
+open_ended,1,1,1.0,No.,There is one specimen bag visible in this frame. Is this object currently being grasped by
+open_ended,1,1,1.0,Yes.,There is one specimen visible in this frame. Is this foreign object currently grasped by a
+open_ended,1,1,1.0,No.,There is one specimen visible in this frame. Is this specimen currently being grasped by a
+open_ended,1,1,1.0,Liver.,What adjacent anatomical structure is the external drain placed next to? Please provide a 
+open_ended,1,1,1.0,The silicone loop.,What are the clips placed on? Please provide the name of a foreign object or anatomical st
+open_ended,1,1,1.0,specimen.,What distinct foreign objects are inserted into the specimen bag (excluding clips)? Please
+open_ended,1,1,1.0,Specimen bag.,What foreign object class is not fully visible due to an anatomical structure? Please prov
+open_ended,1,1,1.0,The cystic duct.,From which anatomical structure is the gallstone extracted? Please provide a single anatom
+open_ended,1,1,1.0,No.,The visible specimen is shown. Is it currently grasped by an instrument? Please answer wit
+open_ended,1,1,1.0,No.,There is a specimen visible in this frame. Is this foreign object currently grasped by an 
+open_ended,1,1,1.0,Yes.,There is an external drain visible in this frame. Is this foreign object currently grasped
+open_ended,1,1,1.0,yes.,Does the foreign object shown in this frame remain intra-abdominal at the end of the proce
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately before being placed in the 
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately prior to being placed in th
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately prior to being placed in th
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately prior to being placed in th
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately prior to being placed in th
+open_ended,1,1,1.0,Liver.,From behind which organ was the specimen retrieved immediately prior to being placed in th
+open_ended,1,1,1.0,Liver.,Which single structure is the sponge in contact with before it is no longer visible for >1
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,(Small) pelvis.,In which abdominal quadrant is the sponge located before it becomes invisible for >1 min? 
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before it becomes invisible for >1 minut
+open_ended,1,1,1.0,(small) pelvis.,In which abdominal quadrant is the sponge located before it becomes invisible? Please prov
+open_ended,1,1,1.0,upper right.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located? Please provide an anatomical location.
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,"2, 1.",How many clips are placed proximally and distally on the nonvascular structure? Please ans
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 min? Ple
+open_ended,1,1,1.0,Lower left abdominal quadrant.,In which abdominal quadrant is the sponge located before being not visible for >1 minute? 
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 minute? 
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 minute? 
+open_ended,1,1,1.0,(Small) pelvis.,In which abdominal quadrant is the sponge located before being not visible for >1 minute? 
+open_ended,1,1,1.0,Upper right abdominal quadrant.,In which abdominal quadrant is the sponge located before it is no longer visible for >1 mi
+open_ended,1,1,1.0,Small pelvis.,In which abdominal quadrant is the sponge located? Please provide an anatomical quadrant.
+open_ended,1,1,1.0,Small pelvis.,In which pelvic region is the specimen bag located in this video? Please provide an anatom
+open_ended,1,1,1.0,Small pelvis.,In which quadrant is this sponge located? Please provide an anatomical region.
+open_ended,1,1,1.0,Left lower abdominal quadrant.,In which quadrant is this sponge? Please provide an anatomical quadrant.
+open_ended,1,1,1.0,Yes.,Is the external drain in this frame currently grasped by an instrument? Please answer with
+open_ended,1,1,1.0,no.,Is the external drain visible in this frame being grasped by an instrument? Please answer 
+open_ended,1,1,1.0,No.,Is the external drain visible in this frame grasped by an instrument? Please answer with '
+open_ended,1,1,1.0,"2,1.",How many clips are placed proximally and distally on the nonvascular structure? Please pro
+open_ended,1,1,1.0,"1,1.",How many clips are placed proximally and distally on the nonvascular structure? Please pro
+open_ended,1,1,1.0,One.,How many clips visible in frame <TS> are visible in a radiograph? Please provide a single 
+open_ended,1,1,1.0,"2, 1.",How many clips are placed proximally and distally on the vascular structure? Answer as two
+open_ended,1,1,1.0,"2, 1.",How many clips are placed proximally and distally on the vascular structure? Answer as two
+open_ended,1,1,1.0,"2,1.",How many clips are placed proximally and distally on the vascular structure? Please answer
+open_ended,1,1,1.0,"1, 1.",How many clips are placed proximally and distally on the vascular structure? Please answer
+open_ended,1,1,1.0,"2, 1.",How many clips are placed proximally and distally on the vascular structure? Please answer
+open_ended,1,1,1.0,"1, 1.",How many clips are placed proximally and distally on the vascular structure? Please answer
+open_ended,1,1,1.0,6.,How many clips are radiopaque in this video? Please provide a single integer corresponding
+open_ended,1,1,1.0,Two.,How many clips have been placed on the silicone loop? Please provide a single integer.
+open_ended,1,1,1.0,3.,How many clips in this video frame remain intra-abdominally at the end of the procedure? P
+open_ended,1,1,1.0,1.,How many clips remain on the specimen side of the cystic duct? Please provide a single int
+open_ended,1,1,1.0,"2,1.",How many clips are placed proximally and distally on the nonvascular structure? Please pro

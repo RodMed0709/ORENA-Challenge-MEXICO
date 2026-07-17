@@ -1,0 +1,12 @@
+generation,answer_format,n,accuracy
+anchor,binary,18,0.8333333333333334
+anchor,fo_class,730,0.7
+anchor,multiple_choice,159,0.7547169811320755
+anchor,number,61,0.39344262295081966
+anchor,open_ended,1,1.0
+automatic,binary,706,0.7606232294617564
+automatic,fo_class,1945,0.5455012853470437
+automatic,multiple_choice,43,0.7906976744186046
+automatic,number,2033,0.43433349729463844
+automatic,open_ended,207,0.7971014492753623
+manual,open_ended,349,0.5415472779369628
