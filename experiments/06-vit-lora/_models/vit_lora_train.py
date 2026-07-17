@@ -30,7 +30,9 @@ in silence is exactly how rung 07 lost a day.
 
 from __future__ import annotations
 
+import json
 import logging
+import math
 import re
 import subprocess
 import sys
@@ -70,6 +72,12 @@ class ViTLoRAConfig(LoRAConfig):
     # (data card §4b). Verified on 4.4.1: split_dataset_ratio defaults to 0.0 and is
     # bypassed when val_dataset is passed, so the train split is NOT carved.
     val_jsonl: Path | None = None
+
+    # Broken-run guard (spec.md §D3, option A). ON by default, auto-OFF in SMOKE.
+    # A pure stdout observer: when it does NOT abort, the run is byte-identical to an
+    # unguarded one → the single-variable A/B is untouched. Guards against a WASTED
+    # run (divergence / not learning), NOT against a faithful negative (that is T4).
+    run_guard: bool = True
 
     @property
     def train_log(self) -> Path:
@@ -168,6 +176,48 @@ def diff_vs_rung02(cfg: ViTLoRAConfig) -> dict[str, tuple]:
     return {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
 
 
+class RunGuardAborted(RuntimeError):
+    """The broken-run guard (spec.md §D3, option A) stopped training.
+
+    NOT a verdict on the hypothesis — only that the run was going nowhere (diverged,
+    or one whole epoch left eval_loss no better than the untrained start). The
+    hypothesis is judged at T4, never here. `agy` reports this; Claude interprets.
+    """
+
+
+# swift/transformers log dict-style lines: {'loss': 1.23, ...} and {'eval_loss': 2.2, ...}.
+_TRAIN_LOSS_RE = re.compile(r"'loss':\s*(-?[\d.]+(?:[eE][-+]?\d+)?|nan|-?inf)")
+_EVAL_LOSS_RE = re.compile(r"'eval_loss':\s*(-?[\d.]+(?:[eE][-+]?\d+)?|nan|-?inf)")
+
+
+def _extract_loss(line: str, rx: re.Pattern) -> float | None:
+    m = rx.search(line)
+    if not m:
+        return None
+    try:
+        return float(m.group(1))
+    except ValueError:
+        return None
+
+
+def _guard_trip(first_train: float | None, first_eval: float | None,
+                train: float | None, evalv: float | None) -> str | None:
+    """Broken-run criteria. Conservative BY DESIGN: fires only on unambiguous
+    failure, NEVER on 'the hypothesis looks weak' (a false abort wastes the whole
+    setup — worse than no guard). Two triggers only:
+      1. NaN/inf in train or eval loss  → divergence, any time.
+      2. the FIRST eval (end of epoch 1) is no better than the first train loss
+         → a whole epoch bought nothing → not learning.
+    """
+    for name, v in (("train_loss", train), ("eval_loss", evalv)):
+        if v is not None and (math.isnan(v) or math.isinf(v)):
+            return f"{name} is {v} (diverged)"
+    if evalv is not None and first_eval is None and first_train is not None and evalv >= first_train:
+        return (f"epoch-1 eval_loss {evalv:.4f} >= first train_loss "
+                f"{first_train:.4f} (not learning)")
+    return None
+
+
 def _train(cfg: ViTLoRAConfig) -> Path:
     """Run swift sft, teeing its log to run_dir/train.log.
 
@@ -176,12 +226,22 @@ def _train(cfg: ViTLoRAConfig) -> Path:
     `model_parameter_info: ... M Trainable ...` (sft.py:174). Capturing them is what
     lets the SMOKE answer "did the LoRA reach the ViT?" in minutes instead of finding
     out after a full run.
+
+    Broken-run guard (spec.md §D3, option A): the SAME loop parses swift's own loss /
+    eval_loss lines and TERMINATES the run only if it is going nowhere. It is a pure
+    observer of stdout — when it does NOT abort, nothing about the training subprocess
+    changes, so the single-variable A/B stays clean. OFF in SMOKE. Its decision is
+    persisted to run_guard.json (numbers, not a verdict).
     """
     cfg.ckpt_dir.mkdir(parents=True, exist_ok=True)
     args = _swift_args(cfg)
     env = {"MAX_PIXELS": str(cfg.max_pixels),
            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}
     logger.info("swift sft: %s", " ".join(args))
+    guard_on = cfg.run_guard and not cfg.smoke
+    first_train: float | None = None
+    first_eval: float | None = None
+    abort_reason: str | None = None
     with subprocess.Popen(
         args, env={**_os_environ(), **env}, stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, text=True, bufsize=1,
@@ -189,6 +249,29 @@ def _train(cfg: ViTLoRAConfig) -> Path:
         for line in proc.stdout:
             fh.write(line)
             print(line, end="")
+            if not guard_on:
+                continue
+            tl = _extract_loss(line, _TRAIN_LOSS_RE)
+            el = _extract_loss(line, _EVAL_LOSS_RE)
+            trip = _guard_trip(first_train, first_eval, tl, el)
+            if trip is not None:
+                abort_reason = trip
+                logger.error("RUN GUARD: aborting training — %s", trip)
+                proc.terminate()
+                break
+            if tl is not None and first_train is None:
+                first_train = tl
+            if el is not None and first_eval is None:
+                first_eval = el
+    (cfg.run_dir / "run_guard.json").write_text(json.dumps({
+        "guard_on": guard_on,
+        "first_train_loss": first_train,
+        "first_eval_loss": first_eval,
+        "aborted": abort_reason is not None,
+        "reason": abort_reason,
+    }, indent=2), encoding="utf-8")
+    if abort_reason is not None:
+        raise RunGuardAborted(abort_reason)
     if proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode, args)
     return cfg.ckpt_dir
