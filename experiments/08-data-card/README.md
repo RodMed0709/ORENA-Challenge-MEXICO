@@ -108,6 +108,11 @@ co-occur?"*, n=112, always `no`) the model scores **0.7411** — **worse than th
 
 ⚠️ Degeneracy is a property of **our** 38-video split, not necessarily of the organisers' test.
 
+> ⚠️ **The floors in the table above are pooled over ID and OOD, and that hides half the story.** See
+> §4b; the split version is `tables/templates_val_by_distribution.csv`. *(This gap was found the hour
+> after this card was first committed, by someone asking "were these numbers measured on ID or OOD?" —
+> which is the right question to ask any number here.)*
+
 ## 4. What the model is, in two sentences
 
 **It uses the image** — swapping in another video's frame costs **22.3 points** across all 6,252
@@ -127,6 +132,48 @@ composition, not perception. Consistent: the model's best template is *"**There 
 foreign object visible. What is it?"* (acc 0.7355, floor 0.3001) — **the question tells it there is
 exactly one**. And its spatial template (*"which FO's centre is closest to the image centre?"*, n=228)
 scores 0.4518 against a floor of 0.4605 — **it does not beat guessing**.
+
+## 4b. 🔴 `acc_OOD > acc_ID` is an artifact. The OOD floor is 12 points higher.
+
+**The exam is 64% OOD** — 4,000 heico against 2,252 lapchole. Every pooled number on this page is
+therefore mostly an OOD number, and ID and OOD are **not the same population**.
+
+rung 02 shipped, and THE_MAP still repeats: *"acc_OOD 0.5918 > acc_ID 0.5209 → OOD gains > ID, no OOD
+collapse."* Both halves are true. **The conclusion does not follow.**
+
+| | accuracy | trivial floor (per template) | **margin** |
+|---|---|---|---|
+| ID | 0.5209 | 0.3370 | **+0.1838** |
+| OOD | **0.5917** | **0.4597** | **+0.1320** |
+
+**OOD scores higher because it is easier to guess.** Its answers are more concentrated: a
+template-aware constant already scores 0.4597 there against 0.3370 on ID. Measured against what a
+trivial baseline achieves on the same slice, **the model contributes 5.2 points less on OOD than on
+ID**.
+
+On `number` the reversal is stark:
+
+| template | ID margin | OOD margin |
+|---|---|---|
+| *How many FO **classes**?* | **+14.75** | **+0.64** |
+| *How many FO **instances**?* | +8.16 | +4.31 |
+| *How many **Clips**?* | +8.42 | +2.02 |
+
+**On OOD the model barely clears the floor on any counting template.** And the template mix itself is
+asymmetric — *"How many External drains?"* is 45 OOD / 0 ID, *"How many Needles?"* is 9 OOD / 0 ID.
+
+> **This matters more than anything else on this page.** OOD is **half the exam**, and beating both
+> baselines on it is the project's stated core value. *"OOD > ID, no collapse"* has been read as
+> *"it generalises well"*. **The honest reading: it generalises worse, and a higher floor was hiding
+> it.**
+>
+> It is also consistent with the sharpest open hypothesis: rung 02's LoRA trained **only the language
+> side**. On a slice where answers are more predictable, a model exploiting the text prior looks good
+> without seeing much.
+
+⚠️ **What this is not.** It is not "the model collapses on OOD" — it does not; 0.5917 is real. It is
+"the model adds less over trivial on OOD", which is a different and quieter failure. And it is our
+proxy: procedure-shift only, 10 held-out videos.
 
 ## 5. The `ood` dossier — why we do not stamp it
 

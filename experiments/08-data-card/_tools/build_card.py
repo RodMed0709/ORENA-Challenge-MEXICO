@@ -132,6 +132,16 @@ def build(data_root: Path, eval_dir: Path, out_dir: Path) -> dict:
     tpl_val, tpl_train = catalogue(val, True), catalogue(train, False)
     tpl_val.to_csv(out_dir / "templates_val.csv", index=False)
     tpl_train.to_csv(out_dir / "templates_train.csv", index=False)
+
+    # The same catalogue split by distribution. Pooling ID and OOD hides that they are
+    # different populations: some templates exist only in OOD, and the same template
+    # can carry a very different floor on each side. Pooling here would be the exact
+    # mistake this card accuses `acc_number` of.
+    by_dist = pd.concat(
+        [catalogue(val[val["distribution"] == d], True).assign(distribution=d) for d in ("ID", "OOD")],
+        ignore_index=True,
+    )
+    by_dist.to_csv(out_dir / "templates_val_by_distribution.csv", index=False)
     h["n_templates_val"] = len(tpl_val)
     h["n_templates_number"] = int((tpl_val["answer_format"] == "number").sum())
     degenerate = tpl_val[tpl_val["n_distinct_answers"] == 1]
@@ -146,6 +156,28 @@ def build(data_root: Path, eval_dir: Path, out_dir: Path) -> dict:
     h["floor_number_per_template"] = _floor_per_template(num)
     h["margin_number_reported"] = h["acc_number"] - h["floor_number_global"]
     h["margin_number_honest"] = h["acc_number"] - h["floor_number_per_template"]
+
+    # ---- ID vs OOD, against a template-aware floor. This is what reverses rung 02's
+    # "acc_OOD > acc_ID, no OOD collapse": the OOD slice has a HIGHER trivial floor
+    # (its answers are more concentrated), so raw accuracy flatters it.
+    h["n_ood"], h["n_id"] = int((val["distribution"] == "OOD").sum()), int((val["distribution"] == "ID").sum())
+    for d in ("ID", "OOD"):
+        s = val[val["distribution"] == d]
+        h[f"acc_{d.lower()}"] = s["correctness"].mean()
+        h[f"floor_{d.lower()}"] = _floor_per_template(s)
+        h[f"margin_{d.lower()}"] = h[f"acc_{d.lower()}"] - h[f"floor_{d.lower()}"]
+    pd.DataFrame(
+        [
+            {
+                "distribution": d,
+                "n": h[f"n_{d.lower()}"],
+                "accuracy": h[f"acc_{d.lower()}"],
+                "trivial_floor_per_template": h[f"floor_{d.lower()}"],
+                "margin": h[f"margin_{d.lower()}"],
+            }
+            for d in ("ID", "OOD")
+        ]
+    ).to_csv(out_dir / "id_vs_ood.csv", index=False)
 
     # ---- the ood dossier. Four options, one number each, one run (rung 02 eval_best).
     stamped = results.copy()
@@ -222,6 +254,7 @@ def _assert_headlines(h: dict) -> None:
         "n_val": 6252, "n_train": 13748, "n_frames": 4486, "n_videos": 38,
         "n_templates_val": 188, "n_templates_number": 8, "n_degenerate_templates": 126,
         "n_degenerate_questions": 351, "n_questions_at_or_below_floor": 952,
+        "n_ood": 4000, "n_id": 2252,
     }
     for k, want in exact.items():
         assert h[k] == want, f"CARD LIES: {k} = {h[k]}, README says {want}"
@@ -234,6 +267,13 @@ def _assert_headlines(h: dict) -> None:
     }
     for k, want in close.items():
         assert abs(h[k] - want) <= 5e-4, f"CARD LIES: {k} = {h[k]:.6f}, README says {want}"
+
+    # rung 02 shipped "acc_OOD 0.5918 > acc_ID 0.5209 → no OOD collapse". Both halves
+    # are true and the conclusion does not follow: OOD's floor is 12 points higher, so
+    # the model adds LESS there. If this ever stops holding, the card's §4b is wrong.
+    assert h["floor_ood"] > h["floor_id"], "CARD LIES: the OOD floor is supposed to be the higher one"
+    assert h["acc_ood"] > h["acc_id"], "CARD LIES: raw acc_OOD is supposed to beat acc_ID"
+    assert h["margin_ood"] < h["margin_id"], "CARD LIES: the OOD margin is supposed to be the smaller one"
 
     # The dossier's load-bearing claim: bucket_mean IS the stamped version.
     assert abs(h["ood_3_stamp_and_drop"] - h["ood_4_bucket_mean"]) < 1e-12, (
