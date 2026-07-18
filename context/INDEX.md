@@ -18,6 +18,9 @@
 - **`ATTACK_LADDER.md`** — original master ladder (recipes valid; THE_MAP supersedes the sequencing).
 - **`CONSTITUTION.md`** — hard rules, version pins, structure §VIII–IX.
 
+## RULES — how we stay consistent (read before eval/training/results)
+- **`context/RULES.md`** — the DO/DON'T checklist that stops recurring mistakes (human or Claude). EVAL rules: score only via `frame.metrics`, leaf→group via `Capability.group`, ID/OOD from qID, headline `bucket_mean`, gates RAISE (never disable). Complements `CONSTITUTION.md`.
+
 ## DECISIONS — settled verdicts (do NOT re-litigate)
 - [[viT-swap-nogo]] — swapping Qwen3-VL's ViT = **NO-GO** (license + full realignment).
 - [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step).
