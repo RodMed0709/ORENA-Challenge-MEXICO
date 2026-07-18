@@ -1,108 +1,108 @@
 # ORENA-Challenge-MEXICO 🇲🇽
 
-Equipo mexicano para el **ORENA SAVE FOCUS Challenge — FRAME Track** (MICCAI 2026). VQA sobre video quirúrgico laparoscópico.
+Mexican team for the **ORENA SAVE FOCUS Challenge — FRAME Track** (MICCAI 2026). VQA over laparoscopic surgical video.
 
-**Privado.** Sincronizado entre: local · RunPod · compu del equipo.
+**Private.** Synced across: local · RunPod · team machine.
 
-## Documentos clave
+## Key documents
 
-| Doc | Qué |
+| Doc | What |
 |---|---|
-| [`CONSTITUTION.md`](CONSTITUTION.md) | 🔒 Hechos duros + reglas no-negociables. **Léelo primero.** Fuente de verdad. |
-| 🆕 [`experiments/08-data-card/`](experiments/08-data-card/) | **Qué hay en los datos y qué decidimos sobre ellos. Léelo ANTES de citar cualquier número.** Ver ⬇️ |
-| [`THE_MAP.md`](THE_MAP.md) | Estrategia unificada (fases 0–5). |
-| [`PLAN.md`](PLAN.md) | Estrategia, técnica, timeline, roles. |
-| `doc1.txt` / `doc2.txt` / `*.pdf` | Specs oficiales del challenge (referencia). |
+| [`CONSTITUTION.md`](CONSTITUTION.md) | 🔒 Hard facts + non-negotiable rules. **Read it first.** Source of truth. |
+| 🆕 [`experiments/08-data-card/`](experiments/08-data-card/) | **What is in the data and what we decided about it. Read it BEFORE citing any number.** See ⬇️ |
+| [`THE_MAP.md`](THE_MAP.md) | Unified strategy (phases 0–5). |
+| [`PLAN.md`](PLAN.md) | Strategy, technique, timeline, roles. |
+| `doc1.txt` / `doc2.txt` / `*.pdf` | Official challenge specs (reference). |
 
 ---
 
-# 📊 Cómo medimos (actualizado 2026-07-16) — **léelo antes de citar un número**
+# 📊 How we measure (updated 2026-07-16) — **read it before citing a number**
 
-> **Los números que este repo citó durante su primer mes eran engañosos.** No por un bug del harness ni
-> por mala fe: **nadie había descrito los datos**. Esta sección resume lo que cambió. El detalle vive en
+> **The numbers this repo cited during its first month were misleading.** Not because of a harness bug or
+> bad faith: **nobody had described the data.** This section summarizes what changed. The detail lives in
 > **[`experiments/08-data-card/README.md`](experiments/08-data-card/README.md)**.
 
-## Lo que decíamos ➜ lo que es
+## What we said ➜ what it is
 
-| Citábamos | Es | Por qué |
+| We cited | It is | Why |
 |---|---|---|
-| **`pre_eval = 0.708`** — el número insignia | **`bucket_mean = 0.5486`** | El `pre_eval` promedia buckets `grupo × ood`. En el dato público **`ood` viene siempre en `False`** (por diseño: lo puebla el test privado), así que **colapsa de 10 buckets a 3** — y **uno de esos 3 es UNA sola pregunta** de `temporal_grounding`, un tipo que FRAME no debería tener. **Esa única pregunta vale ⅓ del score y +14.6 puntos.** |
-| "el 0.708" | **dos números**: `0.7079` y `0.7087` | Dos corridas distintas (rung 02 `eval_best` y rung 05 `a0_real`, que re-corrió el control). |
-| **`raw_acc = 0.5662`** | plano; el estimador del SDK dice **`0.5395`** | El SDK reporta **media de medias por vídeo + bootstrap jerárquico** (`evaluator.py:465`). Nosotros citábamos la media plana. **Ambos son correctos, para preguntas distintas** — plano para el leaderboard, jerárquico para "¿generaliza?". |
-| **`acc_number = 0.4331`** | **NO INTERPRETABLE** | `number` **no es una tarea: son 8 plantillas** con suelos triviales de **0.24 a 1.00**, y **4 de ellas son degeneradas** (una sola respuesta posible en val). |
-| `number` saca **+8 pts** sobre el suelo | **+4.9** | **Paradoja de Simpson.** El "suelo" usado (*responder siempre "1"*) es más tonto que *responder la moda de cada plantilla*. La señal: **el margen agrupado (+8.1) supera al de TODAS las plantillas individuales (máx +6.1)**. |
-| **`acc_OOD 0.5918 > acc_ID 0.5209` → "no hay colapso OOD"** | 🔴 **artefacto** | El slice OOD tiene un **suelo trivial 12 pts más alto** (0.4597 vs 0.3370): sus respuestas están más concentradas. Contra el suelo, **el modelo aporta 5.2 pts MENOS en OOD que en ID**. |
-| `number` 37% · `fo_class` 39.1% del examen | **33.5%** · **42.8%** | Nunca se contaron. |
-| `heico` = "Sigmoid Resection" | **3 procedimientos** | heico = Proctocolectomy + Rectal Resection (train) + **Sigmoid (solo en test)**. **El proxy OOD es más fuerte de lo que decíamos.** |
-| El examen son 5 formatos | **188 plantillas** | La unidad de análisis es la plantilla, no `answer_format`. |
+| **`pre_eval = 0.708`** — the flagship number | **`bucket_mean = 0.5486`** | `pre_eval` averages `group × ood` buckets. In the public data **`ood` always comes as `False`** (by design: the private test populates it), so it **collapses from 10 buckets to 3** — and **one of those 3 is A single question** of `temporal_grounding`, a type FRAME should not have. **That single question is worth ⅓ of the score and +14.6 points.** |
+| "the 0.708" | **two numbers**: `0.7079` and `0.7087` | Two different runs (rung 02 `eval_best` and rung 05 `a0_real`, which re-ran the control). |
+| **`raw_acc = 0.5662`** | flat; the SDK's estimator says **`0.5395`** | The SDK reports **mean of per-video means + hierarchical bootstrap** (`evaluator.py:465`). We were citing the flat mean. **Both are correct, for different questions** — flat for the leaderboard, hierarchical for "does it generalize?". |
+| **`acc_number = 0.4331`** | **NOT INTERPRETABLE** | `number` **is not a task: it is 8 templates** with trivial floors from **0.24 to 1.00**, and **4 of them are degenerate** (a single possible answer in val). |
+| `number` gains **+8 pts** over the floor | **+4.9** | **Simpson's paradox.** The "floor" used (*always answer "1"*) is dumber than *answering each template's mode*. The signal: **the pooled margin (+8.1) beats that of ALL individual templates (max +6.1)**. |
+| **`acc_OOD 0.5918 > acc_ID 0.5209` → "there is no OOD collapse"** | 🔴 **artifact** | The OOD slice has a **trivial floor 12 pts higher** (0.4597 vs 0.3370): its answers are more concentrated. Against the floor, **the model contributes 5.2 pts LESS on OOD than on ID.** |
+| `number` 37% · `fo_class` 39.1% of the exam | **33.5%** · **42.8%** | They were never counted. |
+| `heico` = "Sigmoid Resection" | **3 procedures** | heico = Proctocolectomy + Rectal Resection (train) + **Sigmoid (test only)**. **The OOD proxy is stronger than we said.** |
+| The exam is 5 formats | **188 templates** | The unit of analysis is the template, not `answer_format`. |
 
-## Por qué esto importa más que cualquier experimento
+## Why this matters more than any experiment
 
-**El valor central del proyecto es ganarle a AMBOS baselines en el eje OOD** — eso es la co-autoría.
-**OOD es el 50% del examen.** Y el titular en el que se apoyaba nuestra confianza (*"OOD > ID, sin
-colapso"*) **se invierte al medir contra el suelo**. Un termómetro mal calibrado no te hace perder un
-experimento: te hace **elegir mal el siguiente**.
+**The core value of the project is beating BOTH baselines on the OOD axis** — that is the co-authorship.
+**OOD is 50% of the exam.** And the headline our confidence leaned on (*"OOD > ID, no
+collapse"*) **inverts when measured against the floor**. A badly calibrated thermometer does not make you lose an
+experiment: it makes you **choose the next one wrong.**
 
-Concretamente: **la accuracy no es interpretable sin su suelo trivial.** `0.9778` en *"How many External
-drains?"* parece excelente — hasta que ves que **la respuesta es siempre `1`** y una constante saca
-`1.0000`. **El 5.6% del examen no puede medir nada** en nuestro split, y en el **15.2%** el modelo no le
-gana a una constante.
+Concretely: **accuracy is not interpretable without its trivial floor.** `0.9778` on *"How many External
+drains?"* looks excellent — until you see that **the answer is always `1`** and a constant scores
+`1.0000`. **5.6% of the exam can measure nothing** in our split, and on **15.2%** the model does not
+beat a constant.
 
-## Lo que sí está sólido (medido, no supuesto)
+## What is solid (measured, not assumed)
 
-- ✅ **El modelo usa la imagen.** Ablación de 3 brazos sobre las 6252, misma pregunta, solo cambia la
-  imagen: real **0.5675** · imagen de otro vídeo **0.3440** · imagen negra **0.2681**. **La imagen
-  correcta vale +22.3 puntos.** Es una intervención, no una correlación.
-- ✅ **Nuestro parser no derivó del SDK.** `data.py` se declara *"Mirror of `FocusDataset._parse_row`"*
-  y nadie lo había comprobado: **coincide en las 20,000 filas**.
-- ✅ **El LoRA sirve de verdad.** `raw 0.262 → 0.566`. Lo único inflado era el titular.
-- 🔴 **El cuello de botella: el modelo ve el primer objeto y se queda ciego después.** `fo_class` y
-  `number` se desploman con **la misma curva** según haya 1/2/3/4 objetos (0.64→0.44→0.07 y
-  0.80→0.46→0.19). Dos formatos sin nada en común ⇒ **es percepción, no formato ni conteo.**
+- ✅ **The model uses the image.** A 3-arm ablation over the 6252, same question, only the
+  image changes: real **0.5675** · image from another video **0.3440** · black image **0.2681**. **The
+  correct image is worth +22.3 points.** It is an intervention, not a correlation.
+- ✅ **Our parser did not drift from the SDK.** `data.py` declares itself *"Mirror of `FocusDataset._parse_row`"*
+  and nobody had checked it: **it matches on all 20,000 rows.**
+- ✅ **The LoRA genuinely helps.** `raw 0.262 → 0.566`. The only thing inflated was the headline.
+- 🔴 **The bottleneck: the model sees the first object and goes blind after that.** `fo_class` and
+  `number` collapse with **the same curve** by whether there are 1/2/3/4 objects (0.64→0.44→0.07 and
+  0.80→0.46→0.19). Two formats with nothing in common ⇒ **it is perception, not format or counting.**
 
-## Reglas de lectura (para todo el equipo)
+## Reading rules (for the whole team)
 
-1. **Ningún número sin su suelo trivial**, y el suelo **por plantilla**, nunca por formato.
-2. **Ningún número sin decir si es ID, OOD o pooled.** El val es **64% OOD**.
-3. **No cites `pre_eval` en local.** Usa `bucket_mean`. *(Y ojo: estampar `ood=True` "para arreglarlo"
-   da `0.6389` — parece sano y sigue inflado +9. Los dos defectos están enredados.)*
-4. **Las 6252 preguntas no son independientes**: son **4486 frames** en **38 vídeos**. El `n` efectivo
-   para generalizar está más cerca de 38.
-5. **Lee el SDK antes de reimplementarlo.** `Capability.group` existe; el warning
-   `only 3/10 buckets are populated` lleva saliendo en cada corrida desde el principio.
+1. **No number without its trivial floor**, and the floor **per template**, never per format.
+2. **No number without saying whether it is ID, OOD or pooled.** The val is **64% OOD.**
+3. **Do not cite `pre_eval` locally.** Use `bucket_mean`. *(And beware: stamping `ood=True` "to fix it"
+   gives `0.6389` — it looks healthy and is still inflated +9. The two defects are tangled together.)*
+4. **The 6252 questions are not independent**: they are **4486 frames** in **38 videos**. The effective `n`
+   for generalizing is closer to 38.
+5. **Read the SDK before reimplementing it.** `Capability.group` exists; the warning
+   `only 3/10 buckets are populated` has been printing on every run from the start.
 
-> **El harness nunca falló. Avisaba, y no leíamos el log.**
+> **The harness never failed. It was warning, and we were not reading the log.**
 
-## Setup (cada máquina)
+## Setup (each machine)
 
 ```bash
 git clone https://github.com/RodMed0709/ORENA-Challenge-MEXICO.git
 cd ORENA-Challenge-MEXICO
 
-# Entorno
+# Environment
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install orena-focus                              # SDK oficial (módulo: focus)
+pip install orena-focus                              # official SDK (module: focus)
 
-# Secrets — NO están en el repo. Copiar .secrets.env manualmente (pedirlo al lead).
-export HF_TOKEN=...        # o cargar desde .secrets.env
+# Secrets — NOT in the repo. Copy .secrets.env manually (ask the lead).
+export HF_TOKEN=...        # or load from .secrets.env
 export RUNPOD_API_KEY=...
 ```
 
-## Flujo de trabajo (SDD + sync)
+## Workflow (SDD + sync)
 
-1. **`git pull`** antes de empezar (siempre).
-2. Rama por trabajo: `git checkout -b feat/<algo>` o `exp/<experimento>`.
-3. Spec antes que código → `specs/`. Código que corre → merge a `main`.
-4. **`git push`** al terminar.
-5. **NUNCA commitear:** secrets, datos crudos, pesos, checkpoints, videos (ya bloqueados en `.gitignore`).
+1. **`git pull`** before starting (always).
+2. Branch per task: `git checkout -b feat/<something>` or `exp/<experiment>`.
+3. Spec before code → `specs/`. Code that runs → merge to `main`.
+4. **`git push`** when done.
+5. **NEVER commit:** secrets, raw data, weights, checkpoints, videos (already blocked in `.gitignore`).
 
-Datos y pesos viven en RunPod / HuggingFace, no en git.
+Data and weights live in RunPod / HuggingFace, not in git.
 
-## Reglas duras (resumen — full en CONSTITUTION)
+## Hard rules (summary — full in CONSTITUTION)
 
-- `main` siempre funcional. Siempre existe una submission válida > 0.
-- Toda mejora se valida contra **OOD**, no solo ID — **pero la accuracy OOD sola engaña**: su suelo
-  trivial es 12 pts más alto que el de ID. **Valida contra el MARGEN sobre el suelo** (ver §Cómo medimos).
-- Split por `video`, nunca por frame.
-- Docker offline real (`HF_HUB_OFFLINE=1`). Latencia p99 < 5s en L40S.
-- NUNCA prompt-injection al juez (= descalificación).
+- `main` always functional. There is always a valid submission > 0.
+- Every improvement is validated against **OOD**, not just ID — **but OOD accuracy alone is deceptive**: its trivial
+  floor is 12 pts higher than ID's. **Validate against the MARGIN over the floor** (see §How we measure).
+- Split by `video`, never by frame.
+- Real offline Docker (`HF_HUB_OFFLINE=1`). p99 latency < 5s on L40S.
+- NEVER prompt-inject the judge (= disqualification).
