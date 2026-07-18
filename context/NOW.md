@@ -5,7 +5,7 @@
 > Last updated: **2026-07-18**.
 
 ## Live fronts
-- **Leo (legokna)** → **rung 06 ViT-LoRA**: **TRAINED + EVALUATED + SCORED. Verdict 🟡 PARTIAL.** Selected `checkpoint-1720` (epoch 2) by acc_OOD — same index rung 02 selected. Canonical **`bucket_mean` 0.5667** (vs 02's 0.5486), `margin_ID` +0.0235 / `margin_OOD` +0.0160, registered in the ledger. The pre-registered target was `dice@2`, NOT bucket_mean: `number` moved (OOD Δ +0.091, CI [+0.009,+0.160]) but `fo_class` did not, and **no cell reached the +0.10 relevance threshold** → PARTIAL, one format only. All four cells had power. **Do NOT read this as "the ViT was not the ceiling"** — `vit_lr` ran at the LLM's 2e-5 and is the cheapest unspent lever. Full account: `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`. On `task/vit-lora`, ready to merge.
+- **Leo (legokna)** → **rung 06 ViT-LoRA**: **TRAINED + EVALUATED + SCORED. Verdict 🟡 PARTIAL.** Selected `checkpoint-1720` (epoch 2) by acc_OOD — same index rung 02 selected. Canonical **`bucket_mean` 0.5667** (vs 02's 0.5486), `margin_ID` +0.0235 / `margin_OOD` +0.0160, registered in the ledger. The pre-registered target was `dice@2`, NOT bucket_mean: `number` moved (OOD Δ +0.091, CI [+0.009,+0.160]) but `fo_class` did not, and **no cell reached the +0.10 relevance threshold** → PARTIAL, one format only. All four cells had power. **Do NOT read this as "the ViT was not the ceiling"** — `vit_lr` ran at the LLM's 2e-5, so the run cannot separate ceiling from recipe. ⚠️ **But `vit_lr` is no longer the next move:** [[checkpoint-selection-vs-number]] disconfirmed its rationale. Full account: `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`. **On `main` @ `d902018`.**
 - **Rodrigo** → the MLOps/consistency system (below) + planned **R1 CoA-format SFT** ([[next-move-rodrigo-coa-format]]).
 
 ## Done this session (all on `main`, pushed)
@@ -33,9 +33,9 @@
 - _(nothing open on the results/margin front — see Done.)_
 
 ## Pending / blocked
-- **rung-06 follow-up: a LOWER `vit_lr`** (Leo) — needs a GPU pod. The one lever that disambiguates "the ViT is the ceiling" from "the recipe was wrong for the ViT"; until it runs, the PARTIAL verdict stays ambiguous and the capacity branch stays gated.
+- **rung-06 follow-up: evaluate `checkpoint-860` (epoch 1) on the full 6252** (Leo) — **~24 min of GPU**, weights already merged on the volume. [[checkpoint-selection-vs-number]] found that `number` is best at epoch 1 in BOTH arms while acc_OOD selection took epoch 2; this checks whether we already own a better checkpoint. **The 7.5 h `vit_lr` re-run is NO LONGER the next step** — its rationale (the ViT LR degrades `number`) is disconfirmed: the decay happens with the ViT frozen too.
 - **05-bottleneck-audit + 03-prompt-variants rescore** — their predictions are NOT on the volume (only notebook/logs) → stay `needs_backfill`.
-- **Phase 0** (offline Docker + first leaderboard submission) — still open (was due Jul 15).
+- **Phase 0** (offline Docker + first leaderboard submission) — still open. ⚠️ **Jul 15 was the pre-eval OPENING, not a deadline** — the real dates are **Sep 1** (pre-eval closes) and **Sep 8** (final submission). This line used to read "was due Jul 15", which made an open task look overdue.
 
 ## Infra / workflow
 - **main = shared truth; one branch per task; merge to main when done.** Never work on Leo's `task/vit-lora`.
