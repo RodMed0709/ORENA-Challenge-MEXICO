@@ -1,17 +1,17 @@
-# Secrets — NUNCA versionar
+# Secrets — NEVER version
 .secrets.env
 *.env
 !.env.example
 
-# Docs de dinero/negocio — NO al repo compartido (el amigo hace pull y los ve)
+# Money/business docs — NOT in the shared repo (a teammate pulls and would see them)
 PROPUESTA-LEO.md
 PROPUESTA-LEO.docx
 NEGOCIO/
 
-# Literatura — PDFs versionados (repo PRIVADO; compa los necesita para reproducir).
-# Todos redistribuibles: 19 arXiv + 2 Nature open-access (CC). INDEX + fichas también.
+# Literature — versioned PDFs (PRIVATE repo; a teammate needs them to reproduce).
+# All redistributable: 19 arXiv + 2 Nature open-access (CC). INDEX + FICHAS too.
 
-# Datos / pesos / checkpoints (van en RunPod, no aqui)
+# Data / weights / checkpoints (live on RunPod, not here)
 data/
 datasets/
 *.ckpt
@@ -24,10 +24,10 @@ external_data/
 wandb/
 .ipynb_checkpoints/
 
-# Obsidian — config local del editor (el vault ES el repo; los .md se versionan, el workspace no)
+# Obsidian — local editor config (the vault IS the repo; .md files are versioned, the workspace isn't)
 .obsidian/
 
-# Basura
+# Junk
 __pycache__/
 *.pyc
 .DS_Store

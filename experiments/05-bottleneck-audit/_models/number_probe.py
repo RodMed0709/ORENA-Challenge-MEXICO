@@ -53,7 +53,7 @@ def probe_frame(responses: list, references: list, results_df: pd.DataFrame = No
     correctness_dict = {}
     if results_df is not None and not results_df.empty:
         if "qID" not in results_df.columns or "correctness" not in results_df.columns:
-            raise ValueError("results_df debe contener las columnas 'qID' y 'correctness'.")
+            raise ValueError("results_df must contain the 'qID' and 'correctness' columns.")
             
         for _, row in results_df.iterrows():
             correctness_dict[row["qID"]] = bool(row["correctness"])

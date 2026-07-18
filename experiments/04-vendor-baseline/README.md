@@ -4,9 +4,9 @@
 
 | Rung | What changed (one variable) | Baseline | Status |
 |------|-----------------------------|----------|--------|
-| 00-baseline | Qwen3-VL-8B zero-shot | — | done (raw 0.262 · pre_eval 0.174) |
+| 00-baseline | Qwen3-VL-8B zero-shot | — | done (bucket_mean 0.256 · raw 0.262) |
 | 01-ood-split | frozen ID/OOD split (`frame_ood_v1`) | — | done |
-| 02-lora-sft | LoRA instruction fine-tune | 00 | **done — PASS** (pre_eval 0.708 · raw 0.566 · OOD > ID) |
+| 02-lora-sft | LoRA instruction fine-tune | 00 | **done — PASS** (bucket_mean 0.549 · raw 0.566 · OOD > ID) |
 | 03-prompt-variants | `SYSTEM_PROMPT` additions | 00 (a1_v0) | done — faithful negative |
 | **04-vendor-baseline** | **nothing — this rung does not train or measure** | **—** | **closed — tutorial delivered** |
 

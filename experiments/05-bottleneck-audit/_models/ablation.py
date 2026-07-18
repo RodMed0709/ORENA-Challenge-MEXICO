@@ -5,11 +5,11 @@ from PIL import Image
 ARMS = ("a0_real", "a1_black", "a2_shuffled")
 
 def build_shuffle_map(items, seed: int = 42) -> dict[str, int]:
-    """qID -> índice del item cuya imagen se usará.
+    """qID -> index of the item whose image will be used.
 
-    Determinista. GARANTIZA que ningún qID recibe:
-      - su propia imagen, ni
-      - una imagen del MISMO video_id  (frames del mismo video se parecen demasiado)
+    Deterministic. GUARANTEES that no qID receives:
+      - its own image, nor
+      - an image from the SAME video_id  (frames from the same video look too similar)
     """
     n = len(items)
     
@@ -38,9 +38,9 @@ def build_shuffle_map(items, seed: int = 42) -> dict[str, int]:
     return shuffle_map
 
 def apply_arm(image: Image.Image, arm: str, *, donor: Image.Image | None = None) -> Image.Image:
-    """a0_real     -> image tal cual
+    """a0_real     -> image as-is
        a1_black    -> Image.new("RGB", image.size, (0,0,0))
-       a2_shuffled -> donor (obligatorio para este brazo)
+       a2_shuffled -> donor (mandatory for this arm)
     """
     if arm == "a0_real":
         return image
@@ -54,5 +54,5 @@ def apply_arm(image: Image.Image, arm: str, *, donor: Image.Image | None = None)
         raise ValueError(f"Unknown arm: {arm}")
 
 def tensor_fingerprint(image: Image.Image) -> str:
-    """sha256 de los bytes del PIL.Image. Para el gate G2."""
+    """sha256 of the PIL.Image bytes. For gate G2."""
     return hashlib.sha256(image.tobytes()).hexdigest()
