@@ -58,6 +58,12 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
 13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
     videos); trust the video-level hierarchical CI for "will this hold on a new video?".
 
+## Cross-tool instruction files — `AGENTS.md` ≡ `CLAUDE.md` (BINDING)
+The repo ships two agent-instruction files with **identical content**: `CLAUDE.md` (auto-loaded by
+Claude Code) and `AGENTS.md` (auto-loaded by Codex and other agents). They are two names for the
+SAME project instructions so every teammate's tool lands equally oriented. **Keep them byte-identical:
+whenever you edit one, copy it to the other in the SAME commit. Never let them drift.**
+
 ## How a rule changes
 A rule changes ONLY by: (a) a new measurement that contradicts it, recorded as a
 `context/decisions/*.md` note, then (b) editing this file in the SAME commit, linking that
