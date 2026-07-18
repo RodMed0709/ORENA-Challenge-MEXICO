@@ -10,7 +10,7 @@
 ## NOW — what's happening
 - **`context/NOW.md`** — the living current-state: fronts, real numbers, findings, what's in progress. **Read it first.** (`HANDOFF.md` is the older baseline-run handoff, kept as history.)
 - Live fronts:
-  - **Leo (legokna)** → rung 06 **ViT-LoRA** — TRAINED but NOT evaluated (do not touch); see [[NOW]].
+  - **Leo (legokna)** → rung 06 **ViT-LoRA** — scored, verdict **PARTIAL** ([[vit-lora-partial]]); next is a lower `vit_lr`. See [[NOW]].
   - **Rodrigo** → MLOps consistency system + **R1 CoA-format SFT** — see [[next-move-rodrigo-coa-format]].
 
 ## STRATEGY — the north star
@@ -23,7 +23,8 @@
 
 ## DECISIONS — settled verdicts (do NOT re-litigate)
 - [[viT-swap-nogo]] — swapping Qwen3-VL's ViT = **NO-GO** (license + full realignment).
-- [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step).
+- [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step). 🔒 Gated by [[vit-lora-partial]].
+- [[vit-lora-partial]] — LoRA on the ViT = **PARTIAL**. Settles the *reading*: it neither licenses nor kills the capacity branch. **The ceiling question stays OPEN** until a lower `vit_lr` runs.
 - [[next-move-rodrigo-coa-format]] — Rodrigo owns **CoA-format SFT (R1)**; RL is **deferred**.
 - [[eval-canonical]] — ONE scoring module (`frame.metrics`): leaf→group via `Capability.group`, ID/OOD from qID; headline = `bucket_mean`, pre_eval reference-only.
 
