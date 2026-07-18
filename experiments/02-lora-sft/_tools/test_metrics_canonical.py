@@ -5,12 +5,16 @@ Lives INSIDE the owning experiment's ``_tools/`` (repo rule: never a top-level
 
   PART A — OFFLINE (always runs, pure-python, no pod): synthetic bucket_mean==0.55,
            temporal_grounding n=1 dropped, the leaf-vs-group drop bug + the five
-           gates, and a self-consistency check against rung-05's committed
-           bucket_mean 0.5503 (needs NO saved predictions).
+           gates, the HYBRID cross-check helper (assert_matches_sdk_pre_eval), and a
+           self-consistency check against rung-05's committed bucket_mean 0.5503
+           (needs NO saved predictions).
 
-  PART B — POD-GATED (skips cleanly if artifacts absent): reproduce rung-02's
-           known bucket_mean≈0.550 / acc_OOD≈0.592 from the gitignored saved
-           results.csv under experiments/02-lora-sft/runs/ (present only on the pod).
+  PART B — POD/S3-GATED (skips cleanly if artifacts absent): reproduce rung-02's
+           REAL, S3-verified bucket_mean==0.5486 / acc_OOD==0.5918 / acc_ID==0.5209
+           from the gitignored saved results.csv under experiments/02-lora-sft/runs/
+           (present on the pod, or materialised locally by the S3 backfill). This is
+           the non-circular check: it reproduces real numbers, not arithmetic
+           self-consistency.
 
 Run:  python experiments/02-lora-sft/_tools/test_metrics_canonical.py
 No pytest dependency; plain asserts + a __main__ runner printing PASS/SKIP.
@@ -142,6 +146,41 @@ def part_a_gates() -> None:
     print("  [A3] all 5 gates pass on clean df and RAISE on crafted-bad df  PASS")
 
 
+def part_a_hybrid_crosscheck() -> None:
+    """The HYBRID guard (assert_matches_sdk_pre_eval): our bucket_mean must match
+    the vendor pre_eval buckets restricted to n>=2, and RAISE on divergence.
+
+    The vendor buckets_df is simulated here ([group, ood, accuracy, count]) exactly
+    as focus.Evaluator.pre_evaluation_score emits it — the same four real buckets
+    the synthetic df produces plus the n=1 temporal_grounding bucket the raw vendor
+    pre_eval keeps but bucket_mean drops."""
+    r = stratified_report(_synthetic_df(), n_boot=50)
+    sdk_buckets = pd.DataFrame(
+        [
+            {"group": "object_recognition", "ood": False, "accuracy": 0.60, "count": 100},
+            {"group": "object_recognition", "ood": True, "accuracy": 0.61, "count": 100},
+            {"group": "aggregation", "ood": False, "accuracy": 0.42, "count": 100},
+            {"group": "aggregation", "ood": True, "accuracy": 0.57, "count": 100},
+            {"group": "temporal_grounding", "ood": False, "accuracy": 1.00, "count": 1},
+        ],
+        columns=["group", "ood", "accuracy", "count"],
+    )
+    kept = m.assert_matches_sdk_pre_eval(r["bucket_mean"], sdk_buckets)
+    assert abs(kept - 0.55) < 1e-9, f"vendor kept-mean {kept} != our bucket_mean 0.55"
+
+    def _raises(fn, *a):
+        try:
+            fn(*a)
+        except (AssertionError, ValueError):
+            return True
+        return False
+
+    # a bucket_mean far from the vendor number must RAISE (guards the reimpl).
+    assert _raises(m.assert_matches_sdk_pre_eval, 0.90, sdk_buckets), \
+        "assert_matches_sdk_pre_eval must raise on a large divergence"
+    print("  [A5] HYBRID cross-check: kept-mean == bucket_mean; RAISES on divergence  PASS")
+
+
 def part_a_rung05_self_consistency() -> None:
     if not _05_CSV.exists():
         print(f"  [A4] SKIP — {_05_CSV} not found")
@@ -183,10 +222,13 @@ def part_b_rung02_repro() -> None:
     m.assert_all_rows_grouped(df)
     m.assert_ood_from_qid(df)
     r = stratified_report(df)
-    assert abs(r["bucket_mean"] - 0.550) < 0.005, f"rung-02 bucket_mean {r['bucket_mean']} != ~0.550"
-    assert abs(r["acc_OOD"] - 0.592) < 0.005, f"rung-02 acc_OOD {r['acc_OOD']} != ~0.592"
+    # REAL, S3-verified numbers (not arithmetic self-consistency): the full-val
+    # eval of the OOD-selected checkpoint-1720. Tight tolerance — these are exact.
+    assert abs(r["bucket_mean"] - 0.5486) < 5e-4, f"rung-02 bucket_mean {r['bucket_mean']} != 0.5486"
+    assert abs(r["acc_OOD"] - 0.5918) < 5e-4, f"rung-02 acc_OOD {r['acc_OOD']} != 0.5918"
+    assert abs(r["acc_ID"] - 0.5209) < 5e-4, f"rung-02 acc_ID {r['acc_ID']} != 0.5209"
     print(f"  [B]  rung-02 reproduced from {path.name}: bucket_mean={r['bucket_mean']:.4f}, "
-          f"acc_OOD={r['acc_OOD']:.4f}  PASS")
+          f"acc_OOD={r['acc_OOD']:.4f}, acc_ID={r['acc_ID']:.4f}  PASS")
 
 
 def main() -> int:
@@ -194,6 +236,7 @@ def main() -> int:
     part_a_synthetic_bucket_mean()
     part_a_leaf_vs_group_dropbug()
     part_a_gates()
+    part_a_hybrid_crosscheck()
     part_a_rung05_self_consistency()
     print("PART B - POD-GATED (rung-02 saved predictions):")
     part_b_rung02_repro()
