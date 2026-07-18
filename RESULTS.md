@@ -12,16 +12,16 @@ The committed, git-native results store. `bucket_mean` (unweighted mean over the
 
 `needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is coalesced from its `RESULTS.csv`, and Tier 2/3 are empty for it until a pod pass of `stratified_report` over its saved predictions is registered via `frame.ledger.register_run`.
 
-_0 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
+_2 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 
 | experiment | run | model | bucket_mean | acc_ID | acc_OOD | n_total | date | needs_backfill |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 05-bottleneck-audit | a0_real |  | 0.5503 | 0.5244 | 0.5917 |  |  | true |
+| 02-lora-sft | 02_lora_sft_v1 | Qwen3-VL-8B-Instruct + LoRA r8 (ckpt-1720) | 0.5486 | 0.5209 | 0.5917 | 6252 | 2026-07-13 | false |
 | 05-bottleneck-audit | a2_shuffled |  | 0.3338 | 0.2780 | 0.3812 |  |  | true |
 | 05-bottleneck-audit | a1_black |  | 0.2752 | 0.2673 | 0.2685 |  |  | true |
-| 00-baseline | 0 | Qwen3-VL-8B-Instruct |  |  |  | 6252 | 2026-07-10 | true |
+| 00-baseline | 0 | Qwen3-VL-8B-Instruct | 0.2557 | 0.2487 | 0.2687 | 6252 | 2026-07-10 | false |
 | 01-ood-split | frame_ood_v1 |  |  |  |  |  |  | true |
-| 02-lora-sft | 02_lora_sft_v1 |  |  | 0.5209 | 0.5918 |  |  | true |
 | 03-prompt-variants | a0_noFO |  |  | 0.1808 |  |  |  | true |
 | 03-prompt-variants | a1_v0 |  |  | 0.2421 | 0.2735 |  |  | true |
 | 03-prompt-variants | a2_decisive |  |  | 0.2505 |  |  |  | true |
