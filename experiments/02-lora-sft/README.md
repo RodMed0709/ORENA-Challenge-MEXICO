@@ -6,19 +6,28 @@
 
 ## Ladder
 
-| Notebook | Rung | Metric (pre_evaluation_score) | Verdict |
+| Notebook | Rung | Metric (bucket_mean, canonical) | Verdict |
 |---|---|---|---|
-| `../00-baseline/00_zeroshot_qwen3vl.ipynb` | 00 | 0.174 (raw 0.262) | baseline |
-| `02_lora_sft.ipynb` | 02 | **0.708** (raw 0.566) | **PASS** — crushes zero-shot |
+| `../00-baseline/00_zeroshot_qwen3vl.ipynb` | 00 | 0.256 (raw 0.262) | baseline |
+| `02_lora_sft.ipynb` | 02 | **0.549** (raw 0.566) | **PASS** — crushes zero-shot |
 
-*Success = acc_OOD (val_ood/Sigmoid) up vs zero-shot, no format regressed, p99 < 5 s.*
+*Headline = `bucket_mean` (`frame.metrics`: unweighted mean over the 4 real
+capability_group × {ID,OOD} buckets). Success = acc_OOD (val_ood/Sigmoid) up vs
+zero-shot, no format regressed, p99 < 5 s.*
 
 ## Result — PASS (crushes the zero-shot baseline)
 
 Selected **checkpoint-1720 (epoch 2)** by acc_OOD. Per-epoch acc_OOD was **0.583 /
 0.592 / 0.583** (epoch 1/2/3) — flat, **no OOD collapse** (PITFALLS #1 risk did not
-materialize; epochs 1-3 all strong). Best full-val: **pre_evaluation_score 0.708
-(vs 0.174), raw 0.566 (vs 0.262)**.
+materialize; epochs 1-3 all strong). Best full-val: **bucket_mean 0.549 (vs 0.256),
+acc_OOD 0.592 (vs 0.269), acc_ID 0.521 (vs 0.249), raw 0.566 (vs 0.262)** —
+S3-verified from the saved predictions via `frame.metrics.stratified_report`.[^preeval]
+
+[^preeval]: An earlier draft headlined **pre_evaluation_score 0.708**. That is the
+SDK pre-eval and is **inflated by one `temporal_grounding` n=1 question** (an
+unweighted bucket mean a single question lifts); it is kept only as a labeled
+reference, never the headline. The canonical number is `bucket_mean` 0.549 — see
+`context/decisions/eval-canonical.md` and `context/RULES.md` §4.
 
 | slice | zero-shot | LoRA | Δ |
 |-------|-----------|------|---|
