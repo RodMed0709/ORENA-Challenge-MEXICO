@@ -47,7 +47,7 @@ _VIEW = ["experiment", "arm", "bucket_mean", "acc_ID", "acc_OOD", "verdict", "no
 # ── Tier-1 schema (display / sort order) ──────────────────────────────────────
 _TIER1_COLS = [
     "experiment", "run", "model",
-    "bucket_mean", "acc_ID", "acc_OOD", "margin_ID", "margin_OOD",
+    "bucket_mean", "acc_ID", "acc_OOD", "floor_ID", "floor_OOD", "margin_ID", "margin_OOD",
     "acc_fo_class", "acc_number", "acc_binary", "acc_open_ended", "acc_multiple_choice",
     "n_total", "date", "source_commit", "needs_backfill",
 ]
@@ -71,6 +71,8 @@ _ALIASES: dict[str, tuple[str, ...]] = {
     "acc_OOD": ("acc_OOD", "val_ood_acc"),
     "margin_ID": ("margin_ID",),
     "margin_OOD": ("margin_OOD",),
+    "floor_ID": ("floor_ID",),
+    "floor_OOD": ("floor_OOD",),
     "n_total": ("n_questions", "n_total", "n"),
     "date": ("date",),
     "acc_fo_class": ("acc_fo_class", "acc_fmt_fo_class"),
@@ -291,6 +293,8 @@ def _tier1_row_from_strat(root: Path, strat_path: Path) -> dict:
         "bucket_mean": _num(data.get("bucket_mean")),
         "acc_ID": _num(data.get("acc_ID")),
         "acc_OOD": _num(data.get("acc_OOD")),
+        "floor_ID": _num(data.get("floor_ID")),
+        "floor_OOD": _num(data.get("floor_OOD")),
         "margin_ID": _num(data.get("margin_ID")),
         "margin_OOD": _num(data.get("margin_OOD")),
         "n_total": _int_or_none(meta.get("n_total")),
@@ -325,8 +329,10 @@ def _tier1_rows_from_csv(root: Path, csv: Path, seen: set[tuple[str, str]]) -> l
             "bucket_mean": _num(_first(r, *_ALIASES["bucket_mean"])),
             "acc_ID": _num(_first(r, *_ALIASES["acc_ID"])),
             "acc_OOD": _num(_first(r, *_ALIASES["acc_OOD"])),
-            # margins need the gold answers a bare RESULTS.csv lacks → NaN until the
-            # run is rescored with a stratified.json (needs_backfill).
+            # floors + margins need the gold answers a bare RESULTS.csv lacks → NaN
+            # until the run is rescored with a stratified.json (needs_backfill).
+            "floor_ID": _num(_first(r, *_ALIASES["floor_ID"])),
+            "floor_OOD": _num(_first(r, *_ALIASES["floor_OOD"])),
             "margin_ID": _num(_first(r, *_ALIASES["margin_ID"])),
             "margin_OOD": _num(_first(r, *_ALIASES["margin_OOD"])),
             "n_total": _int_or_none(_first(r, *_ALIASES["n_total"])),
