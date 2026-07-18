@@ -20,6 +20,7 @@ from focus.evaluation.judges import TransformersJudge
 
 from frame.data import FrameProvider, load_frame_items
 from frame.engine import QwenFrameEngine
+from frame.metrics import stratified_report
 from frame.qualitative import export_inspect
 
 logger = logging.getLogger(__name__)
@@ -61,12 +62,27 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
     lat = pd.Series([r.latency for r in responses], dtype=float)
     pre_row = summary_df[summary_df["level"] == "pre_evaluation"]
     overall_row = summary_df[summary_df["level"] == "overall"]
-    _, buckets = evaluator.pre_evaluation_score(results_df)
+
+    # Canonical scoring (frame.metrics): leaf->group via Capability.group and
+    # ID/OOD from the qID prefix (heico=OOD, lapchole=ID) — the fix for the SDK
+    # pre_evaluation_score, which splits ID/OOD by the all-False `ood` column.
+    strat = stratified_report(results_df)
+    pre_eval_ref = float(pre_row["accuracy"].iloc[0]) if len(pre_row) else None
 
     report = {
         "run_name": cfg.run_name,
         "n_questions": int(len(results_df)),
-        "pre_evaluation_score": float(pre_row["accuracy"].iloc[0]) if len(pre_row) else None,
+        # ── HEADLINE — the number we track (4-bucket group×{ID,OOD} mean) ──
+        "bucket_mean": strat["bucket_mean"],
+        "acc_ID": strat["acc_ID"],
+        "acc_OOD": strat["acc_OOD"],
+        "number_estimate": strat["number_estimate"],
+        # Kept for backward-compatibility with existing consumers (e.g. Leo's
+        # rung-06 branch) — NOT the headline anymore.
+        "pre_evaluation_score": pre_eval_ref,
+        # SDK pre_eval — splits ID/OOD by the all-False ood column; kept for
+        # reference, NOT the headline.
+        "pre_evaluation_score_reference": pre_eval_ref,
         "overall_mean_accuracy": float(overall_row["accuracy"].iloc[0]) if len(overall_row) else None,
         "raw_accuracy": float(results_df["correctness"].mean()),
         "overall_ci": (
@@ -91,14 +107,26 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
             }
             for _, r in summary_df[summary_df["level"] == "answer_format"].iterrows()
         },
+        # Same schema as before, but sourced from the qID-derived ID/OOD split
+        # (frame.metrics.by_bucket), NOT the all-False results_df["ood"] column.
         "by_group_distribution": [
             {
-                "group": r["group"],
-                "ood": bool(r["ood"]),
+                "group": r["capability_group"],
+                "ood": r["distribution"] == "OOD",
                 "accuracy": float(r["accuracy"]),
-                "count": int(r["count"]),
+                "count": int(r["n"]),
             }
-            for _, r in buckets.iterrows()
+            for _, r in strat["by_bucket"].iterrows()
+        ],
+        # Canonical per-bucket view (capability_group × {ID,OOD}).
+        "by_bucket": [
+            {
+                "capability_group": r["capability_group"],
+                "distribution": r["distribution"],
+                "accuracy": float(r["accuracy"]),
+                "n": int(r["n"]),
+            }
+            for _, r in strat["by_bucket"].iterrows()
         ],
         "judge_model": cfg.judge_model,
     }
@@ -177,7 +205,10 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
         torch.cuda.empty_cache()
 
     (run_dir / "report.json").write_text(json.dumps(report, indent=2))
-    logger.info("PRE-EVALUATION SCORE: %s", report["pre_evaluation_score"])
+    logger.info(
+        "BUCKET_MEAN (headline): %s  |  acc_OOD %s  |  pre_eval (reference): %s",
+        report["bucket_mean"], report["acc_OOD"], report["pre_evaluation_score_reference"],
+    )
 
     # ── 5. inspection export (inspect.csv — no frame copying) ─────────
     export_inspect(cfg, items, responses, results_df, run_dir)
