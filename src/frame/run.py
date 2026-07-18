@@ -20,7 +20,12 @@ from focus.evaluation.judges import TransformersJudge
 
 from frame.data import FrameProvider, load_frame_items
 from frame.engine import QwenFrameEngine
-from frame.metrics import stratified_report
+from frame.metrics import (
+    assert_all_rows_grouped,
+    assert_matches_sdk_pre_eval,
+    assert_ood_from_qid,
+    stratified_report,
+)
 from frame.qualitative import export_inspect
 
 logger = logging.getLogger(__name__)
@@ -63,10 +68,27 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
     pre_row = summary_df[summary_df["level"] == "pre_evaluation"]
     overall_row = summary_df[summary_df["level"] == "overall"]
 
+    # ── GATES — RAISE before we trust any number (context/RULES.md §7). Until now
+    # these lived only in tests; wire them into the LIVE path so a malformed df
+    # cannot pass: assert_ood_from_qid catches a foreign/typo qID prefix that
+    # _dist_from_qid would otherwise silently mislabel as ID, and
+    # assert_all_rows_grouped catches an un-mappable leaf a group filter would
+    # silently drop (the rung-07 964-drop failure mode).
+    assert_ood_from_qid(results_df)
+    assert_all_rows_grouped(results_df)
+
     # Canonical scoring (frame.metrics): leaf->group via Capability.group and
     # ID/OOD from the qID prefix (heico=OOD, lapchole=ID) — the fix for the SDK
     # pre_evaluation_score, which splits ID/OOD by the all-False `ood` column.
     strat = stratified_report(results_df)
+
+    # ── HYBRID cross-check — verify our bucket_mean against the vendor's OWN
+    # pre_evaluation_score, now OOD-aware because run_baseline stamped ref.ood
+    # from the qID prefix before evaluator.run. It is an independent code path, so
+    # agreement guards our reimplementation. Logs both; raises on a large divergence.
+    _sdk_pre_score, _sdk_buckets = evaluator.pre_evaluation_score(results_df)
+    assert_matches_sdk_pre_eval(strat["bucket_mean"], _sdk_buckets)
+
     pre_eval_ref = float(pre_row["accuracy"].iloc[0]) if len(pre_row) else None
 
     report = {
@@ -178,6 +200,15 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
 
     requests = [it.request for it in items]
     references = [it.reference for it in items]
+    # ── HYBRID cross-check prep: stamp ref.ood from the qID prefix (heico=OOD,
+    # lapchole=ID; data.py:110) so the vendor Evaluator.pre_evaluation_score is
+    # OOD-aware. `ref.ood` is all-False on public data (data_models.py:101) — left
+    # unstamped the SDK splits ID/OOD on an all-False column and its pre_eval is
+    # meaningless. This is the SAME signal frame.metrics derives, which is exactly
+    # what makes our number and the vendor's independently comparable (see the
+    # HYBRID cross-check in _kpi_report).
+    for ref in references:
+        ref.ood = ref.qID.split("__", 1)[0] == "heico"
     save_items(responses, run_dir / "predictions.json")
     save_items(requests, run_dir / "requests.json")
     save_items(references, run_dir / "references.json")
