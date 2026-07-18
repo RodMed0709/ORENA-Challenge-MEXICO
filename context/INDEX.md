@@ -8,10 +8,10 @@
 > (avoid stepping on a teammate's run). GSD = how we *do* work; this brain = what we *know*.
 
 ## NOW — what's happening
-- **`HANDOFF.md`** — current state + the next session's first action (the living NOW).
+- **`context/NOW.md`** — the living current-state: fronts, real numbers, findings, what's in progress. **Read it first.** (`HANDOFF.md` is the older baseline-run handoff, kept as history.)
 - Live fronts:
-  - **Leo (legokna)** → rung 06 **ViT-LoRA** (perception), running on the pod (`origin/task/vit-lora`).
-  - **Rodrigo** → **R1 CoA-format SFT** (data/format) — see [[next-move-rodrigo-coa-format]].
+  - **Leo (legokna)** → rung 06 **ViT-LoRA** — TRAINED but NOT evaluated (do not touch); see [[NOW]].
+  - **Rodrigo** → MLOps consistency system + **R1 CoA-format SFT** — see [[next-move-rodrigo-coa-format]].
 
 ## STRATEGY — the north star
 - **`THE_MAP.md`** — unified FRAME strategy: the 4 buckets, Block A/B, §0 roadmap + Phase-3 status, Block-A diagnosis (folded from the retired `BLOCK_A_MODEL.md`).
