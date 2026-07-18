@@ -50,6 +50,7 @@ results_df schema (Evaluator._make_row, evaluator.py:373-392):
 from __future__ import annotations
 
 import logging
+import math
 import warnings
 from pathlib import Path
 
@@ -488,3 +489,50 @@ def assert_ood_from_qid(results_df: pd.DataFrame) -> None:
             f"qID prefixes {unknown} ∉ {_VALID_PREFIXES}: ID/OOD MUST be derived from the "
             "qID prefix (heico=OOD, lapchole=ID), never the all-False results_df['ood'] column."
         )
+
+
+def assert_matches_sdk_pre_eval(
+    bucket_mean: float,
+    sdk_buckets: pd.DataFrame,
+    *,
+    min_bucket_n: int = 2,
+    tol: float = 0.02,
+) -> float:
+    """HYBRID cross-check: our ``bucket_mean`` must match the vendor SDK's own
+    OOD-aware ``pre_evaluation_score`` restricted to the SAME populated buckets.
+
+    ``sdk_buckets`` is the ``buckets_df`` returned by
+    ``focus.evaluation.Evaluator.pre_evaluation_score`` — computed AFTER stamping
+    ``ref.ood`` from the qID prefix (heico=OOD) so the vendor's ID/OOD split is
+    meaningful (``ref.ood`` is all-False on public data — data_models.py:101,
+    consumed at evaluator.py:440). Its columns are ``[group, ood, accuracy, count]``.
+
+    The vendor number is an INDEPENDENT re-derivation (a different code path:
+    ``Evaluator._to_group`` + its own group×ood loop, evaluator.py:394-462), so
+    agreeing with it proves our reimplementation is faithful — the whole point of
+    the hybrid. The one intended difference: our ``bucket_mean`` drops buckets with
+    ``n < min_bucket_n`` (the n=1 temporal_grounding question) whereas the *raw*
+    vendor pre_eval keeps them; we therefore compare against the vendor mean
+    restricted to ``count >= min_bucket_n``. Both the restricted and the raw vendor
+    means are logged. RAISES only on a large divergence (``> tol``), since the two
+    methods can differ slightly. Returns the restricted vendor mean.
+    """
+    if sdk_buckets is None or len(sdk_buckets) == 0:
+        logger.warning("HYBRID cross-check skipped: empty SDK pre_eval buckets_df.")
+        return float("nan")
+    kept = sdk_buckets[sdk_buckets["count"] >= min_bucket_n]
+    sdk_mean = float(kept["accuracy"].mean()) if len(kept) else float("nan")
+    sdk_raw = float(sdk_buckets["accuracy"].mean())
+    logger.info(
+        "HYBRID cross-check: our bucket_mean=%.4f | vendor pre_eval(count>=%d)=%.4f | "
+        "vendor pre_eval(raw, incl n<%d)=%.4f",
+        bucket_mean, min_bucket_n, sdk_mean, min_bucket_n, sdk_raw,
+    )
+    if not math.isnan(sdk_mean) and abs(bucket_mean - sdk_mean) > tol:
+        raise AssertionError(
+            f"HYBRID cross-check FAILED: our bucket_mean {bucket_mean:.4f} diverges from the "
+            f"vendor SDK OOD-aware pre_evaluation_score {sdk_mean:.4f} (count>={min_bucket_n} "
+            f"buckets) by >{tol}. Our reimplementation disagrees with "
+            "focus.evaluation.Evaluator.pre_evaluation_score — investigate leaf->group / ID-OOD."
+        )
+    return sdk_mean
