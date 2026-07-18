@@ -250,6 +250,11 @@ def stratified_report(
       - ``"bucket_mean"``  : unweighted mean over the populated group×{ID,OOD}
         buckets AFTER dropping any bucket with ``n < min_bucket_n`` (the headline).
       - ``"by_bucket"``    : DataFrame [capability_group, distribution, accuracy, n].
+      - ``"by_bucket_format"`` : DataFrame [capability_group, distribution,
+        answer_format, accuracy, n] — the group×{ID,OOD}×answer_format cross,
+        using the SAME canonical leaf→group + qID ID/OOD. This is the
+        results-ledger Tier-2 source; CIs/floors stay at the coarser
+        ``by_format`` (answer_format×distribution) granularity.
       - ``"by_format"``    : DataFrame [answer_format, distribution, accuracy, n,
         ci_low, ci_high, floor_majority, floor_train_prior].
       - ``"acc_ID"``, ``"acc_OOD"`` : flat per-question mean of correctness over the
@@ -268,6 +273,9 @@ def stratified_report(
         return {
             "bucket_mean": float("nan"),
             "by_bucket": pd.DataFrame(columns=cols),
+            "by_bucket_format": pd.DataFrame(
+                columns=["capability_group", "distribution", "answer_format", "accuracy", "n"]
+            ),
             "by_format": pd.DataFrame(
                 columns=[
                     "answer_format", "distribution", "accuracy", "n",
@@ -306,6 +314,17 @@ def stratified_report(
             list(zip(dropped["capability_group"], dropped["distribution"], dropped["n"])),
         )
     bucket_mean = float(kept["accuracy"].mean()) if len(kept) else float("nan")
+
+    # ── by_bucket_format: group×{ID,OOD}×answer_format cross (Tier-2 source) ──
+    # Same canonical leaf→group + qID ID/OOD already on ``df`` — a pure re-group,
+    # never a re-derivation of buckets/ID-OOD. CIs/floors stay in ``by_format``.
+    by_bucket_format = (
+        df.groupby(["capability_group", "distribution", "answer_format"])["_correct"]
+        .agg(accuracy="mean", n="size")
+        .reset_index()
+        .sort_values(["capability_group", "distribution", "answer_format"])
+        .reset_index(drop=True)
+    )
 
     # ── flat ID / OOD / overall means ────────────────────────────────────────
     dist_means = df.groupby("distribution")["_correct"].mean()
@@ -354,6 +373,7 @@ def stratified_report(
     return {
         "bucket_mean": bucket_mean,
         "by_bucket": by_bucket,
+        "by_bucket_format": by_bucket_format,
         "by_format": by_format,
         "acc_ID": acc_id,
         "acc_OOD": acc_ood,
