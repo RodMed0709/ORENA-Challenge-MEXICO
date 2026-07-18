@@ -14,10 +14,11 @@ The committed, git-native results store. `bucket_mean` (unweighted mean over the
 
 `needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is coalesced from its `RESULTS.csv`, and Tier 2/3 are empty for it until a pod pass of `stratified_report` over its saved predictions is registered via `frame.ledger.register_run`.
 
-_2 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
+_3 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 
 | experiment | run | model | bucket_mean | acc_ID | acc_OOD | margin_ID | margin_OOD | n_total | date | needs_backfill |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 06-vit-lora | 06_vit_lora_v1 | Qwen3-VL-8B-Instruct + LoRA r8 ViT+LLM (ckpt-1720) | 0.5667 | 0.5444 | 0.6078 | 0.2074 | 0.1480 | 6252 | 2026-07-18 | false |
 | 05-bottleneck-audit | a0_real |  | 0.5503 | 0.5244 | 0.5917 |  |  |  |  | true |
 | 02-lora-sft | 02_lora_sft_v1 | Qwen3-VL-8B-Instruct + LoRA r8 (ckpt-1720) | 0.5486 | 0.5209 | 0.5917 | 0.1838 | 0.1320 | 6252 | 2026-07-13 | false |
 | 05-bottleneck-audit | a2_shuffled |  | 0.3338 | 0.2780 | 0.3812 |  |  |  |  | true |
