@@ -29,7 +29,7 @@
 
 ## KNOWLEDGE — dense notes (open only when needed)
 - **Evaluations** → `src/frame/metrics.py` + gates (canonical scoring: leaf→group + qID ID/OOD).
-- **Results ledger** → `RESULTS.md` (auto-built by `frame.ledger` from `experiments/*/RESULTS.csv`).
+- **Results ledger** → `RESULTS.md` + committed `results/` tiers, auto-built by `frame.ledger.build_results_ledger` (never hand-edited, cannot drift). **Tier 1** `results/summary.csv` (one row per experiment/run — headline compare), **Tier 2** `results/detailed.csv` (run × capability_group × {ID,OOD} × answer_format — accuracy/n/floor/CI), **Tier 3** `results/by_run/<experiment>__<run>.csv` (full per-run canonical breakdown). Source = each run's canonical `stratified.json` (dict from `frame.metrics.stratified_report`, dropped via `frame.ledger.register_run`); runs lacking one are Tier-1-only from their `RESULTS.csv` and flagged `needs_backfill` (need a pod pass of `stratified_report` to go rich).
 - Per-experiment context: `context/<id>/CONTEXT.md` (`00-baseline` … `08-data-card`).
 - Experiment designs: `context/EXPERIMENT_DESIGNS.md`.
 - Papers: `literature/INDEX.md` + `literature/FICHAS.md` (the technique fichas).
