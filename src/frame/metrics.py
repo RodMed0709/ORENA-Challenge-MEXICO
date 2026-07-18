@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 import warnings
 from pathlib import Path
 
@@ -207,26 +208,39 @@ def _hier_bootstrap(
     return point, float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))
 
 
-# ── trivial floors (majority-class + train-prior), computed vs the EVAL set ───
+# ── template-aware trivial floor (THE canonical floor — single source) ────────
+# The floor = accuracy of a dumb constant that answers each TEMPLATE's modal
+# answer, exploiting the answer distribution alone (data card rung 08 §3–§4b). The
+# template is the question text with its embedded HH:MM:SS timestamp normalised to
+# ``<TS>`` (so each open_ended question does not become its own n=1 template).
+# ``build_card`` (rung 08) imports BOTH functions below so there is exactly ONE
+# implementation of the floor in the repo (context/RULES.md §EVAL rule 1 —
+# "if the module lacks something, EXTEND it; never reimplement beside it").
 
-def _majority_floor(eval_answers: pd.Series | None) -> float:
-    """Accuracy of always predicting the modal answer of THIS eval slice."""
-    if eval_answers is None or len(eval_answers) == 0:
-        return float("nan")
-    counts = eval_answers.value_counts()
-    return float(counts.iloc[0] / len(eval_answers))
+_TS_RE = re.compile(r"\d{2}:\d{2}:\d{2}")
 
 
-def _train_prior_floor(
-    eval_answers: pd.Series | None, train_answers: pd.Series | None
+def template_of(question) -> str:
+    """Normalise the embedded ``HH:MM:SS`` timestamp to ``<TS>`` → the canonical
+    template key. On the raw string every open_ended question is unique (its own
+    timestamp), inflating 188 real templates to 393 artefact ones (rung 08 §3)."""
+    return _TS_RE.sub("<TS>", str(question))
+
+
+def template_floor(
+    df: pd.DataFrame | None, *, answer_col: str = "answer", template_col: str = "template"
 ) -> float:
-    """Accuracy of predicting the modal TRAIN answer, scored on the eval slice."""
-    if eval_answers is None or train_answers is None:
+    """Template-aware trivial floor over a slice: the fraction you would score by
+    answering, for every question, its own template's modal answer.
+
+    A STRICTLY smarter (and higher) baseline than the global slice-majority; the
+    data card shows measuring against the dumber global constant inflated our margin
+    (§3, Simpson's paradox). Returns NaN on an empty/absent slice. This is the SAME
+    computation the data card's ``_floor_per_template`` performs — it now calls here."""
+    if df is None or len(df) == 0:
         return float("nan")
-    if len(eval_answers) == 0 or len(train_answers) == 0:
-        return float("nan")
-    modal_train = train_answers.value_counts().index[0]
-    return float((eval_answers == modal_train).mean())
+    hits = sum(g[answer_col].value_counts().iloc[0] for _, g in df.groupby(template_col))
+    return float(hits / len(df))
 
 
 # ── public API ───────────────────────────────────────────────────────────────
@@ -238,9 +252,7 @@ def stratified_report(
     min_bucket_n: int = 2,
     n_boot: int = 1000,
     seed: int = 42,
-    train_results_df: pd.DataFrame | None = None,
-    eval_answers: pd.Series | None = None,
-    train_answers: pd.Series | None = None,
+    gold: pd.DataFrame | None = None,
 ) -> dict:
     """Canonical FRAME score for a per-question ``results_df``.
 
@@ -250,42 +262,54 @@ def stratified_report(
     Returns a dict with at least:
       - ``"bucket_mean"``  : unweighted mean over the populated group×{ID,OOD}
         buckets AFTER dropping any bucket with ``n < min_bucket_n`` (the headline).
-      - ``"by_bucket"``    : DataFrame [capability_group, distribution, accuracy, n].
+      - ``"by_bucket"``    : DataFrame [capability_group, distribution, accuracy, n,
+        floor, margin].
       - ``"by_bucket_format"`` : DataFrame [capability_group, distribution,
-        answer_format, accuracy, n] — the group×{ID,OOD}×answer_format cross,
-        using the SAME canonical leaf→group + qID ID/OOD. This is the
-        results-ledger Tier-2 source; CIs/floors stay at the coarser
-        ``by_format`` (answer_format×distribution) granularity.
+        answer_format, accuracy, n, floor, margin] — the group×{ID,OOD}×answer_format
+        cross, using the SAME canonical leaf→group + qID ID/OOD. Tier-2 ledger source;
+        bootstrap CIs stay at the coarser ``by_format`` granularity.
       - ``"by_format"``    : DataFrame [answer_format, distribution, accuracy, n,
-        ci_low, ci_high, floor_majority, floor_train_prior].
+        ci_low, ci_high, floor, margin].
       - ``"acc_ID"``, ``"acc_OOD"`` : flat per-question mean of correctness over the
         ID / OOD halves (acc_OOD is the number the leaderboard weights ~half).
       - ``"acc_overall"``  : flat per-question mean over all rows.
+      - ``"floor_ID"``, ``"floor_OOD"`` : the template-aware trivial floor over the
+        whole ID / OOD slice, and ``"margin_ID" = acc_ID − floor_ID`` /
+        ``"margin_OOD" = acc_OOD − floor_OOD`` — the honest "real skill" numbers
+        (data card §4b: rung-02 margin_ID ≈ +0.184, margin_OOD ≈ +0.132). ``acc_OOD >
+        acc_ID`` reverses under margin because the OOD floor is ~12 pts higher.
       - ``"number_estimate"`` : the SDK per-format hierarchical estimate for
         ``number`` — {accuracy, ci_low, ci_high, n} from the replicated
         video→question bootstrap over all ``answer_format == "number"`` rows.
 
-    ``eval_answers`` / ``train_answers`` (optional, indexed like ``results_df``)
-    supply the ground-truth answers needed for the trivial floors; when absent the
-    floor columns are NaN (results_df carries no answer column) and a note is logged.
+    ``gold`` (optional) supplies the ground-truth needed for the template-aware
+    floors: a DataFrame keyed on ``qID`` carrying an ``answer`` column and either a
+    ``template`` column or a ``question`` column (normalised here via ``template_of``).
+    ``results_df`` itself carries only qID/format/primary/correctness — no gold — so
+    WITHOUT ``gold`` every floor/margin is NaN (a MISSING INPUT, logged, not a bug).
     """
-    cols = ["capability_group", "distribution", "accuracy", "n"]
+    _empty_bucket = ["capability_group", "distribution", "accuracy", "n", "floor", "margin"]
     if results_df.empty:
         return {
             "bucket_mean": float("nan"),
-            "by_bucket": pd.DataFrame(columns=cols),
+            "by_bucket": pd.DataFrame(columns=_empty_bucket),
             "by_bucket_format": pd.DataFrame(
-                columns=["capability_group", "distribution", "answer_format", "accuracy", "n"]
+                columns=["capability_group", "distribution", "answer_format",
+                         "accuracy", "n", "floor", "margin"]
             ),
             "by_format": pd.DataFrame(
                 columns=[
                     "answer_format", "distribution", "accuracy", "n",
-                    "ci_low", "ci_high", "floor_majority", "floor_train_prior",
+                    "ci_low", "ci_high", "floor", "margin",
                 ]
             ),
             "acc_ID": float("nan"),
             "acc_OOD": float("nan"),
             "acc_overall": float("nan"),
+            "floor_ID": float("nan"),
+            "floor_OOD": float("nan"),
+            "margin_ID": float("nan"),
+            "margin_OOD": float("nan"),
             "number_estimate": {"accuracy": float("nan"), "ci_low": float("nan"),
                                 "ci_high": float("nan"), "n": 0},
         }
@@ -296,6 +320,40 @@ def stratified_report(
     df["capability_group"] = df["primary"].map(_leaf_to_group)
     df["distribution"] = _distribution(df, video_split)
     df["_vkey"] = df.apply(_video_key, axis=1)
+
+    # ── attach gold answers + templates for template-aware floors (optional) ──
+    has_gold = gold is not None and len(gold) > 0
+    if has_gold:
+        g = gold.copy()
+        if "template" not in g.columns:
+            if "question" not in g.columns:
+                raise KeyError(
+                    "gold must carry a 'template' or 'question' column for the "
+                    f"template-aware floor; got {list(g.columns)}"
+                )
+            g["template"] = g["question"].map(template_of)
+        g = g[["qID", "answer", "template"]].drop_duplicates("qID")
+        df = df.merge(g, on="qID", how="left").rename(
+            columns={"answer": "_answer", "template": "_template"}
+        )
+        missing = int(df["_answer"].isna().sum())
+        if missing:
+            logger.warning(
+                "template-aware floor: %d/%d rows have no matching gold answer "
+                "(qID not in the supplied gold set) — their templates are dropped "
+                "from the floor.", missing, len(df),
+            )
+    else:
+        logger.info(
+            "template-aware floors: no gold answers supplied — floor/margin columns "
+            "are NaN (results_df carries no answer column; this is a missing input)."
+        )
+
+    def _slice_floor(sub: pd.DataFrame) -> float:
+        """Template-aware floor of a slice, or NaN when gold is absent."""
+        if not has_gold:
+            return float("nan")
+        return template_floor(sub, answer_col="_answer", template_col="_template")
 
     # ── by_bucket + bucket_mean (the headline) ───────────────────────────────
     by_bucket = (
@@ -315,10 +373,17 @@ def stratified_report(
             list(zip(dropped["capability_group"], dropped["distribution"], dropped["n"])),
         )
     bucket_mean = float(kept["accuracy"].mean()) if len(kept) else float("nan")
+    # per-bucket template-aware floor + margin (NaN without gold).
+    by_bucket["floor"] = [
+        _slice_floor(df[(df["capability_group"] == r.capability_group)
+                        & (df["distribution"] == r.distribution)])
+        for r in by_bucket.itertuples(index=False)
+    ]
+    by_bucket["margin"] = by_bucket["accuracy"] - by_bucket["floor"]
 
     # ── by_bucket_format: group×{ID,OOD}×answer_format cross (Tier-2 source) ──
     # Same canonical leaf→group + qID ID/OOD already on ``df`` — a pure re-group,
-    # never a re-derivation of buckets/ID-OOD. CIs/floors stay in ``by_format``.
+    # never a re-derivation of buckets/ID-OOD. Bootstrap CIs stay in ``by_format``.
     by_bucket_format = (
         df.groupby(["capability_group", "distribution", "answer_format"])["_correct"]
         .agg(accuracy="mean", n="size")
@@ -326,41 +391,48 @@ def stratified_report(
         .sort_values(["capability_group", "distribution", "answer_format"])
         .reset_index(drop=True)
     )
+    by_bucket_format["floor"] = [
+        _slice_floor(df[(df["capability_group"] == r.capability_group)
+                        & (df["distribution"] == r.distribution)
+                        & (df["answer_format"] == r.answer_format)])
+        for r in by_bucket_format.itertuples(index=False)
+    ]
+    by_bucket_format["margin"] = by_bucket_format["accuracy"] - by_bucket_format["floor"]
 
-    # ── flat ID / OOD / overall means ────────────────────────────────────────
+    # ── flat ID / OOD / overall means + template-aware floors/margins ─────────
     dist_means = df.groupby("distribution")["_correct"].mean()
     acc_id = float(dist_means.get("ID", float("nan")))
     acc_ood = float(dist_means.get("OOD", float("nan")))
     acc_overall = float(df["_correct"].mean())
+    floor_id = _slice_floor(df[df["distribution"] == "ID"])
+    floor_ood = _slice_floor(df[df["distribution"] == "OOD"])
+    margin_id = acc_id - floor_id
+    margin_ood = acc_ood - floor_ood
 
-    # ── by_format (+ bootstrap CIs + trivial floors) ─────────────────────────
+    # ── by_format (+ bootstrap CIs + template-aware floor + margin) ───────────
     rng = np.random.default_rng(seed)
-    if eval_answers is None or train_answers is None:
-        logger.info(
-            "trivial floors: eval/train answers not supplied — floor columns are "
-            "NaN (results_df carries no answer column)."
-        )
     fmt_rows: list[dict] = []
     for (fmt, dist), sub in df.groupby(["answer_format", "distribution"], sort=True):
         mean, low, high = _hier_bootstrap(sub, n_boot=n_boot, rng=rng)
-        ea = eval_answers.loc[sub.index] if eval_answers is not None else None
+        acc = float(sub["_correct"].mean())
+        floor = _slice_floor(sub)
         fmt_rows.append(
             {
                 "answer_format": str(fmt),
                 "distribution": str(dist),
-                "accuracy": float(sub["_correct"].mean()),
+                "accuracy": acc,
                 "n": int(len(sub)),
                 "ci_low": low,
                 "ci_high": high,
-                "floor_majority": _majority_floor(ea),
-                "floor_train_prior": _train_prior_floor(ea, train_answers),
+                "floor": floor,
+                "margin": acc - floor,
             }
         )
     by_format = pd.DataFrame(
         fmt_rows,
         columns=[
             "answer_format", "distribution", "accuracy", "n",
-            "ci_low", "ci_high", "floor_majority", "floor_train_prior",
+            "ci_low", "ci_high", "floor", "margin",
         ],
     )
 
@@ -379,6 +451,10 @@ def stratified_report(
         "acc_ID": acc_id,
         "acc_OOD": acc_ood,
         "acc_overall": acc_overall,
+        "floor_ID": floor_id,
+        "floor_OOD": floor_ood,
+        "margin_ID": margin_id,
+        "margin_OOD": margin_ood,
         "number_estimate": number_estimate,
     }
 
@@ -439,28 +515,51 @@ def assert_bucket_counts(
 
 
 def assert_floors_vs_eval_set(report: dict) -> None:
-    """Every ``by_format`` accuracy must be >= its trivial floors, vs the EVAL set.
+    """Verify the template-aware floor pipeline actually ran and is self-consistent.
 
-    Floors are computed vs the eval answers split by ID/OOD (never a global
-    prior). NaN floors (answers not supplied) are skipped. RAISES listing any
-    below-floor (format, distribution) rows.
+    For every ``by_format`` / ``by_bucket`` row that carries a POPULATED (non-NaN)
+    floor, assert the floor lies in [0, 1] and ``margin == accuracy − floor`` exactly.
+    This is the real check that replaces the old NaN no-op: it catches a floor that was
+    never wired (all-NaN when gold WAS supplied), a corrupted round-trip, or a margin
+    that drifted from ``accuracy − floor``.
+
+    It deliberately does NOT raise merely because a run sits BELOW its floor. Being
+    below the template-aware floor is a documented FINDING, not malformed input: a weak
+    baseline legitimately is (data card rung 08 §4b — the 00-baseline is below floor in
+    every cell), and the honest signal is the NEGATIVE margin surfaced in ``results/``,
+    never an aborted score. When NO floors are populated (``gold`` not supplied) this
+    stays a logged no-op — a MISSING input, not a broken one.
     """
-    bf = report.get("by_format")
-    if bf is None or len(bf) == 0:
-        return
-    below: list[str] = []
-    for _, r in bf.iterrows():
-        for fcol in ("floor_majority", "floor_train_prior"):
-            floor = r.get(fcol)
-            if floor is not None and pd.notna(floor) and r["accuracy"] < floor:
-                below.append(
-                    f"{r['answer_format']}/{r['distribution']} acc={r['accuracy']:.4f} "
-                    f"< {fcol}={floor:.4f}"
+    problems: list[str] = []
+    n_populated = 0
+    for name in ("by_format", "by_bucket"):
+        t = report.get(name)
+        if t is None or len(t) == 0 or "floor" not in getattr(t, "columns", []):
+            continue
+        for _, r in t.iterrows():
+            floor = r.get("floor")
+            if floor is None or pd.isna(floor):
+                continue
+            n_populated += 1
+            key = "/".join(str(r.get(k)) for k in t.columns if k in
+                           ("answer_format", "capability_group", "distribution"))
+            if not (0.0 <= float(floor) <= 1.0):
+                problems.append(f"{name}[{key}] floor={floor} outside [0,1]")
+            margin = r.get("margin")
+            expected = float(r["accuracy"]) - float(floor)
+            if margin is None or pd.isna(margin) or abs(float(margin) - expected) > 1e-9:
+                problems.append(
+                    f"{name}[{key}] margin={margin} != accuracy−floor={expected:.6f}"
                 )
-    if below:
+    if n_populated == 0:
+        logger.info(
+            "assert_floors_vs_eval_set: no template-aware floors populated (gold "
+            "answers not supplied) — nothing to verify (missing input, not a bug)."
+        )
+        return
+    if problems:
         raise AssertionError(
-            "by_format accuracy below trivial floor (model no better than guessing): "
-            + "; ".join(below)
+            "template-aware floor/margin pipeline inconsistent: " + "; ".join(problems)
         )
 
 

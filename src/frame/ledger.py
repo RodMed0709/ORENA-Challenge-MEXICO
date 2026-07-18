@@ -47,16 +47,19 @@ _VIEW = ["experiment", "arm", "bucket_mean", "acc_ID", "acc_OOD", "verdict", "no
 # ── Tier-1 schema (display / sort order) ──────────────────────────────────────
 _TIER1_COLS = [
     "experiment", "run", "model",
-    "bucket_mean", "acc_ID", "acc_OOD",
+    "bucket_mean", "acc_ID", "acc_OOD", "margin_ID", "margin_OOD",
     "acc_fo_class", "acc_number", "acc_binary", "acc_open_ended", "acc_multiple_choice",
     "n_total", "date", "source_commit", "needs_backfill",
 ]
 _FORMATS = ["fo_class", "number", "binary", "open_ended", "multiple_choice"]
 
 # ── Tier-2 / Tier-3 schema ────────────────────────────────────────────────────
+# ``floor``/``margin`` are the template-aware trivial floor and ``accuracy − floor``
+# at the group×dist×format cell (from stratified_report's by_bucket_format); the
+# bootstrap CIs stay at the coarser answer_format×distribution granularity.
 _TIER2_COLS = [
     "experiment", "run", "capability_group", "distribution", "answer_format",
-    "accuracy", "n", "floor", "ci_low", "ci_high",
+    "accuracy", "n", "floor", "margin", "ci_low", "ci_high",
 ]
 
 # heterogeneous RESULTS.csv column aliases → the canonical field we coalesce to.
@@ -66,6 +69,8 @@ _ALIASES: dict[str, tuple[str, ...]] = {
     "bucket_mean": ("bucket_mean",),
     "acc_ID": ("acc_ID", "val_id_acc"),
     "acc_OOD": ("acc_OOD", "val_ood_acc"),
+    "margin_ID": ("margin_ID",),
+    "margin_OOD": ("margin_OOD",),
     "n_total": ("n_questions", "n_total", "n"),
     "date": ("date",),
     "acc_fo_class": ("acc_fo_class", "acc_fmt_fo_class"),
@@ -190,6 +195,10 @@ def stratified_to_jsonable(
         "acc_ID": strat.get("acc_ID"),
         "acc_OOD": strat.get("acc_OOD"),
         "acc_overall": strat.get("acc_overall"),
+        "floor_ID": strat.get("floor_ID"),
+        "floor_OOD": strat.get("floor_OOD"),
+        "margin_ID": strat.get("margin_ID"),
+        "margin_OOD": strat.get("margin_OOD"),
         "number_estimate": strat.get("number_estimate"),
         "by_bucket": by_bucket,
         "by_bucket_format": _df_records(strat.get("by_bucket_format")),
@@ -282,6 +291,8 @@ def _tier1_row_from_strat(root: Path, strat_path: Path) -> dict:
         "bucket_mean": _num(data.get("bucket_mean")),
         "acc_ID": _num(data.get("acc_ID")),
         "acc_OOD": _num(data.get("acc_OOD")),
+        "margin_ID": _num(data.get("margin_ID")),
+        "margin_OOD": _num(data.get("margin_OOD")),
         "n_total": _int_or_none(meta.get("n_total")),
         "date": meta.get("date") or "",
         "source_commit": _source_commit(root, strat_path),
@@ -314,6 +325,10 @@ def _tier1_rows_from_csv(root: Path, csv: Path, seen: set[tuple[str, str]]) -> l
             "bucket_mean": _num(_first(r, *_ALIASES["bucket_mean"])),
             "acc_ID": _num(_first(r, *_ALIASES["acc_ID"])),
             "acc_OOD": _num(_first(r, *_ALIASES["acc_OOD"])),
+            # margins need the gold answers a bare RESULTS.csv lacks → NaN until the
+            # run is rescored with a stratified.json (needs_backfill).
+            "margin_ID": _num(_first(r, *_ALIASES["margin_ID"])),
+            "margin_OOD": _num(_first(r, *_ALIASES["margin_OOD"])),
             "n_total": _int_or_none(_first(r, *_ALIASES["n_total"])),
             "date": _first(r, *_ALIASES["date"]) or "",
             "source_commit": commit,
@@ -328,9 +343,10 @@ def _tier1_rows_from_csv(root: Path, csv: Path, seen: set[tuple[str, str]]) -> l
 def _tier2_rows_from_strat(root: Path, strat_path: Path) -> list[dict]:
     """Tier-2 (+ per-run Tier-3) rows for one rich run.
 
-    ``by_bucket_format`` (group×dist×format accuracy+n) LEFT-joined to ``by_format``
-    (floor_majority + bootstrap CIs, at the coarser format×dist granularity). All
-    numbers come straight from the canonical output.
+    ``by_bucket_format`` (group×dist×format accuracy, n, template-aware floor, margin)
+    LEFT-joined to ``by_format`` for the bootstrap CIs (which stay at the coarser
+    format×dist granularity). All numbers come straight from the canonical output —
+    the ledger never re-derives a floor or a margin.
     """
     data = json.loads(strat_path.read_text(encoding="utf-8"))
     meta = data.get("_meta", {}) or {}
@@ -338,7 +354,7 @@ def _tier2_rows_from_strat(root: Path, strat_path: Path) -> list[dict]:
     run = meta.get("run") or strat_path.parent.name
     bbf = _df_records(data.get("by_bucket_format"))
     bf = _df_records(data.get("by_format"))
-    # index by_format on (answer_format, distribution) for the floor/CI join.
+    # index by_format on (answer_format, distribution) for the CI join.
     fkey = {
         (str(r.get("answer_format")), str(r.get("distribution"))): r for r in bf
     }
@@ -354,11 +370,41 @@ def _tier2_rows_from_strat(root: Path, strat_path: Path) -> list[dict]:
             "answer_format": fmt,
             "accuracy": _num(r.get("accuracy")),
             "n": int(_num(r.get("n"))) if not math.isnan(_num(r.get("n"))) else 0,
-            "floor": _num(fr.get("floor_majority")),
+            "floor": _num(r.get("floor")),
+            "margin": _num(r.get("margin")),
             "ci_low": _num(fr.get("ci_low")),
             "ci_high": _num(fr.get("ci_high")),
         })
     return rows
+
+
+# ── gold answers for the template-aware floors (offline, reproducible) ────────
+
+def gold_from_frame_parquets(data_root: str | Path, split: str = "test") -> pd.DataFrame:
+    """Build the ``gold`` table ``stratified_report`` needs for template-aware floors.
+
+    Reads every ``<data_root>/<ds>/data/frame/<split>.parquet`` (``test`` = val) and
+    returns ``[qID, answer, question]`` with ``qID = "<ds>__<id>"`` — exactly the
+    namespacing the scorer keys on. The QA parquets are ~410 KB, gitignored, pulled
+    from the pod / RunPod S3 (data card rung 08 §11). Pure pandas — no torch, no SDK.
+    ``stratified_report`` normalises ``question`` → template via ``metrics.template_of``.
+    """
+    import glob  # noqa: PLC0415 — local: keep the module's top imports minimal
+
+    root = Path(data_root)
+    files = sorted(glob.glob(str(root / "*" / "data" / "frame" / f"{split}.parquet")))
+    if not files:
+        raise FileNotFoundError(
+            f"no {split}.parquet under {root} — pull the QA parquets from the pod/S3 "
+            "(gitignored, ~410 KB; data card rung 08 §11)."
+        )
+    frames = []
+    for f in files:
+        ds = Path(f).parents[2].name
+        d = pd.read_parquet(f, columns=["id", "question", "answer"])
+        d["qID"] = ds + "__" + d["id"].astype(str)
+        frames.append(d[["qID", "answer", "question"]])
+    return pd.concat(frames, ignore_index=True)
 
 
 # ── public entry points ───────────────────────────────────────────────────────
@@ -461,7 +507,8 @@ def _write_results_md(
     except ValueError:
         rel_dir = str(out_dir)
     view = [
-        "experiment", "run", "model", "bucket_mean", "acc_ID", "acc_OOD",
+        "experiment", "run", "model", "bucket_mean",
+        "acc_ID", "acc_OOD", "margin_ID", "margin_OOD",
         "n_total", "date", "needs_backfill",
     ]
     lines = [
@@ -473,12 +520,19 @@ def _write_results_md(
         "real capability_group × {ID,OOD} buckets, canonical headline from "
         "`frame.metrics.stratified_report`) is the number we track; rows sort by it.",
         "",
+        "**Read `margin`, not raw accuracy.** `margin_ID`/`margin_OOD` = `acc − floor`, where "
+        "the floor is the template-aware trivial constant (answer each template's modal answer; "
+        "data card rung 08 §4b). It is the REAL skill the model adds. `acc_OOD > acc_ID` does NOT "
+        "mean the model generalises better — the OOD floor is ~12 pts higher, so by margin the "
+        "model usually adds *less* on OOD. A negative margin = below the trivial floor (a weak "
+        "baseline legitimately is). Blank margins = `needs_backfill` (no gold answers joined yet).",
+        "",
         "**Tiers (all in `" + rel_dir + "/`, auto-built from each run's canonical "
         "`stratified.json`):**",
         "",
         f"- `{rel_dir}/summary.csv` — Tier 1: one row per experiment/run (this table is its digest).",
         f"- `{rel_dir}/detailed.csv` — Tier 2: one row per run × capability_group × "
-        "{ID,OOD} × answer_format (accuracy, n, floor, CI).",
+        "{ID,OOD} × answer_format (accuracy, n, floor, margin, CI).",
         f"- `{rel_dir}/by_run/<experiment>__<run>.csv` — Tier 3: the full per-run canonical breakdown.",
         "",
         "`needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is "
