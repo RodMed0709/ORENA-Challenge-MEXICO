@@ -360,3 +360,111 @@ def stratified_report(
         "acc_overall": acc_overall,
         "number_estimate": number_estimate,
     }
+
+
+# ── gates — importable, unconditional, RAISE on malformed input ───────────────
+# These encode the exact failure modes from the git archaeology (964 dropped in
+# rung 07). They cannot be silently disabled: no flag, no env toggle. An
+# experiment that imports them cannot pass a broken df past them.
+
+def assert_all_rows_grouped(results_df: pd.DataFrame) -> None:
+    """Every ``primary`` leaf must map to a real Capability group (ex-gate G3).
+
+    RAISES ``ValueError`` listing any un-mappable leaves + example qIDs — this is
+    the 964-drop guard: a group-name-vs-leaf filter would silently drop these.
+    """
+    if results_df.empty:
+        return
+    bad: dict[str, list] = {}
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for leaf in results_df["primary"].unique():
+            if Capability.from_any(leaf) is None:
+                qids = results_df.loc[results_df["primary"] == leaf, "qID"].tolist()
+                bad[str(leaf)] = qids[:5]
+    if bad:
+        raise ValueError(
+            f"{len(bad)} un-mappable primary leaf value(s) would be dropped by a "
+            f"group filter: {bad}. Every scored row must map its leaf to a "
+            "Capability group (Capability.from_any(leaf).group)."
+        )
+
+
+def assert_bucket_counts(
+    results_df: pd.DataFrame, expected: dict[tuple[str, str], int]
+) -> None:
+    """Recompute {group}×{ID,OOD} counts and assert they equal ``expected``.
+
+    Catches a group-name-vs-leaf filter: e.g. ``object_recognition`` totals 3421,
+    NOT the ``object_identification`` leaf n=2457. RAISES on any mismatch.
+    """
+    assert_all_rows_grouped(results_df)
+    df = results_df.copy()
+    df["capability_group"] = df["primary"].map(_leaf_to_group)
+    df["distribution"] = df["qID"].map(_dist_from_qid)
+    got = {
+        (g, d): int(n)
+        for (g, d), n in df.groupby(["capability_group", "distribution"]).size().items()
+    }
+    diffs = {
+        k: (got.get(k), expected.get(k))
+        for k in set(got) | set(expected)
+        if got.get(k) != expected.get(k)
+    }
+    if diffs:
+        raise AssertionError(
+            f"bucket count mismatch (got, expected) per (group, dist): {diffs}"
+        )
+
+
+def assert_floors_vs_eval_set(report: dict) -> None:
+    """Every ``by_format`` accuracy must be >= its trivial floors, vs the EVAL set.
+
+    Floors are computed vs the eval answers split by ID/OOD (never a global
+    prior). NaN floors (answers not supplied) are skipped. RAISES listing any
+    below-floor (format, distribution) rows.
+    """
+    bf = report.get("by_format")
+    if bf is None or len(bf) == 0:
+        return
+    below: list[str] = []
+    for _, r in bf.iterrows():
+        for fcol in ("floor_majority", "floor_train_prior"):
+            floor = r.get(fcol)
+            if floor is not None and pd.notna(floor) and r["accuracy"] < floor:
+                below.append(
+                    f"{r['answer_format']}/{r['distribution']} acc={r['accuracy']:.4f} "
+                    f"< {fcol}={floor:.4f}"
+                )
+    if below:
+        raise AssertionError(
+            "by_format accuracy below trivial floor (model no better than guessing): "
+            + "; ".join(below)
+        )
+
+
+def assert_no_dup_qid(results_df: pd.DataFrame) -> None:
+    """``qID`` must be unique (mirrors run.py:130 + evaluator.py duplicate-qID abort)."""
+    if not results_df["qID"].is_unique:
+        dups = results_df.loc[results_df["qID"].duplicated(keep=False), "qID"].unique()
+        raise AssertionError(
+            f"{len(dups)} duplicate qID(s), e.g. {list(dups[:5])} — Evaluator would abort "
+            "and buckets would double-count."
+        )
+
+
+def assert_ood_from_qid(results_df: pd.DataFrame) -> None:
+    """Every qID prefix must be a known dataset so ID/OOD comes from the qID.
+
+    RAISES if any prefix ∉ {heico, lapchole} — a df whose distribution silently
+    came from the all-False ``ood`` column would have unknown/foreign prefixes.
+    """
+    if results_df.empty:
+        return
+    prefixes = results_df["qID"].map(_prefix_from_qid)
+    unknown = sorted(set(prefixes) - set(_VALID_PREFIXES))
+    if unknown:
+        raise AssertionError(
+            f"qID prefixes {unknown} ∉ {_VALID_PREFIXES}: ID/OOD MUST be derived from the "
+            "qID prefix (heico=OOD, lapchole=ID), never the all-False results_df['ood'] column."
+        )
