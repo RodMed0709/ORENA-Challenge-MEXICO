@@ -18,9 +18,24 @@ datasets/
 *.safetensors
 *.bin
 checkpoints/
-runs/
-experiments/*/runs/
 external_data/
+
+# Run artifacts stay out (weights, predictions, logs — they live on RunPod).
+# EXCEPTION: the canonical `stratified.json` IS versioned. A few KB of pure JSON, no
+# weights. Reason: `results/` is COMMITTED but `frame.ledger.build_results_ledger`
+# regenerates it from these files. With them ignored, rebuilding on a clone that lacks
+# another run's artifacts silently DOWNGRADES that run's committed row to
+# needs_backfill=True with every floor/margin → NaN (verified 2026-07-18: a rebuild
+# here wiped 02-lora-sft's and 00-baseline's canonical margins). Versioning them is
+# what makes the ledger's "auto-built, cannot drift" promise true on ANY clone.
+# NOTE: git cannot re-include a file whose PARENT directory is excluded, so these
+# patterns exclude the run CONTENTS and re-include the directories to descend through.
+runs/**
+experiments/*/runs/**
+!runs/**/
+!experiments/*/runs/**/
+!runs/**/stratified.json
+!experiments/*/runs/**/stratified.json
 wandb/
 .ipynb_checkpoints/
 
