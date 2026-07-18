@@ -139,10 +139,17 @@ def part_a_gates() -> None:
     foreign = pd.DataFrame([{"qID": "weird__1", "video": "v", "primary": "object_identification",
                              "answer_format": "number", "correctness": 1}])
     assert _raises(m.assert_ood_from_qid, foreign), "ood_from_qid must raise"
-    below = {"by_format": pd.DataFrame([{"answer_format": "number", "distribution": "ID",
-                                         "accuracy": 0.10, "n": 10, "ci_low": 0.0, "ci_high": 0.2,
-                                         "floor_majority": 0.50, "floor_train_prior": float("nan")}])}
-    assert _raises(m.assert_floors_vs_eval_set, below), "floors gate must raise below floor"
+    # floors gate: RAISES on an INCONSISTENT floor/margin (margin != accuracy − floor),
+    # NOT on a below-floor run (being below the template floor is a documented finding
+    # a weak baseline legitimately hits — data card §4b — surfaced as a negative margin).
+    inconsistent = {"by_format": pd.DataFrame([{"answer_format": "number", "distribution": "ID",
+                                                "accuracy": 0.50, "n": 10, "ci_low": 0.4, "ci_high": 0.6,
+                                                "floor": 0.30, "margin": 0.99}])}  # 0.99 != 0.50−0.30
+    assert _raises(m.assert_floors_vs_eval_set, inconsistent), "floors gate must raise on margin drift"
+    below_but_consistent = {"by_format": pd.DataFrame([{"answer_format": "number", "distribution": "ID",
+                                                        "accuracy": 0.10, "n": 10, "ci_low": 0.0, "ci_high": 0.2,
+                                                        "floor": 0.50, "margin": -0.40}])}  # below floor, consistent
+    m.assert_floors_vs_eval_set(below_but_consistent)  # must NOT raise
     print("  [A3] all 5 gates pass on clean df and RAISE on crafted-bad df  PASS")
 
 
@@ -181,6 +188,39 @@ def part_a_hybrid_crosscheck() -> None:
     print("  [A5] HYBRID cross-check: kept-mean == bucket_mean; RAISES on divergence  PASS")
 
 
+def _synthetic_gold(df: pd.DataFrame) -> pd.DataFrame:
+    """Gold answers + a shared template for the synthetic df — enough to exercise the
+    template-aware floor path deterministically (no pod, no parquet)."""
+    g = df[["qID"]].copy()
+    g["question"] = "How many objects at timepoint 00:00:01 ?"  # <TS> collapses the time
+    g["answer"] = ["1" if i % 3 else "2" for i in range(len(g))]  # modal "1" → floor 2/3
+    return g
+
+
+def part_a_template_floor_margin() -> None:
+    """WITHOUT gold every floor/margin is NaN (missing input, no crash); WITH gold the
+    floors populate and margin == accuracy − floor everywhere, split ID/OOD."""
+    df = _synthetic_df()
+
+    r0 = stratified_report(df, n_boot=50)
+    assert r0["by_format"]["floor"].isna().all(), "no-gold floors must be NaN"
+    assert pd.isna(r0["margin_ID"]) and pd.isna(r0["floor_OOD"]), "no-gold ID/OOD floors NaN"
+    m.assert_floors_vs_eval_set(r0)  # no-op, must not raise
+
+    r = stratified_report(df, gold=_synthetic_gold(df), n_boot=50)
+    for tbl in ("by_format", "by_bucket", "by_bucket_format"):
+        t = r[tbl]
+        assert t["floor"].notna().all(), f"{tbl} floors must populate with gold"
+        assert (abs(t["margin"] - (t["accuracy"] - t["floor"])) < 1e-12).all(), \
+            f"{tbl} margin != accuracy − floor"
+    for k in ("floor_ID", "floor_OOD", "margin_ID", "margin_OOD"):
+        assert pd.notna(r[k]), f"{k} must be populated with gold"
+    assert abs(r["margin_ID"] - (r["acc_ID"] - r["floor_ID"])) < 1e-12
+    assert abs(r["margin_OOD"] - (r["acc_OOD"] - r["floor_OOD"])) < 1e-12
+    m.assert_floors_vs_eval_set(r)  # consistent → passes
+    print("  [A6] template-aware floor/margin: NaN without gold, consistent with gold  PASS")
+
+
 def part_a_rung05_self_consistency() -> None:
     if not _05_CSV.exists():
         print(f"  [A4] SKIP — {_05_CSV} not found")
@@ -211,6 +251,16 @@ def _find_rung02_results() -> Path | None:
     return hits[0] if hits else None
 
 
+def _load_val_gold() -> "pd.DataFrame | None":
+    """The val gold table (qID, answer, question) from the gitignored parquets, or
+    None if they were not pulled (data card rung 08 §11)."""
+    data_root = _ROOT / "external_data" / "orena-data"
+    if not any(data_root.glob("*/data/frame/test.parquet")):
+        return None
+    from frame.ledger import gold_from_frame_parquets  # noqa: PLC0415
+    return gold_from_frame_parquets(data_root)
+
+
 def part_b_rung02_repro() -> None:
     path = _find_rung02_results()
     if path is None:
@@ -221,14 +271,28 @@ def part_b_rung02_repro() -> None:
     m.assert_no_dup_qid(df)
     m.assert_all_rows_grouped(df)
     m.assert_ood_from_qid(df)
-    r = stratified_report(df)
+    gold = _load_val_gold()
+    r = stratified_report(df, gold=gold)
     # REAL, S3-verified numbers (not arithmetic self-consistency): the full-val
     # eval of the OOD-selected checkpoint-1720. Tight tolerance — these are exact.
     assert abs(r["bucket_mean"] - 0.5486) < 5e-4, f"rung-02 bucket_mean {r['bucket_mean']} != 0.5486"
     assert abs(r["acc_OOD"] - 0.5918) < 5e-4, f"rung-02 acc_OOD {r['acc_OOD']} != 0.5918"
     assert abs(r["acc_ID"] - 0.5209) < 5e-4, f"rung-02 acc_ID {r['acc_ID']} != 0.5209"
+    if gold is None:
+        print(f"  [B]  rung-02 reproduced from {path.name}: bucket_mean={r['bucket_mean']:.4f}, "
+              f"acc_OOD={r['acc_OOD']:.4f}, acc_ID={r['acc_ID']:.4f} (floors SKIPPED — "
+              "val parquets not pulled)  PASS")
+        return
+    m.assert_floors_vs_eval_set(r)
+    # The self-check that ties results/ to the data card §4b: the template-aware floor
+    # is HIGHER on OOD, so acc_OOD > acc_ID reverses under margin.
+    assert abs(r["margin_ID"] - 0.1838) < 5e-4, f"rung-02 margin_ID {r['margin_ID']} != +0.1838"
+    assert abs(r["margin_OOD"] - 0.1320) < 5e-4, f"rung-02 margin_OOD {r['margin_OOD']} != +0.1320"
+    assert r["floor_OOD"] > r["floor_ID"], "OOD floor must be the higher one (data card §4b)"
+    assert r["margin_ID"] > r["margin_OOD"], "by margin the model adds LESS on OOD (§4b)"
     print(f"  [B]  rung-02 reproduced from {path.name}: bucket_mean={r['bucket_mean']:.4f}, "
-          f"acc_OOD={r['acc_OOD']:.4f}, acc_ID={r['acc_ID']:.4f}  PASS")
+          f"acc_OOD={r['acc_OOD']:.4f}, acc_ID={r['acc_ID']:.4f}, "
+          f"margin_ID={r['margin_ID']:+.4f}, margin_OOD={r['margin_OOD']:+.4f}  PASS")
 
 
 def main() -> int:
@@ -237,6 +301,7 @@ def main() -> int:
     part_a_leaf_vs_group_dropbug()
     part_a_gates()
     part_a_hybrid_crosscheck()
+    part_a_template_floor_margin()
     part_a_rung05_self_consistency()
     print("PART B - POD-GATED (rung-02 saved predictions):")
     part_b_rung02_repro()
