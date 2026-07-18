@@ -22,7 +22,6 @@ Two design points that carry the experiment:
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 
 import numpy as np
@@ -35,32 +34,21 @@ import pandas as pd
 # perception change (the rung 07 failure mode).
 from number_probe import parse_number  # noqa: F401  (re-exported for the notebook)
 
-_TS = re.compile(r"\d{2}:\d{2}:\d{2}")
+# Single-sourced from the canonical scoring module (context/RULES.md §1-3, §5), NOT
+# reimplemented here. These three used to be copied into this file line-for-line —
+# which is exactly the duplication RULES.md §1 forbids, and the reason the copies
+# agreed to six decimals for as long as nobody edited one of them.
+#
+# `distribution` is now STRICTER than the `qid.startswith("heico")` it replaces: it
+# compares the exact `__`-delimited prefix, so a hypothetical `heicoXYZ__1` can no
+# longer be mislabelled OOD. Same answer on today's data, safer on tomorrow's.
+from frame.metrics import _dist_from_qid as distribution  # noqa: F401
+from frame.metrics import template_floor as trivial_floor  # noqa: F401
+from frame.metrics import template_of as template  # noqa: F401
 
 # A cell contributes to the verdict only if its delta CI is tighter than the effect we
 # care about. Below that it is SIN POTENCIA — reported, but counting neither way.
 POWER_HALF_WIDTH = 0.10
-
-
-def template(question: str) -> str:
-    """The question with its embedded timestamp normalised out.
-
-    `open_ended` questions carry their own timestamp ("At timepoint 01:27:41 ..."), so
-    on the raw string every one of them is its own template of n=1 — and a template
-    with one question is degenerate by construction. Counting on the raw string is what
-    inflated the data card's first draft from 188 templates to 393.
-    """
-    return _TS.sub("<TS>", question)
-
-
-def distribution(qid: str) -> str:
-    """ID/OOD from the qID prefix — heico = Sigmoid Resection = our OOD proxy.
-
-    NEVER read `results_df["ood"]`: it is False on all 6252 rows because the public
-    data does not carry the label (CONSTITUTION.md:63; the private test populates it).
-    Not a bug — a landmine.
-    """
-    return "OOD" if qid.startswith("heico") else "ID"
 
 
 def n_items(text) -> int:
@@ -133,23 +121,17 @@ def dice_at(df: pd.DataFrame, fmt: str, dist: str, k: int) -> float:
     return float(s["dice"].mean()) if len(s) else float("nan")
 
 
-def trivial_floor(df: pd.DataFrame) -> float:
-    """Score of answering each TEMPLATE's modal answer, without looking at anything.
-
-    Per template, never per format: the global modal answer is a *dumber* strategy, and
-    measuring against it inflated `number`'s reported margin from +4.9 to +8.1 — a
-    pooled margin that exceeded every individual template's margin, which is the tell
-    (card §3).
-    """
-    hits = sum(g["answer"].value_counts().iloc[0] for _, g in df.groupby("template"))
-    return hits / len(df)
-
-
 def margin(df: pd.DataFrame, dist: str) -> float:
     """Accuracy minus the template-aware trivial floor, on one distribution.
 
     This is the number the co-authorship needs to move on OOD. Raw acc_OOD is not:
     it rises when the floor rises (card §4b).
+
+    The floor itself is `frame.metrics.template_floor` (imported above as
+    `trivial_floor`) — per template, never per format: the global modal answer is a
+    *dumber* strategy, and measuring against it inflated `number`'s reported margin
+    from +4.9 to +8.1, a pooled margin exceeding every individual template's, which
+    is the tell (card §3).
     """
     s = df[df["distribution"] == dist]
     return float(s["correctness"].mean() - trivial_floor(s))

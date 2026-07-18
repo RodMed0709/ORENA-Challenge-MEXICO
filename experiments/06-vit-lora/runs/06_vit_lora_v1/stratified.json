@@ -1,0 +1,299 @@
+{
+  "_meta": {
+    "experiment": "06-vit-lora",
+    "run": "06_vit_lora_v1",
+    "model": "Qwen3-VL-8B-Instruct + LoRA r8 ViT+LLM (ckpt-1720)",
+    "date": "2026-07-18",
+    "n_total": 6252,
+    "extra": {
+      "baseline": "02-lora-sft/02_lora_sft_v1 (LoRA on the LLM only)",
+      "single_variable": "freeze_vit=False -> LoRA also targets model.visual.*",
+      "trainable_params_total": 25673472,
+      "trainable_params_visual": 3850000,
+      "trainable_params_language": 21823500,
+      "eval_loss_ep1_ep2_ep3": [
+        0.32042527,
+        0.29251683,
+        0.27824777
+      ],
+      "paired_delta": "runs/06_vit_lora_v1/paired_delta.csv (dice@2, the pre-registered target)"
+    }
+  },
+  "bucket_mean": 0.566707285167315,
+  "acc_ID": 0.544404973357016,
+  "acc_OOD": 0.60775,
+  "acc_overall": 0.5849328214971209,
+  "floor_ID": 0.3370337477797513,
+  "floor_OOD": 0.45975,
+  "margin_ID": 0.20737122557726467,
+  "margin_OOD": 0.14800000000000002,
+  "number_estimate": {
+    "accuracy": 0.37144183512792184,
+    "ci_low": 0.3178896237131944,
+    "ci_high": 0.41896457697929634,
+    "n": 2094
+  },
+  "by_bucket": [
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "accuracy": 0.418848167539267,
+      "n": 955,
+      "floor": 0.3256544502617801,
+      "margin": 0.09319371727748693
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "accuracy": 0.5664,
+      "n": 1875,
+      "floor": 0.5445333333333333,
+      "margin": 0.0218666666666667
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "accuracy": 0.6373456790123457,
+      "n": 1296,
+      "floor": 0.3449074074074074,
+      "margin": 0.29243827160493835
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "accuracy": 0.644235294117647,
+      "n": 2125,
+      "floor": 0.38494117647058823,
+      "margin": 0.2592941176470588
+    },
+    {
+      "capability_group": "temporal_grounding",
+      "distribution": "ID",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    }
+  ],
+  "by_bucket_format": [
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "binary",
+      "accuracy": 0.8352272727272727,
+      "n": 176,
+      "floor": 0.6590909090909091,
+      "margin": 0.17613636363636365
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "number",
+      "accuracy": 0.3268229166666667,
+      "n": 768,
+      "floor": 0.24088541666666666,
+      "margin": 0.08593750000000003
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.18181818181818182,
+      "n": 11,
+      "floor": 0.9090909090909091,
+      "margin": -0.7272727272727273
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "binary",
+      "accuracy": 0.7718978102189781,
+      "n": 548,
+      "floor": 0.7262773722627737,
+      "margin": 0.04562043795620441
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "number",
+      "accuracy": 0.4819004524886878,
+      "n": 1326,
+      "floor": 0.46907993966817496,
+      "margin": 0.01282051282051283
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "open_ended",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "fo_class",
+      "accuracy": 0.6119565217391304,
+      "n": 920,
+      "floor": 0.2891304347826087,
+      "margin": 0.3228260869565217
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "multiple_choice",
+      "accuracy": 0.8555555555555555,
+      "n": 90,
+      "floor": 0.36666666666666664,
+      "margin": 0.4888888888888889
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.6503496503496503,
+      "n": 286,
+      "floor": 0.5174825174825175,
+      "margin": 0.1328671328671328
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "fo_class",
+      "accuracy": 0.6239316239316239,
+      "n": 1755,
+      "floor": 0.36182336182336183,
+      "margin": 0.2621082621082621
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "multiple_choice",
+      "accuracy": 0.7767857142857143,
+      "n": 112,
+      "floor": 0.5,
+      "margin": 0.2767857142857143
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "open_ended",
+      "accuracy": 0.7248062015503876,
+      "n": 258,
+      "floor": 0.49224806201550386,
+      "margin": 0.2325581395348837
+    },
+    {
+      "capability_group": "temporal_grounding",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    }
+  ],
+  "by_format": [
+    {
+      "answer_format": "binary",
+      "distribution": "ID",
+      "accuracy": 0.8352272727272727,
+      "n": 176,
+      "ci_low": 0.7435030864197532,
+      "ci_high": 0.918557098765432,
+      "floor": 0.6590909090909091,
+      "margin": 0.17613636363636365
+    },
+    {
+      "answer_format": "binary",
+      "distribution": "OOD",
+      "accuracy": 0.7718978102189781,
+      "n": 548,
+      "ci_low": 0.6686659962844173,
+      "ci_high": 0.831056421100829,
+      "floor": 0.7262773722627737,
+      "margin": 0.04562043795620441
+    },
+    {
+      "answer_format": "fo_class",
+      "distribution": "ID",
+      "accuracy": 0.6119565217391304,
+      "n": 920,
+      "ci_low": 0.5604487685255458,
+      "ci_high": 0.7024175239061731,
+      "floor": 0.2891304347826087,
+      "margin": 0.3228260869565217
+    },
+    {
+      "answer_format": "fo_class",
+      "distribution": "OOD",
+      "accuracy": 0.6239316239316239,
+      "n": 1755,
+      "ci_low": 0.5567020234924764,
+      "ci_high": 0.7303553237151259,
+      "floor": 0.36182336182336183,
+      "margin": 0.2621082621082621
+    },
+    {
+      "answer_format": "multiple_choice",
+      "distribution": "ID",
+      "accuracy": 0.8555555555555555,
+      "n": 90,
+      "ci_low": 0.6751984126984126,
+      "ci_high": 0.9374313186813188,
+      "floor": 0.36666666666666664,
+      "margin": 0.4888888888888889
+    },
+    {
+      "answer_format": "multiple_choice",
+      "distribution": "OOD",
+      "accuracy": 0.7767857142857143,
+      "n": 112,
+      "ci_low": 0.5233291245791245,
+      "ci_high": 0.9259347507331377,
+      "floor": 0.5,
+      "margin": 0.2767857142857143
+    },
+    {
+      "answer_format": "number",
+      "distribution": "ID",
+      "accuracy": 0.3268229166666667,
+      "n": 768,
+      "ci_low": 0.2754384237454546,
+      "ci_high": 0.37772808895964377,
+      "floor": 0.24088541666666666,
+      "margin": 0.08593750000000003
+    },
+    {
+      "answer_format": "number",
+      "distribution": "OOD",
+      "accuracy": 0.4819004524886878,
+      "n": 1326,
+      "ci_low": 0.4044198924454149,
+      "ci_high": 0.5917957772593824,
+      "floor": 0.46907993966817496,
+      "margin": 0.01282051282051283
+    },
+    {
+      "answer_format": "open_ended",
+      "distribution": "ID",
+      "accuracy": 0.6308724832214765,
+      "n": 298,
+      "ci_low": 0.5953963611959936,
+      "ci_high": 0.7410989383369896,
+      "floor": 0.5335570469798657,
+      "margin": 0.09731543624161076
+    },
+    {
+      "answer_format": "open_ended",
+      "distribution": "OOD",
+      "accuracy": 0.722007722007722,
+      "n": 259,
+      "ci_low": 0.6302780058651026,
+      "ci_high": 0.8284334393676499,
+      "floor": 0.4942084942084942,
+      "margin": 0.2277992277992278
+    }
+  ]
+}
