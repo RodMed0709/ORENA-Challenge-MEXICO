@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import glob
 import logging
-import re
 from pathlib import Path
 
 import pandas as pd
@@ -22,13 +21,13 @@ import pandas as pd
 from focus.data.data_models import Capability
 from focus.evaluation.evaluator import Evaluator
 
-# `answer_format == "open_ended"` embeds the timestamp in the question text, so the
-# raw string is unique per question and useless as a template key. Normalise it out.
-_TS = re.compile(r"\d{2}:\d{2}:\d{2}")
-
-
-def _template(question: str) -> str:
-    return _TS.sub("<TS>", question)
+# The template normalisation and the template-aware floor are the SAME logic the
+# results ledger scores with — imported from the ONE canonical implementation in
+# `frame.metrics` so the card and `results/` can never drift (context/RULES.md
+# §EVAL rule 1). `_template` normalises the embedded timestamp so open_ended
+# questions collapse to their template instead of each being an n=1 artefact.
+from frame.metrics import template_floor as _tpl_floor
+from frame.metrics import template_of as _template
 
 
 def _load(data_root: Path, split: str) -> pd.DataFrame:
@@ -55,9 +54,11 @@ def _floor_per_template(df: pd.DataFrame) -> float:
 
     Not the same as the global majority: a template-aware constant is a strictly
     smarter baseline, and measuring against the dumber one inflates our margin.
+    Delegates to ``frame.metrics.template_floor`` — the single source the results
+    ledger also scores with, so the card's §4b margins and ``results/`` agree by
+    construction.
     """
-    hits = sum(g["answer"].value_counts().iloc[0] for _, g in df.groupby("template"))
-    return hits / len(df)
+    return _tpl_floor(df, answer_col="answer", template_col="template")
 
 
 def build(data_root: Path, eval_dir: Path, out_dir: Path) -> dict:

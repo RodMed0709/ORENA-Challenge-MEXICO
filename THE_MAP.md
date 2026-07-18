@@ -116,6 +116,119 @@ official spec was read; left intact as provenance):
 - **Phase 5's SGLang "reuse image cache across a frame's questions"** is likely moot: the
   contract is one image + one question per call.
 
+## Block A — the model: diagnosis, evidence, CoA (folded from `BLOCK_A_MODEL.md`, 2026-07-16)
+
+> Block A = **the product** (what ships in the Docker). This folds in the reviewed Block A strategy;
+> `BLOCK_A_MODEL.md` is retired — two strategy docs that can diverge is a known failure mode.
+> Precedence: `documentacion/overview.md` > a measured number > a hand-verified citation.
+
+### A0 — the objective and its metric (✅ measured 2026-07-16, `experiments/08-data-card/`)
+
+The exam is the **mean accuracy over the 4 buckets** (`object_recognition × {ID,OOD}`, `aggregation ×
+{ID,OOD}`), subject to <5 s/q · 48 GB · offline · one GPU. Real composition and weight, **counted on val
+(6252 q), not assumed:**
+
+| Format | % of score (val) | our acc |
+|---|---|---|
+| `fo_class` | ~39.1% | 0.589 |
+| `number` | **~37.0%** | **0.432** ⚠ the weak one |
+| `binary` | ~12.8% | 0.769 |
+| `open_ended` | ~8.1% | 0.639 |
+| `multiple_choice` | ~3.0% | 0.762 |
+
+- **`fo_class` and `number` are a 1:1 pair** (each ~38%). THE_MAP's original *"leverage → fo_class + number"*
+  was right; a later draft "corrected" it on an unverified premise and was reverted.
+- 🌟 **`binary` is disguised counting** — 100% of it sits in `aggregation` (*"is there any gauze?"* = count > 0).
+
+🔴 **`pre_evaluation_score` is broken on our split — do not use it locally; the ladder's headline is
+`bucket_mean`.** The SDK score is a valid unweighted mean over 10 `group × ood` buckets *on paper*, but on our
+data: (a) `ood` is `False` on all 6252 public rows **by design** (`CONSTITUTION §I.5`; the organizers populate
+it in their private test → **the submission is unaffected**), collapsing 10 buckets to 3; and (b) `frame_ood_v1`
+carries one stray `temporal_grounding` question that an unweighted mean weighs like a bucket of 3421.
+
+| | Reported | Honest (n=1 bucket dropped) |
+|---|---|---|
+| Rung 02 LoRA | **pre_eval 0.708** | **0.563** |
+
+**~43% of the headline gain over zero-shot is that one question flipping.** ✅ **The LoRA gain is real**
+(`raw` 0.262→0.566, +0.305, matching the honest +0.312) — only the headline inflated. **Nothing to repair;
+something to avoid:** stamping our proxy onto `ood` would buy a `pre_eval` over our invented split, which is
+exactly what `bucket_mean` already is.
+
+### A1 — the diagnosis: no shortcut, the model looks (rung 05, image ablation)
+
+> **NO SHORTCUT. The model looks.** `fo_class` drops to **0.230** with a shuffled image — *below* its 0.269
+> trivial floor. Without the image↔question link it does worse than guessing the mode. That is real perception.
+
+⇒ **The CoA branch's original premise (SFT damaged priors → shortcut) is falsified by pre-registered data.**
+But the real finding is narrower and worse:
+
+| Format | Weight | Visual signal (real − black image) |
+|---|---|---|
+| `fo_class` | 39.1% | **+51.9 pts** |
+| `number` | **37.0%** | **+8.0 pts** |
+
+**Same encoder, same image: the vision path delivers object identity richly and almost nothing usable for
+counting.** With a black image `number` sits at the majority floor (0.352). The bottleneck is not "looks" nor
+"shortcut" — it is *"barely extracts anything for counting"*, and it carries **37% of the score**. **The live
+question is not "was the ViT the ceiling?" but "is the ViT the ceiling *for counting*?"** — which rung 06 (LoRA
+on the ViT) tests. Full report: `experiments/05-bottleneck-audit/`.
+
+### A2 — CoA: format, not RL (the convergence)
+
+> The old CoA premise died with the shortcut hypothesis. What survives, **independently**, is the ablation:
+> **RL = +1.7, FORMAT = +16.3** (SFT 65.7 → RLVR-no-format 67.4 → RLVR + CoA format 83.7).
+
+Two independent surgical papers — one in our own backbone family — split the gain the same way:
+
+| Paper | format / instruction side | visual-adapter side |
+|---|---|---|
+| **CoA** (2603.20116) | **+16.3** | RL +1.7 |
+| **Surgical-LVLM / VP-LoRA** (2405.10948, Qwen-VL) | instruction-FT **+16** | VP-LoRA **+2** |
+
+**~+16 on format, ~+2 on the visual path — twice, different methods.** It matches our measurement (healthy
+encoder + poor `number` output → points at format, not the eyes). This **lowers rung 06's (ViT-LoRA) expected
+value but does NOT cancel it** — VP-LoRA (Mamba SS2D) ≠ plain LoRA on the ViT, so the +2 is the closest
+evidence, not a prediction. 🔴 **Do not pivot the roadmap without measuring** (that was the 2026-07-15 error:
+"correcting" on an unverified premise). The rising cheap question: **how much of the +16.3 survives with SFT on
+the CoA format, without RL?** — no RL, no new infra; cost is the data project of synthesising the reasoning
+fields for ~13.7k examples. Plain instruction-FT's +16 is **already spent** (rung 02); the live question is
+whether *better-structured* instruction data buys more on top.
+
+### The backbone is closed — but the 32B question is latency, not memory
+
+`CONSTITUTION` fixes Qwen3-VL-8B, now validated by evidence (2506.17337: generalist + light FT ≥ specialist,
+**especially transferring to OOD** — half our exam). **Do not change family.** The 8B was chosen against the
+**pod's** 24–32 GB, not the **L40S's** 48 GB — so "32B FP8 doesn't fit" was concluded against the wrong
+constraint (in FP8 it is ~32–35 GB → fits 48, and the L40S is Ada with native FP8). **The 32B question is
+latency on the L40S, and nobody has measured it** → a hard gate before any capacity spend.
+
+### Evidence base — what each paper ACTUALLY supports
+
+> Kept so this is not re-litigated a third time. All hand-verified; abstracts in
+> `documentacion/papers-corroborados.md`. Citations the research agents misread are marked 🔧.
+
+| Paper | What it **DOES** support | What it does **NOT** |
+|---|---|---|
+| **2506.06232** — Challenging VLMs with Surgical Data *(DKFZ, our videos)* | VLMs do basic perception; **collapse when medical knowledge is needed.** Specialised medical VLMs underperform generalists. | 🔧 No comparable counting accuracy → cannot calibrate our 0.432. |
+| **2506.17337** — Generalist vs Specialist Medical VLMs | **Generalist + efficient FT ≥ specialist**, especially **transferring to OOD** → validates Qwen. | — |
+| **2603.20116** — Chain-of-Adaptation ⭐ | SFT *"can alter pretrained priors → reduced generalization"*. Ablation **SFT 65.7 → RL 67.4 → RL+format 83.7**. | Does **NOT** support RL as the lever (RL +1.7; **format +16.3**). Its shortcut premise was falsified by rung 05 — the format result stands alone. |
+| **2405.10948** — Surgical-LVLM / **VP-LoRA** ⭐ | **Qwen-VL backbone, our family.** Ablation: instruction-FT alone **+16** (72.48→88.53); **VP-LoRA adds only +2.** Own ficha `literature/FICHAS.md:61`. | 🔴 Does **NOT** support "unfreeze the aligner" — says the opposite. VP-LoRA (*Mamba SS2D in LoRA layers*) ≠ unfreezing anything. |
+| **2504.13837** — Does RL Really Incentivize…? | RLVR **sharpens** what the base can already do; does not expand the frontier. | — |
+| **2506.07218** — Perception-R1 | Naive RLVR **does not improve perception**; a perception-targeted reward does. | 🔧 Its reward needs **CoT-trajectory annotations + an LLM judge in the loop** — we have neither. |
+| **2603.17326** — FineViT | *"Visual encoders frequently remain a performance bottleneck."* | 🔧 Does **NOT** support "unfreeze the ViT" — it is a **new encoder trained from scratch**, no freeze-vs-unfreeze ablation. |
+| **2406.09246** — OpenVLA | Efficient VLA fine-tuning with LoRA on consumer GPUs. | 🔧 **Robotics**, not VQA. |
+| **2408.02442** — Let Me Speak Freely? | *"Significant decline in reasoning under format restrictions."* | Damage hits **CoT**, not short atomic answers → constrain **only the final output**. |
+| **2607.06420** — HoloCount | *thinking* mode improves counting **+10.6 to +15.4**. | A benchmark, not a method. |
+| **2501.02385** — MedVP | Visual prompts improve medical VQA. | Needs **Grounding DINO fine-tuned on medical data** → bboxes we do not have. |
+| **SurgeNetDINO** *(MIDL 2026)* | Surgical-domain SSL pretraining helps (4.7M frames). | Weights **CC-BY-NC-SA** → would infect our released model; ViT ≠ Qwen3-VL's dynamic-resolution ViT. |
+
+**Evidence WE measured (not cited):** `aggregation` = 77% `number` + 22% `binary` · FRAME has 2 groups (4
+buckets) · 100% of `binary` is `aggregation` · **NO SHORTCUT — the model looks** (rung 05, 18,756 inferences) ·
+`number` has only **+8.0 pts** of visual signal vs `fo_class`'s **+51.9** · `pre_eval 0.708` is +14.6 pts of one
+question. **No evidence for:** "unfreezing the ViT unlocks perception" (must be measured — rung 06; expected
+value dropped) · 32B FP8 latency on the L40S (a research agent fabricated it) · how the 5 s are timed.
+
 ## 0 — Executive roadmap (v3, improved map · added 2026-07-14)
 
 > Canonical, self-contained plan with the strategy-notes improvements folded in. The sections
@@ -158,7 +271,7 @@ official spec was read; left intact as provenance):
 
 ### STATUS (updated 2026-07-14) — Phase 2 DONE, Phase 3 redirected
 
-- **Phase 2 (LoRA v1) — DONE, PASS.** rung-02 (r8/α32/lr2e-5, 3 epochs, frozen ViT+aligner, 1 frame, max_pixels 1280×720). Best ckpt = **epoch 2** by acc_OOD (per-epoch 0.583/0.592/0.583 — **no OOD collapse**). Full val: **pre_eval 0.174→0.708, raw 0.262→0.566, OOD 0.269→0.592**. Per format: **fo_class 0.168→0.588 (+0.42), number 0.141→0.433 (+0.29)**, all up, OOD>ID. Merged model on volume `gf78k60nlt` at `experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720` (each run owns its ckpt/merged; only frames are shared, in `/workspace/frames_cache/`). See `experiments/02-lora-sft/RESULTS.csv`.
+- **Phase 2 (LoRA v1) — DONE, PASS.** rung-02 (r8/α32/lr2e-5, 3 epochs, frozen ViT+aligner, 1 frame, max_pixels 1280×720). Best ckpt = **epoch 2** by acc_OOD (per-epoch 0.583/0.592/0.583 — **no OOD collapse**). Full val: **bucket_mean 0.550** — the ladder's honest headline. The old **`pre_eval` 0.708 is inflated +14.6 pts by one `temporal_grounding` n=1 bucket** (see the Block A section, "A0"); `raw 0.262→0.566, OOD 0.269→0.592`. Per format: **fo_class 0.168→0.588 (+0.42), number 0.141→0.433 (+0.29)**, all up, OOD>ID. Merged model on volume `gf78k60nlt` at `experiments/02-lora-sft/runs/02_lora_sft_v1/merged/checkpoint-1720` (each run owns its ckpt/merged; only frames are shared, in `/workspace/frames_cache/`). See `experiments/02-lora-sft/RESULTS.csv`.
 - **rung-03 (prompt engineering) — faithful negative.** Rigorous select-on-val_id / confirm-on-val_ood: no prompt arm beats baseline beyond noise on OOD (winner's curse caught). Measured: FO-grounding lever = +0.061 (already in baseline). **fo_class + number are LoRA/data wins, NOT prompt.** See `experiments/03-prompt-variants/`.
 - **`number` diagnosed — NOT a data problem.** It is already 31% of train (4262q) with a well-spread answer distribution (mean 2.74, not skewed low) → oversampling won't help; the bottleneck is **perception**.
 - **Phase 3 REDIRECT — CORRECTED 2026-07-16. The target is the ViT, not the aligner.** Train loss AND acc_OOD both **plateau at epoch 1**. rung-02 froze **ViT + aligner**, so the LoRA only ever touched the language side; Surgical-LVLM's contribution (**VP-LoRA**, arXiv 2405.10948) is LoRA on the *visual-perception path* — we froze what the SOTA surgical VQA model adapts. **Next experiments (single-variable vs rung-02):** #1 **LoRA on the ViT**, #2 **rank probe r=8→32** (capacity vs representation vs resolution), then resolution / multi-frame / domain-augmentation. Resolution is **demoted** to a co-lever (untested assumption feeding a frozen encoder; headroom is ~4× not 8× per §2 above).

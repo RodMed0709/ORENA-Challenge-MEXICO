@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from frame.metrics import _leaf_to_group
+
 logger = logging.getLogger(__name__)
 
 
@@ -40,23 +42,34 @@ def correctness_frame(results_df: pd.DataFrame) -> pd.DataFrame:
 def question_metadata(items, video_split: dict | None = None) -> pd.DataFrame:
     """Build ``[qID, answer_format, capability_group, distribution]`` from FRAME items.
 
-    ``distribution`` = 'OOD' if the item's video is ``val_ood`` in the manifest, else 'ID'.
-    If ``video_split`` is None, fall back to ``reference.ood`` (usually all-False).
+    ``capability_group`` is the canonical leaf→group from ``frame.metrics`` (the
+    SINGLE source of truth — ``Capability.group``, which RAISES on an un-mappable
+    leaf); this module no longer reimplements the mapping (context/RULES.md §2).
+
+    ``distribution`` = 'OOD' if the item's video is ``val_ood`` in the frozen split
+    manifest, else 'ID' — the same OOD signal frame.metrics uses (the manifest's
+    ``val_ood`` set is the ``heico`` qID-prefix Sigmoid procedure). ``video_split``
+    is REQUIRED: RAISES ``ValueError`` when it is None. The old ``reference.ood``
+    fallback is forbidden — ``ood`` is all-False on public data, so it would
+    mislabel every question as ID (context/RULES.md §3). Both callers
+    (``02_lora_sft.ipynb``, ``05_bottleneck_audit.ipynb``) always pass a real split.
     """
+    if video_split is None:
+        raise ValueError(
+            "question_metadata requires a video_split manifest; the reference.ood "
+            "fallback is forbidden (it is all-False on public data and would mislabel "
+            "every question as ID — context/RULES.md §3). Pass the frozen split "
+            "(keyed (dataset, video_id) → 'val_ood'/'val_id')."
+        )
     rows = []
     for it in items:
         ref = it.reference
-        grp = getattr(ref.primary, "group", ref.primary)
-        grp = getattr(grp, "value", str(grp))
-        if video_split is not None:
-            dist = "OOD" if video_split.get((it.dataset, it.video_id)) == "val_ood" else "ID"
-        else:
-            dist = "OOD" if getattr(ref, "ood", False) else "ID"
+        leaf = getattr(ref.primary, "value", ref.primary)
         rows.append({
             "qID": ref.qID,
             "answer_format": str(getattr(ref, "_format", "unknown")),
-            "capability_group": grp,
-            "distribution": dist,
+            "capability_group": _leaf_to_group(leaf),
+            "distribution": "OOD" if video_split.get((it.dataset, it.video_id)) == "val_ood" else "ID",
         })
     return pd.DataFrame(rows)
 
