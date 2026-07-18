@@ -82,7 +82,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 - **Storage layout (BINDING, user rule):** each run OWNS its heavy artifacts inside `experiments/<id>/runs/<run>/` — `ckpt/`, `merged/`, `train.jsonl`, small CSVs, `inspect.csv`. The ONLY shared store is frames: `/workspace/frames_cache/` (single-source, identity-keyed, populate-if-missing — a frame exists ONCE and is called from there; never re-copied per experiment). Do NOT hoist ckpt/merged out to a flat `/workspace/ckpt`.
 - **Two-part store:** `experiments/<id>/` (notebooks `NN_<slug>.ipynb`, `_models/` engines-only, `report.py`, `RESULTS.csv`, README opening with the ladder) + `context/<id>/CONTEXT.md` (curated, outside the artifact dir).
 - **Single-variable A/B** vs a named baseline; flags default OFF = byte-identical. **build → smoke → independent review (GO/NO-GO + file:line) → full.** Faithful negatives are valid.
-- **Cleanup discipline (CONSTITUTION §IX):** temp files / smoke scripts / scratch → delete the moment they're not needed, log why. No files/folders created "al aventón." Temporaries go to the session scratchpad, not the repo. Every new repo file is justified against §VIII.
+- **Cleanup discipline (CONSTITUTION §IX):** temp files / smoke scripts / scratch → delete the moment they're not needed, log why. No files/folders created haphazardly. Temporaries go to the session scratchpad, not the repo. Every new repo file is justified against §VIII.
 - **Gitignored:** `runs/`, `experiments/*/runs/`, `external_data/`, `.ipynb_checkpoints/`. `docs/` = deliverables only.
 <!-- GSD:conventions-end -->
 
