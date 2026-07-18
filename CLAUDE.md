@@ -72,7 +72,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
-**The brain — read `context/INDEX.md` FIRST.** Before proposing an architecture change, a model swap, or a new experiment, open `context/INDEX.md` (the root map) and the relevant `context/decisions/*.md` — settled verdicts live there so we do NOT re-litigate them (e.g. ViT-swap = NO-GO, next size = 30B-A3B MoE FP8). New settled verdict → add one short file under `context/decisions/` and link it in the INDEX. Current state (the NOW) lives in `HANDOFF.md`.
+**The brain — read `context/INDEX.md` FIRST.** Before proposing an architecture change, a model swap, or a new experiment, open `context/INDEX.md` (the root map), `context/RULES.md` (the DO/DON'T rules — esp. EVAL: score ONLY via `frame.metrics`, leaf→group via `Capability.group`, ID/OOD from qID, headline `bucket_mean`, gates RAISE and are never disabled, never re-derive metrics inline in a notebook), and the relevant `context/decisions/*.md` — settled verdicts live there so we do NOT re-litigate them (e.g. ViT-swap = NO-GO, next size = 30B-A3B MoE FP8). New settled verdict → add one short file under `context/decisions/` and link it in the INDEX; a rule changes only via a decision note edited into `RULES.md` in the same commit. Current state (the NOW) lives in `HANDOFF.md`.
 
 **Repo structure + experiment discipline are BINDING.** Read `EXPERIMENT_REPO_STRUCTURE_SPEC.md` (repo root) and `CONSTITUTION.md` §VIII–IX before creating any file/folder or building experiments. Non-negotiables:
 
