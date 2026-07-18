@@ -72,6 +72,8 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 <!-- GSD:conventions-start source:CONVENTIONS.md -->
 ## Conventions
 
+**The brain — read `context/INDEX.md` FIRST.** Before proposing an architecture change, a model swap, or a new experiment, open `context/INDEX.md` (the root map) and the relevant `context/decisions/*.md` — settled verdicts live there so we do NOT re-litigate them (e.g. ViT-swap = NO-GO, next size = 30B-A3B MoE FP8). New settled verdict → add one short file under `context/decisions/` and link it in the INDEX. Current state (the NOW) lives in `HANDOFF.md`.
+
 **Repo structure + experiment discipline are BINDING.** Read `EXPERIMENT_REPO_STRUCTURE_SPEC.md` (repo root) and `CONSTITUTION.md` §VIII–IX before creating any file/folder or building experiments. Non-negotiables:
 
 - **Notebooks generate runs; `.py` files are importable libraries, NEVER launchers.** No `run_*.py`/`main.py`/`.sh` chains run by hand. Config goes inline in a notebook cell that calls `engine.main(cfg)`. We work in **Jupyter**. (Reconciliation: the `scripts/*.py` in the Phase 1-3 plans become notebook cells at the experiment layer.)
