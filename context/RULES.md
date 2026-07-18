@@ -44,6 +44,20 @@
 9. **Every result → the ledger.** Regenerate root `RESULTS.md` via `frame.ledger`; every
    number must be reproducible from a commit.
 
+## READING results (from the data card, rung 08 — read `experiments/08-data-card/`)
+A raw accuracy is meaningless without its trivial floor. Read numbers this way:
+
+10. **Judge by MARGIN over the template-aware floor, not raw accuracy.** The floor = what a dumb
+    constant (the per-template modal answer) scores by exploiting the answer distribution alone.
+    Margin = accuracy − floor = the real skill added. A high floor makes a raw number look good.
+11. **`acc_OOD > acc_ID` does NOT mean better generalization.** The OOD floor is ~12 pts higher
+    (answers are easier to guess), so by margin the model adds *less* on OOD. Never read the raw
+    OOD>ID gap as "generalises well".
+12. **`acc_number` is NOT interpretable — do not quote it.** It averages 8 templates with floors
+    from 0.24 to 1.00 (4 degenerate). Use the SDK hierarchical estimate + per-template margins.
+13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
+    videos); trust the video-level hierarchical CI for "will this hold on a new video?".
+
 ## How a rule changes
 A rule changes ONLY by: (a) a new measurement that contradicts it, recorded as a
 `context/decisions/*.md` note, then (b) editing this file in the SAME commit, linking that
