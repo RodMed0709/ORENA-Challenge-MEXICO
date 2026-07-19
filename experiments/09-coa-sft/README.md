@@ -2,9 +2,16 @@
 
 > Rung 02 trained the LLM to emit the **bare gold answer** ("2"). This rung asks one
 > question: does training the model to emit a **structured reasoning scaffold that ends
-> in the gold** — instead of the bare gold — generalize better on OOD? The literature's
-> CoA ablation says the lever is the **format**, not RL: SFT 65.7 → +RL 67.4 (+1.7) →
-> **+CoA-format 83.7 (+16.3)**. OOD is 50% of the FRAME score. Single variable vs rung 02.
+> in the gold** — instead of the bare gold — generalize better on OOD? Single variable vs
+> rung 02.
+>
+> ⚠️ **Expectation reset (adversarial gate, 2026-07-18 — [[coa-generator-qwen32b-onpod]]).**
+> The oft-quoted CoA "+16.3" (SFT 65.7 → +RL 67.4 → **+CoA-format 83.7**) is **format stacked
+> on RL** — there is NO `SFT+CoA-format, no-RL` row in the source; **R1 is exactly that untested
+> cell.** And the paper measured 83.7 while EMITTING the full CoA; we emit **only `<answer>`**
+> (5 s / ≤32-token budget), betting structured SFT is a **weights-level regularizer** that keeps
+> the gain — also untested. So **do NOT carry +16.3 into planning**; the honest prior is
+> "unknown, plausibly ~0." The pilot's whole value is measuring these two cells for ~$10.
 
 ## Ladder
 
@@ -43,23 +50,29 @@ R1 changes **only the assistant `content`** → a CoA scaffold that still ends i
 target**, nothing else. At inference the model reasons internally and emits **only
 `<answer>…</answer>`** (parsed to the bare answer before it reaches the judge).
 
-## How the scaffold is built — reverse generation, NO pixels (settled)
+## How the scaffold is built — reverse generation from a frame-seeing VLM, ON-POD
 
 The `<description>/<evidence>/<thought>` do not exist in the data (which carries only
-question + gold). They are **reverse-generated**: we hand a text LLM the **known gold**
-and ask it to write reasoning that *lands on* that gold (LLaVA-Surg two-stage trick). The
-generator **does not see the frame**. Adjudicated by the vlm-strategist adversarial pass
-(`context/09-coa-sft/CONTEXT.md`):
+question + gold). They are **reverse-generated**: we hand a VLM the frame + question + the
+**known gold** + the sibling fact-sheet, and it writes reasoning that *derives* that gold.
+The gold is never guessed. **Generator = `Qwen/Qwen3-VL-32B-Instruct`, zero-shot, run ON-POD**
+(FP8) — full rationale + adversarial-required changes in [[coa-generator-qwen32b-onpod]].
 
-- **Our own Qwen3-VL-8B seeing the frame is REJECTED** — it scores `bucket_mean 0.256`,
-  below floor everywhere, and collapses on exactly the multi-object OOD frames R1 targets
-  (`fo_class 0.00@4obj`). It would write confident hallucinations that *look* pixel-grounded
-  — a worse training target than generic-but-answer-correct text.
-- **The corpus is unanimous**: LLaVA-Surg, SSG-VQA, GP-VLS, Surgical-LVLM all grounded
-  structured reasoning on **annotations / known answers via a text model**, never on raw-pixel
-  free perception. "Faithful" = anchored on the correct **label**, not on a perceiver.
-- The +16.3 lever's mechanism is **output structure that preserves pretrained priors**, not
-  visual faithfulness — so frame-grounding of the scaffold is not required for it to fire.
+- **On-pod is non-negotiable (DUA):** no challenge frame or annotation may go to an external
+  API — [[no-external-api-for-challenge-data]]. The earlier text-only sample (deepseek/Claude
+  via MCP) is DUA-invalid and kept ONLY as a format/methodology proof.
+- **Why a frame-seeing 32B (not text-only, not our 8B):** text-only hallucinates the scene
+  (fatal for positional questions); our own 8B is below-floor (`bucket_mean 0.256`) and would
+  self-distill hallucinations on the multi-object OOD frames R1 targets. A strong general 32B
+  is a genuine perceiver and Apache-2.0 (clean outputs, same family as the 8B student). No
+  surgical-domain generative VLM has downloadable weights (SurgVLM/GP-VLS/LLaVA-Surg verify-fail;
+  EndoChat has a Llama-2 output clause) — see [[coa-generator-qwen32b-onpod]].
+- **Quality without training:** few-shot prompt (2-3 exemplars) + **short scaffolds** (protects
+  the 5 s latency budget AND the `number` answer gradient).
+- ⚠️ **The 32B still isn't a surgical expert.** Anchored on gold, a perception slip shows as
+  slightly-off `<evidence>`, not a wrong answer — but on multi-object OOD frames it can write
+  evidence that *contradicts the scene*, and the Qwen judge-mirror (itself below-floor) CANNOT
+  catch evidence↔frame incoherence. This is why the **eyeball-50 gate below runs first.**
 
 ### Anchoring — the sibling fact-sheet (and its 62% limit)
 
@@ -80,21 +93,28 @@ generator (a strong open VLM captioner on a pod, data-gen only — Stage 4 reser
 
 | Stage | What | Kill-gate | Status |
 |---|---|---|---|
-| **1** | Scaffold **generator** engine + a **~50 stratified SAMPLE** for eyeball review | user eyeball: format valid, no answer-leak, reasoning coherent, not all-detached | **this session** |
-| 2 | Generate full 13.7k + **pilot train** on ~2k stratified, **≤2 epochs** | pilot must beat rung-02 OOD margin (+0.132) on the ~2k or STOP | later |
-| 3 | Eval canonically (`frame.metrics`), margin vs rung-02 | **OOD margin ≤ +0.132 AND `number` not preserved → KILL** | later |
-| 4 | Scale (full train) / reserve: VLM-hybrid generator if Stage-1 detachment forced it | — | later |
+| **0** | Generator **engine** + a text-only 50-sample as a **format/methodology proof** (DUA-invalid for training) | — | **done (local)** |
+| **1** | **ON-POD**: pull Qwen3-VL-32B (FP8), generate **~50 vision scaffolds**, over-sampling **multi-object-OOD + single-Q** frames → **eyeball** | user eyeball: `<evidence>` does NOT contradict the frame on multi-object frames; format valid; no answer-leak. **Fail → switch generator / stop.** | **next (pod)** |
+| **2** | **Matched pilot**: generate **2k CoA** + train, AND a **2k bare-gold control** (same subset/seed/recipe/epochs, ≤2) | read **`CoA-2k − bare-2k`** (paired), bootstrap CI must clear 0 on bucket_mean AND per-template `number` margin. Also measure **p99 in emit-only-`<answer>` mode**. | later |
+| 3 | If pilot clears: generate full 13.7k, train, **clean A/B** = full-CoA vs rung-02 (`frame.metrics`) | **OOD margin ≤ rung-02 AND `number` not preserved → KILL** | later |
+| 4 | Scale / reserve: Qwen2.5-VL-72B second-pass generator on hard frames only | — | later |
 
-### Sample deliverable (Stage 1)
+*Pilot comparison is **`CoA-2k − bare-2k` (paired, single-variable)** — NOT CoA-2k vs full-13.7k
+rung-02, which confounds format with 6.9× less data (Cholec80: data quantity > architecture) and
+would kill a real winner. The clean A/B stays the full-set run.*
 
-- **~50 examples, stratified** across `answer_format` (fo_class / number / open_ended /
-  binary / multiple_choice) × dataset (heico=OOD-proxy / lapchole=ID-proxy), **oversampling
-  single-Q frames** to test the weak case.
-- **Two backends side by side** for each example: **deepseek-reasoner** vs **Claude**. The
-  eyeball compares reasoning quality → decides whether deepseek is good enough to scale
-  cheaply to 13.7k, or whether a frontier model is needed.
-- Emitted as an **eyeball CSV** (`runs/<run>/sample_eyeball.csv`, gitignored) with the raw
-  scaffolds + per-check flag columns (see below).
+### Sample deliverable
+
+- **Stage 0 (done, local):** a text-only 50-sample (deepseek vs Claude) in
+  `runs/<run>/sample_eyeball.csv` — kept ONLY as a format/methodology proof. It is
+  **DUA-invalid** as training data (annotations went to external APIs) and used a generator that
+  cannot see the frame. What it already showed: positional (`multiple_choice`) questions force
+  circular reasoning for a blind generator, and text-only makes logical-coherence slips the
+  literal answer-leak flag misses — both motivate the on-pod vision generator.
+- **Stage 1 (on-pod, next):** ~50 **vision** scaffolds from Qwen3-VL-32B, stratified across
+  `answer_format` × dataset (heico=OOD-proxy / lapchole=ID-proxy) and **over-sampling
+  multi-object-OOD + single-Q frames** (the poisoning-risk cases). Emitted as an eyeball CSV
+  with per-check flags. **This is the first real kill-gate** — see the Stages table.
 
 ### Filter — sample vs full set
 
@@ -103,10 +123,13 @@ generator (a strong open VLM captioner on a pod, data-gen only — Stage 4 reser
   **answer-leak** (gold asserted as a premise in `<description>`/`<evidence>` before any
   derivation); nothing after `</answer>`; canonical answer form (`number`→bare int,
   `fo_class`→exact enum).
-- **Full set (Stage 2):** add the **offline Qwen judge-mirror** (ρ=0.94,
-  `vendor/orena-focus/.../judges.py`). Because `<answer>==gold` by construction, the judge is
-  prompted to score **evidence→answer coherence + answer-leak**, NOT just answer-match (which
-  is a near no-op here). Needs GPU → pod, deferred.
+- **Pilot 2k + full set:** add the **offline Qwen judge-mirror** (ρ=0.94,
+  `vendor/orena-focus/.../judges.py`) — run it on the **2k too**, not only the full set. Because
+  `<answer>==gold` by construction, prompt it to score **evidence→answer coherence + answer-leak
+  + over-specific spatial/numeric claims** (a proxy for frame-detachment), NOT just answer-match.
+  ⚠️ **Blind spot:** the judge-mirror is a text model (and itself a below-floor perceiver of these
+  frames) → it CANNOT catch evidence that contradicts the actual FRAME. That failure mode is
+  caught only by the human eyeball-50 gate (Stage 1) over-sampling multi-object frames.
 
 ## BINDING notes for the training stages (do NOT lose these)
 
@@ -114,7 +137,17 @@ generator (a strong open VLM captioner on a pod, data-gen only — Stage 4 reser
   [[checkpoint-selection-vs-number]]: training **erases `number`** with time (to +0.000 by
   epoch 3, *even with the ViT frozen*) and **acc_OOD selection picks the checkpoint that
   erased more**. R1 must save per-epoch, select with `number` margin in view, and not
-  default to a late epoch. rung-02 recipe defaults to 3 epochs — **lower it**.
+  default to a late epoch. rung-02 recipe defaults to 3 epochs — **lower it**. ⚠️ **CoA makes
+  this WORSE by construction:** SFT loss is over *all* target tokens, so a scaffold that is ~95%
+  prose / ~5% answer puts most gradient on prose, not the count — bare-gold put *all* gradient on
+  the answer. Mitigate with **short scaffolds** and/or **up-weighting the `<answer>` span**; read
+  per-template `number` margin (pooled `acc_number` is not interpretable, data card §3).
+- **Matched control + deployment-mode eval (adversarial gate).** The pilot kill-gate reads
+  **`CoA-2k − bare-2k`** (a matched 2k-bare-gold arm, same subset/seed/recipe/epochs) — paired,
+  single-variable — NOT CoA-2k vs full-13.7k rung-02. Evaluate in **emit-only-`<answer>`**
+  deployment mode (parse `<answer>` from generation); an emit-full-reasoning eval is
+  non-transferable. Retire the "+16.3" prior — it is RL+format, R1 tests the untested SFT-only
+  cell ([[coa-generator-qwen32b-onpod]]).
 - **p99 latency gate BEFORE the full run.** The unmeasured L40S p99 with longer internal
   reasoning tokens is the hard unknown gating R1
   (`context/decisions/next-move-rodrigo-coa-format.md:38`). Measure p99 on a scaffold-trained

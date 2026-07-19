@@ -8,16 +8,18 @@ model reasons internally at inference and emits **only `<answer>`**. Owner: **Ro
 orthogonal to Leo's rung 06 (perception/ViT). Decision:
 `context/decisions/next-move-rodrigo-coa-format.md`.
 
-## Why the format, not RL, and why no pixels (settled)
-- **Format is the lever, not RL.** CoA ablation: SFT 65.7 → +RL 67.4 (+1.7) →
-  +CoA-format 83.7 (+16.3). GRPO on 1×L40S is unvalidated; the +1.7 RLVR variant was killed.
-- **Generator does NOT see the frame.** Adjudicated by a vlm-strategist adversarial pass
-  (2026-07-18). The user's first instinct (our own 8B sees the frame) was **refuted by our
-  own numbers**: the 8B is below floor everywhere (`bucket_mean 0.256`) and hallucinates on
-  exactly the multi-object OOD frames R1 targets — self-distilling from a below-floor teacher.
-  Every surgical-VLM paper (LLaVA-Surg, SSG-VQA, GP-VLS, Surgical-LVLM) grounded structured
-  reasoning on **annotations / known answers via a text model**, never on raw-pixel free
-  perception. "Faithful" = anchored on the correct label, not on a perceiver.
+## Why this format, the RL caveat, and the generator (updated 2026-07-18)
+- ⚠️ **The +16.3 is RL+format, not SFT+format** — there is no SFT-only-CoA row in the source
+  (`Bloque-A-Modelo.md:301-306`); R1 is that untested cell, and we emit only `<answer>` (the
+  paper emitted the full CoA) → the whole thesis is a **weights-level-regularizer bet** the pilot
+  exists to test. Retire the +16.3 prior. Full reasoning: [[coa-generator-qwen32b-onpod]].
+- **Generator = Qwen3-VL-32B, vision, zero-shot, ON-POD** ([[coa-generator-qwen32b-onpod]]).
+  The path here moved through three positions: (1) our own 8B sees the frame — REJECTED (below
+  floor, self-distills hallucinations); (2) text-only reverse-gen, no pixels — REJECTED (DUA:
+  the deepseek/Claude route sent annotations to external APIs; and it hallucinates the scene,
+  fatal for positional questions); (3) **a strong general VLM that sees the frame, run on-pod** —
+  a genuine perceiver, Apache-2.0, same family as the 8B student, DUA-compliant. No surgical
+  generative VLM has downloadable weights, so a general Qwen is the correct on-pod generator.
 
 ## The reverse-generation recipe
 Per training row we hand the generator: `question`, **`gold`**, `procedure_type`,
@@ -46,12 +48,15 @@ Per training row we hand the generator: `question`, **`gold`**, `procedure_type`
 - **answer_format counts (train):** fo_class 6294, number 4262, open_ended 1322,
   binary 1230, multiple_choice 640.
 
-## Stage-1 backend decision
-Generate the ~50 sample with **deepseek-reasoner AND Claude, side by side**, so the eyeball
-picks the cheapest sufficient generator for the 13.7k. No Gemini/OpenAI key exists in
-`.secrets.env` (only RUNPOD); deepseek is available via the `deepseek-worker` MCP, Claude via
-the orchestrator. The engine's backend is pluggable → swapping to a VLM-hybrid or an API
-model later is a config flip, not a rewrite.
+## Backend history (Stage 0 done → Stage 1 pivot)
+- **Stage 0 (done, local):** a text-only 50-sample generated with deepseek-reasoner AND Claude
+  side by side. **DUA-invalid for training** (annotations went to external APIs — the exact
+  thing [[no-external-api-for-challenge-data]] now forbids); kept ONLY as a format/methodology
+  proof. It already showed the payoff of moving to vision: positional questions are un-derivable
+  for a blind generator, and text-only makes coherence slips the literal flag misses.
+- **Stage 1 (on-pod, next):** regenerate with **Qwen3-VL-32B seeing the frame**, on-pod. The
+  engine's backend is pluggable (`vlm-local`), so this is a config flip, not a rewrite. Kill-gate
+  is the eyeball-50 (over-sampling multi-object-OOD + single-Q) BEFORE any 2k generation.
 
 ## Landmines / open
 - **62% single-Q frames** — the anti-detachment anchor is absent for most rows. Watch it.
