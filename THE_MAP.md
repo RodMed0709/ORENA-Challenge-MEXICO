@@ -229,6 +229,47 @@ buckets) · 100% of `binary` is `aggregation` · **NO SHORTCUT — the model loo
 question. **No evidence for:** "unfreezing the ViT unlocks perception" (must be measured — rung 06; expected
 value dropped) · 32B FP8 latency on the L40S (a research agent fabricated it) · how the 5 s are timed.
 
+### What comes next — the two roadmaps RECONCILED (2026-07-19)
+
+> **Why this section exists.** The Block-A fold (2026-07-16) brought over the *diagnosis*
+> but not the *roadmap*: `Bloque-A`'s A0→A4 step diagram and its pipeline diagram never
+> made it, so for three days two documents disagreed about what to do next and nobody
+> could see it. This reconciles them. Where they conflict, the conflict is named — not
+> silently resolved in favour of one.
+
+| Candidate | In Bloque-A? | In THE_MAP? | Status after rung 06 + T7 |
+|---|---|---|---|
+| **LoRA on the ViT** | A2 → capacity | Phase 3 **#1** | ✅ **RUN — PARTIAL.** Both cheap follow-ups closed: `vit_lr` (rationale disconfirmed) and epoch-1 checkpoint (loses to epoch 2) |
+| **Measure p99 on the REAL L40S** | **A4** + 🚦 **hard gate** on A2's capacity branch | Phase 1 (b), pending | ⬜ **OPEN — the only item BOTH documents demand.** Blocks 30B. Bloque-A also records that the 32B latency figure once cited was **fabricated** by an agent ("NO ENCONTRADO. r1 lo fabricó") |
+| **Rank probe r=8→32** | ❌ **ABSENT** | Phase 3 **#2** | ⬜ Open, but single-sourced. Attacks the "representation ceiling", which THE_MAP itself flags as an **n=1 conclusion** |
+| **Constrained decoding** | **A3**, standalone, "in parallel" | only inside Phase 0 as a serving detail | 🔴 **MEASURED DEAD (2026-07-19).** `number` answers are **100% bare integers in all three rungs, including zero-shot**; `engine.py:88-94` only strips + caps, so the model genuinely emits clean. The FRAME questions carry their own format instruction. **Expected gain ≈ 0** |
+| **Resolution (`max_pixels`)** | A2 → "ahora sí se puede pagar" | **demoted** to co-lever | ⚠️ **The two disagree.** THE_MAP's demotion is the later and better-argued call (untested assumption feeding a frozen encoder; headroom ~4× not 8×) |
+| **Bigger backbone** | A2 → "Qwen3-VL-**32B** FP8" | — | ⚠️ **Superseded by [[qwen-size-ladder]]: 30B-A3B-FP8**, and gated by [[vit-lora-partial]]. Bloque-A's "32B" is stale |
+| **`src/frame/serve` package** | **A4** — "HOY, sin GPU" | ❌ **ABSENT (0 mentions)** | ⬜ Open, no GPU. Lost in the fold |
+| **Data flywheel (error→mint-QA→retrain)** | ❌ **ABSENT (0 mentions)** | Phase 3, its main content | ⬜ Open. Lost in the *other* direction |
+| **Multi-frame** | ❌ absent | Phase 3 | ⚠️ THE_MAP elsewhere calls multi-frame **dead as an inference lever** (they hand us one image); it only affects training data |
+| **YOLO→ROI / visual prompts** | reserve | `[RESERVE]`, gated on LoRA missing the bar | ⬜ Reserve in both. Consistent |
+| **Offline Docker** | A4 — ⛔ template missing | Phase 0 | ⛔ Blocked by the organizers, not by us |
+
+**What the reconciliation actually says.**
+
+1. **`p99` on a real L40S is the only step both documents ask for**, and Bloque-A makes it a
+   **hard gate** on the whole capacity branch. Nothing has ever run on the target hardware —
+   the 0.59 s figure is from an A100, and the one 32B latency number that circulated was
+   fabricated. It is also unpaid Phase-1 debt. **Best-evidenced next move.**
+2. **The rank probe is single-sourced.** It exists to attack a "representation ceiling" that
+   THE_MAP itself labels an n=1 conclusion from one training configuration. Worth running —
+   but it is a weaker claim on the queue than a gate both documents demand.
+3. **A3 is dead and should stop being listed.** It was designed against an assumption
+   (the model rambles) that was never measured and is false.
+4. **Two items were lost in each direction** — `src/frame/serve` (Bloque-A only) and the
+   data flywheel (THE_MAP only). Neither is blocked; both were simply invisible to whoever
+   read the other document.
+
+⚠️ **Still not folded:** Bloque-A's two ASCII diagrams (the product pipeline §4 and the
+A0→A4 step map §5). They are *structure*, not prose, and the fold dropped every code block.
+`local/Bloque-A-Modelo.md` remains the only copy.
+
 ## 0 — Executive roadmap (v3, improved map · added 2026-07-14)
 
 > Canonical, self-contained plan with the strategy-notes improvements folded in. The sections
