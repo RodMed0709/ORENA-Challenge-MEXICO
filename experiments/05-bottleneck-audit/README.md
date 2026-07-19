@@ -14,6 +14,7 @@
 | 04-vendor-baseline | External vendor baseline | 00 | done (tutorial, no results row by design) |
 | **05-bottleneck-audit** | **The image passed to the model (Real vs Black vs Shuffled)** | **02-lora-sft (checkpoint-1720)** | **done — NO SHORTCUT** |
 | **05b-number-probe** | *(probe, not a rung — no variable changed)* **reads the predicted text rung 05 discarded** | — | **done — COUNTS BADLY** |
+| **05c-count-confusion** | *(probe, not a rung)* **`P(pred\|true)` per TEMPLATE — does the error have correctable structure?** | — | **done — CALIBRATION IS DEAD** |
 
 ---
 
@@ -210,6 +211,62 @@ the language-only LoRA had 13.7k examples and did not learn to read it.
 For `number` the bands **overlap**: `SHORTCUT` needs `≥ 0.3885`, `LOOKS` needs `≤ 0.4020`. Any value
 between fires **both**. The rule is undefined when `A_real ≈ A_trivial`. It did not bite here (0.3567
 falls outside) — **by luck, not by design**. Recorded rather than patched after the fact.
+
+## 5c. The `count-confusion` probe — calibration is measured dead
+
+**Run 2026-07-19, zero GPU.** `05c_count_confusion.ipynb` · engine `_models/count_confusion.py`
+(reuses 05b's `parse_number`) · `RESULTS_count_confusion.csv`.
+
+### Why, after 05b
+
+[[the-gap-is-the-number-format]] localised the whole `aggregation` deficit to the **`number`
+format** — 80.4% of `aggregation × ID`, and no path to the target avoids lifting it from 0.327 to
+~0.482. That left exactly two levers: **post-hoc count calibration** and **synthetic-counting
+SFT**. 05b had shown the model counts but saturates; it could not say whether the error had
+**correctable structure**, because it pooled the 8 templates (4 degenerate — `acc_number` is not
+interpretable across them, data card §3).
+
+### Pre-registered rule, applied
+
+| # | Condition | Threshold | Measured | Fires? |
+|---|---|---|---|---|
+| 1 | oracle LUT gain (optimistic upper bound) | `≥ +0.05` | **+0.0263** | ❌ fails |
+| 2 | ID↔OOD transfer gain | `> 0` | **−0.0164** | ❌ fails |
+| 3 | `argmax_injective` on dominant templates | all `True` | **False** | ❌ fails |
+
+**`calibration_survives = False`** — on all three, independently.
+
+### 🔴 The mechanism, not just the verdict
+
+`P(pred | true)` on the dominant template (`…foreign object instances…`, n=830), row-modal cells:
+
+| true | modal prediction | share |
+|---|---|---|
+| 1 | **1** | 67% |
+| 2 | **1** | 39% |
+| 3 | **1** | 40% |
+| 4 | **1** | 34% |
+| 5 | 4 | 35% |
+
+**True values 2, 3 and 4 all share the same modal prediction: 1.** A lookup table can send
+`pred=1` to exactly one target, so correcting for `true=2` necessarily breaks `true=3` and
+`true=4`. Under exact-match scoring (no MAE partial credit) the remap trades one error for
+another. **This is r1's stated precondition failing mechanically** — not a sample-size problem,
+and not fixable with more calibration data.
+
+The oracle number says the same thing quantitatively: fitted *and* evaluated on the same rows —
+an impossible best case — it buys **+0.026** where **+0.155** is required.
+
+### What it closes and what it leaves open
+
+- ✅ **Closed:** post-hoc count calibration. Faithful negative, three ways.
+- ⚠️ **Left open, untouched:** synthetic-counting SFT is now the *only* remaining lever in the
+  group that owns the gap. **This probe does not endorse it — it removes its competitor.** Its own
+  risk stands: §5 of this README measured that `number` barely uses the image, so training a
+  counting circuit where counting is visually trivial may not fire on the hard cases.
+- **Incidental — the data card's "4 degenerate templates" now have names:** `External drains`
+  (n=45), `Needles` (9), `Specimens` (6), `Specimen bags` (4) each have exactly **one** true value
+  in val. Their ~1.0 accuracy is a constant-answer artefact. Never quote it as counting skill.
 
 ## 6. 🔴 Incidental finding — `pre_evaluation_score` is broken on our split
 
