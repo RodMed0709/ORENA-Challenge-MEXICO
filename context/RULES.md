@@ -58,6 +58,17 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
 13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
     videos); trust the video-level hierarchical CI for "will this hold on a new video?".
 
+## COMPLIANCE — challenge data never leaves the secure environment (BINDING, DUA)
+
+14. **No challenge data — frames OR annotations (questions + gold) — to any external API.**
+    Gemini/GPT/Claude/DeepSeek and any MCP-backed API are third parties; sending data to them
+    violates DUA (2)/(5). The PURPOSE (data-gen vs training) is irrelevant — transmission is
+    the violation. Any model that touches the data must have **downloadable weights** and run
+    **on-pod** (secure env). The generator's license need not be releasable (we ship only
+    Qwen, documented use); it must only permit **using its outputs to train** our model. Full
+    reasoning + retroactive flag (this session leaked annotations to DeepSeek via MCP):
+    [[no-external-api-for-challenge-data]].
+
 ## Cross-tool instruction files — `AGENTS.md` ≡ `CLAUDE.md` (BINDING)
 The repo ships two agent-instruction files with **identical content**: `CLAUDE.md` (auto-loaded by
 Claude Code) and `AGENTS.md` (auto-loaded by Codex and other agents). They are two names for the
