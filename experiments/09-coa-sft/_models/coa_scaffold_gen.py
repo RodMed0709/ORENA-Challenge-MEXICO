@@ -64,6 +64,50 @@ GEN_PROMPT_TEMPLATE = (
 
 _BACKENDS = ("deepseek", "claude")
 
+# ── on-pod vision generator (Qwen3-VL-32B) — few-shot + SHORT scaffold ──
+# The frame is passed as an image by the on-pod driver; this text is the user turn.
+# Short by design: protects the 5 s / <=32-token deployment budget AND the `number`
+# answer gradient (a scaffold that is 95% prose puts most SFT gradient on prose).
+FEWSHOT_EXEMPLARS = (
+    "EXAMPLE (number):\n"
+    "QUESTION: How many Clips appear in this frame?  GOLD: 2\n"
+    "<description>A laparoscopic field with metallic hardware on the dissected tissue.</description>"
+    "<evidence>Two small metal clips sit on the duct; no others are in view.</evidence>"
+    "<thought>Counting the clips gives two.</thought><answer>2</answer>\n\n"
+    "EXAMPLE (fo_class):\n"
+    "QUESTION: List all foreign objects visible.  GOLD: Sponge\n"
+    "<description>An operative field with soft material resting on tissue.</description>"
+    "<evidence>A white, woven, fibrous object is visible.</evidence>"
+    "<thought>That texture is a surgical sponge.</thought><answer>Sponge</answer>\n"
+)
+
+GEN_PROMPT_VISION_TEMPLATE = (
+    "You SEE one laparoscopic surgical frame (the attached image). Write a short chain-of-answer "
+    "scaffold that DERIVES the given ground-truth answer from what is actually visible. Ground every "
+    "claim in the image — do NOT invent objects, counts, or positions that are not there.\n\n"
+    "Output EXACTLY these four tags, in order, nothing else:\n"
+    "<description>1 sentence: the scene you see.</description>"
+    "<evidence>the specific visual facts the answer rests on (what you actually see).</evidence>"
+    "<thought>one step from evidence to the answer.</thought><answer>GOLD</answer>\n\n"
+    "Rules: <answer> MUST be exactly: {gold}. Do NOT state the gold as a premise in "
+    "<description>/<evidence> — reason TO it. Keep the WHOLE thing under ~55 words. If the image "
+    "does not actually support the gold, still emit the gold in <answer> but keep <evidence> "
+    "honest about what is visible (do not fabricate).\n\n"
+    + FEWSHOT_EXEMPLARS +
+    "\nNOW DO THIS ONE:\n"
+    "QUESTION: {question}\nANSWER FORMAT: {answer_format}\nPROCEDURE: {procedure_type}\n"
+    "GROUND-TRUTH ANSWER: {gold}\n"
+    "OTHER VERIFIED FACTS ABOUT THIS SAME FRAME (may be 'none'):\n{siblings}\n"
+)
+
+
+def build_vision_prompt(row: "pd.Series", siblings: str) -> str:
+    """The user-turn text for the on-pod VLM (image is attached separately by the driver)."""
+    return GEN_PROMPT_VISION_TEMPLATE.format(
+        question=row["question"], answer_format=row["answer_format"],
+        procedure_type=row["procedure_type"], gold=str(row["answer"]), siblings=siblings,
+    )
+
 
 @dataclass
 class GenConfig:
@@ -170,10 +214,10 @@ def stratified_sample(cfg: GenConfig, df: pd.DataFrame) -> pd.DataFrame:
         got: list[pd.DataFrame] = []
         for g in cells:
             got.append(g.sample(n=min(per, len(g)), random_state=cfg.seed))
-        drawn = pd.concat(got, ignore_index=True) if got else pool.head(0)
-        # top up / trim to `want` from the remaining pool
+        drawn = pd.concat(got, ignore_index=True).drop_duplicates("qID") if got else pool.head(0)
+        # top up / trim to `want` from the remaining pool (qID-safe)
         if len(drawn) < want:
-            rest = pool.drop(index=pool.index.intersection(drawn.index), errors="ignore")
+            rest = pool[~pool["qID"].isin(drawn["qID"])]
             extra = rest.sample(n=min(want - len(drawn), len(rest)), random_state=cfg.seed)
             drawn = pd.concat([drawn, extra], ignore_index=True)
         picks.append(drawn.head(want))
@@ -183,6 +227,74 @@ def stratified_sample(cfg: GenConfig, df: pd.DataFrame) -> pd.DataFrame:
     logger.info("sampled %d rows (%d single-Q / %d multi-Q)", len(sample),
                 int(sample["is_single_q"].sum()), int((~sample["is_single_q"]).sum()))
     return sample
+
+
+# ── object-count estimate + adversarial-required selections ──
+
+def estimate_frame_objects(df: pd.DataFrame) -> pd.DataFrame:
+    """Add `n_objects_est` per frame: the max integer among that frame's `number`-instance
+    golds, else the # of classes listed in any fo_class gold on the frame, else 1. A coarse
+    proxy — good enough to OVER-SAMPLE the multi-object frames where perception collapses
+    (data card §4). Not used for scoring."""
+    def _num(g):
+        vals = []
+        for _, r in g.iterrows():
+            a = str(r["answer"])
+            if r["answer_format"] == "number" and re.fullmatch(r"\d+", a.strip() or ""):
+                vals.append(int(a.strip()))
+            elif r["answer_format"] == "fo_class" and a.strip().lower() not in ("none", "none.", ""):
+                vals.append(a.count(",") + 1)
+        return max(vals) if vals else 1
+    est = df.groupby("frameid", group_keys=False).apply(_num)
+    return df.merge(est.rename("n_objects_est"), left_on="frameid", right_index=True)
+
+
+def select_eyeball_frames(cfg: GenConfig, df: pd.DataFrame, n: int = 50) -> pd.DataFrame:
+    """~n rows for the on-pod VISION eyeball, deterministically OVER-SAMPLING the poisoning-risk
+    cases (adversarial gate): multi-object (n_objects_est>=3), OOD (heico), and single-Q frames.
+    Still spans every answer_format so no format is unchecked."""
+    if "n_objects_est" not in df.columns:
+        df = estimate_frame_objects(df)
+    hard = df[(df["n_objects_est"] >= 3) | (df["dataset"] == "heico") | df["is_single_q"]]
+    pool = hard if len(hard) >= n else df
+    # at least 1 per answer_format, then fill weighting the hard pool
+    picks = []
+    per = max(1, n // (2 * len(ANSWER_FORMATS)))
+    for _, grp in pool.groupby("answer_format"):
+        picks.append(grp.sample(n=min(per, len(grp)), random_state=cfg.seed))
+    drawn = pd.concat(picks, ignore_index=True).drop_duplicates("qID")
+    if len(drawn) < n:  # qID-safe top-up
+        rest = pool[~pool["qID"].isin(drawn["qID"])]
+        drawn = pd.concat([drawn, rest.sample(n=min(n - len(drawn), len(rest)),
+                                               random_state=cfg.seed)], ignore_index=True)
+    out = drawn.head(n).sample(frac=1.0, random_state=cfg.seed).reset_index(drop=True)
+    logger.info("eyeball selection: %d rows | multi-obj>=3: %d | OOD(heico): %d | single-Q: %d",
+                len(out), int((out["n_objects_est"] >= 3).sum()),
+                int((out["dataset"] == "heico").sum()), int(out["is_single_q"].sum()))
+    return out
+
+
+def select_pilot(cfg: GenConfig, df: pd.DataFrame, n: int = 2000) -> pd.DataFrame:
+    """~n rows for the MATCHED pilot, stratified across answer_format x dataset x
+    (multi-object vs not). BOTH arms (CoA and bare-gold control) train on THIS identical qID
+    set — the matched control is what makes the kill-gate single-variable. Deterministic."""
+    if "n_objects_est" not in df.columns:
+        df = estimate_frame_objects(df)
+    df = df.copy()
+    df["_multi"] = df["n_objects_est"] >= 3
+    cells = [g for _, g in df.groupby(["answer_format", "dataset", "_multi"]) if len(g)]
+    per = max(1, n // len(cells))
+    picks = [g.sample(n=min(per, len(g)), random_state=cfg.seed) for g in cells]
+    drawn = pd.concat(picks, ignore_index=True).drop_duplicates("qID")
+    if len(drawn) < n:  # proportional top-up preserving the strata weighting (qID-safe)
+        rest = df[~df["qID"].isin(drawn["qID"])]
+        drawn = pd.concat([drawn, rest.sample(n=min(n - len(drawn), len(rest)),
+                                              random_state=cfg.seed)], ignore_index=True)
+    out = drawn.head(n).reset_index(drop=True)
+    logger.info("pilot selection: %d rows | multi-obj: %d | OOD(heico): %d | formats: %s",
+                len(out), int(out["_multi"].sum()), int((out["dataset"] == "heico").sum()),
+                out["answer_format"].value_counts().to_dict())
+    return out.drop(columns=["_multi"])
 
 
 # ── prompt + validation ──
