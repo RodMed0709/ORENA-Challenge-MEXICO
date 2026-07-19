@@ -24,7 +24,7 @@
 ## DECISIONS — settled verdicts (do NOT re-litigate)
 - [[viT-swap-nogo]] — swapping Qwen3-VL's ViT = **NO-GO** (license + full realignment).
 - [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step). 🔒 Gated by [[vit-lora-partial]].
-- [[checkpoint-selection-vs-number]] — 🔴 training ERASES `number` (to +0.000 by epoch 3, **with the ViT frozen too**) and **acc_OOD selection picks the checkpoint that erased more**. Qualifies RULES §6. Killed a 7.5 h `vit_lr` run before it was spent.
+- [[checkpoint-selection-vs-number]] — training erodes `number` on OOD **in both arms, so it is not the ViT** — killed a 7.5 h `vit_lr` run before it was spent. ⚠️ **Its selection claim is RETRACTED**: measured on OOD only; on the full 6252 epoch 2 wins and **RULES §6 is CONFIRMED**.
 - [[vit-lora-partial]] — LoRA on the ViT = **PARTIAL**. Settles the *reading*: it neither licenses nor kills the capacity branch. **The ceiling question stays OPEN** until a lower `vit_lr` runs.
 - [[next-move-rodrigo-coa-format]] — Rodrigo owns **CoA-format SFT (R1)**; RL is **deferred**.
 - [[eval-canonical]] — ONE scoring module (`frame.metrics`): leaf→group via `Capability.group`, ID/OOD from qID; headline = `bucket_mean`, pre_eval reference-only.
