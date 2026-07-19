@@ -2,6 +2,11 @@
 
 - **Status:** MEASURED · ⚠️ **its first recommendation is RETRACTED same-day** — see the
   retraction at the bottom and [[open-class-vocabulary]] **before acting on the data lever**.
+- 🔴 **RE-SCOPED 2026-07-19 by [[the-gap-is-the-number-format]]: everything below is measured on
+  `fo_class`, which sits ENTIRELY inside `object_recognition` — the bucket we LEAD by +14.9.**
+  The measurements stand; their strategic reading does not. **This work defends our advantage;
+  it does not close the `aggregation` gap** (which is 80.4% `number` format). Do not fund it
+  out of the gap budget. See "Scope" below.
 - **Status (original):** MEASURED (zero GPU, from artifacts we already had) · 2026-07-19
 - **Applies when:** deciding whether to spend on data (rebalancing / synthetic QA), on
   perception (resolution, augmentation), or on capacity (bigger model).
@@ -104,3 +109,29 @@ sound and cheap, which is exactly when this error gets made.
 LoRA lifted `needle` +17.8 pts, and the ceiling calculation (68% of omissions sit on
 classes with >400 training examples, so data volume is not the lever). See
 [[open-class-vocabulary]] for what the class set actually is.
+
+---
+
+## 🔴 Scope (added 2026-07-19) — this measures `object_recognition`, not the gap
+
+Everything above was measured on *"List all foreign objects that are visible"* (n=976), which
+is **`answer_format == fo_class`**. The bucket × format cross
+([[the-gap-is-the-number-format]]) shows `fo_class` appears **exclusively** in
+`object_recognition` — **zero occurrences in `aggregation`**.
+
+So this note answers *"why do we miss foreign objects when listing them?"*, in the bucket where
+we already **lead the external reference by +14.9 pts**. It does **not** answer *"why is
+`aggregation` 12.5 pts behind?"* — that bucket is **80.4% `number` format**, and `number`
+clears its trivial floor by only +8.0 pts (+0.013 margin on OOD).
+
+**How to read this note now:**
+- ✅ Still valid as the map of our `object_recognition` weaknesses, and as evidence the ViT LoRA
+  did real perceptual work that `bucket_mean` averaged away.
+- ✅ Its "Next" item 2 (the `sponge` error slice) is still worth doing — as advantage-defence.
+- 🔴 **Invalid** as a rationale for spending the gap budget. `sponge` is 31.8% of omissions in a
+  bucket that is not the problem.
+
+The framing error is worth naming: this note was written to correct a **tunnel-vision** objection
+(*"why only the `Clips` template?"*) and it did widen the question correctly — from *how many* to
+*which classes*. But it widened along the **format** axis while the score is computed along the
+**bucket** axis, so the wider view still missed the target. Widening is not the same as aiming.
