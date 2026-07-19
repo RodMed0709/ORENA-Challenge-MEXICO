@@ -97,10 +97,13 @@ class VLMGenerator:
         self.model = _AutoVLM.from_pretrained(self.cfg.model_id, **kw).eval()
         logger.info("generator ready.")
 
-    def generate(self, image, prompt_text: str) -> str:
+    def generate(self, image, prompt_text: str, system: str | None = None) -> str:
         import torch
-        messages = [{"role": "user", "content": [
-            {"type": "image", "image": image}, {"type": "text", "text": prompt_text}]}]
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": [
+            {"type": "image", "image": image}, {"type": "text", "text": prompt_text}]})
         text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         try:
             from qwen_vl_utils import process_vision_info
@@ -157,17 +160,37 @@ def _iter_rows_with_frames(cfg: OnPodConfig, sample_df):
 
 def run_stage(cfg: OnPodConfig, stage: str) -> Path:
     """stage='eyeball' -> sample_eyeball_vision.csv ; stage='pilot' -> train_coa.jsonl + train_bare.jsonl."""
-    assert stage in ("eyeball", "eyeball_grouped", "pilot"), stage
+    assert stage in ("eyeball", "eyeball_grouped", "blind_probe", "pilot"), stage
     gcfg = cfg.gen_cfg
     df = g.estimate_frame_objects(g.load_train_rows(gcfg))
     if stage == "eyeball_grouped":
         sample = g.select_eyeball_grouped(gcfg, df, n_questions=cfg.eyeball_n)
     elif stage == "eyeball":
         sample = g.select_eyeball_frames(gcfg, df, n=cfg.eyeball_n)
+    elif stage == "blind_probe":
+        sample = g.select_blind_probe(gcfg, df, n=cfg.eyeball_n)
     else:
         sample = g.select_pilot(gcfg, df, n=cfg.pilot_n)
     gen = VLMGenerator(cfg); gen.load()
     cfg.run_dir.mkdir(parents=True, exist_ok=True)
+
+    if stage == "blind_probe":
+        # 32B answers the FRAME question directly, NO gold, NO scaffold — pure perception on the
+        # target bucket. Uses the baseline system prompt so it mirrors real inference.
+        import pandas as pd
+        sysp = g._system_prompt()
+        rows = []
+        for r, image, _sib in _iter_rows_with_frames(cfg, sample):
+            ans = gen.generate(image, str(r["question"]), system=sysp)
+            correct = g.blind_match(ans, r["answer"], r["answer_format"])
+            rows.append({"qID": r["qID"], "dataset": r["dataset"], "answer_format": r["answer_format"],
+                         "n_objects_est": r["n_objects_est"], "question": r["question"],
+                         "gold": r["answer"], "model_answer": ans, "correct": correct})
+        out = cfg.run_dir / "blind_probe.csv"
+        pd.DataFrame(rows).to_csv(out, index=False)
+        acc = sum(x["correct"] for x in rows) / max(1, len(rows))
+        logger.info("BLIND PROBE: %d Q, acc %.2f (32B perception, no gold) -> %s", len(rows), acc, out)
+        return out
 
     if stage in ("eyeball", "eyeball_grouped"):
         rows = []

@@ -100,6 +100,11 @@ GEN_PROMPT_VISION_TEMPLATE = (
     "- If NO verified fact names the objects and the question only asks a COUNT or YES/NO, describe "
     "the objects by visual features ONLY (shape/color/texture) — do NOT guess a class name you "
     "cannot verify. A generic honest 'two objects' beats a fabricated 'two clips'.\n"
+    "- SURGICAL INSTRUMENTS/TOOLS are NOT foreign objects: graspers, staplers, scissors, the metal "
+    "instrument shafts/tips entering the field. NEVER count or describe an instrument as the answer "
+    "object. Count/describe ONLY foreign objects (clip, sponge, needle, external drain, specimen, "
+    "specimen bag, silicone loop, gauze, …). If you cannot find the foreign object, keep <evidence> "
+    "honest about that rather than substituting an instrument.\n"
     "- If the image does not support the gold, still emit the gold in <answer> but keep <evidence> "
     "honest about what is actually visible (never fabricate objects/counts/positions).\n\n"
     + FEWSHOT_EXEMPLARS +
@@ -333,6 +338,41 @@ def select_eyeball_grouped(cfg: GenConfig, df: pd.DataFrame, n_questions: int = 
                 int((out.groupby("frameid")["qID"].transform("size") >= 2).sum()),
                 int((out.groupby("frameid")["qID"].transform("size") == 1).sum()))
     return out
+
+
+def select_blind_probe(cfg: GenConfig, df: pd.DataFrame, n: int = 50) -> pd.DataFrame:
+    """Diagnostic selection: heico (OOD) number/fo_class questions, stratified by object count
+    (over-samples the 2/3/4-object tail where perception collapses). Used by the BLIND probe —
+    the 32B answers WITHOUT the gold, so we measure raw perception on the target bucket (is the
+    teacher's evidence genuine, or does it only look right because the gold was injected?)."""
+    if "n_objects_est" not in df.columns:
+        df = estimate_frame_objects(df)
+    pool = df[(df["dataset"] == "heico") & (df["answer_format"].isin(["number", "fo_class"]))].copy()
+    pool["_bin"] = pd.cut(pool["n_objects_est"], [0, 1, 2, 3, 1000], labels=["1", "2", "3", "4+"])
+    per = max(1, n // 4)
+    picks = [g.sample(n=min(per, len(g)), random_state=cfg.seed)
+             for _, g in pool.groupby("_bin", observed=True) if len(g)]
+    out = pd.concat(picks, ignore_index=True).drop_duplicates("qID")
+    if len(out) < n:
+        rest = pool[~pool["qID"].isin(out["qID"])]
+        out = pd.concat([out, rest.sample(n=min(n - len(out), len(rest)), random_state=cfg.seed)],
+                        ignore_index=True)
+    out = out.head(n).reset_index(drop=True)
+    logger.info("blind probe: %d heico Q | object-count dist: %s",
+                len(out), out["_bin"].value_counts().sort_index().to_dict())
+    return out.drop(columns=["_bin"])
+
+
+def blind_match(model_answer: str, gold, answer_format: str) -> bool:
+    """Loose correctness for the blind probe (perception signal, not official scoring)."""
+    a = _norm(model_answer)
+    if answer_format == "number":
+        ma = re.search(r"-?\d+", a); mg = re.search(r"-?\d+", str(gold))
+        return bool(ma and mg and int(ma.group()) == int(mg.group()))
+    # fo_class: order-independent class-set match
+    def classes(s):
+        return {c.strip() for c in re.split(r"[,;]", _norm(s)) if c.strip() and c.strip() != "none"}
+    return classes(model_answer) == classes(gold)
 
 
 # ── prompt + validation ──
