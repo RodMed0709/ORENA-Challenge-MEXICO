@@ -157,25 +157,30 @@ def _iter_rows_with_frames(cfg: OnPodConfig, sample_df):
 
 def run_stage(cfg: OnPodConfig, stage: str) -> Path:
     """stage='eyeball' -> sample_eyeball_vision.csv ; stage='pilot' -> train_coa.jsonl + train_bare.jsonl."""
-    assert stage in ("eyeball", "pilot"), stage
+    assert stage in ("eyeball", "eyeball_grouped", "pilot"), stage
     gcfg = cfg.gen_cfg
     df = g.estimate_frame_objects(g.load_train_rows(gcfg))
-    sample = (g.select_eyeball_frames(gcfg, df, n=cfg.eyeball_n) if stage == "eyeball"
-              else g.select_pilot(gcfg, df, n=cfg.pilot_n))
+    if stage == "eyeball_grouped":
+        sample = g.select_eyeball_grouped(gcfg, df, n_questions=cfg.eyeball_n)
+    elif stage == "eyeball":
+        sample = g.select_eyeball_frames(gcfg, df, n=cfg.eyeball_n)
+    else:
+        sample = g.select_pilot(gcfg, df, n=cfg.pilot_n)
     gen = VLMGenerator(cfg); gen.load()
     cfg.run_dir.mkdir(parents=True, exist_ok=True)
 
-    if stage == "eyeball":
+    if stage in ("eyeball", "eyeball_grouped"):
         rows = []
         for r, image, sib in _iter_rows_with_frames(cfg, sample):
             scaffold = gen.generate(image, g.build_vision_prompt(__import__("pandas").Series(r), sib))
             flags = g.validate_scaffold(scaffold, r["answer"], r["answer_format"])
-            rows.append({"qID": r["qID"], "dataset": r["dataset"], "ood_proxy": r["dataset"] == "heico",
+            rows.append({"qID": r["qID"], "frameid": r["frameid"], "n_q_on_frame": r["n_q_on_frame"],
+                         "dataset": r["dataset"], "ood_proxy": r["dataset"] == "heico",
                          "answer_format": r["answer_format"], "n_objects_est": r["n_objects_est"],
                          "is_single_q": r["is_single_q"], "question": r["question"], "gold": r["answer"],
                          "siblings": sib, "vision_scaffold": scaffold,
                          **{f"vlm__{k}": v for k, v in flags.items()}})
-        out = cfg.run_dir / "sample_eyeball_vision.csv"
+        out = cfg.run_dir / f"sample_{stage}_vision.csv"
         __import__("pandas").DataFrame(rows).to_csv(out, index=False)
         n_ok = sum(r["vlm__valid"] for r in rows)
         logger.info("EYEBALL: %d scaffolds, %d valid — INSPECT %s before the pilot", len(rows), n_ok, out)
