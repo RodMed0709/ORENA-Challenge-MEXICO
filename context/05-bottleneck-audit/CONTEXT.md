@@ -169,7 +169,21 @@ the DOES-NOT-COUNT branch fires on neither of its two conditions). → **Test B 
   `_models/count_confusion.py` (engine; reuses 05b's `parse_number`) ·
   `RESULTS_count_confusion.csv` · `runs/05c_count_confusion/*.csv` (gitignored).
 
-## Next
+## Next — ⚠️ HISTORICAL, ALREADY EXECUTED (do not read as pending)
+
+> **Test B ran: it is `experiments/06-vit-lora/` (rung 06), closed 2026-07-18 with verdict
+> 🟡 PARTIAL.** Its pre-registered target was `dice@2` per cell: `number` moved (OOD Δ +0.091)
+> but `fo_class` did not, and no cell reached the +0.10 relevance threshold → one format only.
+> Verdict and full account: [[vit-lora-partial]] · `experiments/06-vit-lora/README.md`.
+>
+> **The bifurcation below did NOT resolve as written.** `vit_lr` was disconfirmed
+> ([[checkpoint-selection-vs-number]]) and the epoch-1 checkpoint switch was measured and lost.
+> The capacity branch neither died nor was licensed — see [[vit-lora-partial]] and
+> [[qwen-size-ladder]]. **The live next step is not here**; it is the surviving lever in
+> [[count-calibration-dead]], against the constraint in [[the-gap-is-the-number-format]].
+>
+> Kept verbatim below as the record of what was pre-registered before Test B ran.
+
 - **Test B — LoRA on the ViT** (not fine-tune of the ViT; the A/B of one variable is "the LoRA also
   reaches the vision path"). Verify the `ms-swift` flag semantics by **trainable-parameter count**:
   a few M = LoRA ✅ / hundreds of M = fine-tune ❌ → stop.
