@@ -94,6 +94,12 @@ GEN_PROMPT_VISION_TEMPLATE = (
     "- In <description>/<evidence> describe only VISUAL FEATURES — do NOT write the class name, the "
     "count, the yes/no, or the quadrant. Name/derive it ONLY in <thought>/<answer>. Reason TO the answer.\n"
     "- Total UNDER 40 words. One sentence per tag max. Nothing after </answer>.\n"
+    "- The OTHER VERIFIED FACTS below are GROUND TRUTH for this frame. Your <evidence> MUST be "
+    "consistent with them — if they identify the objects (e.g. a clip AND a needle), reflect that "
+    "exactly; combine their counts when relevant. NEVER contradict a verified fact.\n"
+    "- If NO verified fact names the objects and the question only asks a COUNT or YES/NO, describe "
+    "the objects by visual features ONLY (shape/color/texture) — do NOT guess a class name you "
+    "cannot verify. A generic honest 'two objects' beats a fabricated 'two clips'.\n"
     "- If the image does not support the gold, still emit the gold in <answer> but keep <evidence> "
     "honest about what is actually visible (never fabricate objects/counts/positions).\n\n"
     + FEWSHOT_EXEMPLARS +
@@ -298,6 +304,35 @@ def select_pilot(cfg: GenConfig, df: pd.DataFrame, n: int = 2000) -> pd.DataFram
                 len(out), int(out["_multi"].sum()), int((out["dataset"] == "heico").sum()),
                 out["answer_format"].value_counts().to_dict())
     return out.drop(columns=["_multi"])
+
+
+def select_eyeball_grouped(cfg: GenConfig, df: pd.DataFrame, n_questions: int = 50) -> pd.DataFrame:
+    """Pick WHOLE frames (all their questions) so the eyeball can check conjunctive consistency —
+    do the evidences of a frame's 2-4 questions agree on what is in the frame? Favors multi-Q
+    frames (2-5 questions), then fills with single-Q for contrast. Deterministic. Returns all rows
+    for the chosen frames, sorted by frameid so a frame's questions are consecutive."""
+    if "n_objects_est" not in df.columns:
+        df = estimate_frame_objects(df)
+    counts = df.groupby("frameid").size()
+    multi = pd.Series(counts[(counts >= 2) & (counts <= 5)].index).sample(frac=1, random_state=cfg.seed).tolist()
+    single = pd.Series(counts[counts == 1].index).sample(frac=1, random_state=cfg.seed).tolist()
+    chosen: list[str] = []
+    total = 0
+    for f in multi:  # fill ~70% from multi-Q frames (the conjunctive cases)
+        c = int(counts[f])
+        if total + c > n_questions and total >= n_questions * 0.6:
+            break
+        chosen.append(f); total += c
+    for f in single:  # then single-Q for contrast
+        if total >= n_questions:
+            break
+        chosen.append(f); total += 1
+    out = df[df["frameid"].isin(chosen)].sort_values(["frameid", "answer_format"]).reset_index(drop=True)
+    logger.info("grouped eyeball: %d questions across %d frames (%d multi-Q, %d single-Q)",
+                len(out), out["frameid"].nunique(),
+                int((out.groupby("frameid")["qID"].transform("size") >= 2).sum()),
+                int((out.groupby("frameid")["qID"].transform("size") == 1).sum()))
+    return out
 
 
 # ── prompt + validation ──
