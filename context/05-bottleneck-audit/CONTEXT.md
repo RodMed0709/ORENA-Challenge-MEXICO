@@ -132,6 +132,43 @@ the DOES-NOT-COUNT branch fires on neither of its two conditions). → **Test B 
 - **Where the money is:** the mass is at truth 1–3 (73.6% of `number`); the 7–12 tail is ~5% and already
   at zero. **The largest single pocket of loss in the project is truth=2: 527 questions at 0.459.**
 
+## 05c — count-confusion per template (done, zero GPU) · 2026-07-19
+
+**Verdict by the pre-registered rule: post-hoc count CALIBRATION is DEAD, on both counts.**
+`RESULTS_count_confusion.csv` → `calibration_survives = False`.
+
+- **Why it was run:** [[the-gap-is-the-number-format]] localised the gap to the `number` format
+  (80.4% of `aggregation × ID`), leaving two levers: post-hoc calibration and synthetic-counting
+  SFT. 05b had closed the *aggregate* question (counts, saturates at ~2) but pooled the 8
+  templates, so it could not say whether the error had **correctable structure**.
+- **Subject:** rung 06 `eval_best/inspect.csv` (ckpt-1720, the ladder's best), 2094 `number`
+  rows, **0 parse failures**. Per template via `frame.metrics.template_of`; ID/OOD from the qID
+  prefix, never the SDK's all-False `ood`.
+- **Rule 1 — oracle LUT gain `+0.0263`**, against a pre-registered threshold of `+0.05` and a
+  requirement of `+0.155`. The oracle is fitted *and* evaluated on the same rows, so it
+  **overstates** any achievable calibration. Even so it buys under a fifth of what is needed.
+- **Rule 2 — ID↔OOD transfer `−0.0164`, NEGATIVE.** A LUT fitted on one distribution makes the
+  other *worse*. This is precisely the domain-dependence the idea's own ficha listed as its risk.
+- **Rule 3 — `argmax_injective = False` on all four non-degenerate templates.** 🔴 **The
+  mechanism:** true values **2, 3 and 4 all share the same modal prediction (1)**. A LUT can send
+  `pred=1` to exactly one target, so correcting one necessarily breaks the other two. This is
+  r1's stated precondition failing **mechanically** — not a power problem, and not fixable with
+  more data.
+- **Where the mass is:** `…foreign object instances…` (n=830, acc 0.336) and `…Clips…` (n=681,
+  acc 0.266) carry the loss; `…object classes…` (n=436) is already at 0.665.
+- **Incidental — the data card's "4 degenerate templates" now has names:** `External drains`
+  (n=45), `Needles` (9), `Specimens` (6), `Specimen bags` (4) each have exactly **one** true
+  value in val. Their ~1.0 accuracy is a constant-answer artefact, not counting skill. Never
+  quote them as evidence the model counts.
+- **What survives:** synthetic-counting SFT (the only idea with measured evidence on our
+  backbone) is now the sole remaining lever in the group that owns the gap. **This probe does not
+  endorse it — it removes its competitor.** Its own risk stands untouched: rung 05 measured that
+  `number` barely uses the image (+8.0 over floor; the mode floor on a black image), so training
+  a counting circuit where counting is visually trivial may not fire on the hard cases.
+- **Artifacts:** `05c_count_confusion.ipynb` (carries the pre-registered rule in cell 1) ·
+  `_models/count_confusion.py` (engine; reuses 05b's `parse_number`) ·
+  `RESULTS_count_confusion.csv` · `runs/05c_count_confusion/*.csv` (gitignored).
+
 ## Next
 - **Test B — LoRA on the ViT** (not fine-tune of the ViT; the A/B of one variable is "the LoRA also
   reaches the vision path"). Verify the `ms-swift` flag semantics by **trainable-parameter count**:
