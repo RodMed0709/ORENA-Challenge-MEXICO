@@ -1,6 +1,8 @@
 # Finding: the failure is PER-CLASS, not per-count — and the ViT LoRA worked where it mattered
 
-- **Status:** MEASURED (zero GPU, from artifacts we already had) · 2026-07-19
+- **Status:** MEASURED · ⚠️ **its first recommendation is RETRACTED same-day** — see the
+  retraction at the bottom and [[open-class-vocabulary]] **before acting on the data lever**.
+- **Status (original):** MEASURED (zero GPU, from artifacts we already had) · 2026-07-19
 - **Applies when:** deciding whether to spend on data (rebalancing / synthetic QA), on
   perception (resolution, augmentation), or on capacity (bigger model).
 - **Origin:** legokna pushed back on a proposal to measure counting on the `Clips`
@@ -60,9 +62,9 @@ examples.** More sponge data will not fix sponges. Sponges are deformable, blood
 and blend into tissue — this is the case THE_MAP's "visual-degradation slice" names.
 
 So the data lever splits into two very different bets:
-- **Cheap and bounded:** drop `silicone loop` (guaranteed FPs), mint `gallstone`/`needle`,
-  reduce `clip`'s dominance to cut the 212 clip FPs. Real, but it addresses ~16% of
-  omissions plus a slice of the false positives.
+- ~~**Cheap and bounded:** drop `silicone loop` (guaranteed FPs)~~ 🔴 **RETRACTED — see
+  bottom.** Minting `gallstone`/`needle` and reducing `clip`'s dominance remain arguable,
+  but address only ~16% of omissions plus a slice of the false positives.
 - **The actual prize is `sponge`+`clip` perception**, which is NOT a data-volume problem.
 
 ⚠️ **This qualifies THE_MAP's "`number` is NOT a data problem".** That claim was measured
@@ -70,7 +72,9 @@ on the *distribution of numeric answers* (31% of train, well spread). It was nev
 measured on **class balance**, where the imbalance is 953:14 plus a phantom class.
 
 ## Next (cheapest first)
-1. Drop `silicone loop` from training; re-price. Zero risk, removes guaranteed FPs.
+1. 🔴 ~~Drop `silicone loop` from training.~~ **RETRACTED — it is in the organizers'
+   predefined class list; "never correct in val" is a fact about OUR proxy, not the
+   hidden test. See [[open-class-vocabulary]].**
 2. Per-class error slice on `sponge` — is it occlusion, blood, or scale? Decides whether
    augmentation, resolution or ROI is the right lever, and all three are currently
    un-evidenced guesses.
@@ -80,3 +84,23 @@ measured on **class balance**, where the imbalance is 953:14 plus a phantom clas
 - `experiments/06-vit-lora/_tools/per_class_recall.py` (zero GPU).
 - Train/val class counts via `frame.ledger.gold_from_frame_parquets(split=...)`.
 - Related: [[vit-lora-partial]], [[checkpoint-selection-vs-number]], `experiments/08-data-card/`.
+
+
+---
+
+## 🔴 Retraction (same day) — "drop `silicone loop`" was fitting the proxy
+
+The recommendation rested on `silicone loop` never being correct **in val**. But val is
+our Sigmoid/chole proxy, not the judges' hidden set, and `silicone loop` **is in the
+organizers' own predefined foreign-object list** (verified: 9 questions across the corpus
+enumerate it). Removing it from training would blind the model to a class the challenge
+explicitly names, to buy points on a local metric.
+
+That is the same error class this repo guards against everywhere else — optimising against
+the measuring instrument. It is recorded rather than deleted because the reasoning looked
+sound and cheap, which is exactly when this error gets made.
+
+**What survives untouched:** the per-class recall measurements, the finding that the ViT
+LoRA lifted `needle` +17.8 pts, and the ceiling calculation (68% of omissions sit on
+classes with >400 training examples, so data volume is not the lever). See
+[[open-class-vocabulary]] for what the class set actually is.
