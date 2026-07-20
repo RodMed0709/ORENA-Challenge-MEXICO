@@ -1,12 +1,19 @@
 ---
 question: What question metadata are we not reading?
-verdict: `secondary_capabilities` (89.8% of train) — aggregation supervision is +77% larger; `clinical_relevance` is all-False
-status: MEASURED
+verdict: "`secondary_capabilities` (89.8% of train) — the +77% aggregation pool is real but 89.6% `fo_class`, 0% `number`; `clinical_relevance` is all-False"
+status: RE_SCOPED
+amended_by: [secondary-labels-are-fo-class]
 date: 2026-07-19
 measured_in: experiments/08-data-card/
 question_derived: true
 ---
 # Finding: 90% of questions carry secondary capability labels we have never used
+
+> 🔴 **RE-SCOPED 2026-07-19 by [[secondary-labels-are-fo-class]]: the +77% aggregation pool is
+> 89.6% `fo_class` and 0% `number`.** The counts below are correct; the strategic reading is not.
+> The gap lives in the `number` format ([[the-gap-is-the-number-format]]), which this pool does
+> **not** supply. The lever survives only as a *multiplicity-transfer* hypothesis, judged on
+> `number`, never on `fo_class`.
 
 - **Status:** MEASURED (zero GPU, from the released parquets) · 2026-07-19
 - **Applies when:** sizing the training pool for a capability, reweighting a data mix, or
@@ -74,8 +81,10 @@ Both all-False columns should be treated the same way: **never filter or stratif
 `1c` attributes · `1e` spatial_situs · `2a` temporal (train n=2, val n=1 — the known orphan).
 
 ## Next
-1. When reweighting toward `aggregation`, select on **primary OR secondary** — 77% more data,
-   zero annotation cost.
+1. ⚠️ ~~When reweighting toward `aggregation`, select on **primary OR secondary** — 77% more
+   data, zero annotation cost.~~ **RE-SCOPED — the pool is 89.6% `fo_class` and 0% `number`**
+   ([[secondary-labels-are-fo-class]]). It adds no supervision to the format that owns the gap.
+   Pursue it **only** as a multiplicity-transfer test, pre-registered on `number` at truth=2.
 2. Consider `generation` as a quality weight (expert-written vs auto-generated).
 3. Add `clinical_relevance` to the "never trust on public data" rule beside `ood`.
 

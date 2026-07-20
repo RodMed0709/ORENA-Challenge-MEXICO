@@ -14,8 +14,9 @@
 
 | | Question | Verdict | Status | Where |
 |---|---|---|---|---|
-|  | What question metadata are we not reading? *(derived)* | `secondary_capabilities` (89.8% of train) — aggregation supervision is +77% larger; `clinical_relevance` is all-False | MEASURED | `context/decisions/unused-metadata.md` |
+| ⚠️ | What question metadata are we not reading? *(derived)* | `secondary_capabilities` (89.8% of train) — the +77% aggregation pool is real but 89.6% `fo_class`, 0% `number`; `clinical_relevance` is all-False | RE_SCOPED<br>amended by: [[secondary-labels-are-fo-class]] | `context/decisions/unused-metadata.md` |
 |  | Which answer_format composes the `aggregation` gap? | 80.4% `number`; `fo_class` does not appear in the bucket at all | MEASURED | `context/decisions/the-gap-is-the-number-format.md` |
+|  | Does the +77% secondary-label supervision pool actually reach the `number` format? | NO — it is 89.6% `fo_class` and 0% `number`; the gap's format gains nothing directly | MEASURED | `context/decisions/secondary-labels-are-fo-class.md` |
 |  | Is the foreign-object class set closed, and do our 8 classes define the task? *(derived)* | OPEN — the organizers list 10 classes; `mesh` and `foreign object` have ZERO examples anywhere | MEASURED | `context/decisions/open-class-vocabulary.md` |
 |  | How do we stop re-deriving work the repo has already measured? | a GENERATED index (`context/MEASURED.md`) over four sources — never hand-maintained | SETTLED | `context/decisions/measured-index.md` |
 |  | Does the `number` error have correctable structure — can post-hoc calibration work? | NO — dead on three pre-registered rules; true 2, 3 and 4 share the same modal prediction | MEASURED | `context/decisions/count-calibration-dead.md` |
