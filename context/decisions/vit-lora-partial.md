@@ -1,3 +1,10 @@
+---
+question: Is the vision tower the ceiling?
+verdict: PARTIAL — neither licenses nor kills the capacity branch; the ceiling question stays OPEN
+status: SETTLED
+date: 2026-07-18
+measured_in: experiments/06-vit-lora/
+---
 # Decision: LoRA on the ViT — verdict PARTIAL, the ceiling question stays OPEN
 
 - **Status:** SETTLED (the *reading* of rung 06) · **the ceiling question is NOT settled** · 2026-07-18
