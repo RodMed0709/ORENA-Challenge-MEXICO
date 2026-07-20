@@ -4,6 +4,35 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-07-19**.
 
+## 🔴 2026-07-19 — the strategy moved. Read these three before anything else.
+
+**A zero-GPU session relocated the target and killed a lever.** Nothing was trained; every number
+below came from artifacts already committed.
+
+1. **The gap is the `number` FORMAT, not the classes** ([[the-gap-is-the-number-format]]).
+   `aggregation × ID` is **80.4 % `number`**; `fo_class` does not appear in the bucket at all.
+   Answering 100 % of `binary` only reaches 0.4492 — **no path to the target avoids lifting
+   `number` 0.327 → ~0.482.** ⚠️ This **re-scopes [[class-imbalance-not-counting]]**: the
+   `sponge`/`gallstone`/`clip` work measures `object_recognition`, the bucket we **lead by
+   +14.9**. It defends the advantage; it does not close the gap.
+2. **Post-hoc count calibration is DEAD** ([[count-calibration-dead]], probe 05c). Three
+   pre-registered rules fail. Mechanism: true values **2, 3 and 4 share the same modal prediction
+   (1)**, so a LUT trades one error for another. Not fixable with more data.
+3. **The 5 s cap is POOLED, not per-question** ([[latency-budget-is-pooled]], read from the
+   official submission template): `120 s setup + B × 5 s`, and the `latency` we emit is not
+   scored. Measured p99 is **0.352 s**. **Self-consistency and higher `max_pixels` are
+   affordable** — both had been closed against a ceiling that does not exist as modelled.
+   🔴 **The risk inverts to COLD START:** imports + weight load + CUDA-graph capture all eat the
+   120 s setup allowance.
+
+Also: **the +77 % secondary-label pool is 89.6 % `fo_class` and 0 % `number`**
+([[secondary-labels-are-fo-class]]) — the top-ranked data lever adds nothing to the format that
+owns the gap, and survives only as a *multiplicity-transfer* hypothesis judged on `number`.
+
+**New:** 🤖 **`context/MEASURED.md`** — generated (`python -m frame.measured`), answers *"has this
+already been measured?"* over four sources. **Read it before proposing an experiment.** It exists
+because this session re-derived **four** pieces of already-committed work.
+
 ## Live fronts
 - **Leo (legokna)** → **rung 06 ViT-LoRA**: **TRAINED + EVALUATED + SCORED. Verdict 🟡 PARTIAL.** Selected `checkpoint-1720` (epoch 2) by acc_OOD — same index rung 02 selected. Canonical **`bucket_mean` 0.5667** (vs 02's 0.5486), `margin_ID` +0.0235 / `margin_OOD` +0.0160, registered in the ledger. The pre-registered target was `dice@2`, NOT bucket_mean: `number` moved (OOD Δ +0.091, CI [+0.009,+0.160]) but `fo_class` did not, and **no cell reached the +0.10 relevance threshold** → PARTIAL, one format only. All four cells had power. **Do NOT read this as "the ViT was not the ceiling"** — `vit_lr` ran at the LLM's 2e-5, so the run cannot separate ceiling from recipe. ⚠️ **But `vit_lr` is no longer the next move:** [[checkpoint-selection-vs-number]] disconfirmed its rationale. **T7 then closed the epoch question:** epoch 1 of both arms measured on the full 6252 — **epoch 2 wins**, so acc_OOD selection was right and we did not own a better checkpoint. Full account: `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`. **On `main` @ `9d2f1c7`. Rung 06 is CLOSED.**
 - **Rodrigo** → the MLOps/consistency system (below) + planned **R1 CoA-format SFT** ([[next-move-rodrigo-coa-format]]).
@@ -35,10 +64,30 @@
 - **Effective n ≈ 38 videos**, not 6252. `procedure_type`/`generation` reach the model but `procedure_type` as a model lever risks OOD (unseen procedures break it) → analysis-only stratifier.
 
 ## In progress
-- _(nothing open on the results/margin front — see Done.)_
+- **Rung 10 — self-consistency (k-voting on `number`)** · branch **`task/self-consistency`**,
+  pushed, **NOT merged**. Local half done and unit-checked; **nothing has run, there is no
+  `RESULTS.csv`.** `experiments/10-self-consistency/README.md` + `context/10-self-consistency/`.
+  - ⚠️ **The branch changes SHARED code** (`src/frame/engine.py`, `config.py`): sampling flags
+    whose defaults are meant to reproduce greedy byte-identically. **That guarantee could not be
+    verified — there is no local GPU.** It is deliberately held off `main` until the bit-identity
+    gate passes on a pod. **If you pull the branch, know the guarantee is by design, not by test.**
+  - Order on the pod: **(1)** bit-identity gate with the flag OFF · **(2)** T0 diversity probe
+    (~20 min) · **(3)** STOP for go/no-go before spending T1.
+  - 🔴 **Why T0 first:** voting moves toward the mode, and ours is *measured biased* (05b: 81.5 %
+    of `number` errors are under-counts; 05c: true 2/3/4 share modal prediction 1). Aggregating a
+    biased distribution reinforces it — how calibration died. The decisive T0 column is
+    `mode_closer_than_greedy`, **not** entropy.
 
 ## Pending / blocked
-- **Next experiment for rung 06: UNDECIDED.** Two candidates were cleared out of the way today, both cheaply: the 7.5 h `vit_lr` re-run (rationale disconfirmed — `number` decays with the ViT frozen too) and the epoch-1 checkpoint switch (**T7 measured it: epoch 2 is better in both arms, we did not own a better checkpoint**). **The two roadmaps are now reconciled in THE_MAP §"What comes next"** — they disagreed for three days and nobody could see it. Its read: **measuring p99 on a real L40S is the only step BOTH documents demand** (Bloque-A makes it a hard gate on the whole capacity branch; no question has ever run on the target hardware). The rank probe is single-sourced. 🔴 **Constrained decoding is measured dead** — `number` is 100% bare integers in all three rungs including zero-shot. See [[checkpoint-selection-vs-number]] **including its retraction**.
+- **Rung 06's successor: DECIDED — it is rung 10** (above). The two candidates cleared on 07-18
+  (`vit_lr`, epoch-1 checkpoint) stay dead.
+- **Superseded note — the old text of this bullet said:** "Next experiment for rung 06: UNDECIDED. Two candidates were cleared out of the way today, both cheaply: the 7.5 h `vit_lr` re-run (rationale disconfirmed — `number` decays with the ViT frozen too) and the epoch-1 checkpoint switch (**T7 measured it: epoch 2 is better in both arms, we did not own a better checkpoint**). **The two roadmaps are now reconciled in THE_MAP §"What comes next"** — they disagreed for three days and nobody could see it. Its read: **measuring p99 on a real L40S is the only step BOTH documents demand** (Bloque-A makes it a hard gate on the whole capacity branch; no question has ever run on the target hardware). The rank probe is single-sourced. 🔴 **Constrained decoding is measured dead** — `number` is 100% bare integers in all three rungs including zero-shot. See [[checkpoint-selection-vs-number]] **including its retraction**."
+  - ✅ **What still holds:** both dead candidates stay dead; constrained decoding stays measured dead.
+  - 🔴 **What changed 07-19:** *"measuring p99 on a real L40S is the only step BOTH documents
+    demand"* was answered from the **official template instead** — the budget is POOLED, and our
+    measured p99 is 0.352 s ([[latency-budget-is-pooled]]). L40S confirmation is now a
+    verification, **not a gate**. THE_MAP's capacity branch and its resolution branch were both
+    costed against a per-question ceiling that does not exist as modelled; **both need re-costing.**
 - **05-bottleneck-audit + 03-prompt-variants rescore** — their predictions are NOT on the volume (only notebook/logs) → stay `needs_backfill`.
 - **Phase 0** (offline Docker + first leaderboard submission) — still open. ⚠️ **Jul 15 was the pre-eval OPENING, not a deadline** — the real dates are **Sep 1** (pre-eval closes) and **Sep 8** (final submission). This line used to read "was due Jul 15", which made an open task look overdue.
 
