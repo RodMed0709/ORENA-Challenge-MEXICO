@@ -1,3 +1,11 @@
+---
+question: Is the foreign-object class set closed, and do our 8 classes define the task?
+verdict: OPEN — the organizers list 10 classes; `mesh` and `foreign object` have ZERO examples anywhere
+status: MEASURED
+date: 2026-07-19
+measured_in: "experiments/08-data-card/ + context/challenge/overview.md:17"
+question_derived: true
+---
 # Finding: the foreign-object class set is OPEN, and two of its classes have ZERO data
 
 - **Status:** MEASURED + spec-verified · 2026-07-19

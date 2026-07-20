@@ -1,3 +1,10 @@
+---
+question: What is the next model size up from Qwen3-VL-8B under 1xL40S 48GB and the 5 s cap?
+verdict: Qwen3-VL-30B-A3B-Instruct-FP8 — a measured wildcard, NOT the cheap next step
+status: SETTLED
+date: 2026-07-17
+measured_in: context/decisions/qwen-size-ladder.md
+---
 # Decision: next model-size rung = Qwen3-VL-30B-A3B-Instruct-FP8
 
 - **Status:** SETTLED (candidate identified) · **measured wildcard, NOT the cheap next step** · 2026-07-17
