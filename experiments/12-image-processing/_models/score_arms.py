@@ -20,18 +20,30 @@ def load_arm(inspect_csv: str | Path) -> pd.DataFrame:
 
 
 def score_one(inspect_csv: str | Path, gold: pd.DataFrame) -> dict:
-    """Canonical stratified report for one arm."""
+    """Canonical stratified report for one arm.
+
+    `inspect.csv` names the leaf column `primary_capability`; `stratified_report`
+    reads `primary`. Renaming here keeps the canonical scorer untouched — the
+    adapter belongs to the caller, not to `frame.metrics`.
+    """
     from frame.metrics import stratified_report
 
-    return stratified_report(pd.read_csv(inspect_csv), gold=gold)
+    df = pd.read_csv(inspect_csv)
+    if "primary" not in df.columns and "primary_capability" in df.columns:
+        df = df.rename(columns={"primary_capability": "primary"})
+    return stratified_report(df, gold=gold)
 
 
-def fo_class_margins(report: dict) -> dict[str, float]:
-    """Pull `fo_class` margin per distribution out of a canonical report."""
+def format_margins(report: dict, answer_format: str = "fo_class") -> dict[str, float]:
+    """Pull one format's margin per distribution out of a canonical report.
+
+    Takes the format explicitly: hard-coding `fo_class` here silently mislabelled
+    the `number` context table with `fo_class` margins on first run.
+    """
     bf = report["by_format"]
     out = {}
     for dist in ("ID", "OOD"):
-        row = bf[(bf["answer_format"] == "fo_class") & (bf["distribution"] == dist)]
+        row = bf[(bf["answer_format"] == answer_format) & (bf["distribution"] == dist)]
         out[dist] = float(row["margin"].iloc[0])
         out[f"{dist}_acc"] = float(row["accuracy"].iloc[0])
         out[f"{dist}_n"] = int(row["n"].iloc[0])
@@ -73,10 +85,10 @@ def verdict_table(
     answer_format: str = "fo_class",
 ) -> pd.DataFrame:
     """One row per arm: margin, paired delta and CI, ID and OOD. NO verdict column."""
-    ctrl = fo_class_margins(score_one(control_csv, gold))
+    ctrl = format_margins(score_one(control_csv, gold), answer_format)
     rows = []
     for name, csv in arms.items():
-        rep = fo_class_margins(score_one(csv, gold))
+        rep = format_margins(score_one(csv, gold), answer_format)
         paired = paired_vs_control(control_csv, csv, answer_format)
         for dist in ("ID", "OOD"):
             p = paired[dist]
