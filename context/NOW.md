@@ -2,7 +2,25 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-19**.
+> Last updated: **2026-07-20**.
+
+## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
+
+**Self-consistency is measured dead** ([[self-consistency-dead]]). Three pre-registered arms on the
+full 2094 `number`: every one negative, and **k=16 significantly HARMS OOD** (−0.0430, CI excludes
+0). Doubling k doubled the harm — the signature of a mode sitting on the wrong value. On OOD the
+voted answer falls **below the trivial floor**. It died on **quality, not latency** (k=8 ≈ 1.15 s/q
+against a pooled budget that affords it).
+
+🔴 **The generalisation, and it is the important part.** This is the **third independent
+measurement** of one fact, after [[count-calibration-dead]] and [[naming-equals-counting]]:
+**the deficit is UPSTREAM of the output.** Anything that aggregates, re-encodes, re-ranks, votes on
+or remaps what the model has **already emitted** is closed by measurement. Of the six ideas in the
+group that owns the gap, **three are now dead** (voting, calibration, enumerate-then-count).
+**The next lever must attack perception or supervision — not the output.**
+
+⚠️ **Arm C was a trap the ID-AND-OOD conjunction caught**: +0.0284 in ID, within reach of the bar,
+while significantly damaging OOD. **Never relax that conjunction.**
 
 ## 🔴 2026-07-19 — the strategy moved. Read these three before anything else.
 
@@ -53,6 +71,22 @@ because this session re-derived **four** pieces of already-committed work.
   - **Real skill (MARGIN over the template-aware floor): margin_ID +0.184, margin_OOD +0.132** (floors 0.337 ID / 0.460 OOD). By margin the model adds LESS on OOD even though acc_OOD > acc_ID — matches data card §4b.
 - **00-baseline zero-shot: `bucket_mean` 0.2557** — **below floor everywhere** (margin_ID −0.088, margin_OOD −0.191): a weak zero-shot model legitimately under the trivial constant.
 - rung-05 arms: a0_real 0.550 / a2_shuffled 0.334 / a1_black 0.275 (from committed CSVs).
+- 🔴 **`number` per TEMPLATE (new read, 2026-07-20, from rung 10's `RESULTS_templates.csv`).** The
+  2094 are not one block: **five templates are already maxed and 1947 questions carry the whole
+  fight.** Margin over the template-aware floor:
+
+  | template | n | distinct true | floor | acc | **margin** |
+  |---|---|---|---|---|---|
+  | *How many **Clips**…* | **681** | 12 | 0.239 | 0.266 | **+0.026** |
+  | *…foreign object **instances**…* | **830** | 11 | 0.286 | 0.336 | **+0.051** |
+  | *…foreign object **classes**…* | 436 | 4 | 0.608 | 0.665 | +0.057 |
+  | *How many Sponges…* | 83 | 2 | 0.904 | 0.928 | +0.024 |
+  | Drains / Needles / Bags / Specimens | 64 | 1 | 1.000 | ~0.99 | 0 (degenerate) |
+
+  **`Clips` is the single largest hole in the exam**: 681 questions, 12 distinct true values, and
+  the model beats "always answer the mode" by **+2.6 pts**. Read with rung 05 (black image returns
+  the `number` floor to 16 digits) the diagnosis is: **we are a good object RECOGNISER that does not
+  INDIVIDUATE instances** — and the exam weights individuation at 50 %.
 
 ## Key findings baked in (from the data card, rung 08)
 - 🔴 **We have never read `secondary_capabilities`** ([[unused-metadata]], 2026-07-19). 89.8% of train questions carry them, and **aggregation appears as a SECONDARY label on 4,238 more train questions (+77%)** — the supervision pool for the bucket we need to lift is **9,762, not 5,524**, at zero annotation cost. Ranking stays primary-only, so this changes what we can TRAIN on, not what we are SCORED on. Also unused: `generation` (automatic 78% / anchor 15% / manual 6.4%, same proportions in train and val). ⚠️ **`clinical_relevance` is all-False in BOTH splits** — a second landmine beside `ood`; never filter on either from public data.
@@ -64,23 +98,23 @@ because this session re-derived **four** pieces of already-committed work.
 - **Effective n ≈ 38 videos**, not 6252. `procedure_type`/`generation` reach the model but `procedure_type` as a model lever risks OOD (unseen procedures break it) → analysis-only stratifier.
 
 ## In progress
-- **Rung 10 — self-consistency (k-voting on `number`)** · branch **`task/self-consistency`**,
-  pushed, **NOT merged**. Local half done and unit-checked; **nothing has run, there is no
-  `RESULTS.csv`.** `experiments/10-self-consistency/README.md` + `context/10-self-consistency/`.
-  - ⚠️ **The branch changes SHARED code** (`src/frame/engine.py`, `config.py`): sampling flags
-    whose defaults are meant to reproduce greedy byte-identically. **That guarantee could not be
-    verified — there is no local GPU.** It is deliberately held off `main` until the bit-identity
-    gate passes on a pod. **If you pull the branch, know the guarantee is by design, not by test.**
-  - Order on the pod: **(1)** bit-identity gate with the flag OFF · **(2)** T0 diversity probe
-    (~20 min) · **(3)** STOP for go/no-go before spending T1.
-  - 🔴 **Why T0 first:** voting moves toward the mode, and ours is *measured biased* (05b: 81.5 %
-    of `number` errors are under-counts; 05c: true 2/3/4 share modal prediction 1). Aggregating a
-    biased distribution reinforces it — how calibration died. The decisive T0 column is
-    `mode_closer_than_greedy`, **not** entropy.
+- **Rung 10 — self-consistency: CLOSED, FAITHFUL NEGATIVE. Merged to `main` @ `e520dcf`.**
+  `experiments/10-self-consistency/` + `context/10-self-consistency/CONTEXT.md`.
+  - ✅ **The bit-identity gate PASSED** — `n_samples = 1` reproduces rung 06's `predictions.json`
+    **50/50 byte-for-byte across four independent model loads** on the GPU class that produced the
+    reference. The shared-code change in `src/frame/{engine,config,parsing}.py` is verified
+    flag-off-identical, so the A/B was single-variable and the branch was safe to merge.
+  - `src/frame/metrics.py` gained **`paired_delta_ci`** — an A/B on the same questions needs the
+    bootstrap of the paired DIFFERENCE; two independent CIs discard the pairing and read far too wide.
 
 ## Pending / blocked
-- **Rung 06's successor: DECIDED — it is rung 10** (above). The two candidates cleared on 07-18
-  (`vit_lr`, epoch-1 checkpoint) stay dead.
+- **Rung 06's successor: rung 10 ran and returned a faithful negative.** The two candidates cleared
+  on 07-18 (`vit_lr`, epoch-1 checkpoint) stay dead. **Next lever: UNDECIDED, but constrained** —
+  it must act upstream of the output (see the 07-20 block). The live candidate is the **resolution
+  axis (6b)**: `heico` 960×540 vs `lapchole` 1280×720 splits the datasets 100 %/0 %, so **OOD
+  receives ~56 % of the visual tokens of ID** — and `number`-OOD sits at margin **+0.013**, level
+  with its trivial floor. Measured on n=50 non-random frames (`local/hallazgos/imagenes-por-centro.md`);
+  **must be confirmed over the full `frames_cache` before it becomes a decision note.**
 - **Superseded note — the old text of this bullet said:** "Next experiment for rung 06: UNDECIDED. Two candidates were cleared out of the way today, both cheaply: the 7.5 h `vit_lr` re-run (rationale disconfirmed — `number` decays with the ViT frozen too) and the epoch-1 checkpoint switch (**T7 measured it: epoch 2 is better in both arms, we did not own a better checkpoint**). **The two roadmaps are now reconciled in THE_MAP §"What comes next"** — they disagreed for three days and nobody could see it. Its read: **measuring p99 on a real L40S is the only step BOTH documents demand** (Bloque-A makes it a hard gate on the whole capacity branch; no question has ever run on the target hardware). The rank probe is single-sourced. 🔴 **Constrained decoding is measured dead** — `number` is 100% bare integers in all three rungs including zero-shot. See [[checkpoint-selection-vs-number]] **including its retraction**."
   - ✅ **What still holds:** both dead candidates stay dead; constrained decoding stays measured dead.
   - 🔴 **What changed 07-19:** *"measuring p99 on a real L40S is the only step BOTH documents
