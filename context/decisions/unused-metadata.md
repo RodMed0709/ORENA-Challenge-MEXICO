@@ -1,3 +1,11 @@
+---
+question: What question metadata are we not reading?
+verdict: `secondary_capabilities` (89.8% of train) — aggregation supervision is +77% larger; `clinical_relevance` is all-False
+status: MEASURED
+date: 2026-07-19
+measured_in: experiments/08-data-card/
+question_derived: true
+---
 # Finding: 90% of questions carry secondary capability labels we have never used
 
 - **Status:** MEASURED (zero GPU, from the released parquets) · 2026-07-19

@@ -7,6 +7,9 @@
 > **Workflow:** local-first → push to GitHub. Never `pull` on the pod while it trains
 > (avoid stepping on a teammate's run). GSD = how we *do* work; this brain = what we *know*.
 
+## HAS THIS BEEN MEASURED? — ask here FIRST
+- **`context/MEASURED.md`** — 🤖 **GENERATED** (`python -m frame.measured`, never hand-edited). One table of every question this project has already answered: settled verdicts, what each rung changed, which runs produced a number, and **which stratified cuts are already computed**. **Read it before proposing an experiment.** Four sessions in a row re-derived work that was already committed — not for lack of documentation, but for lack of a way to ask. Rows marked ⚠️ have been narrowed or partly withdrawn: **read their note, not the row.**
+
 ## NOW — what's happening
 - **`context/NOW.md`** — the living current-state: fronts, real numbers, findings, what's in progress. **Read it first.** (`HANDOFF.md` is the older baseline-run handoff, kept as history.)
 - Live fronts:

@@ -1,3 +1,11 @@
+---
+question: Which answer_format composes the `aggregation` gap?
+verdict: 80.4% `number`; `fo_class` does not appear in the bucket at all
+status: MEASURED
+date: 2026-07-19
+measured_in: experiments/06-vit-lora/runs/06_vit_lora_v1/stratified.json (by_bucket_format)
+amends: [class-imbalance-not-counting]
+---
 # Finding: the `aggregation` gap is the `number` FORMAT — 80.4% of it — and `fo_class` is not in it
 
 - **Status:** MEASURED · 2026-07-19 · **zero GPU, zero new inference.** The number had been

@@ -58,6 +58,16 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
 13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
     videos); trust the video-level hierarchical CI for "will this hold on a new video?".
 
+## BEFORE proposing an experiment — check `context/MEASURED.md` (BINDING)
+Read **`context/MEASURED.md`** before proposing any measurement, probe or rung. It is
+**generated** (`python -m frame.measured`) from four sources — decision notes, the ladders,
+`RESULTS*.csv`, and the cuts already present in `stratified.json` — so it cannot drift.
+Rationale in [[measured-index]]: four sessions in a row re-derived work that was already
+committed and well written, including a complete probe spec whose run had closed.
+**A row marked ⚠️ has been narrowed or partly withdrawn — read its note, never the row alone.**
+New decision note → it MUST carry frontmatter (`question`/`verdict`/`status`); the gate
+`frame.measured.assert_decisions_indexed` RAISES otherwise, and is never disabled.
+
 ## Cross-tool instruction files — `AGENTS.md` ≡ `CLAUDE.md` (BINDING)
 The repo ships two agent-instruction files with **identical content**: `CLAUDE.md` (auto-loaded by
 Claude Code) and `AGENTS.md` (auto-loaded by Codex and other agents). They are two names for the
