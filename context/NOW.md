@@ -109,12 +109,20 @@ because this session re-derived **four** pieces of already-committed work.
 
 ## Pending / blocked
 - **Rung 06's successor: rung 10 ran and returned a faithful negative.** The two candidates cleared
-  on 07-18 (`vit_lr`, epoch-1 checkpoint) stay dead. **Next lever: UNDECIDED, but constrained** —
-  it must act upstream of the output (see the 07-20 block). The live candidate is the **resolution
-  axis (6b)**: `heico` 960×540 vs `lapchole` 1280×720 splits the datasets 100 %/0 %, so **OOD
-  receives ~56 % of the visual tokens of ID** — and `number`-OOD sits at margin **+0.013**, level
-  with its trivial floor. Measured on n=50 non-random frames (`local/hallazgos/imagenes-por-centro.md`);
-  **must be confirmed over the full `frames_cache` before it becomes a decision note.**
+  on 07-18 (`vit_lr`, epoch-1 checkpoint) stay dead.
+- 🔴 **Rung 11 — the resolution axis (6b) is CLOSED too, at the gate, for zero GPU**
+  ([[resolution-is-not-the-gap]]). The "100 %/0 % partition" was an artefact of a non-random n=50:
+  over the full 15,213-frame cache `lapchole` (ID) has **six** resolutions and its minimum (230k px)
+  is **below** `heico`'s uniform 518k. **"OOD gets 56 % of ID's visual tokens" is wrong** — ~66 % by
+  mean, inverted in the tails. And **130/130 videos have exactly one resolution**, so resolution is
+  **perfectly confounded with video identity** and this dataset cannot answer the question at all.
+  Accuracy across resolution cells is non-monotonic. **6b, 11b and 11c die unrun.**
+- **Next lever: UNDECIDED, and the constraint has tightened.** It must act upstream of the output
+  (rung 10) — and rung 11 plus rung 05 (`number` returns its floor **to 16 digits** on a black
+  image) together argue that levers acting on the *image itself* have little to act on for the
+  format that owns the gap. ⚠️ **Phase 0 (offline Docker + first leaderboard submission) is still
+  open, and every lever is being judged against a score we have never confirmed transfers to the
+  organizers' hardware, engine and batching.**
 - **Superseded note — the old text of this bullet said:** "Next experiment for rung 06: UNDECIDED. Two candidates were cleared out of the way today, both cheaply: the 7.5 h `vit_lr` re-run (rationale disconfirmed — `number` decays with the ViT frozen too) and the epoch-1 checkpoint switch (**T7 measured it: epoch 2 is better in both arms, we did not own a better checkpoint**). **The two roadmaps are now reconciled in THE_MAP §"What comes next"** — they disagreed for three days and nobody could see it. Its read: **measuring p99 on a real L40S is the only step BOTH documents demand** (Bloque-A makes it a hard gate on the whole capacity branch; no question has ever run on the target hardware). The rank probe is single-sourced. 🔴 **Constrained decoding is measured dead** — `number` is 100% bare integers in all three rungs including zero-shot. See [[checkpoint-selection-vs-number]] **including its retraction**."
   - ✅ **What still holds:** both dead candidates stay dead; constrained decoding stays measured dead.
   - 🔴 **What changed 07-19:** *"measuring p99 on a real L40S is the only step BOTH documents
