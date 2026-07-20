@@ -635,3 +635,80 @@ def assert_matches_sdk_pre_eval(
             "focus.evaluation.Evaluator.pre_evaluation_score — investigate leaf->group / ID-OOD."
         )
     return sdk_mean
+
+
+# ── paired delta CI (added for rung 10) ──────────────────────────────────────
+# stratified_report and _hier_bootstrap each describe ONE arm. An A/B on the SAME
+# questions (greedy vs voted) needs the bootstrap of the paired DIFFERENCE: two
+# independent CIs would throw away the pairing and come out far too wide, because
+# both arms share the questions, the frames and the model — nearly all of the
+# variance is common and cancels in the difference. Added here rather than
+# re-derived in a notebook (RULES §EVAL rule 1: extend the module, never
+# reimplement beside it). Same video→question two-level scheme as
+# ``_hier_bootstrap`` and the same deterministic-for-a-fixed-seed contract.
+
+
+def paired_delta_ci(
+    df: pd.DataFrame,
+    *,
+    correct_a: str = "correct_a",
+    correct_b: str = "correct_b",
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict[str, float]:
+    """Video→question bootstrap of the paired difference ``b - a`` over a slice.
+
+    ``df`` needs ``qID``, ``video`` and the two correctness columns, one row per
+    question, both arms scored on the SAME questions. Returns the point estimate,
+    its 95 % percentile CI, and how many questions each arm wins outright — the
+    paired win counts are what a sign test reads, so they come back here instead
+    of being recomputed by every caller.
+
+    Returns NaNs on an empty slice instead of raising: callers slice by
+    (format × distribution) and an empty cell is a legitimate reportable state.
+    """
+    empty = {
+        "delta": float("nan"), "ci_low": float("nan"), "ci_high": float("nan"),
+        "n": 0, "n_videos": 0, "wins_b": 0, "wins_a": 0,
+    }
+    if df is None or len(df) == 0:
+        return empty
+
+    work = df[["qID", "video", correct_a, correct_b]].copy()
+    work["_vkey"] = work.apply(_video_key, axis=1)
+    work["_diff"] = work[correct_b].astype(float) - work[correct_a].astype(float)
+
+    vid_groups = {
+        v: work.loc[work["_vkey"] == v, "_diff"].to_numpy(dtype=float)
+        for v in work["_vkey"].dropna().unique()
+    }
+    keys = list(vid_groups)
+    n_videos = len(keys)
+    if n_videos == 0:
+        return empty
+
+    point = float(np.mean([vid_groups[v].mean() for v in keys]))
+    rng = np.random.default_rng(seed)
+    boots = np.empty(n_boot)
+    for b in range(n_boot):
+        # sample video POSITIONS: keys are tuples and cannot go through rng.choice
+        sampled_pos = rng.integers(0, n_videos, size=n_videos)
+        boots[b] = float(
+            np.mean(
+                [
+                    rng.choice(
+                        vid_groups[keys[i]], size=len(vid_groups[keys[i]]), replace=True
+                    ).mean()
+                    for i in sampled_pos
+                ]
+            )
+        )
+    return {
+        "delta": point,
+        "ci_low": float(np.percentile(boots, 2.5)),
+        "ci_high": float(np.percentile(boots, 97.5)),
+        "n": int(len(work)),
+        "n_videos": n_videos,
+        "wins_b": int((work["_diff"] > 0).sum()),
+        "wins_a": int((work["_diff"] < 0).sum()),
+    }

@@ -14,6 +14,7 @@
 
 | | Question | Verdict | Status | Where |
 |---|---|---|---|---|
+|  | Can majority voting over k sampled answers lift the `number` format? | NO — negative in all three pre-registered arms on the full 2094. k=16 SIGNIFICANTLY HARMS OOD (−0.043, CI excludes 0) and doubling k doubled the harm — the signature of a mode sitting on the wrong value. On OOD the voted answer falls BELOW the trivial floor | MEASURED | `context/decisions/self-consistency-dead.md` |
 | ⚠️ | What question metadata are we not reading? *(derived)* | `secondary_capabilities` (89.8% of train) — the +77% aggregation pool is real but 89.6% `fo_class`, 0% `number`; `clinical_relevance` is all-False | RE_SCOPED<br>amended by: [[secondary-labels-are-fo-class]] | `context/decisions/unused-metadata.md` |
 |  | Which answer_format composes the `aggregation` gap? | 80.4% `number`; `fo_class` does not appear in the bucket at all | MEASURED | `context/decisions/the-gap-is-the-number-format.md` |
 |  | Does the +77% secondary-label supervision pool actually reach the `number` format? | NO — it is 89.6% `fo_class` and 0% `number`; the gap's format gains nothing directly | MEASURED | `context/decisions/secondary-labels-are-fo-class.md` |
@@ -29,31 +30,25 @@
 |  | What is the next model size up from Qwen3-VL-8B under 1xL40S 48GB and the 5 s cap? | Qwen3-VL-30B-A3B-Instruct-FP8 — a measured wildcard, NOT the cheap next step | SETTLED | `context/decisions/qwen-size-ladder.md` |
 |  | Where should the second teammate attack without colliding with rung 06? | CoA-format SFT (R1); RL is deferred | ACTIVE_PLAN | `context/decisions/next-move-rodrigo-coa-format.md` |
 |  | How do we stop the same eval bugs recurring across experiments? | ONE scoring module (`frame.metrics`) — leaf→group via Capability.group, ID/OOD from qID | SETTLED | `context/decisions/eval-canonical.md` |
+|  | Does the model see more foreign objects than it reports — is there a hidden "sees it but won't say it" channel? | NO — asked to NAME or to COUNT, the same frames return the same multiplicity (paired n=38, 1.447 vs 1.526, p=0.45, 31/38 identical). Naming and counting are one mechanism, so no output-format lever recovers objects the count misses | MEASURED | `context/decisions/naming-equals-counting.md` |
 
 ## The ladder — what each rung changed
 
 | Question | Answer | Where |
 |---|---|---|
-| What did rung Notebook change, and what came of it? | Rung → Verdict | `experiments/00-baseline` |
-| What did rung 00-baseline change, and what came of it? | Qwen3-VL-8B zero-shot → done (raw acc 0.262) | `experiments/03-prompt-variants` |
-| What did rung 01-ood-split change, and what came of it? | frozen ID/OOD split (`frame_ood_v1`) → done | `experiments/03-prompt-variants` |
-| What did rung 02-lora-sft change, and what came of it? | LoRA instruction fine-tune → training | `experiments/03-prompt-variants` |
+| What did rung 00-baseline change, and what came of it? | Qwen3-VL-8B zero-shot → done (raw acc 0.262) | `experiments/00-baseline` |
+| What did rung 01-ood-split change, and what came of it? | frozen ID/OOD split (`frame_ood_v1`) → done | `experiments/01-ood-split` |
+| What did rung 02-lora-sft change, and what came of it? | LoRA instruction fine-tune → training | `experiments/02-lora-sft` |
 | What did rung 03-prompt-variants change, and what came of it? | `SYSTEM_PROMPT` additions → done — faithful negative | `experiments/03-prompt-variants` |
-| What did rung 00-baseline change, and what came of it? | Qwen3-VL-8B zero-shot → done (bucket_mean 0.256 · raw 0.262) | `experiments/04-vendor-baseline` |
-| What did rung 02-lora-sft change, and what came of it? | LoRA instruction fine-tune → done — PASS** (bucket_mean 0.549 · raw 0.566 · OOD > ID) | `experiments/04-vendor-baseline` |
 | What did rung 04-vendor-baseline change, and what came of it? | nothing — this rung does not train or measure → closed — tutorial delivered | `experiments/04-vendor-baseline` |
-| What did rung 00-baseline change, and what came of it? | Qwen3-VL-8B zero-shot → done | `experiments/05-bottleneck-audit` |
-| What did rung 01-ood-split change, and what came of it? | frozen ID/OOD split (`frame_ood_v1`) → done (infra) | `experiments/05-bottleneck-audit` |
-| What did rung 02-lora-sft change, and what came of it? | LoRA instruction fine-tune → done (acc_OOD = 0.5918) | `experiments/05-bottleneck-audit` |
-| What did rung 04-vendor-baseline change, and what came of it? | External vendor baseline → done (tutorial, no results row by design) | `experiments/05-bottleneck-audit` |
 | What did rung 05-bottleneck-audit change, and what came of it? | The image passed to the model (Real vs Black vs Shuffled) → done — NO SHORTCUT | `experiments/05-bottleneck-audit` |
 | What did rung 05b-number-probe change, and what came of it? | (probe, not a rung — no variable changed)* **reads the predicted text rung 05 discarded → done — COUNTS BADLY | `experiments/05-bottleneck-audit` |
-| What did rung 05c-count-confusion change, and what came of it? | (probe, not a rung)* **`P(pred\ → — | **done — CALIBRATION IS DEAD | `experiments/05-bottleneck-audit` |
-| What did rung 05b-number-probe change, and what came of it? | (probe)* reads the predicted text rung 05 discarded → done — COUNTS BADLY | `experiments/07-enumeration` |
+| What did rung 05c-count-confusion change, and what came of it? | (probe, not a rung)* **`P(pred|true)` per TEMPLATE — does the error have correctable structure? → done — CALIBRATION IS DEAD | `experiments/05-bottleneck-audit` |
+| What did rung 06-vit-lora change, and what came of it? | LoRA also on the ViT → done — PARTIAL (`bucket_mean` 0.5667) | `experiments/06-vit-lora` |
 | What did rung 07-enumeration change, and what came of it? | (probe)* **forces the model to enumerate before it answers → closed — NO VERDICT: the model will not enumerate | `experiments/07-enumeration` |
-| What did rung 05-bottleneck-audit change, and what came of it? | The image passed to the model → done — NO SHORTCUT | `experiments/08-data-card` |
-| What did rung 07-enumeration change, and what came of it? | (probe)* forces the model to enumerate → closed — the model will not enumerate | `experiments/08-data-card` |
 | What did rung 08-data-card change, and what came of it? | (documentation)* **what is actually in the data → done — read this before quoting any number | `experiments/08-data-card` |
+| What did rung 09-coa-sft change, and what came of it? | CoA-format SFT (Rodrigo) → in progress, `task/r1-coa-sft` | `experiments/10-self-consistency` |
+| What did rung 10-self-consistency change, and what came of it? | greedy → majority vote over k samples, `number` only → closed — FAITHFUL NEGATIVE, k=16 harms OOD | `experiments/10-self-consistency` |
 
 ## Runs and probes that produced a number
 
@@ -69,6 +64,7 @@
 | What numbers does 06-vit-lora report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/06-vit-lora/RESULTS.csv` |
 | What numbers does 06-vit-lora report? | 2 row(s); columns: arm, trainable_params, bucket_mean, acc_bucket_object_recognition_ID, acc_bucket_object_recognition_OOD, acc_bucket_aggregation_ID… | `experiments/06-vit-lora/RESULTS_arms.csv` |
 | What numbers does 06-vit-lora report? | 2 row(s); columns: arm, bucket_mean_ep1, bucket_mean_ep2, delta_ep1_minus_ep2, margin_ID, margin_OOD… | `experiments/06-vit-lora/RESULTS_epoch1.csv` |
+| What numbers does 10-self-consistency report? | 3 row(s); columns: run, arm, k, temperature, n_all, n_nondegenerate… | `experiments/10-self-consistency/RESULTS.csv` |
 
 ## Cuts already computed (do not recompute these)
 
