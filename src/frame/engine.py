@@ -50,7 +50,22 @@ class QwenFrameEngine:
             self.model.generation_config.max_length = None
         logger.info("Model ready.")
 
+    def _enhanced(self, image: Image.Image) -> Image.Image:
+        """Apply the rung-12 enhancement, or return the image untouched.
+
+        With ``cfg.enhance is None`` this returns the SAME object — no resample, no
+        re-encode, nothing. That is what makes the flag-off guarantee byte-identical
+        and therefore the A/B single-variable.
+        """
+        kind = getattr(self._cfg, "enhance", None)
+        if kind is None:
+            return image
+        from enhance import apply  # experiment-private; only imported when ON
+
+        return apply(image, kind, getattr(self._cfg, "enhance_amount", 1.0))
+
     def _messages(self, image: Image.Image, question: str) -> list[dict]:
+        image = self._enhanced(image)
         return [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
