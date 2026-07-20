@@ -1,8 +1,10 @@
 # Rung 10 — Self-consistency (k-voting on `number`)
 
-> **Status: CODE READY, NOT YET RUN.** No `RESULTS.csv` exists and none should be invented.
-> The local half (engine flag, voting library, unit checks) is done; T0 needs a pod.
-> Spec: `local/specs/self-consistency/` (private vault).
+> **Status: CLOSED — FAITHFUL NEGATIVE (2026-07-20).** Ran in full on 1× RTX 5090: identity gate,
+> T0 pilot, T1 over the whole 2094-question `number` population in three pre-registered arms, T2
+> scoring. **All three arms negative; k=16 significantly HARMS OOD.** Verdict and mechanism in
+> [`context/decisions/self-consistency-dead.md`](../../context/decisions/self-consistency-dead.md);
+> numbers in `RESULTS.csv`. Spec: `local/specs/self-consistency/` (private vault).
 
 ## Ladder
 
@@ -20,7 +22,7 @@
 | 07-enumeration | *(probe)* can the model enumerate? | — | done — faithful negative *of the method* |
 | 08-data-card | *(not an experiment)* what is in the data | — | done |
 | 09-coa-sft | CoA-format SFT (Rodrigo) | 02 | in progress, `task/r1-coa-sft` |
-| **10-self-consistency** | **greedy → majority vote over k samples, `number` only** | **06 (`ckpt-1720`)** | **code ready, T0 pending** |
+| **10-self-consistency** | **greedy → majority vote over k samples, `number` only** | **06 (`ckpt-1720`)** | **closed — FAITHFUL NEGATIVE, k=16 harms OOD** |
 
 ## 1. Why this rung, and why now
 
@@ -100,5 +102,34 @@ the verdict.
 | `src/frame/parsing.py` | `parse_number` moved here (three rungs depend on it); 05b re-exports it verbatim |
 
 **Flag-off guarantee:** with `n_samples = 1` the engine takes the original `do_sample=False`
-branch. This must be verified bit-identically against rung 06's `predictions.json` on the pod
-**before** T0 — there is no local GPU to check it here.
+branch. ✅ **VERIFIED 2026-07-20** — 50/50 strings byte-identical to rung 06's `predictions.json`,
+reproduced across four independent model loads on the same GPU class (RTX 5090) that produced the
+reference. The A/B is therefore single-variable.
+
+`src/frame/metrics.py` also gained `paired_delta_ci`: the module had a video→question bootstrap for
+ONE arm, but an A/B on the same questions needs the bootstrap of the paired DIFFERENCE — two
+independent CIs discard the pairing and come out far too wide.
+
+## 6. Result — FAITHFUL NEGATIVE
+
+Full 2094 `number`, greedy control rescored by the same function and **gated to reproduce the SDK's
+0.4250**. Margin over the template-aware floor, ID/OOD disaggregated, paired video-level CI.
+
+| arm | k | T | ID | OOD | verdict |
+|---|---|---|---|---|---|
+| A | 8 | 1.0 | −0.0053 [−0.050, +0.041] | −0.0195 [−0.055, +0.012] | NEGATIVE |
+| B | 8 | 1.3 | −0.0172 [−0.067, +0.035] | −0.0074 [−0.048, +0.026] | NEGATIVE |
+| C | 16 | 1.0 | **+0.0284** [−0.009, +0.070] | **−0.0430 [−0.081, −0.008]** | NEGATIVE |
+
+🔴 **Arm C is a trap the ID-AND-OOD conjunction caught.** Its ID rise is within reach of the +0.02
+bar; its OOD harm is significant. Reading ID alone would have promoted a change that measurably
+damages generalisation.
+
+**Mechanism:** doubling k doubled the OOD harm — more samples estimate the mode better, and a
+better estimate of a *wrong* mode is further from the truth. On OOD the vote falls **below the
+trivial floor** (margin −0.0047 at k=8, −0.0189 at k=16). Full reasoning:
+[`context/decisions/self-consistency-dead.md`](../../context/decisions/self-consistency-dead.md).
+
+**Cost, for the record:** k=8 ≈ 1.15 s/q, k=16 ≈ 1.96 s/q vs greedy 0.173 s — sublinear in k
+because the k candidates share one prefill. Cold start 8.7–23.9 s load + ≤1.3 s first inference
+against the pooled 120 s setup allowance. **The lever died on quality, not on latency.**
