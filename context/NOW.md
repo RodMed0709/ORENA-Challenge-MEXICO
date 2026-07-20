@@ -98,6 +98,28 @@ because this session re-derived **four** pieces of already-committed work.
 - **Effective n ≈ 38 videos**, not 6252. `procedure_type`/`generation` reach the model but `procedure_type` as a model lever risks OOD (unseen procedures break it) → analysis-only stratifier.
 
 ## In progress
+- 🔶 **Rung 12 — image processing. OPEN. Branch A closed NEGATIVE; branch B is what decides it.**
+  Branch `task/image-processing`, **not merged**. `experiments/12-image-processing/README.md`.
+  - **A (fine-tuned base, rung 06 ckpt-1720):** unsharp at ×1 and ×3, inference only, measured on
+    `fo_class`. **No arm rises; ×3 harms significantly in ID AND OOD** (−0.0558 [−0.0949,−0.0176] ·
+    −0.0582 [−0.0887,−0.0277]) and the damage is **monotonic in dose**. Identity gate 50/50 byte for
+    byte; control reused from rung 06 and gated to its canonical `fo_class`.
+  - 🔴 **The generalisable part — appearance rarity is real and now quantified.** Rung 05 warned a
+    black frame degrades *"by rarity, not only by absence of information"*; this is the first clean
+    dose-response of it. ⚠️ **Therefore branch A does NOT show enhancement fails to help
+    perception** — it cannot separate that from the fine-tune penalising an unfamiliar appearance.
+  - 🔴 **Method consequence that reaches back:** **any inference-only test of an INPUT-side
+    intervention is biased toward negative** on a model fine-tuned without it. That applies to
+    **rung 11** too. It does **NOT** apply to the output-side family (voting, calibration,
+    enumerate-then-count), which died with no train/test mismatch. ⇒ **The honest test of the
+    input-side family is to TRAIN with the transform**, which raises the value of a cheap
+    subsampled-training harness from convenience to enabler.
+  - **B (next): the same arms on the ZERO-SHOT model**, far less locked to our frames' appearance.
+    ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**) — read it for direction,
+    never magnitude.
+  - **Tooling built and reusable:** `_models/build_frame_index.py` — one entry per cached frame with
+    its questions, their results in three runs, and photometric statistics. It killed two candidates
+    (global white-boost, CLAHE) for **zero GPU** before any arm ran.
 - **Rung 10 — self-consistency: CLOSED, FAITHFUL NEGATIVE. Merged to `main` @ `e520dcf`.**
   `experiments/10-self-consistency/` + `context/10-self-consistency/CONTEXT.md`.
   - ✅ **The bit-identity gate PASSED** — `n_samples = 1` reproduces rung 06's `predictions.json`
