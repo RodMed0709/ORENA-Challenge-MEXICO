@@ -67,10 +67,13 @@ Verdict and full reasoning: [`context/decisions/resolution-is-not-the-gap.md`](.
 
 ## 6. Files
 
-| Path | What |
-|---|---|
-| `_models/resize.py` | library — `audit_frame_dims`, `dims_crosstab`, `pixel_spread`, `upscale_to` |
-| `runs/11_resolution_v1/frame_dims.csv` | native (w,h) of all 15,213 cached frames |
+| Path | What | Versioned |
+|---|---|---|
+| `_models/resize.py` | library — `audit_frame_dims`, `dims_crosstab`, `pixel_spread`, `upscale_to` | ✅ |
+| `runs/…/RESULTS_dims_crosstab.csv` | dataset × (w,h), absolute counts | ✅ |
+| `runs/…/RESULTS_pixel_spread.csv` | min/max/distinct `n_pixels` per dataset | ✅ |
+| `runs/…/RESULTS_video_res_constant.csv` | 130 videos, 0 multi-resolution — the structural finding | ✅ |
+| `runs/…/frame_dims.csv` | raw (w,h) of all 15,213 frames, 880 KB | ❌ too big; **regenerate** with `audit_frame_dims('/workspace/frames_cache')`, ~3 min of I/O |
 
 `upscale_to` is kept although 11b never ran: it is the Lanczos helper any future
 resolution work would need, and deleting it would only mean rewriting it.
