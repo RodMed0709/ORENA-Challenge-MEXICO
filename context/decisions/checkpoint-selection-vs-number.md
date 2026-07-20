@@ -1,3 +1,11 @@
+---
+question: Does acc_OOD checkpoint selection choose against `number`?
+verdict: NO — on the full 6252 epoch 2 wins; RULES §6 is CONFIRMED, not qualified
+status: MEASURED
+date: 2026-07-18
+measured_in: experiments/06-vit-lora/06b_epoch1_eval.ipynb
+withdrawn: the selection claim — it was measured on the OOD slice only
+---
 # Finding: training erodes `number` on OOD — in BOTH arms, so it is not the ViT
 
 *(Original title claimed acc_OOD selection picks the worse checkpoint. **Retracted** — see bottom.)*

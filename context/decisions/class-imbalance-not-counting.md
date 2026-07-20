@@ -1,3 +1,12 @@
+---
+question: Is the foreign-object failure a counting limit, or does the model not SEE certain classes?
+verdict: per-CLASS — but inside `object_recognition`, NOT in the gap
+status: RE_SCOPED
+date: 2026-07-19
+measured_in: experiments/06-vit-lora/_tools/per_class_recall.py
+withdrawn: drop `silicone loop` from training — it is in the organizers' predefined list
+amended_by: [the-gap-is-the-number-format]
+---
 # Finding: the failure is PER-CLASS, not per-count — and the ViT LoRA worked where it mattered
 
 - **Status:** MEASURED · ⚠️ **its first recommendation is RETRACTED same-day** — see the

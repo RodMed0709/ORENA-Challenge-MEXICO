@@ -1,3 +1,10 @@
+---
+question: Can we swap Qwen3-VL-8B's ViT for a stronger open-source encoder?
+verdict: NO-GO — licence plus a full ViT→LLM realignment we cannot afford
+status: NO_GO
+date: 2026-07-17
+measured_in: context/decisions/viT-swap-nogo.md
+---
 # Decision: swapping Qwen3-VL-8B's vision encoder = NO-GO
 
 - **Status:** SETTLED · NO-GO · 2026-07-17

@@ -1,3 +1,10 @@
+---
+question: Does the `number` error have correctable structure — can post-hoc calibration work?
+verdict: NO — dead on three pre-registered rules; true 2, 3 and 4 share the same modal prediction
+status: MEASURED
+date: 2026-07-19
+measured_in: experiments/05-bottleneck-audit/05c_count_confusion.ipynb
+---
 # Decision: post-hoc count calibration is DEAD — measured, three ways
 
 - **Status:** MEASURED · 2026-07-19 · zero GPU · **faithful negative**

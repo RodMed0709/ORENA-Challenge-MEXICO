@@ -1,3 +1,11 @@
+---
+question: Where is our largest scoring gap against the external reference?
+verdict: `aggregation` — a 4B beats us by 12.5 pts there while we lead `object_recognition` by +14.9
+status: MEASURED
+date: 2026-07-19
+measured_in: results/summary.csv + the public leaderboard's single participant row
+question_derived: true
+---
 # Finding: a 4B model beats us by 12.5 pts on `aggregation` — that gap IS the 60% target
 
 - **Status:** MEASURED against the first EXTERNAL reference the project has ever had · 2026-07-19

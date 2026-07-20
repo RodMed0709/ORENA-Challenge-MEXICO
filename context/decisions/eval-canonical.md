@@ -1,3 +1,10 @@
+---
+question: How do we stop the same eval bugs recurring across experiments?
+verdict: ONE scoring module (`frame.metrics`) — leaf→group via Capability.group, ID/OOD from qID
+status: SETTLED
+date: 2026-07-17
+measured_in: src/frame/metrics.py
+---
 # Decision: ONE canonical eval-metrics module (`src/frame/metrics.py`) — leaf→group + qID-derived ID/OOD
 
 - **Status:** SETTLED · 2026-07-17
