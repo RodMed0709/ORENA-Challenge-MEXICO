@@ -139,7 +139,102 @@ def read_decisions(repo: Path = REPO) -> list[Measurement]:
     return rows
 
 
-_LADDER_ROW = re.compile(r"^\|\s*\**([\w\-.]+)\**\s*\|(.+?)\|(.+?)\|(.+?)\|\s*$")
+_CELL_SPLIT = re.compile(r"(?<!\\)\|")
+_RUNG_PREFIX = re.compile(r"^(\d+)")
+
+
+def _cells(line: str) -> list[str]:
+    """Split one markdown table row into cells, honouring ESCAPED pipes.
+
+    Splitting on a bare ``|`` truncates any cell that contains one: rung 05c's
+    verdict is ``P(pred\\|true) per template`` and reached the index as the
+    fragment ``P(pred\\ → —``. The escape is unescaped again for display.
+    """
+    parts = _CELL_SPLIT.split(line.strip())
+    if parts and not parts[0].strip():
+        parts = parts[1:]
+    if parts and not parts[-1].strip():
+        parts = parts[:-1]
+    return [p.replace(r"\|", "|").strip().strip("*").strip() for p in parts]
+
+
+def _ladder_columns(header: list[str]) -> tuple[int, int, int] | None:
+    """Locate the (rung, changed, verdict) columns BY NAME, or None if unknown.
+
+    The repo grew two ladder layouts — ``| Rung | What changed | Baseline | Status |``
+    and ``| Notebook | Rung | Metric | Verdict |``. The old parser assumed the first
+    and read the second column-shifted, which is how a phantom "rung Notebook" whose
+    verdict was the literal string "Rung → Verdict" got into the index. Resolving by
+    name means a third layout degrades to `skipped` — visible — instead of to silent
+    garbage.
+    """
+    low = [h.lower() for h in header]
+    if "rung" not in low:
+        return None
+    rung = low.index("rung")
+    verdict = next((i for i, h in enumerate(low) if h in {"status", "verdict"}), None)
+    if verdict is None:
+        return None
+    changed = next((i for i in range(rung + 1, len(low)) if i != verdict), None)
+    return None if changed is None else (rung, changed, verdict)
+
+
+def _rung_key(rung: str) -> str:
+    """Identity of a rung across the two ladder layouts: ``\\d+`` + optional letter.
+
+    One README calls it ``06`` and the next calls it ``06-vit-lora``; both are the
+    same rung and must collapse to one row. The letter is part of the key so the
+    ``05b``/``05c`` probes stay distinct from ``05`` itself.
+    """
+    m = re.match(r"(\d+[a-z]?)", rung.strip().lower())
+    return m.group(1) if m else rung.strip().lower()
+
+
+def _dedupe_ladder(rows: list[Measurement], exp_dirs: list[str]) -> list[Measurement]:
+    """One row per rung, described by the ladder that actually describes it.
+
+    Every downstream README repeats the whole ladder, so each rung is written up many
+    times and the wordings drift as they are copied. The previous dedup keyed on the
+    verdict TEXT, so drifted copies were never recognised as duplicates: rung 07
+    shipped three times with three verdicts and three ``where`` paths, none of which
+    was its own directory.
+
+    Two layouts also answer two different questions. ``| Rung | What changed | ... |``
+    says what the rung CHANGED; ``| Notebook | Rung | Metric | Verdict |`` reports the
+    resulting NUMBER. This index asks "what changed, and what came of it", so the
+    descriptive form wins — detected as the longer rung id (``06-vit-lora`` over
+    ``06``), which is exactly how the two layouts spell it.
+
+    ``where`` is then resolved from the rung id to the directory that OWNS the rung,
+    never left as whichever README happened to mention it.
+    """
+    best: dict[str, Measurement] = {}
+    for r in rows:
+        rung = r.question.removeprefix("What did rung ").split(" change,")[0]
+        key = _rung_key(rung)
+        current = best.get(key)
+        if current is None or len(rung) > len(
+            current.question.removeprefix("What did rung ").split(" change,")[0]
+        ):
+            best[key] = r
+
+    resolved = []
+    for key, r in sorted(best.items()):  # ladder order, not first-mention order
+        digits = re.match(r"\d+", key)
+        owner = next(
+            (d for d in exp_dirs if digits and d.startswith(f"{digits.group(0)}-")), None
+        )
+        resolved.append(
+            Measurement(
+                question=r.question, verdict=r.verdict,
+                # a rung with no directory in THIS tree (e.g. 09, still on a
+                # teammate's branch) keeps the README that mentioned it — a real
+                # pointer beats a fabricated one.
+                where=f"experiments/{owner}" if owner else r.where,
+                source_kind=r.source_kind,
+            )
+        )
+    return resolved
 
 
 def read_ladders(repo: Path = REPO) -> tuple[list[Measurement], list[str]]:
@@ -156,33 +251,37 @@ def read_ladders(repo: Path = REPO) -> tuple[list[Measurement], list[str]]:
         if block is None:
             skipped.append(str(readme.relative_to(repo)))
             continue
-        found = False
+        cols, found = None, False
         for line in block.group(1).splitlines():
-            m = _LADDER_ROW.match(line)
-            if not m or set(m.group(2).strip()) <= {"-", ":"}:
+            if not line.strip().startswith("|"):
                 continue
-            rung, changed, _baseline, verdict = (g.strip(" *") for g in m.groups())
-            if rung.lower() in {"rung", ""}:
+            cells = _cells(line)
+            if not cells or set("".join(cells)) <= {"-", ":", " "}:
+                continue  # separator row
+            if cols is None:  # first non-separator row is the header
+                cols = _ladder_columns(cells)
+                if cols is None:
+                    break  # unrecognised layout → reported as skipped, never guessed
+                continue
+            i_rung, i_changed, i_verdict = cols
+            if max(cols) >= len(cells):
+                continue
+            rung = cells[i_rung]
+            if not rung or rung.lower() == "rung":
                 continue
             found = True
             rows.append(
                 Measurement(
                     question=f"What did rung {rung} change, and what came of it?",
-                    verdict=f"{changed} → {verdict}",
+                    verdict=f"{cells[i_changed]} → {cells[i_verdict]}",
                     where=str(readme.parent.relative_to(repo)),
                     source_kind=SourceKind.LADDER,
                 )
             )
         if not found:
             skipped.append(str(readme.relative_to(repo)))
-    # a rung appears in every downstream README's ladder; keep the first mention only
-    seen, unique = set(), []
-    for r in rows:
-        if r.verdict in seen:
-            continue
-        seen.add(r.verdict)
-        unique.append(r)
-    return unique, skipped
+    exp_dirs = sorted(p.name for p in (repo / "experiments").iterdir() if p.is_dir())
+    return _dedupe_ladder(rows, exp_dirs), skipped
 
 
 def read_results(repo: Path = REPO) -> list[Measurement]:
