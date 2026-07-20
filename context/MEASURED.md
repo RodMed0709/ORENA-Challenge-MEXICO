@@ -15,6 +15,7 @@
 | | Question | Verdict | Status | Where |
 |---|---|---|---|---|
 |  | Can majority voting over k sampled answers lift the `number` format? | NO — negative in all three pre-registered arms on the full 2094. k=16 SIGNIFICANTLY HARMS OOD (−0.043, CI excludes 0) and doubling k doubled the harm — the signature of a mode sitting on the wrong value. On OOD the voted answer falls BELOW the trivial floor | MEASURED | `context/decisions/self-consistency-dead.md` |
+|  | Does frame resolution explain part of the model's failure — is the ID/OOD split confounded by it? | NO — resolution is a per-video constant (130/130 videos, one resolution each), so it is PERFECTLY confounded with video identity and cannot be separated even in principle. Accuracy across resolution buckets is non-monotonic. And the premise was false: `lapchole` (ID) has SIX resolutions, its minimum (230k px) below `heico`'s uniform 518k | MEASURED | `context/decisions/resolution-is-not-the-gap.md` |
 | ⚠️ | What question metadata are we not reading? *(derived)* | `secondary_capabilities` (89.8% of train) — the +77% aggregation pool is real but 89.6% `fo_class`, 0% `number`; `clinical_relevance` is all-False | RE_SCOPED<br>amended by: [[secondary-labels-are-fo-class]] | `context/decisions/unused-metadata.md` |
 |  | Which answer_format composes the `aggregation` gap? | 80.4% `number`; `fo_class` does not appear in the bucket at all | MEASURED | `context/decisions/the-gap-is-the-number-format.md` |
 |  | Does the +77% secondary-label supervision pool actually reach the `number` format? | NO — it is 89.6% `fo_class` and 0% `number`; the gap's format gains nothing directly | MEASURED | `context/decisions/secondary-labels-are-fo-class.md` |
@@ -79,4 +80,5 @@
 These READMEs have no parseable `## Ladder` table, so their rungs are missing
 from this index. Reported rather than dropped silently:
 
+- `experiments/11-resolution/README.md`
 - `experiments/splits/README.md`
