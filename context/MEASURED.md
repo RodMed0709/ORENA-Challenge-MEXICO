@@ -54,6 +54,14 @@
 | What did rung 05-bottleneck-audit change, and what came of it? | The image passed to the model → done — NO SHORTCUT | `experiments/08-data-card` |
 | What did rung 07-enumeration change, and what came of it? | (probe)* forces the model to enumerate → closed — the model will not enumerate | `experiments/08-data-card` |
 | What did rung 08-data-card change, and what came of it? | (documentation)* **what is actually in the data → done — read this before quoting any number | `experiments/08-data-card` |
+| What did rung 02-lora-sft change, and what came of it? | LoRA instruction fine-tune → done (`bucket_mean` 0.5486) | `experiments/10-self-consistency` |
+| What did rung 05-bottleneck-audit change, and what came of it? | the image passed to the model (real/black/shuffled) → done — NO SHORTCUT | `experiments/10-self-consistency` |
+| What did rung 05c-count-confusion change, and what came of it? | (probe)* `P(pred\ → — | done — CALIBRATION IS DEAD | `experiments/10-self-consistency` |
+| What did rung 06-vit-lora change, and what came of it? | LoRA also on the ViT → done — PARTIAL (`bucket_mean` 0.5667) | `experiments/10-self-consistency` |
+| What did rung 07-enumeration change, and what came of it? | (probe)* can the model enumerate? → done — faithful negative *of the method | `experiments/10-self-consistency` |
+| What did rung 08-data-card change, and what came of it? | (not an experiment)* what is in the data → done | `experiments/10-self-consistency` |
+| What did rung 09-coa-sft change, and what came of it? | CoA-format SFT (Rodrigo) → in progress, `task/r1-coa-sft` | `experiments/10-self-consistency` |
+| What did rung 10-self-consistency change, and what came of it? | greedy → majority vote over k samples, `number` only → code ready, T0 pending | `experiments/10-self-consistency` |
 
 ## Runs and probes that produced a number
 
