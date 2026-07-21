@@ -705,6 +705,16 @@ def downscale(fn, factor: float, post: bool = True):
     return _run
 
 
+# 🔴 The ONE canonical aux view for rung 12c, registered so training and serving reference
+# the same object by name. 12c-res settled every parameter here: `bilateral+morphgrad`
+# (beats homo_soft+morphgrad at every scale), map computed at native resolution then shrunk
+# to half (`post=True`, +0.0199 vs +0.0165 for shrink-first), half because that is on the
+# plateau and quarter's extra saving is not worth closing on the cliff. Change this in ONE
+# place or train/serve drift silently.
+AUX_VIEW_NAME = "aux_bimg_half"
+COMBOS[AUX_VIEW_NAME] = downscale(COMBOS["bilateral+morphgrad"], 0.5, post=True)
+
+
 def rank_within_video_both(wv: pd.DataFrame) -> pd.DataFrame:
     """`rank_within_video`, but reporting the MEAN over descriptors alongside the MAX.
 

@@ -57,15 +57,16 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
-MAP_NAME = "bilateral+morphgrad"
-MAP_SCALE = 0.5
+# 🔴 Single source of truth: the engine serves this SAME named transform at inference, so
+# there is no second definition to drift. 12c-res fixed every parameter inside it.
+MAP_SCALE = 0.5  # kept only for the identity arm's matched shrink
 
 
 def _map_fn():
-    """The aux view exactly as 12c-res measured it: map at native resolution, then shrink."""
+    """The aux view, by its canonical name — identical to what `engine._aux_view` serves."""
     import transform_bank as tb
 
-    return tb.downscale(tb.COMBOS[MAP_NAME], MAP_SCALE, post=True)
+    return tb.COMBOS[tb.AUX_VIEW_NAME]
 
 
 @dataclass
