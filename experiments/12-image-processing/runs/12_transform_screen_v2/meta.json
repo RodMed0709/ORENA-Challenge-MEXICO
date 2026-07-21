@@ -1,0 +1,37 @@
+{
+ "n_frames": 15213,
+ "seed": 20260720,
+ "transforms": [
+  "identity",
+  "unsharp_x1",
+  "unsharp_x3",
+  "clahe",
+  "specular",
+  "canny",
+  "sobel",
+  "morph_gradient",
+  "tophat",
+  "blackhat",
+  "bilateral",
+  "bilateral_unsharp",
+  "despecular",
+  "dehaze",
+  "contrast_1s",
+  "homomorphic",
+  "null_jpeg",
+  "null_noise"
+ ],
+ "classes": [
+  "Clip",
+  "External drain",
+  "Gallstone",
+  "Needle",
+  "Silicone loop",
+  "Specimen",
+  "Specimen bag",
+  "Sponge"
+ ],
+ "grid": 8,
+ "topk": 4,
+ "seconds": 1796.2
+}
