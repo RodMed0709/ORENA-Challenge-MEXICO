@@ -150,7 +150,7 @@ def freeze_subsample(cfg: PipelineConfig, st) -> dict:
     train_items = sp.apply_split(items, vs, "train")
     import pandas as pd
     full = pd.DataFrame([{"qID": i.request.qID, "dataset": i.dataset, "video": i.video_id,
-                          "answer_format": str(i.request.answer_format)} for i in train_items])
+                          "answer_format": ss.fmt_of(i)} for i in train_items])
     rows = ss.choose(train_items, scfg)
     gate = ss.gate(rows, full, scfg)
     if not gate["PASS"]:
