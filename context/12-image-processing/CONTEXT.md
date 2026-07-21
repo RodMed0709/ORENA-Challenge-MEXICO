@@ -171,6 +171,68 @@ honest summary is:
 Since the thing we are hunting is a *subtle improvement*, it is the wrong tool to find one and the
 right tool to cheapen the search.
 
+## 12e — the conditional hypothesis, measured. It does NOT hold up.
+
+The strongest remaining explanation for this whole rung was the one recorded above under
+"conditional effects are averaged away": each operator shines in a different scenario, so
+`wv_delta` — a mean over cells — cancels a real, sign-flipping effect. If true it would explain
+branch A's −0.056 too. Measured for zero GPU against the rung-06 run. **It is not supported.**
+
+🔴 **First, the literal test is NOT MEASURABLE, and that is itself the result.** Recomputing the
+screen inside the model's right pile and its wrong pile splits 235 (class, video) cells into two
+and leaves **14** with both piles clearing `min_per_side=15` — 19 if every answer format is used
+rather than just `fo_class`, because the model was asked about only **4,486 of the 15,213** indexed
+frames. A sign inversion reported over 14 cells would be manufactured. Recorded, not worked around.
+
+**What was measured instead** (`right_wrong_by_video`, `transform_bank.py`): inside each video,
+does a transform's descriptor separate the frames the model gets **right** from those it **fails**?
+37 of 38 videos clear the gate, 3,977 frames. Crossed with the screen this is a 2×2 — a transform
+that separates present/absent but *not* right/wrong carries a signal orthogonal to the model's
+actual failures. Both statistics reported (max and mean over the 18 descriptors), per 12d bis, and
+read against a null band that permutes the verdict **inside each video**, so video clustering and
+per-video accuracy are preserved. Bonferroni over 26 comparisons ⇒ **|z| > 3.1**.
+
+| transform | `sep_max` Δ | z | `sep_mean` Δ | z | (B) within-class Δ max/mean |
+|---|---|---|---|---|---|
+| `bilateral+morphgrad` | −0.0092 | +1.28 | +0.0177 | **+3.91** | −0.0319 / −0.0005 |
+| `homo_soft+morphgrad` | −0.0121 | +1.12 | +0.0085 | **+3.28** | −0.0220 / +0.0059 |
+| `despec+tophat` | −0.0265 | −0.58 | +0.0088 | +2.55 | −0.0307 / +0.0060 |
+| `homo_soft` | −0.0099 | −0.99 | +0.0020 | +2.05 | −0.0022 / −0.0012 |
+| `null_jpeg` (anchor) | **+0.0001** | +0.22 | +0.0000 | −0.32 | +0.0013 / +0.0002 |
+| `despec+clahe` | −0.0152 | **−4.03** | −0.0035 | −2.31 | +0.0070 / +0.0063 |
+| `despec+homo+sobel` | −0.0375 | −2.87 | −0.0126 | −2.65 | −0.0658 / −0.0186 |
+
+**Three readings.**
+
+1. 🔴 **On the primary (max) statistic, nothing clears the band — and `null_jpeg` ranks FIRST**
+   (+0.0001, z=+0.22). A null anchor topping the ranking is the textbook signature of no effect.
+2. **On the mean statistic two transforms do clear Bonferroni** — `bilateral+morphgrad` (+3.91σ)
+   and `homo_soft+morphgrad` (+3.28σ). ⚠️ **But (B) does not corroborate them.** Restricted to
+   frames that actually contain the class, `bilateral+morphgrad` collapses to −0.0319 / −0.0005.
+   The parsimonious explanation is **composition, not conspicuity**: the right pile and the wrong
+   pile hold different objects and different scenes, and edge operators respond to that. The null
+   permutes within video, which controls for the video — it does **not** control for class mix.
+3. ⚠️ **Unexplained, flagged not interpreted:** `despec+clahe`, the screen's #1, separates
+   right from wrong **less than its own permuted null** (−4.03σ). A below-null value on an
+   unsigned |AUC−0.5| statistic has no ready mechanism; it is recorded as an anomaly.
+
+🔴 **Consequence.** The conditional hypothesis was the last cheap explanation available for rung 12
+and it is now a faithful negative: at the resolution these instruments have, **the screen's
+averaging is not hiding a sign inversion.** None of the five selected transforms has evidence of
+touching what the model actually gets wrong — which **lowers**, not raises, the case for spending
+pod on them in their current form.
+
+⚠️ **What this does NOT close:** 12c (image **plus** map) is untested and untouched by this;
+the honest test of the input family is still to **train** with the transform; and the negative-class
+contamination below is unaffected. It also cannot see an effect that exists only at a resolution
+finer than a per-video AUC over global-ish descriptors.
+
+**Reproduce.** `right_wrong_by_video`, `right_wrong_within_class`, `right_wrong_null` in
+`_models/transform_bank.py`; verdict = frames whose `fo_class`/all-format questions in
+`06-vit-lora/.../eval_best/inspect.csv` are **unanimously** right or wrong (mixed frames, 3.9 %,
+are dropped — a frame with one right and one wrong question has no verdict). Outputs in
+`runs/12e_right_wrong_v1/`. ~4 min on CPU, no GPU, seed 20260720.
+
 ## Also worth knowing (from the same session)
 
 **Of 8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. Every
