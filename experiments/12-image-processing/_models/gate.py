@@ -76,3 +76,54 @@ def control_rescore(inspect_csv: str | Path, expected: dict[str, float], tol: fl
         "deltas": deltas,
         "passed": all(abs(d) <= tol for d in deltas.values()),
     }
+
+
+def aux_view_payload_gate(cfg_cls, image, question: str = "Which objects are visible?") -> dict:
+    """Rung 12c — the identity gate for `aux_view`, at the PAYLOAD level. No GPU, no model.
+
+    `flag_off_identity` above is the real gate but it needs the checkpoint and the GPU, so
+    it can only run on the pod. This one runs anywhere and catches the failure that would
+    waste that pod time: a composite flag that changes the single-image payload even when
+    it is off, which would silently un-single-variable every arm ever run with it.
+
+    Five checks, and #3 is the one people skip:
+
+    1. OFF is byte-identical to the historical payload AND passes the SAME object — a copy
+       would mean a resample, which is a second variable.
+    2. `identity` builds the four-part composite and reuses the object: it is the NULL ARM,
+       paying a second image's cost with zero new information.
+    3. In the map arm the ORIGINAL is still the untouched object. This is the entire reason
+       12c exists after branch A: the reference must stay in distribution.
+    4. The caption is identical across the identity and map arms, so it cancels in their
+       difference and cannot become the variable under test.
+    5. An unknown transform name raises instead of silently degrading to one image.
+    """
+    from frame.engine import QwenFrameEngine, SYSTEM_PROMPT
+
+    def content(**kw):
+        return QwenFrameEngine(cfg_cls(**kw))._messages(image, question)
+
+    out, off = {}, content()
+    out["off_identical"] = off == [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": [{"type": "image", "image": image},
+                                     {"type": "text", "text": question}]},
+    ] and off[1]["content"][0]["image"] is image
+
+    idn = content(aux_view="identity")[1]["content"]
+    out["identity_is_null_arm"] = len(idn) == 4 and idn[1]["image"] is image
+
+    mp = content(aux_view="bilateral+morphgrad")[1]["content"]
+    out["original_untouched"] = mp[0]["image"] is image
+    out["map_differs"] = (mp[1]["image"] is not image
+                          and list(mp[1]["image"].getdata()) != list(image.getdata()))
+    out["caption_cancels"] = mp[2]["text"] == idn[2]["text"] and mp[3]["text"] == question
+
+    try:
+        content(aux_view="__no_such_transform__")
+        out["typo_raises"] = False
+    except ValueError:
+        out["typo_raises"] = True
+
+    out["PASS"] = all(v for k, v in out.items() if k != "PASS")
+    return out

@@ -64,17 +64,59 @@ class QwenFrameEngine:
 
         return apply(image, kind, getattr(self._cfg, "enhance_amount", 1.0))
 
+    def _aux_view(self, image: Image.Image) -> Image.Image | None:
+        """Rung 12c — a SECOND view of the same frame, or ``None`` when the flag is off.
+
+        With ``cfg.aux_view is None`` this returns ``None`` and ``_messages`` takes the
+        exact single-image path it always has: same list, same order, same objects. That
+        is the byte-identical guarantee, and it is why the branch lives here rather than
+        as a rewrite of ``_messages``.
+
+        Why a second view at all: branch A replaced the image and died of appearance
+        rarity (−0.056, monotone in dose), which biases any inference-only test of an
+        INPUT intervention toward the negative. Adding a view instead of substituting one
+        keeps the reference frame **in distribution** — the one configuration of the input
+        family where that bias does not bite.
+
+        ``"identity"`` is not a no-op here: it is the null ARM. It pays the full cost of a
+        second image while carrying zero new information, so ``map − identity`` isolates
+        what the map contributes from the mere fact of receiving two pictures. Reading a
+        composite arm without it repeats branch A's mistake one level up.
+        """
+        kind = getattr(self._cfg, "aux_view", None)
+        if kind is None:
+            return None
+        if kind == "identity":
+            return image
+        from transform_bank import COMBOS, TRANSFORMS  # experiment-private; only when ON
+
+        try:
+            return (COMBOS | TRANSFORMS)[kind](image)
+        except KeyError:  # a typo must fail loudly, never silently fall back to one image
+            raise ValueError(
+                f"unknown aux_view {kind!r} — not in transform_bank COMBOS/TRANSFORMS"
+            ) from None
+
     def _messages(self, image: Image.Image, question: str) -> list[dict]:
         image = self._enhanced(image)
+        aux = self._aux_view(image)
+        if aux is None:
+            content = [
+                {"type": "image", "image": image},
+                {"type": "text", "text": question},
+            ]
+        else:
+            # the caption is IDENTICAL across the identity and map arms, so it cancels in
+            # their difference and cannot become the variable under test
+            content = [
+                {"type": "image", "image": image},
+                {"type": "image", "image": aux},
+                {"type": "text", "text": self._cfg.aux_view_text},
+                {"type": "text", "text": question},
+            ]
         return [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image", "image": image},
-                    {"type": "text", "text": question},
-                ],
-            },
+            {"role": "user", "content": content},
         ]
 
     def predict(self, image: Image.Image, question: str) -> str:
