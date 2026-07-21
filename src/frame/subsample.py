@@ -58,6 +58,16 @@ class SubsampleConfig:
     manifest_path: Path = Path("experiments/splits/train_subsample_v1.csv")
 
 
+def fmt_of(item) -> str:
+    """Canonical answer-format string of an SDK item — the project's vocabulary.
+
+    ``item.reference.format`` is a ``focus.data.formats`` object; its ``.type`` is the
+    string the parquet and the evaluator use (``fo_class``, ``number``, …). Read off the
+    reference, NOT the request — the request carries no format (checked on the pod).
+    """
+    return item.reference.format.type
+
+
 def _digest(rows: pd.DataFrame) -> str:
     blob = rows.to_csv(index=False)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
@@ -70,7 +80,7 @@ def choose(items: list, cfg: SubsampleConfig) -> pd.DataFrame:
     this composes with the existing export path rather than replacing it.
     """
     rows = [{"qID": it.request.qID, "dataset": it.dataset, "video": it.video_id,
-             "answer_format": str(it.request.answer_format)} for it in items]
+             "answer_format": fmt_of(it)} for it in items]
     df = pd.DataFrame(rows)
     if df.qID.duplicated().any():
         raise ValueError("duplicate qID in the candidate pool — the subsample would be ambiguous")
