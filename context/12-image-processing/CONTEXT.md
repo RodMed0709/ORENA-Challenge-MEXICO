@@ -233,6 +233,56 @@ finer than a per-video AUC over global-ish descriptors.
 are dropped — a frame with one right and one wrong question has no verdict). Outputs in
 `runs/12e_right_wrong_v1/`. ~4 min on CPU, no GPU, seed 20260720.
 
+## 12c-res — the map can be sent at HALF resolution for free. Zero GPU.
+
+The composite arm sends the frame plus a second view, roughly doubling the visual tokens.
+An edge map is low-entropy, so it plausibly does not need the original's resolution — and
+settling that **inside** the training A/B would be fatal: a negative composite arm could
+not be told apart from a map crippled by downscaling. Answered with the screen instead.
+
+⚠️ **This is NOT rung 11's question.** The original frame is sent untouched; nothing here
+concerns the model's input resolution, which is irresolvable anyway (130 videos, none with
+more than one resolution → resolution is perfectly confounded with video). The question is
+how much of the **map's** information survives, which is a property of the map.
+
+**Δ within-video separability vs `identity`, 235 cells, 15,213 frames:**
+
+| scale | `identity` Δ mean | `bilateral+morphgrad` Δ mean |
+|---|---|---|
+| full (1×) | 0 | **+0.0176** |
+| 1/2 | +0.0009 | **+0.0199** |
+| 1/4 | — | **+0.0187** |
+| 1/8 | −0.0071 | — |
+| **1/16** | **−0.0127** | **−0.0113** |
+
+🔴 **The control that makes this readable.** The first run said halving costs nothing — but
+it also said halving the *raw photograph* costs nothing (+0.0009), which is suspicious: the
+descriptors are tile statistics over an 8×8 grid and a per-tile mean is close to
+scale-invariant **by construction**. So the instrument was suspected blind before it was
+believed, and tested with an extreme dose. It is **not** blind: degradation is monotone to
+1/16, where the map collapses from +0.0176 to −0.0113. There is a **plateau to 1/4 and then
+a cliff**. The flat reading at 1/2 is a finding, not a limitation.
+
+**Three consequences.**
+
+1. **Half resolution for the aux view is free**, cutting the composite arm's token penalty
+   from ~2× to ~1.25× (1/4 is also measured and inside the plateau, ~1.06×, but 1/8 is
+   untested for the map so 1/2 keeps two doses of margin from the cliff).
+2. **Compute the map at native resolution, THEN shrink** (`half_post` +0.0199 vs
+   `half_pre` +0.0165). Shrinking first never resolves the fine edges at all.
+3. **The choice between maps does not change with scale** — `bilateral+morphgrad` beats
+   `homo_soft+morphgrad` on the mean statistic at every scale (+0.0176/+0.0199 vs
+   +0.0087/+0.0077), which supports carrying only the former into the composite arm.
+
+⚠️ **Standing limit, unchanged:** this measures descriptor separability, not what a ViT
+does with pixels. It **bounds** the information loss; it does not prove the encoder is
+unaffected. Correct use of an instrument whose record is exclusion.
+
+**Reproduce.** `downscale` and `rank_within_video_both` in `_models/transform_bank.py`;
+outputs in `runs/12c_map_resolution_v1/` (9 pipelines, 20 min) and
+`runs/12c_map_resolution_sens/` (the sensitivity control, 5 pipelines, 8 min). 11 CPU
+workers, no GPU, seed 20260720.
+
 ## Also worth knowing (from the same session)
 
 **Of 8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. Every
