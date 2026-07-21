@@ -283,6 +283,100 @@ outputs in `runs/12c_map_resolution_v1/` (9 pipelines, 20 min) and
 `runs/12c_map_resolution_sens/` (the sensitivity control, 5 pipelines, 8 min). 11 CPU
 workers, no GPU, seed 20260720.
 
+## 12c — PRE-REGISTRATION (written 2026-07-21, before any pod time)
+
+Everything below is fixed **before** the runs. A threshold adjusted after seeing a number
+stops being a gate and becomes a story.
+
+### Arms — two, not three
+
+Both train on the **byte-identical** subsample (`frame.subsample`, sha256-verified). 🔴 A
+subsampled arm may **not** be compared against rung 02/06, which trained on the full 13,748:
+that would confound the intervention with the training-set size. The matched control is the
+only legitimate baseline.
+
+| arm | input | cost (est.) |
+|---|---|---|
+| **control** | one image — the subsampled rung-06 recipe, unchanged | ~1.5 h |
+| **composite** | frame + `bilateral+morphgrad` at **half** resolution | ~2 h |
+| ~~null~~ | frame + a shrunk copy of itself | **CONTINGENT** — only if composite wins |
+
+The null arm separates "the map carries information" from "two pictures help at all". It is
+deferred on purpose: its information has value in exactly one branch of the tree, so
+ordering arms by what a result would force next keeps this to two runs instead of three.
+
+**Run the control FIRST and alone.** If the subsample is too destructive we learn it for
+1.5 h instead of discovering it inside an A/B where the failure could not be attributed.
+
+### Subsample: 25 %, proportional, all videos kept
+
+13,748 → **3,449** questions, **92/92 videos**, per-format fractions within 2 % of target,
+deterministic, frozen with a `.sha256` sidecar. Measured on the branch-A effect: at 25 % the
+paired delta stays ≈ unbiased (−0.046 vs −0.056) while the CI widens ~1.8×.
+
+### Evaluation: the FULL set, not a subsample
+
+⚠️ Deliberate simplification. The asymmetric eval allocation derived earlier (ID full /
+OOD 25 %) solves a problem this experiment does not have: here **training dominates the
+cost** (~1.5–2 h) and a full eval is ~23 min. Subsampling eval would buy minutes and cost
+comparability against rung 06. Evaluate on the full 6,252.
+
+### Decision rule
+
+- **Metric:** `fo_class`, **margin over the template-aware floor**, paired CI clustered by
+  video, per `RULES`. `fo_class` is the sensitive instrument (+52 of visual signal vs +8 for
+  `number`); if it does not move there, it will not move the deaf one.
+- **Conjunction: ID *and* OOD.** Never relaxed — rung 10's arm C looked within reach in ID
+  while significantly damaging OOD.
+- **Bar: +0.04** (spec §, the rung-10 noise floor at comparable video counts). The observed
+  CI is always reported alongside.
+- **Checkpoint selection: `acc_OOD`, per epoch** (`RULES` §6), never last-by-default.
+
+### Stopping rules — three tiers, pre-registered
+
+**Tier 0 (free, no eval).** The existing guard, `vit_lora_train._guard_trip`: NaN/inf in
+train or eval loss, or epoch-1 eval loss no better than the first train loss. Conservative by
+design — it fires on unambiguous failure, never on "the hypothesis looks weak".
+
+**Tier 1 (the catastrophe gate, epoch 2).** Compare the composite arm against the **control**
+— not against its own curve. Trip if it is below the control by **more than 0.03**.
+🔴 The threshold is the *measured* ep1→ep2 gain (rung 02 +0.020, rung 06 +0.032): below it a
+later epoch could still recover, above it that is not plausible. **Do not trip on "not
+winning yet"** — our own trajectories improve late, and stopping there would kill a real
+winner.
+
+**Tier 2 (the decision).** `acc_OOD` per epoch. ⚠️ **Keep epoch 3.** On rung 06, ep3 lost in
+aggregate (0.6045 vs 0.6078) but `fo_class` was **still rising** (0.624 → 0.633) — and
+`fo_class` is this experiment's metric. Discarding ep3 by default would throw away the read
+on the format that matters here. (Salvage caveat: that is **one** training trajectory, not a
+law.)
+
+By `RULES` §7 a gate that fires is a **finding**. "The composite input breaks training" is a
+publishable result worth the 1.5 h it cost.
+
+### What is built and green, before any GPU
+
+- `src/frame/subsample.py` — proportional harness + `gate()`. Verified on the real 13,748.
+- `_models/composite_train.py` — map cache, ShareGPT record, `consistency_gate`.
+- 🔴 `consistency_gate` checks the JSONL layout **against `engine._messages` itself**, not
+  against a copied string. A train/serve mismatch would sink the arm for a reason unrelated
+  to the hypothesis and would be invisible in the loss curve. Green.
+- `gate.aux_view_payload_gate` — flag-off byte-identity, the null arm reusing the object,
+  the original untouched in the map arm, the caption cancelling, typos raising. Green.
+- Map cache measured: 960×540 → 480×270, **~2 min** for 3,449 frames, ~130 MB. The identity
+  arm is the same size as the map arm (matched token count) and differs only in content
+  (MAE 1.5 = JPEG noise, vs 59.6 for the map).
+
+### Known limits, recorded before the result
+
+1. **Still not the clean test of the map alone.** Without the contingent null arm, a positive
+   composite result cannot separate the map's information from having two pictures.
+2. **The screen's prior is unfavourable.** 12e found no transform whose descriptors track
+   where the model fails. That prior is against this experiment; it does not close it,
+   because the screen measures descriptor statistics, not what a ViT does with pixels.
+3. **Relative only.** Subsampled arms compare to each other, never to the ladder.
+4. **The negative-class contamination is untouched** and caps any perception-side lever.
+
 ## Also worth knowing (from the same session)
 
 **Of 8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. Every
