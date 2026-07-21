@@ -666,3 +666,53 @@ def right_wrong_null(features: pd.DataFrame, verdict: pd.DataFrame, n_perm: int 
                 .pipe(lambda x: x.set_axis(
                     [f"null_{a}_{'p95' if 'lambda' in b else b}" for a, b in x.columns], axis=1))
                 .reset_index())
+
+
+# ── 12c-res: how much of the MAP survives being sent at lower resolution? ────
+# The composite arm sends the original frame plus a second view, which roughly doubles the
+# visual tokens. An edge map is low-entropy — mostly zeros — so it plausibly does not need
+# the original's resolution, and halving it would cut the penalty from ~2x to ~1.25x.
+#
+# 🔴 That is a design choice that must NOT be settled inside the training A/B: if the
+# composite arm came back negative we could not tell the map from its resolution. It is
+# also NOT rung 11's question — the original frame goes in untouched, so nothing here is
+# about the model's input resolution, which is irresolvable anyway (130 videos, none with
+# more than one resolution, so resolution is perfectly confounded with video). The question
+# is how much of the MAP's information survives, and that is a property of the map,
+# measurable with the screen for zero GPU.
+#
+# ⚠️ The screen's standing limit applies: it measures descriptor separability, not what a
+# ViT does with pixels. This BOUNDS the information loss; it does not prove the encoder is
+# unaffected. That is the correct use of an instrument whose record is exclusion.
+
+
+def downscale(fn, factor: float, post: bool = True):
+    """Wrap a transform so the map is produced at reduced resolution.
+
+    `post=True` computes the map at native resolution and THEN shrinks it — compute on the
+    best available information, then compress. `post=False` shrinks first and computes the
+    map on the smaller image. They are genuinely different designs: the first averages fine
+    edges away, the second never resolves them. The screen ranks both rather than assuming.
+
+    LANCZOS on the way down, because a box filter would alias exactly the high-frequency
+    content an edge map consists of.
+    """
+    def _run(img: Image.Image) -> Image.Image:
+        small = (max(1, int(img.width * factor)), max(1, int(img.height * factor)))
+        if post:
+            return fn(img).resize(small, Image.LANCZOS)
+        return fn(img.resize(small, Image.LANCZOS))
+    return _run
+
+
+def rank_within_video_both(wv: pd.DataFrame) -> pd.DataFrame:
+    """`rank_within_video`, but reporting the MEAN over descriptors alongside the MAX.
+
+    12d bis: `wv_delta` takes only the best of 18 descriptors, and that statistic is what
+    made the edge family look "strongly negative" — those pipelines raise every descriptor
+    while lowering the top one. Any ranking on this page reports both or repeats it.
+    """
+    cells = (wv.assign(cell=wv["klass"] + "|" + wv["video"])
+               .groupby(["cell", "transform"])["sep"]
+               .agg(sep_max="max", sep_mean="mean").reset_index())
+    return _paired_vs_identity(cells)

@@ -1,0 +1,17 @@
+{
+ "n_frames": 15213,
+ "bank": [
+  "identity",
+  "null_jpeg",
+  "identity_half",
+  "bimg",
+  "bimg_half_post",
+  "bimg_half_pre",
+  "bimg_quarter_post",
+  "hsmg",
+  "hsmg_half_post"
+ ],
+ "question": "how much of the MAP's separability survives downscaling",
+ "seed": 20260720,
+ "note": "NOT rung 11's question \u2014 the original frame is sent untouched"
+}
