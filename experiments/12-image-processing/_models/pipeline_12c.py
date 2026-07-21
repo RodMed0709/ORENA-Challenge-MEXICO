@@ -502,7 +502,25 @@ def _aux_name() -> str:
 # ── driver ───────────────────────────────────────────────────────────────────
 
 
+def _ensure_offline(cfg: PipelineConfig) -> None:
+    """Pin the offline env IN-PROCESS, before any HF import.
+
+    The Docker target runs with no network (`HF_HUB_OFFLINE=1`), and this makes the pod
+    behave the same so a run cannot silently depend on a reachable hub. Setting it in the
+    shell is not enough: a `nohup` launch or a merge subprocess can lose it, and the failure
+    then looks like a network error mid-eval. `HF_HOME` points at the pod's populated cache
+    (`HOME=/workspace`) so the judge resolves from disk, never from the hub.
+    """
+    import os
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    hf_home = cfg.extra.get("hf_home", "/workspace/.cache/huggingface")
+    if Path(hf_home).exists():
+        os.environ.setdefault("HF_HOME", hf_home)
+
+
 def run(cfg: PipelineConfig, stages: list[str] | None = None) -> dict:
+    _ensure_offline(cfg)
     """Execute the pipeline, resuming past any stage that already has a stamp.
 
     Never raises out of a stage: a failure is recorded, the terminal marker is written, and
