@@ -81,6 +81,30 @@ class PipelineConfig:
     # case where the next question is "why", and that question is much cheaper to answer
     # on a live machine. Successes and pre-registered aborts always shut down.
     shutdown_on_failure: bool = False
+
+    # ── paths + recipe (pod layout; mirror rung 02/06) ───────────────────────
+    model_path: Path = Path("/workspace/models/qwen3-vl-8b")
+    data_root: Path = Path("/workspace/orena-data")
+    frames_dir: Path = Path("/workspace/frames_cache")
+    model_type: str = "qwen3_vl"
+    attn_impl: str = "sdpa"
+    # S2Can LoRA recipe, identical to rung 02/06 so the ONLY differences from the ladder are
+    # the subsample and the aux view. batch 1 + ga 16 fits 8B bf16 on the 32 GB 5090.
+    lora_rank: int = 8
+    lora_alpha: int = 32
+    lora_dropout: float = 0.1
+    learning_rate: float = 2e-5
+    num_train_epochs: int = 3
+    max_pixels: int = 1280 * 720
+    per_device_train_batch_size: int = 1
+    gradient_accumulation_steps: int = 16
+    train_seed: int = 42  # the ladder's training seed, distinct from the subsample seed
+
+    # ── smoke: validate the whole chain cheaply before the real frac ─────────
+    smoke: bool = False
+    smoke_n_eval: int = 24      # eval items in smoke (stratified by run.py's n_eval)
+    smoke_max_steps: int = 2
+
     extra: dict = field(default_factory=dict)
 
     @property
@@ -89,6 +113,9 @@ class PipelineConfig:
 
     def stamp(self, stage: str) -> Path:
         return self.root / "stamps" / f"{stage}.json"
+
+    def arm_dir(self, arm: str) -> Path:
+        return self.root / arm
 
 
 class StageAborted(RuntimeError):
@@ -173,9 +200,7 @@ def gate_harness(cfg: PipelineConfig, st) -> dict:
     """
     if cfg.dry_run:
         return {"dry_run": True, "margin_ID": 0.11, "margin_OOD": 0.08, "passed": True}
-    report = json.loads((cfg.root / "eval_control" / "report.json").read_text())
-    mid = report["by_bucket_format"]["fo_class"]["margin_ID"]
-    mood = report["by_bucket_format"]["fo_class"]["margin_OOD"]
+    mid, mood = _fo_class_margins(cfg.arm_dir("control") / "selected_strat.json")
     passed = mid > cfg.floor_margin_min and mood > cfg.floor_margin_min
     out = {"margin_ID": mid, "margin_OOD": mood, "threshold": cfg.floor_margin_min,
            "passed": passed}
@@ -188,30 +213,282 @@ def gate_harness(cfg: PipelineConfig, st) -> dict:
     return out
 
 
-def _todo(name: str):
-    """Stages whose body lives in the rung-02/06 modules and is wired on the pod.
+# ── real stage bodies (wired to the rung-02/06 machinery) ────────────────────
 
-    Written as an explicit hole rather than a plausible-looking guess: `swift` and the video
-    files are absent here, so any body would be unverified code that merely looks finished.
+
+def _load_subsample_items(cfg: PipelineConfig):
+    """The frozen subsample, as SDK items, sha256-verified. Both arms start here."""
+    from frame import subsample as ss
+    from frame.data import load_frame_items
+    from frame.config import BaselineConfig
+
+    bcfg = BaselineConfig(data_root=cfg.data_root, model_path=cfg.model_path,
+                          max_pixels=cfg.max_pixels)
+    items = load_frame_items(bcfg, splits=("train", "test"))
+    qids = ss.load(cfg.root / "train_subsample.csv")
+    return ss.apply(items, qids), bcfg
+
+
+def _write_jsonl(cfg: PipelineConfig, arm: str, aux: str | None) -> dict:
+    """Materialise one arm's ShareGPT JSONL from the frozen subsample.
+
+    Pure filesystem — every subsample frame is already in the shared cache (verified on the
+    pod). The record layout comes from `composite_train.record`, the SAME function the
+    consistency gate checks against the engine, so train and serve cannot drift.
     """
-    def _run(cfg: PipelineConfig, st) -> dict:
-        if cfg.dry_run:
-            return {"dry_run": True, "stage": name}
-        raise NotImplementedError(
-            f"{name}: wire to the rung-02/06 module on the pod and smoke it there "
-            f"(lora_sft_train._export / vit_lora_train._train / frame.run)"
+    import composite_train as ctm
+    from frame.data import frame_cache_name
+
+    items, _ = _load_subsample_items(cfg)
+    if cfg.smoke:
+        items = items[: max(4, cfg.smoke_n_eval)]
+    ccfg = ctm.CompositeConfig(run_dir=cfg.arm_dir(arm), frames_dir=cfg.frames_dir,
+                               aux_view=aux)
+    frame_paths = [cfg.frames_dir / frame_cache_name(it) for it in items]
+    maps = ctm.build_map_cache(ccfg, frame_paths) if aux else {}
+    ccfg.run_dir.mkdir(parents=True, exist_ok=True)
+    n = 0
+    with open(ccfg.train_jsonl, "w", encoding="utf-8") as fh:
+        for it, fp in zip(items, frame_paths):
+            mp = maps.get(fp) if aux else None
+            rec = ctm.record(ccfg, fp, mp, it.request.question, str(it.reference.answer))
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            n += 1
+    return {"arm": arm, "aux": aux, "n": n, "jsonl": str(ccfg.train_jsonl),
+            "maps": len(maps)}
+
+
+def _swift_sft(cfg: PipelineConfig, arm: str, st) -> dict:
+    """swift sft for one arm, streaming into runstate and guarded against a dead run.
+
+    The recipe is byte-identical to rung 02/06 (freeze ViT + aligner, all-linear LoRA); the
+    only per-arm difference is the JSONL. The guard is the rung-06 one: NaN/inf, or an
+    epoch-1 eval no better than the first train loss. It only TERMINATES a doomed run, so
+    when it does not fire the A/B stays clean.
+    """
+    ckpt = cfg.arm_dir(arm) / "ckpt"
+    ckpt.mkdir(parents=True, exist_ok=True)
+    args = [
+        "swift", "sft",
+        "--model", str(cfg.model_path), "--model_type", cfg.model_type,
+        "--tuner_type", "lora",
+        "--dataset", str(cfg.arm_dir(arm) / "train.jsonl"),
+        "--torch_dtype", "bfloat16",
+        "--freeze_vit", "true", "--freeze_aligner", "true",
+        "--lora_rank", str(cfg.lora_rank), "--lora_alpha", str(cfg.lora_alpha),
+        "--lora_dropout", str(cfg.lora_dropout), "--target_modules", "all-linear",
+        "--learning_rate", str(cfg.learning_rate), "--lr_scheduler_type", "cosine",
+        "--warmup_ratio", "0.03",
+        "--num_train_epochs", "1" if cfg.smoke else str(cfg.num_train_epochs),
+        "--save_strategy", "epoch",
+        "--per_device_train_batch_size", str(cfg.per_device_train_batch_size),
+        "--gradient_accumulation_steps", str(cfg.gradient_accumulation_steps),
+        "--gradient_checkpointing", "true", "--attn_impl", cfg.attn_impl,
+        "--seed", str(cfg.train_seed), "--output_dir", str(ckpt),
+    ]
+    if cfg.smoke:
+        args += ["--max_steps", str(cfg.smoke_max_steps)]
+    import os
+    env = {**os.environ, "MAX_PIXELS": str(cfg.max_pixels),
+           "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}
+    _run_guarded_swift(args, env, cfg, arm, st)
+    return {"arm": arm, "ckpt": str(ckpt),
+            "checkpoints": sorted(p.name for p in ckpt.glob("checkpoint-*"))}
+
+
+def _run_guarded_swift(args, env, cfg, arm, st) -> None:
+    """The rung-06 tee-and-guard loop, reused verbatim in spirit, feeding runstate."""
+    import sys as _sys
+    sys_path = str(cfg.repo / "experiments" / "06-vit-lora" / "_models")
+    if sys_path not in _sys.path:
+        _sys.path.insert(0, sys_path)
+    from vit_lora_train import _extract_loss, _guard_trip, _TRAIN_LOSS_RE, _EVAL_LOSS_RE
+    from frame import runstate as rs
+
+    first_train = first_eval = None
+    abort = None
+    log = cfg.arm_dir(arm) / "train.log"
+    with subprocess.Popen(args, env=env, stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT, bufsize=0) as proc, \
+            open(log, "w", encoding="utf-8") as fh:
+        for frag in rs.iter_fragments(proc.stdout):
+            fh.write(frag + "\n")
+            st.observe(frag)
+            if cfg.smoke:
+                continue
+            tl = _extract_loss(frag, _TRAIN_LOSS_RE)
+            el = _extract_loss(frag, _EVAL_LOSS_RE)
+            trip = _guard_trip(first_train, first_eval, tl, el)
+            if trip:
+                abort = trip
+                proc.terminate()
+                break
+            if tl is not None and first_train is None:
+                first_train = tl
+            if el is not None and first_eval is None:
+                first_eval = el
+        proc.wait()
+    (cfg.arm_dir(arm) / "run_guard.json").write_text(json.dumps(
+        {"first_train_loss": first_train, "first_eval_loss": first_eval,
+         "aborted": abort is not None, "reason": abort}, indent=1))
+    if abort is not None:
+        raise StageAborted(f"run guard: {arm} — {abort}")
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, args)
+
+
+def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
+    """Per-epoch merge → eval → select by acc_OOD; save the selected epoch's stratified
+    report WITH template-aware margins (the thing the gate and the report read).
+
+    `aux` set → the eval engine sends the composite input, so train and serve match. The
+    map is computed live by `engine._aux_view` from the SAME named transform the JSONL used.
+    """
+    import os
+    from frame import runstate as rs
+    from frame.config import BaselineConfig
+    from frame.metrics import stratified_report
+    from frame.ledger import gold_from_frame_parquets
+    from frame.run import run_baseline
+    from frame import split as sp
+
+    ckpt = cfg.arm_dir(arm) / "ckpt"
+    adapters = sorted(ckpt.glob("checkpoint-*"),
+                      key=lambda p: int(p.name.split("-")[-1]))
+    if not adapters:
+        raise FileNotFoundError(f"no checkpoint under {ckpt}")
+    gold = gold_from_frame_parquets(cfg.data_root)
+    vs = sp.load_manifest(cfg.extra["split_manifest"])
+    best = None
+    for adapter in adapters:
+        st.heartbeat(note=f"{arm}: merge+eval {adapter.name}")
+        merged = cfg.arm_dir(arm) / "merged" / adapter.name
+        subprocess.run(["swift", "export", "--adapters", str(adapter),
+                        "--merge_lora", "true", "--output_dir", str(merged)],
+                       check=True, env=dict(os.environ))
+        ecfg = BaselineConfig(
+            data_root=cfg.data_root, model_path=merged, max_pixels=cfg.max_pixels,
+            out_dir=str(cfg.arm_dir(arm) / "eval"), run_name=adapter.name,
+            n_eval=(cfg.smoke_n_eval if cfg.smoke else 0),
         )
-    return _run
+        if aux:
+            ecfg.aux_view = aux
+        report = run_baseline(ecfg)
+        run_dir = Path(ecfg.out_dir) / ecfg.run_name
+        # stratified report WITH gold → template-aware floor + margin on by_bucket_format
+        import pandas as pd
+        inspect = pd.read_csv(run_dir / "inspect.csv")
+        strat = stratified_report(_inspect_to_results(inspect), gold=gold)
+        acc_ood = report["acc_OOD"]
+        rec = {"epoch": adapter.name, "acc_OOD": acc_ood,
+               "bucket_mean": report["bucket_mean"], "merged": str(merged)}
+        _dump_strat(run_dir / "strat.json", strat)
+        st.event("epoch_eval", **rec)
+        if best is None or acc_ood > best["acc_OOD"]:
+            best = {**rec, "strat_path": str(run_dir / "strat.json")}
+    # persist the selected epoch's stratified report at the arm root
+    import shutil
+    shutil.copy(best["strat_path"], cfg.arm_dir(arm) / "selected_strat.json")
+    (cfg.arm_dir(arm) / "selected.json").write_text(json.dumps(best, indent=1))
+    return best
+
+
+def build_maps(cfg: PipelineConfig, st) -> dict:
+    """Materialise the half-res aux view for every subsample frame. CPU, ~2 min."""
+    if cfg.dry_run:
+        return {"dry_run": True}
+    import composite_train as ctm
+    from frame.data import frame_cache_name
+    items, _ = _load_subsample_items(cfg)
+    if cfg.smoke:
+        items = items[: max(4, cfg.smoke_n_eval)]
+    ccfg = ctm.CompositeConfig(run_dir=cfg.arm_dir("composite"),
+                               frames_dir=cfg.frames_dir, aux_view="map")
+    st.heartbeat(note=f"building {len(items)} maps")
+    maps = ctm.build_map_cache(ccfg, [cfg.frames_dir / frame_cache_name(it) for it in items])
+    return {"maps": len(maps), "dir": str(ccfg.maps_dir)}
+
+
+def report_stage(cfg: PipelineConfig, st) -> dict:
+    """The A/B: composite vs control on fo_class margin, ID and OOD. Written to disk."""
+    if cfg.dry_run:
+        return {"dry_run": True}
+    c_id, c_ood = _fo_class_margins(cfg.arm_dir("control") / "selected_strat.json")
+    p_id, p_ood = _fo_class_margins(cfg.arm_dir("composite") / "selected_strat.json")
+    out = {
+        "control": {"margin_ID": c_id, "margin_OOD": c_ood},
+        "composite": {"margin_ID": p_id, "margin_OOD": p_ood},
+        "delta_ID": p_id - c_id, "delta_OOD": p_ood - c_ood,
+        "bar": 0.04,
+        "verdict_ID": "pass" if (p_id - c_id) >= 0.04 else "below bar",
+        "verdict_OOD": "pass" if (p_ood - c_ood) >= 0.04 else "below bar",
+    }
+    (cfg.root / "RESULTS_12c.json").write_text(json.dumps(out, indent=1))
+    return out
+
+
+# ── small helpers ────────────────────────────────────────────────────────────
+
+
+def _fo_class_margins(strat_path: Path) -> tuple[float, float]:
+    """(margin_ID, margin_OOD) for fo_class from a saved stratified report."""
+    bbf = json.loads(Path(strat_path).read_text())["by_bucket_format"]
+    mid = mood = float("nan")
+    for r in bbf:
+        if r["answer_format"] != "fo_class":
+            continue
+        if r["distribution"] == "ID":
+            mid = r["margin"]
+        elif r["distribution"] == "OOD":
+            mood = r["margin"]
+    return mid, mood
+
+
+def _dump_strat(path: Path, strat: dict) -> None:
+    """Persist stratified_report's DataFrames as JSON records (by_bucket_format is what we read)."""
+    import pandas as pd
+    out = {}
+    for k, v in strat.items():
+        out[k] = v.to_dict("records") if isinstance(v, pd.DataFrame) else v
+    Path(path).write_text(json.dumps(out, indent=1, default=str))
+
+
+def _inspect_to_results(inspect):
+    """Adapt inspect.csv columns to what stratified_report expects.
+
+    inspect.csv carries [qID, correct, answer_format, primary_capability, ...]; the scorer
+    keys on [qID, correctness/_correct, answer_format, primary]. A thin rename, no re-derivation.
+    """
+    df = inspect.rename(columns={"correct": "correctness",
+                                 "primary_capability": "primary"})
+    return df
 
 
 BODIES = {
     "env_check": env_check,
     "freeze_subsample": freeze_subsample,
+    "export_control": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                       else _write_jsonl(cfg, "control", None)),
+    "train_control": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                      else _swift_sft(cfg, "control", st)),
+    "eval_control": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                     else _eval_arm(cfg, "control", None, st)),
     "gate_harness": gate_harness,
-    **{s: _todo(s) for s in
-       ("export_control", "train_control", "eval_control", "build_maps",
-        "export_composite", "train_composite", "eval_composite", "report")},
+    "build_maps": build_maps,
+    "export_composite": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                         else _write_jsonl(cfg, "composite",
+                                                           _aux_name())),
+    "train_composite": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                        else _swift_sft(cfg, "composite", st)),
+    "eval_composite": lambda cfg, st: ({"dry_run": True} if cfg.dry_run
+                                       else _eval_arm(cfg, "composite", _aux_name(), st)),
+    "report": report_stage,
 }
+
+
+def _aux_name() -> str:
+    import transform_bank as tb
+    return tb.AUX_VIEW_NAME
 
 
 # ── driver ───────────────────────────────────────────────────────────────────
