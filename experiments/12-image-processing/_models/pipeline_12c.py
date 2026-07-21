@@ -200,6 +200,12 @@ def gate_harness(cfg: PipelineConfig, st) -> dict:
     """
     if cfg.dry_run:
         return {"dry_run": True, "margin_ID": 0.11, "margin_OOD": 0.08, "passed": True}
+    if cfg.smoke:
+        # A 2-step model on a 24-item slice cannot clear the floor, and the slice is all
+        # one distribution (margin_ID is nan) — the gate is meaningless here and would abort
+        # the chain-validation before the composite path is exercised. Skipped, exactly as
+        # rung 02 disables its run-guard in smoke.
+        return {"smoke": True, "skipped": True}
     mid, mood = _fo_class_margins(cfg.arm_dir("control") / "selected_strat.json")
     passed = mid > cfg.floor_margin_min and mood > cfg.floor_margin_min
     out = {"margin_ID": mid, "margin_OOD": mood, "threshold": cfg.floor_margin_min,
