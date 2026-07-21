@@ -527,3 +527,142 @@ def null_band(features: pd.DataFrame, labels: pd.DataFrame, n_perm: int = 20,
                      null_p95=lambda s: float(np.percentile(s, 95)),
                      null_max="max")
                 .reset_index())
+
+
+# ── 12e: is the effect CONDITIONAL on what the model already gets right? ──────
+# The screen ranks transforms by present-vs-absent separability averaged over cells, and
+# `CONTEXT.md` records the objection that this "averages conditional effects away": the
+# eyeball pass reports each operator shining in a different scenario — helping when the
+# object is conspicuous, hurting when it is camouflaged. If that is true it would explain
+# the whole rung, branch A's -0.056 included, for zero GPU.
+#
+# 🔴 The literal test — recompute the screen inside the model's right pile and its wrong
+# pile — is NOT measurable. Splitting 235 (class, video) cells in two leaves **14** with
+# both piles clearing `min_per_side=15` (19 if every answer format is used instead of just
+# `fo_class`, because the model was asked about only 4,486 of the 15,213 indexed frames).
+# Reporting a sign inversion over 14 cells would manufacture exactly the kind of winner
+# this rung has already caught twice. That negative is recorded, not worked around.
+#
+# What IS measurable is the adjacent question, and it decides as well or better:
+# **does the transform's descriptor separate the frames the model gets right from the ones
+# it fails, inside each video?** 37 of 38 videos clear the gate. Crossed with the screen it
+# gives a 2x2 — a transform that separates present/absent but NOT right/wrong carries a
+# signal orthogonal to the model's actual failures and will not help it.
+
+
+def _cell_summary(rows: list[dict]) -> pd.DataFrame:
+    """Per (cell, transform): the BEST descriptor and the MEAN over descriptors.
+
+    🔴 Both, deliberately. `wv_delta` reports only the best of 18 descriptors, and 12d bis
+    showed that statistic is what made the edge family look "strongly negative": those
+    pipelines raise every descriptor while lowering the top one, because they collapse 18
+    diverse measurements onto a single axis and a maximum reads compression as loss. Any
+    new metric on this page reports both or repeats the mistake.
+    """
+    df = pd.DataFrame(rows)
+    return (df.groupby(["cell", "transform"])["sep"]
+              .agg(sep_max="max", sep_mean="mean").reset_index())
+
+
+def _paired_vs_identity(cells: pd.DataFrame) -> pd.DataFrame:
+    """Rank transforms against `identity` on the SAME cells, paired (cells differ in difficulty)."""
+    out = []
+    for stat in ("sep_max", "sep_mean"):
+        w = cells.pivot(index="cell", columns="transform", values=stat)
+        if "identity" not in w.columns:
+            raise ValueError("`identity` must be in the bank — it is the paired baseline")
+        for t in w.columns:
+            d = (w[t] - w["identity"]).dropna()
+            out.append({"transform": t, "stat": stat, "value": float(w[t].mean()),
+                        "delta": float(d.mean()), "wins": int((d > 0).sum()),
+                        "cells": int(len(d))})
+    return (pd.DataFrame(out).pivot(index="transform", columns="stat")
+              .pipe(lambda x: x.set_axis([f"{b}_{a}" for a, b in x.columns], axis=1))
+              .reset_index()
+              .sort_values("sep_max_delta", ascending=False, ignore_index=True))
+
+
+def right_wrong_by_video(features: pd.DataFrame, verdict: pd.DataFrame,
+                         min_per_side: int = 15) -> pd.DataFrame:
+    """(A) Inside each video, does each transform separate model-RIGHT from model-WRONG frames?
+
+    `verdict` is indexed by frame key with a `video` column and a boolean `right`. The cell
+    is the video, so illumination, scope, patient and centre are held fixed exactly as in
+    `within_video` — what differs between the two piles is whatever made the model fail.
+
+    ⚠️ This conditions on an OUTCOME. The two piles are not randomly composed: they differ
+    in class mix and in scene difficulty, so a transform can separate them without touching
+    the object at all. `right_wrong_null` is the control that says how much of any result is
+    that composition, and it is not optional here.
+    """
+    rows = []
+    for vid, g in verdict.groupby("video"):
+        m = g["right"].to_numpy(dtype=bool)
+        if m.sum() < min_per_side or (~m).sum() < min_per_side:
+            continue
+        sub = features.loc[features.index.intersection(g.index)]
+        m = g.loc[sub.index, "right"].to_numpy(dtype=bool)
+        for col in sub.columns:
+            x = sub[col].to_numpy(dtype=np.float64)
+            ok = np.isfinite(x)
+            transform, descriptor = col.split("::", 1)
+            rows.append({"cell": vid, "transform": transform, "descriptor": descriptor,
+                         "sep": abs(auc(x[ok & m], x[ok & ~m]) - 0.5)})
+    return _paired_vs_identity(_cell_summary(rows))
+
+
+def right_wrong_within_class(features: pd.DataFrame, verdict: pd.DataFrame,
+                             labels: pd.DataFrame, classes: list[str] | None = None,
+                             min_per_side: int = 15) -> pd.DataFrame:
+    """(B) The same, restricted to frames that CONTAIN the class — the closest to the literal question.
+
+    ⚠️ **EXPLORATORY, NOT CONCLUSIVE.** Only 19 (class, video) cells clear the gate, against
+    235 in the screen. It is reported so the literal hypothesis is on the record with a
+    number, not so it can be cited as a result.
+    """
+    classes = classes or [c[4:] for c in labels.columns if c.startswith("has_")]
+    rows = []
+    for klass in classes:
+        for vid, g in verdict.groupby("video"):
+            idx = g.index.intersection(labels.index[labels[f"has_{klass}"]])
+            gg = g.loc[idx]
+            m = gg["right"].to_numpy(dtype=bool)
+            if m.sum() < min_per_side or (~m).sum() < min_per_side:
+                continue
+            sub = features.loc[features.index.intersection(gg.index)]
+            m = gg.loc[sub.index, "right"].to_numpy(dtype=bool)
+            for col in sub.columns:
+                x = sub[col].to_numpy(dtype=np.float64)
+                ok = np.isfinite(x)
+                transform, descriptor = col.split("::", 1)
+                rows.append({"cell": f"{klass}|{vid}", "transform": transform,
+                             "descriptor": descriptor,
+                             "sep": abs(auc(x[ok & m], x[ok & ~m]) - 0.5)})
+    return _paired_vs_identity(_cell_summary(rows))
+
+
+def right_wrong_null(features: pd.DataFrame, verdict: pd.DataFrame, n_perm: int = 20,
+                     seed: int = 20260720, **kw) -> pd.DataFrame:
+    """Noise floor of (A), permuting the right/wrong verdict INSIDE each video.
+
+    Permuting within video preserves each video's accuracy and its frame composition, so
+    what the band measures is exactly the chance separation a max-over-18 buys — the same
+    reason `null_band` exists. Not a lower bound in the same way that one is: the video
+    clustering is kept, because the permutation happens inside it.
+    """
+    rng = np.random.default_rng(seed)
+    rows = []
+    for i in range(n_perm):
+        v = verdict.copy()
+        for vid in v["video"].unique():
+            m = v["video"] == vid
+            v.loc[m, "right"] = rng.permutation(v.loc[m, "right"].to_numpy())
+        r = right_wrong_by_video(features, v, **kw)
+        r["perm"] = i
+        rows.append(r)
+    allp = pd.concat(rows, ignore_index=True)
+    return (allp.groupby("transform")[["sep_max_delta", "sep_mean_delta"]]
+                .agg(["mean", "std", lambda s: float(np.percentile(s, 95))])
+                .pipe(lambda x: x.set_axis(
+                    [f"null_{a}_{'p95' if 'lambda' in b else b}" for a, b in x.columns], axis=1))
+                .reset_index())
