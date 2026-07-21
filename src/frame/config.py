@@ -49,6 +49,20 @@ class BaselineConfig:
     enhance: str | None = None  # None | "unsharp" | "specular"
     enhance_amount: float = 1.0  # only read when enhance is not None
 
+    # ── rung 12c: composite input — the ORIGINAL frame plus a second view ─
+    # DEFAULT OFF IS BYTE-IDENTICAL. `aux_view = None` never builds the second
+    # branch of `_messages`, so an off run sends the identical single-image
+    # payload it always has.
+    # "identity" is the NULL ARM, not a no-op: it pays the cost of a second
+    # image with zero new information, so `map − identity` isolates the map's
+    # contribution from the mere fact of receiving two pictures.
+    # ⚠️ `max_pixels` above is PER IMAGE — a composite arm roughly doubles the
+    # visual tokens. Measure p99 before trusting a composite latency.
+    aux_view: str | None = None  # None (OFF) | "identity" | any transform_bank name
+    aux_view_text: str = (  # identical across arms, so it cancels in their difference
+        "The second image is a processed view of the same frame, provided as an aid."
+    )
+
     # ── evaluation ───────────────────────────────────────────────────
     judge_model: str = "Qwen/Qwen3-4B"  # real HF id (SDK default "Qwen3.5-4B" does not exist)
     enforce_latency: bool = True  # Track.FRAME → 5.0 s cap
