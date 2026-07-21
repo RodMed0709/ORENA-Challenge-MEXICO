@@ -292,8 +292,20 @@ def _swift_sft(cfg: PipelineConfig, arm: str, st) -> dict:
     env = {**os.environ, "MAX_PIXELS": str(cfg.max_pixels),
            "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}
     _run_guarded_swift(args, env, cfg, arm, st)
-    return {"arm": arm, "ckpt": str(ckpt),
-            "checkpoints": sorted(p.name for p in ckpt.glob("checkpoint-*"))}
+    cks = _list_checkpoints(cfg, arm)
+    return {"arm": arm, "ckpt": str(ckpt), "checkpoints": [c.name for c in cks]}
+
+
+def _list_checkpoints(cfg: PipelineConfig, arm: str) -> list:
+    """Every per-epoch adapter, ordered by step. swift nests under ckpt/v0-<ts>/checkpoint-N,
+    so the glob is recursive and excludes the merged tree (rung-02 `list_checkpoints`)."""
+    ckpt = cfg.arm_dir(arm) / "ckpt"
+    merged = cfg.arm_dir(arm) / "merged"
+    cks = sorted((c for c in ckpt.glob("**/checkpoint-*") if merged not in c.parents),
+                 key=lambda p: int(p.name.split("-")[-1]))
+    if not cks:
+        raise FileNotFoundError(f"no checkpoint under {ckpt}")
+    return cks
 
 
 def _run_guarded_swift(args, env, cfg, arm, st) -> None:
@@ -352,11 +364,7 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
     from frame.run import run_baseline
     from frame import split as sp
 
-    ckpt = cfg.arm_dir(arm) / "ckpt"
-    adapters = sorted(ckpt.glob("checkpoint-*"),
-                      key=lambda p: int(p.name.split("-")[-1]))
-    if not adapters:
-        raise FileNotFoundError(f"no checkpoint under {ckpt}")
+    adapters = _list_checkpoints(cfg, arm)
     gold = gold_from_frame_parquets(cfg.data_root)
     vs = sp.load_manifest(cfg.extra["split_manifest"])
     best = None
