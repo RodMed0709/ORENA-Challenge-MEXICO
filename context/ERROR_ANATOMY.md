@@ -123,6 +123,69 @@ it is the same number compared with itself. There is no independent annotation i
 11 %, so most of the deficit remains the model's. But the honest separation of "the model cannot
 see it" from "the label is wrong" needs **human eyes on frames**, not more of this data.
 
+## 🔴 `number` is COUNTING CLIPS — and the model is already at the label's noise floor
+
+Found by looking at frames, after the confusion matrices said "counting fails" without saying
+at what.
+
+**The task is not "count foreign objects". It is "count surgical clips."**
+**83 %** of the per-class counting questions are about `Clip` (2,071 of 2,495), and on the
+"how many instances in total" template with a known breakdown, **93 % of the counted mass is
+clips** and **82 %** of those frames are clips *and nothing else*.
+
+**The label is unstable between frames a fraction of a second apart** (1,946 consecutive
+pairs inside the same video, clip counts from the golds):
+
+| gap | n | mean \|Δcount\| | identical | jump ≥3 | max |
+|---|---|---|---|---|---|
+| ≤0.5 s | 1257 | 0.77 | 48.5 % | 6.0 % | **8** |
+| 0.5–1 s | 242 | 1.33 | 16.9 % | 11.2 % | 7 |
+| 1–3 s | 236 | 1.54 | 12.3 % | 14.8 % | 7 |
+
+In windows **≤1 s the count changes in 56.6 % of pairs**, by **±0.86** on average — against
+frames a human observer describes as nearly identical. Observed extremes: `8 → 14 → 6` in
+690 ms, `7 → 7 → 1` in 270 ms.
+
+🔴 **Set that beside the model: its mean absolute counting error is 1.01 clips.** The model
+is within ~1.2× of how much the *target itself* moves between adjacent frames.
+
+⚠️ **The honest caveat:** frame-to-frame change mixes genuine scene change (the laparoscope
+moves fast, clips are being placed, things occlude) with annotation noise, so 0.86 is an
+**upper bound** on the noise, not a clean estimate of it. It does not prove the labels are
+wrong. What it does establish is that **the target is not stable at the timescale the model
+is asked to resolve**, which caps how much any counting lever can buy.
+
+**Corroborated independently by a human pass** (40 frames, gold 3–6, gold hidden): a
+motivated non-clinical observer scored **r = −0.17 against the gold** — no relationship at
+all — while the model scores **r = +0.43**. The observer reported that clips are often small
+and *camouflaged against tissue*, that some frames plainly show 3 while others give no clue
+where "so many" come from, and that most frames also contain an unidentifiable instrument.
+**The model outperforms an untrained human at this task**, which is further evidence against
+"it only answers by statistics" — and evidence that the task needs clinical training to
+adjudicate.
+
+⇒ **Strategic consequence.** `number` owns the gap to the target (`aggregation × ID` is
+80.4 % `number`), and this is the first evidence that **the gap may not be recoverable**.
+Before spending more compute on counting, that ceiling is the thing to settle — and settling
+it needs annotation, not training.
+
+## 🔴 There is NO spatial annotation anywhere in the dataset
+
+The parquets carry `question` / `answer` and metadata only: no bounding boxes, no masks, no
+coordinates. A label says *"there are 4 clips in this frame"* and **nowhere records where any
+of them is**.
+
+Consequences, both load-bearing:
+
+1. **Object size cannot be measured**, so "does counting fail on small objects?" — the
+   natural follow-up to the clip finding, and the one that would justify or kill a
+   resolution lever — **is not answerable from this data**. Substituting a classical
+   detector would measure the detector's failures, which is the confound rung 12 already
+   fell into three times.
+2. More generally, **any "which part of the image caused this error?" question is closed.**
+   Zero-GPU analysis can characterise *what* the model answers (the matrices above) but not
+   *why*. That bounds what further offline work can deliver.
+
 ## What this reframes
 
 The recurring claim that the model "is not learning, just answering by statistics" is **false
