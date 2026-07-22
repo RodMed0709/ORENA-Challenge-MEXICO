@@ -377,9 +377,17 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
     for adapter in adapters:
         st.heartbeat(note=f"{arm}: merge+eval {adapter.name}")
         merged = cfg.arm_dir(arm) / "merged" / adapter.name
+        # 🔴 Merge on CPU: `swift export` defaults to device_map cuda:0, and after the first
+        # epoch's eval this process still holds ~15.6 GB of VRAM (the SDK's engine/judge are
+        # not fully released on return), so the second merge OOMs with tens of MB free. The
+        # merge is a weight addition — it needs no GPU — and hiding CUDA from the subprocess
+        # removes the contention entirely instead of racing the allocator. Slower, and the
+        # eval that follows still runs on GPU as before.
+        # The composite arm surfaced this and the control did not: two images per sample
+        # leave more allocated/fragmented memory behind.
         subprocess.run(["swift", "export", "--adapters", str(adapter),
                         "--merge_lora", "true", "--output_dir", str(merged)],
-                       check=True, env=dict(os.environ))
+                       check=True, env={**os.environ, "CUDA_VISIBLE_DEVICES": ""})
         ecfg = BaselineConfig(
             data_root=cfg.data_root, model_path=merged, max_pixels=cfg.max_pixels,
             out_dir=str(cfg.arm_dir(arm) / "eval"), run_name=adapter.name,
