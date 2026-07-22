@@ -377,6 +377,89 @@ publishable result worth the 1.5 h it cost.
 3. **Relative only.** Subsampled arms compare to each other, never to the ladder.
 4. **The negative-class contamination is untouched** and caps any perception-side lever.
 
+## 12c RESULT — trained composite input is a NULL, and three things fall out of it
+
+Both arms trained on the byte-identical 25 % subsample, same recipe, single variable = a
+second image (`aux_bimg_half`). Epochs selected by `acc_OOD` in each arm (control ep2,
+composite ep3). `fo_class`, margin over the template-aware floor:
+
+| | control | composite | Δ | paired CI (video-clustered) |
+|---|---|---|---|---|
+| ID | +0.1946 | +0.2152 | **+0.0209** | [−0.0099, +0.0533] |
+| OOD | +0.1442 | +0.1481 | +0.0005 | [−0.0218, +0.0269] |
+| `bucket_mean` | 0.4792 | 0.4819 | +0.0027 | — |
+
+**Every CI includes zero**, on every format. The pre-registered bar was +0.04 and nothing
+approaches it. ⚠️ The bar was itself conservative — it came from rung 10's noise floor on
+`number`, and `fo_class` CIs run narrower — but relaxing it does not rescue the result,
+because the interval covers zero regardless.
+
+🔴 **The method correction is what this rung actually bought.** The same family of
+intervention, measured two ways:
+
+| | how measured | result |
+|---|---|---|
+| branch A (unsharp ×3) | inference, on a model trained without it | **−0.056** |
+| 12c (edge map) | **trained** with it | **+0.021 (ns)** |
+
+The sign flips when the measurement stops being biased. That transfers to any future
+input-side lever and is worth more than the null itself.
+
+### 1. The frozen ViT was NOT blocking the map
+
+The obvious objection to the null is that the aux view is visual information and the vision
+tower was frozen, so the encoder never adapted to it. Testable from the two runs' answers:
+
+| comparison | identical answers |
+|---|---|
+| control vs composite | **83.8 %** (differs on 1,012 / 6,252) |
+| rung 02 vs rung 06 (**different models**) | 79.5 % |
+
+The composite arm diverges from its control almost as much as two different ladder models
+diverge from each other. **A frozen encoder ignoring the second image would give ~100 %
+identical.** The map reaches the model and changes answers; on the 1,012 it changes,
+accuracy goes 0.293 → 0.314. It moves the model nearly at random.
+
+⇒ The strong form of the objection ("the information cannot get through") is **refuted**.
+The weak form ("it gets through but is encoded suboptimally") survives and is unmeasured —
+but the bottleneck is discrimination, not access.
+
+### 2. 🔴 `max_pixels` is NOT a lever — the frames are already below it
+
+Recorded because it was the most promising remaining hypothesis and it does not exist.
+Measured resolutions in `frames_cache` (n=300): **52 % are 960×540** (518k px), 35 % are
+1280×720 (922k px), the rest smaller. Config `max_pixels` = 1280×720 = **921,600 px**.
+
+**No frame exceeds it.** The model already receives every frame at full native resolution;
+raising the cap adds nothing. Whatever resolution was lost was lost at the source, not in
+our configuration. The "counting small clips needs more pixels" hypothesis has no knob to
+turn.
+
+### 3. The headline arithmetic — why small format gains cannot matter
+
+`bucket_mean` averages **4 cells of equal weight** (aggregation × {ID,OOD},
+object_recognition × {ID,OOD}). `fo_class` is 71 % of object_recognition ID and 83 % of OOD,
+so a `fo_class`-only gain is diluted twice:
+
+| gain in `fo_class` | → cell | → **`bucket_mean`** |
+|---|---|---|
+| +0.02 | +0.015 | **+0.004** |
+| +0.05 | +0.038 | +0.010 |
+| +0.10 | +0.077 | +0.019 |
+
+The 12c effect *as measured*, projected: `bucket_mean` 0.5667 → **0.5705**. Moving the
+headline by a perceptible +0.02 needs `fo_class` up **~+0.10** — five times an effect that
+is not significant. ⚠️ **This arithmetic applies to any format-specific lever**, which is
+why "does it help?" is the wrong question and "does it move a whole cell?" is the right one.
+
+### Does it help where counting is hard? Marginally, and never enough
+
+`number`, composite − control by gold count: gold 1 −0.071, gold 2 +0.095, gold 3 −0.036,
+gold 4 +0.015, gold 5–6 +0.013, **gold ≥7 exactly 0.000 in both arms**. Mean absolute error
+falls slightly at every level ≥3 (1.82→1.75, 2.58→2.56, 4.76→4.65) and the under-count bias
+softens (−0.766 → −0.729). Real, in the right direction, and far too small — and at gold ≥7
+nothing rescues it, matching the eyeball finding that camouflaged clips are not resolvable.
+
 ## Also worth knowing (from the same session)
 
 **Of 8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. Every
