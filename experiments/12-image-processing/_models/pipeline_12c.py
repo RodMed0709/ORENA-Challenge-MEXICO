@@ -375,8 +375,26 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
     vs = sp.load_manifest(cfg.extra["split_manifest"])
     best = None
     for adapter in adapters:
+        run_dir = Path(cfg.arm_dir(arm) / "eval") / adapter.name
+        epoch_json = run_dir / "epoch.json"
+        # 🔴 Per-epoch resume. `eval_arm` re-loops every adapter on re-entry, so a crash in
+        # epoch 2 used to force epoch 1's ~28 min merge+eval to be redone. An epoch whose
+        # metrics are already on disk is finished; re-running it cannot change the result,
+        # only the bill. This stage has now crashed twice, which is what makes it worth
+        # making resumable at epoch granularity rather than only at stage granularity.
+        if epoch_json.exists() and (run_dir / "strat.json").exists():
+            rec = json.loads(epoch_json.read_text())
+            st.event("epoch_skipped", **rec)
+            if best is None or rec["acc_OOD"] > best["acc_OOD"]:
+                best = {**rec, "strat_path": str(run_dir / "strat.json")}
+            continue
+
         st.heartbeat(note=f"{arm}: merge+eval {adapter.name}")
         merged = cfg.arm_dir(arm) / "merged" / adapter.name
+        # swift export refuses a pre-existing output_dir (exist_ok=False), so a partial or
+        # leftover merge from an earlier attempt would fail the run rather than be replaced.
+        import shutil as _sh0
+        _sh0.rmtree(merged, ignore_errors=True)
         # 🔴 Merge on CPU: `swift export` defaults to device_map cuda:0, and after the first
         # epoch's eval this process still holds ~15.6 GB of VRAM (the SDK's engine/judge are
         # not fully released on return), so the second merge OOMs with tens of MB free. The
@@ -396,7 +414,6 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
         if aux:
             ecfg.aux_view = aux
         report = run_baseline(ecfg)
-        run_dir = Path(ecfg.out_dir) / ecfg.run_name
         # stratified report WITH gold → template-aware floor + margin on by_bucket_format
         import pandas as pd
         inspect = pd.read_csv(run_dir / "inspect.csv")
@@ -405,6 +422,7 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
         rec = {"epoch": adapter.name, "acc_OOD": acc_ood,
                "bucket_mean": report["bucket_mean"], "adapter": str(adapter)}
         _dump_strat(run_dir / "strat.json", strat)
+        epoch_json.write_text(json.dumps(rec, indent=1))  # the per-epoch resume marker
         st.event("epoch_eval", **rec)
         if best is None or acc_ood > best["acc_OOD"]:
             best = {**rec, "strat_path": str(run_dir / "strat.json")}
