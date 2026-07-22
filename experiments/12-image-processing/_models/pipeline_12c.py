@@ -395,11 +395,18 @@ def _eval_arm(cfg: PipelineConfig, arm: str, aux: str | None, st) -> dict:
         strat = stratified_report(_inspect_to_results(inspect), gold=gold)
         acc_ood = report["acc_OOD"]
         rec = {"epoch": adapter.name, "acc_OOD": acc_ood,
-               "bucket_mean": report["bucket_mean"], "merged": str(merged)}
+               "bucket_mean": report["bucket_mean"], "adapter": str(adapter)}
         _dump_strat(run_dir / "strat.json", strat)
         st.event("epoch_eval", **rec)
         if best is None or acc_ood > best["acc_OOD"]:
             best = {**rec, "strat_path": str(run_dir / "strat.json")}
+        # 🔴 delete the merged 8B (~17 GB) the instant its metrics are captured. A LoRA merge
+        # is a full standalone model per epoch; keeping all of them is 3×2×17 GB ≈ 100 GB and
+        # would overflow the 500 GB volume. Everything downstream reads strat.json, never the
+        # weights, and the 84 MB adapter re-merges in seconds if the model is ever needed again.
+        import shutil as _sh
+        _sh.rmtree(merged, ignore_errors=True)
+        st.heartbeat(note=f"{arm}: freed merged {adapter.name}")
     # persist the selected epoch's stratified report at the arm root
     import shutil
     shutil.copy(best["strat_path"], cfg.arm_dir(arm) / "selected_strat.json")
