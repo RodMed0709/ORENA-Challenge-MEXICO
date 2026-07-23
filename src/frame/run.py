@@ -155,12 +155,19 @@ def _kpi_report(cfg, evaluator, results_df, summary_df, responses) -> dict:
     return report
 
 
-def run_baseline(cfg, video_filter: set | None = None) -> dict:
+def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = None) -> dict:
     """Execute the full run and return the KPI report dict.
 
     ``video_filter`` (optional set of ``(dataset, video_id)``) restricts eval to those
     videos — e.g. the ``val_ood`` (Sigmoid) videos, for cheap per-epoch OOD checkpoint
     selection. Default None = the full test set (backward-compatible with the baseline).
+
+    ``qid_filter`` (optional set of qIDs, rung 13) restricts eval to exactly those
+    questions. Default None = no filtering, so the path is byte-identical to today.
+    A video-bounded probe cannot express "these 200 stratified questions", which is
+    what an identity gate needs: the gate must compare the SAME questions the control
+    answered, not a superset that happens to contain them. Both filters compose;
+    ``qid_filter`` applies second.
     """
     run_dir = Path(cfg.out_dir) / cfg.run_name
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -171,6 +178,9 @@ def run_baseline(cfg, video_filter: set | None = None) -> dict:
     if video_filter is not None:
         items = [it for it in items if (it.dataset, it.video_id) in video_filter]
         logger.info("video_filter: kept %d items across %d videos", len(items), len(video_filter))
+    if qid_filter is not None:
+        items = [it for it in items if it.request.qID in qid_filter]
+        logger.info("qid_filter: kept %d of %d requested qIDs", len(items), len(qid_filter))
     if cfg.n_eval:
         items = items[: cfg.n_eval]
         logger.info("SMOKE/sample: capped to %d items", len(items))
