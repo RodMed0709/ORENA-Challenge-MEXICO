@@ -42,6 +42,19 @@ wandb/
 # Obsidian — local editor config (the vault IS the repo; .md files are versioned, the workspace isn't)
 .obsidian/
 
+# Literature PDFs of the technique corpora — the INDEX.md/FICHAS.md ARE the artifact.
+# 664 MB / 87 files (preprocessing 396 MB, vlm-techniques 268 MB). PDFs are already
+# compressed, so git gains nothing from delta/zlib: committing them takes .git from
+# 167 MB to ~830 MB and a fresh clone to ~1.5 GB, crossing GitHub's 1 GB soft warning,
+# and one file (p04_awad_2025) is 81 MB — past the 50 MB warning, 19 MB short of the
+# 100 MB hard reject. Git-LFS is worse: its free tier is 1 GB storage + 1 GB/month
+# bandwidth, so three clones exhaust the quota in month one. Every catalogued paper
+# carries an arXiv/PMC link and a byte-verified status column, so the PDFs are
+# reconstructible on demand. The 21 PDFs already tracked in literature/pdfs/ stay —
+# rewriting history to evict 146 MB is not worth the breakage.
+literature/preprocessing/pdfs/
+literature/vlm-techniques/pdfs/
+
 # Junk
 __pycache__/
 *.pyc
