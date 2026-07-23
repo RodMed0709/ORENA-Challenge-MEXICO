@@ -126,12 +126,20 @@ class AppearanceAugConfig(ViTLoRAConfig):
 
 # ── argv: rung 06's, with one value swapped ──────────────────────────────────
 
-def _swift_args_aug(cfg: AppearanceAugConfig) -> list[str]:
+def _swift_args_aug(cfg: AppearanceAugConfig, base=None) -> list[str]:
     """rung 06's argv with ``--dataset`` re-pointed. Built FROM rung 06's, never
-    retyped — a hand-copied command would be a claim, this is a measurement."""
+    retyped — a hand-copied command would be a claim, this is a measurement.
+
+    🔴 ``base`` exists because ``_train_aug`` installs THIS function as
+    ``r06._swift_args`` for the duration of the call. Reading the module attribute
+    here would then resolve back to this function: infinite recursion (measured —
+    the first pod SMOKE died on it at 69 s with `RecursionError`). ``_train_aug``
+    passes the captured original, so the delegation stays a measurement.
+    """
     import vit_lora_train as r06
 
-    args = list(r06._swift_args(cfg))
+    builder = base if base is not None else r06._swift_args
+    args = list(builder(cfg))
     i = args.index("--dataset")
     args[i + 1] = str(cfg.dataset_jsonl)
     return args
@@ -390,7 +398,9 @@ def _train_aug(cfg: AppearanceAugConfig) -> Path:
     import vit_lora_train as r06
 
     real = r06._swift_args
-    r06._swift_args = _swift_args_aug
+    # Bind the captured original into the replacement: the patched attribute must not
+    # be what _swift_args_aug reads, or it calls itself. See its docstring.
+    r06._swift_args = lambda c, _base=real: _swift_args_aug(c, base=_base)
     try:
         return r06._train(cfg)
     finally:
