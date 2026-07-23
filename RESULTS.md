@@ -14,7 +14,7 @@ The committed, git-native results store. `bucket_mean` (unweighted mean over the
 
 `needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is coalesced from its `RESULTS.csv`, and Tier 2/3 are empty for it until a pod pass of `stratified_report` over its saved predictions is registered via `frame.ledger.register_run`.
 
-_5 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
+_7 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 
 | experiment | run | model | bucket_mean | acc_ID | acc_OOD | margin_ID | margin_OOD | n_total | date | needs_backfill |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -23,6 +23,8 @@ _5 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 | 02-lora-sft | 02_lora_sft_v1 | Qwen3-VL-8B-Instruct + LoRA r8 (ckpt-1720) | 0.5486 | 0.5209 | 0.5917 | 0.1838 | 0.1320 | 6252 | 2026-07-13 | false |
 | 06-vit-lora | 06_vit_lora_v1__ep1_full | b1_vit_lora epoch 1 (checkpoint-860) | 0.5345 | 0.5062 | 0.5785 | 0.1692 | 0.1188 | 6252 | 2026-07-18 | false |
 | 02-lora-sft | 02_lora_sft_v1__ep1_full | b0_baseline epoch 1 (checkpoint-860) | 0.5282 | 0.4876 | 0.5833 | 0.1505 | 0.1235 | 6252 | 2026-07-18 | false |
+| 12-image-processing | 12c_composite_v1 |  | 0.4819 | 0.4463 | 0.5288 | 0.1092 | 0.0690 |  |  | false |
+| 12-image-processing | 12c_control_v1 |  | 0.4792 | 0.4436 | 0.5250 | 0.1066 | 0.0653 |  |  | false |
 | 05-bottleneck-audit | a2_shuffled |  | 0.3338 | 0.2780 | 0.3812 |  |  |  |  | true |
 | 05-bottleneck-audit | a1_black |  | 0.2752 | 0.2673 | 0.2685 |  |  |  |  | true |
 | 00-baseline | 0 | Qwen3-VL-8B-Instruct | 0.2557 | 0.2487 | 0.2687 | -0.0884 | -0.1910 | 6252 | 2026-07-10 | false |
@@ -34,3 +36,4 @@ _5 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 | 03-prompt-variants | a4_negexem |  |  | 0.2602 | 0.2640 |  |  |  |  | true |
 | 03-prompt-variants | a5_baredigit |  |  | 0.2136 |  |  |  |  |  | true |
 | 03-prompt-variants | VERDICT |  |  |  |  |  |  |  |  | true |
+| 10-self-consistency | 10_self_consistency_v1 |  |  |  |  |  |  |  | 2026-07-20 | true |
