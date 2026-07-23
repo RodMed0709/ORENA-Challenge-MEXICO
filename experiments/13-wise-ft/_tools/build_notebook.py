@@ -171,9 +171,12 @@ means the interpolation, the write or the load changed the model, and every α w
 be measuring something other than θ(α).
 
 The probe is **frozen with a sha256 sidecar** (`frame.subsample.freeze` — not a
-re-implemented digest) and **video-bounded**, because `run_baseline` can restrict an eval
-by video but not by qID: a probe spread over all 38 videos would cost a full eval, the
-gate would stop being cheap, and a gate that is expensive is a gate that gets skipped.
+re-implemented digest) and the eval is restricted to **exactly those 200 qIDs** via
+`run_baseline(..., qid_filter=...)` (`src/frame/run.py:158`). That matters: an identity
+gate must compare the same questions the control answered, not a superset that happens
+to contain them. The qIDs are still *drawn* from a handful of videos so the run stays a
+~3-minute one — a gate that is expensive is a gate that gets skipped — but the video
+bound is now a sampling choice, not a limit of the eval path.
 
 ⚠️ The probe covers 4 videos. It is an **identity check and nothing else** — no CI, no
 margin and no verdict is ever read off it (`context/RULES.md` §13).
@@ -193,25 +196,37 @@ print("manifest:", cfg.probe_manifest, "(+ .sha256)")
 """)
 
 code(r"""
-# Evaluate α=1.0 on the probe's videos with the IDENTICAL protocol rung 06 used, then
-# demand its answers back verbatim. `run_baseline` also runs the judge; we ignore its
-# score here — the gate is on the raw strings, not on any metric.
+# Evaluate α=1.0 on EXACTLY the frozen 200 qIDs with the IDENTICAL protocol rung 06
+# used, then demand its answers back verbatim. `run_baseline` also runs the judge; we
+# ignore its score here — the gate is on the raw strings, not on any metric.
 from frame.config import BaselineConfig
 from frame.run import run_baseline
+
+# `load_probe` verifies the manifest's sha256 on the way in, so the SAME set object both
+# selects the eval and bounds the comparison — the filter and the gate cannot drift apart.
+PROBE_QIDS = I.load_probe(cfg)
+assert len(PROBE_QIDS) == cfg.probe_n, f"probe manifest has {len(PROBE_QIDS)} qIDs, expected {cfg.probe_n}"
 
 bcfg = BaselineConfig(
     data_root=cfg.data_root, model_path=A1, out_dir=cfg.run_dir, run_name="gate_alpha1_probe",
     max_pixels=cfg.max_pixels, seed=cfg.seed,
 )
 t0 = time.perf_counter()
-run_baseline(bcfg, video_filter=PROBE_VIDEOS)
-print(f"probe eval done in {(time.perf_counter()-t0)/60:.1f} min")
+# qid_filter (src/frame/run.py:158), NOT video_filter: the gate must compare the SAME
+# questions the control answered, not a superset containing them. The probe still lives
+# inside 4 videos, so the decode cost is unchanged.
+run_baseline(bcfg, qid_filter=PROBE_QIDS)
+print(f"probe eval done in {(time.perf_counter()-t0)/60:.1f} min "
+      f"(videos the probe lives in, for reference: {sorted(PROBE_VIDEOS)})")
 
 gate_b = I.assert_predictions_identical(
     cfg.control_eval_dir / "predictions.json",
     cfg.run_dir / "gate_alpha1_probe" / "predictions.json",
-    I.load_probe(cfg),          # verifies the manifest's sha256 on the way in
+    PROBE_QIDS,
 )
+assert gate_b["n_compared"] == cfg.probe_n, (
+    f"Gate B compared {gate_b['n_compared']} answers, not the frozen {cfg.probe_n} — "
+    "the qid_filter did not bind the eval to the probe")
 print(f"OK Gate B: {gate_b['n_equal']}/{gate_b['n_compared']} answers verbatim")
 """)
 
@@ -260,11 +275,17 @@ for a in cfg.alphas:
         n_eval=cfg.smoke_n_eval if SMOKE else None,
     )
     t0 = time.perf_counter()
-    report_json = run_baseline(bcfg)
-    state.heartbeat(note=f"evaluated α={a:.2f} in {(time.perf_counter()-t0)/60:.1f} min")
-
-    # 🔴 delete IMMEDIATELY after the eval, before the next α is built.
-    I.delete_alpha_checkpoint(cfg, a)
+    # 🔴 delete IMMEDIATELY after the eval, before the next α is built — and on the
+    # FAILURE path too. Without the `finally`, a CUDA OOM or a judge crash inside
+    # run_baseline leaves 17 GB on the volume and takes the run down with it: the exact
+    # rung-12 failure this rung's docstring cites by name, reintroduced on the one path
+    # nobody watches. `delete_alpha_checkpoint` is guarded so it can only ever remove a
+    # directory this rung wrote (marker + inside runs/<run>/interpolated/).
+    try:
+        report_json = run_baseline(bcfg)
+        state.heartbeat(note=f"evaluated α={a:.2f} in {(time.perf_counter()-t0)/60:.1f} min")
+    finally:
+        I.delete_alpha_checkpoint(cfg, a)
 
     # ── canonical scoring, gated ─────────────────────────────────────
     run_dir = cfg.run_dir / cfg.eval_tag(a)
@@ -353,7 +374,8 @@ md(r"""
   faithful negative and a valid result (CONSTITUTION §VIII.6).
 - **Regenerate the root ledger** (`frame.ledger.build_results_ledger`) so `results/` and
   `RESULTS.md` pick up the new `stratified.json` files.
-- **LiNeS (depth-scaled interpolation, ficha v13 / arXiv:2410.17146) is CONTINGENT** —
+- **LiNeS (depth-scaled interpolation, `literature/vlm-techniques/FICHAS.md` ficha
+  v13 / arXiv:2410.17146) is CONTINGENT** —
   build it only if this rung shows a favourable trade. Do not build it speculatively
   (WAVE_SPEC §Rung 13).
 """)

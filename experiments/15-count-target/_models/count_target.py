@@ -62,7 +62,8 @@ content.
 (``vendor/orena-focus/src/focus/evaluation/evaluator.py:337-343``). A structured answer
 reaching the judge is therefore a guaranteed 0. :func:`parse_count` maps it back to a
 bare integer BEFORE ``Response.content`` is built, it never raises, and its malformed
-rate is measured — Perek 2026 (v02) reports vanilla CoT-SFT malformation at **4.76 %**,
+rate is measured — Perek 2026 (``literature/vlm-techniques/FICHAS.md`` v02) reports
+vanilla CoT-SFT malformation at **4.76 %**,
 so this is a measured failure mode, not a hypothetical.
 
 What is verified where
@@ -173,7 +174,9 @@ class CountTargetConfig(ViTLoRAConfig):
     rung06_run_dir: Path | None = None
 
     # The eval leg. Only read by the notebook; kept here so the whole run is one config.
-    parse_answers: bool = False   # wire `parse_count` into the answer path at inference
+    # Wire `parse_count` into the answer path at inference, via
+    # `BaselineConfig.answer_postprocess` (src/frame/config.py:46 -> engine.py:129).
+    parse_answers: bool = False
 
     @property
     def base_train_jsonl(self) -> Path:
@@ -188,7 +191,7 @@ class CountTargetConfig(ViTLoRAConfig):
         return self.run_dir / "count_targets.jsonl"
 
     # NOTE: the parse log is written PER EVAL (one per epoch) to
-    # ``run_dir/<eval_tag>/parse_log.jsonl`` by ``count_answer_patch(log_path=...)`` — a
+    # ``run_dir/<eval_tag>/parse_log.jsonl`` by ``count_answer_hook(log_path=...)`` — a
     # single run-level path would have each epoch overwrite the previous one's evidence.
 
 
@@ -218,9 +221,9 @@ def count_label(question: str) -> str | None:
 def render_count_target(label: str, count: int) -> str:
     """The assistant target for one `number` row.
 
-    Field names ``label`` / ``counts`` are v05 Gautam 2025 verbatim; label-first order
-    is the one declared deviation (v28 Guo 2025 — the count must be bound to a named
-    class). ``json.dumps`` with ``ensure_ascii=False`` so the emitted string is exactly
+    Field names ``label`` / ``counts`` are ``literature/vlm-techniques/FICHAS.md`` v05
+    (Gautam 2025) verbatim; label-first order is the one declared deviation (v28, Guo
+    2025 — the count must be bound to a named class). ``json.dumps`` with ``ensure_ascii=False`` so the emitted string is exactly
     what a JSON reader round-trips.
     """
     if int(count) < 0:
@@ -296,7 +299,8 @@ def malformed_stats(records: Iterable[dict]) -> dict:
         "malformed_rate": _rate(counted),
         "malformed_rate_excl_warmup": _rate(no_warm),
         "by_status": by_status,
-        # Perek 2026 (v02) measures 4.76 % for vanilla CoT-SFT. Reported side by side so
+        # Perek 2026 (vlm-techniques FICHAS v02) measures 4.76 % for vanilla CoT-SFT,
+        # reported side by side so
         # our number is read against a published one, not against an intuition.
         "perek2026_vanilla_cot_sft_reference": 0.0476,
     }
@@ -607,66 +611,65 @@ def assert_nonnumber_lines_identical(base_path, rewritten_path, specs: list[RowS
 # as INCORRECT. So the structured answer must become a bare integer inside `predict`,
 # before the Response exists — there is no later hook.
 #
-# `frame.run` resolves `QwenFrameEngine` as a module global at call time (run.py:183),
-# so swapping that name is enough and NOTHING in src/frame changes. It is a scoped,
-# reversible patch, applied by a context manager and restored in `finally`; rung 06
-# already uses the same technique to capture rung 02's argv (vit_lora_train.py:130).
-# ⚠️ This is a workaround for a missing hook. The clean fix is a
-# `BaselineConfig.answer_postprocess` callable in src/frame — proposed, not applied,
-# because src/frame is shared with two sibling rungs this wave.
+# That hook is `BaselineConfig.answer_postprocess` (`src/frame/config.py:46`), applied at
+# `src/frame/engine.py:129` — the LAST thing `predict` does, after `predict_samples` has
+# produced the generation and BEFORE `Response.content` is built and before the SDK's
+# format verification ever sees it. DEFAULT OFF IS BYTE-IDENTICAL: `None` skips the call
+# entirely, so a control run takes the identical path it always has.
+#
+# ⚠️ This replaces an earlier monkeypatch of `frame.run.QwenFrameEngine`. The patch was
+# functionally correct — it wrapped the same `predict` at the same point — but it was
+# correct by coincidence of module-global resolution order, in the one place where a
+# post-processor that silently fails to wire is indistinguishable from a model that
+# cannot count (an unparsed structured answer scores 0 by construction). A declared
+# config field cannot be defeated by an import order.
 
 PARSE_LOG: list[dict] = []
 
 
-def _make_count_engine(base_cls):
-    class CountTargetEngine(base_cls):  # type: ignore[valid-type,misc]
-        """``QwenFrameEngine`` + :func:`parse_count` on the way out.
+def make_count_postprocess(log: list[dict] | None = None):
+    """Build the ``BaselineConfig.answer_postprocess`` callable: ``fn(answer, question)``.
 
-        Non-count questions take the identical path they always have: `parse_count`
-        with ``is_count=False`` returns the generation object untouched.
-        """
+    Non-count questions take the identical path they always have: :func:`parse_count`
+    with ``is_count=False`` returns the generation untouched.
+    """
+    sink = PARSE_LOG if log is None else log
 
-        def __init__(self, cfg) -> None:
-            super().__init__(cfg)
-            self._n_calls = 0
+    def postprocess(answer: str, question: str) -> str:
+        res = parse_count(answer, is_count=is_count_question(question))
+        sink.append({
+            "call_index": len(sink),     # 0 == run.py:42's CUDA warm-up call
+            "question": question,
+            "raw": res.raw,
+            "answer": res.answer,
+            "status": res.status,
+        })
+        return res.answer
 
-        def predict(self, image, question: str) -> str:
-            raw = super().predict(image, question)
-            res = parse_count(raw, is_count=is_count_question(question))
-            PARSE_LOG.append({
-                "call_index": self._n_calls,     # 0 == run.py:42's CUDA warm-up call
-                "question": question,
-                "raw": res.raw,
-                "answer": res.answer,
-                "status": res.status,
-            })
-            self._n_calls += 1
-            return res.answer
-
-    return CountTargetEngine
+    return postprocess
 
 
 @contextmanager
-def count_answer_patch(*, enabled: bool, log_path: str | Path | None = None) -> Iterator[list[dict]]:
-    """Wire :func:`parse_count` into ``run_baseline``'s answer path for the duration.
+def count_answer_hook(*, enabled: bool, log_path: str | Path | None = None) -> Iterator[tuple]:
+    """Yield ``(answer_postprocess, parse_log)`` for the duration, and flush the log.
 
-    ``enabled=False`` patches NOTHING — the control run is byte-identical, which is what
-    lets the same notebook produce both arms.
+    ``enabled=False`` yields ``(None, PARSE_LOG)`` — and ``answer_postprocess=None`` is
+    exactly the default, so the control run is byte-identical. That is what lets the same
+    notebook produce both arms.
+
+    The caller passes the yielded callable into ``BaselineConfig(answer_postprocess=...)``.
+    Nothing is patched, so nothing has to be restored; the ``finally`` exists only to
+    write the parse log even when the eval raised.
     """
-    import frame.run as frun  # noqa: PLC0415 — needs torch; only available on the pod
-
     if not enabled:
-        logger.info("count_answer_patch: DISABLED — answer path untouched")
-        yield PARSE_LOG
+        logger.info("count_answer_hook: DISABLED — answer_postprocess stays None")
+        yield None, PARSE_LOG
         return
     PARSE_LOG.clear()
-    original = frun.QwenFrameEngine
-    frun.QwenFrameEngine = _make_count_engine(original)
-    logger.info("count_answer_patch: ENABLED — frame.run.QwenFrameEngine -> CountTargetEngine")
+    logger.info("count_answer_hook: ENABLED — BaselineConfig.answer_postprocess = parse_count")
     try:
-        yield PARSE_LOG
+        yield make_count_postprocess(PARSE_LOG), PARSE_LOG
     finally:
-        frun.QwenFrameEngine = original
         if log_path is not None:
             p = Path(log_path)
             p.parent.mkdir(parents=True, exist_ok=True)
@@ -833,7 +836,7 @@ __all__ = [
     "assert_count_regex_matches_formats", "assert_safe_answer_not_modal",
     "assert_flag_off_identical", "assert_nonnumber_lines_identical",
     "diff_vs_rung06", "sha256_of",
-    "count_answer_patch", "PARSE_LOG",
+    "count_answer_hook", "make_count_postprocess", "PARSE_LOG",
     "number_margin_by_template",
     "list_checkpoints", "merge_checkpoint", "read_g1",
 ]

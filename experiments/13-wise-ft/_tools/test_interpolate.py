@@ -226,7 +226,11 @@ def test_probe_is_exactly_n_and_stratified():
 
 
 def test_probe_is_video_bounded_so_video_filter_can_serve_it():
-    """The gate is only cheap if `run_baseline(video_filter=...)` can run it."""
+    """The gate is only cheap if the probe stays inside a handful of source videos.
+
+    (The eval itself is bounded by `qid_filter`, not by these videos — this test is
+    about decode cost, and `probe_videos` is still reported for context.)
+    """
     df = _results()
     p = I.choose_probe(df, n=200, seed=123, n_videos_per_dataset=2)
     vids = I.probe_videos(p)

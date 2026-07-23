@@ -7,18 +7,26 @@ cover the things that genuinely need the pod.
 Run: ``python experiments/14-appearance-aug/_tools/test_appearance.py``
 (also importable; ``main()`` returns the number of failures).
 
+Every check is a ``test_*`` function taking ``log=print``, for two reasons at once:
+``pytest experiments/`` collects it (a ``t1_``-style name is collected by NOTHING, so
+the file used to contribute **0 tests** to a blanket sweep while still passing in
+script mode), and ``log`` has a default so pytest does not try to resolve it as a
+fixture. Failure is an ``assert``, never a returned bool — a returned bool is
+discarded by pytest and would report a red test as green.
+
 Covered:
-  T1  flag OFF returns the SAME object (the gate, not an assertion)
-  T2  determinism: same (seed, qID) → identical pixels, across two runs and two
+  T1  ``test_flag_off``      flag OFF returns the SAME object (the gate, not an assertion)
+  T2  ``test_determinism``   same (seed, qID) → identical pixels, across two runs and two
       fresh interpreter states; different qIDs → different draws
-  T3  the drawn dose matches the pre-registered marginals (Afifi 1/5 identity,
-      severity-0 1/3)
-  T4  the operators do what their citations say (WB warms/cools, brightness
-      raises V, contrast compresses about the mean) and 5500 K is the identity
-  T5  JSONL rewriting: OFF path untouched, ON path differs in ``images`` only
-  T6  the within-video statistic returns NULL on data whose association is purely
-      BETWEEN video, while the pooled correlation happily reports a big number —
-      the rung-12d failure mode, reproduced and caught
+  T3  ``test_dose``          the drawn dose matches the pre-registered marginals
+      (Afifi 1/5 identity, severity-0 1/3)
+  T4  ``test_operators``     the operators do what their citations say (WB warms/cools,
+      brightness raises V, contrast compresses about the mean) and 5500 K is the identity
+  T5  ``test_jsonl``         JSONL rewriting: OFF path untouched, ON path differs in
+      ``images`` only
+  T6  ``test_within_video``  the within-video statistic returns NULL on data whose
+      association is purely BETWEEN video, while the pooled correlation happily reports a
+      big number — the rung-12d failure mode, reproduced and caught
 """
 
 from __future__ import annotations
@@ -67,14 +75,14 @@ def _mean_hue_ratio(img: Image.Image) -> float:
 
 # ── tests ────────────────────────────────────────────────────────────────────
 
-def t1_flag_off(log) -> bool:
+def test_flag_off(log=print) -> None:
     img = _synth()
     g = A.gate_flag_off_identity(img)
     log(f"T1 flag-OFF identity            : {g}")
-    return bool(g["PASS"])
+    assert g["PASS"], "T1 flag-OFF identity FAILED"
 
 
-def t2_determinism(log) -> bool:
+def test_determinism(log=print) -> None:
     img = _synth()
     pol = A.AugPolicy()
     keys = [f"heico__{i:04d}" for i in range(24)] + [f"lapchole__{i:04d}" for i in range(24)]
@@ -97,10 +105,10 @@ def t2_determinism(log) -> bool:
     # Two independent AugPolicy() instances must agree too (no hidden state).
     same_pol = [A.draw(A.AugPolicy(), k) for k in keys] == here
     log(f"T2 determinism (new policy obj) : identical_draws={same_pol}")
-    return bool(g["PASS"]) and cross and same_pol
+    assert g["PASS"] and cross and same_pol, "T2 determinism FAILED — see the log above"
 
 
-def t3_dose(log) -> bool:
+def test_dose(log=print) -> None:
     pol = A.AugPolicy()
     keys = [f"lapchole__{i}" for i in range(20000)]
     d = A.dose_table(pol, keys)
@@ -115,10 +123,10 @@ def t3_dose(log) -> bool:
     ops_ok = A.gate_no_forbidden_ops(pol)["PASS"]
     log(f"T3 marginals ok                 : wb={wb_ok} sev0={sev_ok} untouched={unt_ok} "
         f"no_forbidden_ops={ops_ok}")
-    return wb_ok and sev_ok and unt_ok and ops_ok
+    assert wb_ok and sev_ok and unt_ok and ops_ok, "T3 dose FAILED — see the log above"
 
 
-def t4_operators(log) -> bool:
+def test_operators(log=print) -> None:
     img = _synth()
     base_ratio = _mean_hue_ratio(img)
     warm = _mean_hue_ratio(A.wb_error(img, 2850))
@@ -151,10 +159,10 @@ def t4_operators(log) -> bool:
     except ValueError:
         typo_ok = True
     log(f"T4 unknown op raises            : {typo_ok}")
-    return wb_ok and br_ok and ct_ok and id_ok and typo_ok
+    assert wb_ok and br_ok and ct_ok and id_ok and typo_ok, "T4 operators FAILED — see the log above"
 
 
-def t5_jsonl(log) -> bool:
+def test_jsonl(log=print) -> None:
     import aug_export as AE
 
     with tempfile.TemporaryDirectory() as td:
@@ -221,11 +229,12 @@ def t5_jsonl(log) -> bool:
             for p in sorted((td / "aug_frames2").glob("*.jpg")))
         log(f"T5 rerun byte-identical frames  : {same_pixels}")
 
-        return (untouched and shape["PASS"] and raises and same_pixels
-                and info["n_rows"] == 12 and len(man) == 12)
+        assert (untouched and shape["PASS"] and raises and same_pixels
+                and info["n_rows"] == 12 and len(man) == 12), (
+            "T5 jsonl rewrite FAILED — see the log above")
 
 
-def t6_within_video(log) -> bool:
+def test_within_video(log=print) -> None:
     """The rung-12d trap, built on purpose.
 
     Construction: every video has its own quality level AND its own accuracy, and
@@ -266,7 +275,8 @@ def t6_within_video(log) -> bool:
         log(f"T6 scan_frames                  :\n{sc.to_string(index=False)}")
         scan_ok = len(sc) == 4 and sc[list(Q.SCORES)].notna().all().all()
 
-    return trap_caught and w2["excludes_zero"] and scan_ok
+    assert trap_caught and w2["excludes_zero"] and scan_ok, (
+        "T6 within-video FAILED — see the log above")
 
 
 def main() -> int:
@@ -276,13 +286,21 @@ def main() -> int:
         print(msg)
         lines.append(str(msg))
 
-    tests = [("T1 flag-off", t1_flag_off), ("T2 determinism", t2_determinism),
-             ("T3 dose", t3_dose), ("T4 operators", t4_operators),
-             ("T5 jsonl", t5_jsonl), ("T6 within-video", t6_within_video)]
+    tests = [("T1 flag-off", test_flag_off), ("T2 determinism", test_determinism),
+             ("T3 dose", test_dose), ("T4 operators", test_operators),
+             ("T5 jsonl", test_jsonl), ("T6 within-video", test_within_video)]
     fails = 0
     for name, fn in tests:
         log(f"\n{'=' * 72}\n{name}\n{'=' * 72}")
-        ok = fn(log)
+        # Each test RAISES on failure (so `pytest experiments/` sees a real failure
+        # instead of a discarded return value); script mode turns that back into a
+        # per-test PASS/FAIL line and a non-zero exit code.
+        try:
+            fn(log)
+            ok = True
+        except AssertionError as exc:
+            log(f"ASSERTION: {exc}")
+            ok = False
         log(f"--> {name}: {'PASS' if ok else 'FAIL'}")
         fails += 0 if ok else 1
     log(f"\n{'=' * 72}\n{len(tests) - fails}/{len(tests)} PASS, {fails} FAIL")

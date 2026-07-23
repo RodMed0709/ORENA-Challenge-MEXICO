@@ -24,10 +24,10 @@ That is the one design the literature says is biased negative.
 
 | Evidence | What it says |
 |---|---|
-| Jong 2025, *Endoscopy* 57(6) (FICHAS Tier-1 #1) | 16 vendor enhancement settings swing endoscopic-AI sensitivity 9 pts / specificity 18 pts. **Enhancement-as-augmentation during training collapses that to 1–2 pts (P<0.001).** |
-| Medeiros 2026 (Tier-1 #3) | Transforms applied at inference only, on a model trained without them, cost up to **−31.6 pts**. Independently explains our own `unsharp` result (−0.026 → −0.056, monotone in dose). |
-| Ramesh 2023, *MedIA* (Tier-2 #12) | The only surgical augmentation ablation there is. **Colour augmentation consistently and significantly helps** on Cholec80. Low-resolution multi-crop **HURTS** (−3.5 % / −4.5 % F1). |
-| Afifi & Brown, ICCV 2019 (Tier-1 #9) | White-balance error is a global manipulation DNNs are fragile to, **generic colour jitter does not model it**, and the fix is a *matched augmentation*, not a pre-processing step. |
+| Jong 2025, *Endoscopy* 57(6) (`literature/preprocessing/FICHAS.md` Tier-1 #1 = `p01`) | 16 vendor enhancement settings swing endoscopic-AI sensitivity 9 pts / specificity 18 pts. **Enhancement-as-augmentation during training collapses that to 1–2 pts (P<0.001).** |
+| Medeiros 2026 (preprocessing Tier-1 #3 = `p03`) | Transforms applied at inference only, on a model trained without them, cost up to **−31.6 pts**. Independently explains our own `unsharp` result (−0.026 → −0.056, monotone in dose). |
+| Ramesh 2023, *MedIA* (preprocessing Tier-2 #12 = `p12`) | The only surgical augmentation ablation there is. **Colour augmentation consistently and significantly helps** on Cholec80. Low-resolution multi-crop **HURTS** (−3.5 % / −4.5 % F1). |
+| Afifi & Brown, ICCV 2019 (preprocessing Tier-1 #9 = `p09`) | White-balance error is a global manipulation DNNs are fragile to, **generic colour jitter does not model it**, and the fix is a *matched augmentation*, not a pre-processing step. |
 
 Our own 32-operator screen contained **no chromatic operator at all**, so the one
 family surgical CV certifies was never tested here.
@@ -58,10 +58,11 @@ Draw per row, keyed on `(seed=42, qID)` via BLAKE2b:
    keep their original white balance, the analogue of Afifi keeping the
    correct-WB image alongside the emulated variations.
 2. **Illumination severity** ~ Uniform{0, 1, 2}, operator ~ Uniform{brightness,
-   dark, contrast}. *Source: Wang 2024 (Tier-2 #19) — its Illumination
+   dark, contrast}. *Source: Wang 2024 (preprocessing Tier-2 #19 = `p19`) — its Illumination
    Variability family is (Brightness, Dark, Contrast), severity 0 = uncorrupted,
    and it states verbatim that it uses the `imagecorruptions` (ImageNet-C)
-   severity settings. Severity 1–2 is the dose `FICHAS.md` → "What to steal"
+   severity settings. Severity 1–2 is the dose
+   `literature/preprocessing/FICHAS.md` → "What to steal"
    §3(b) prescribes.*
    - brightness: additive on HSV V, `c ∈ {0.10, 0.20}` (ImageNet-C).
    - contrast: scale about the per-image mean, `c ∈ {0.40, 0.30}` (ImageNet-C).
@@ -148,6 +149,43 @@ both distributions, and the paired CI per format.
 selection takes the checkpoint that erased more. **No last-by-default.** The
 headline row of `RESULTS.csv` names its checkpoint.
 
+### Checkpoint selection — `acc_OOD`, and only `acc_OOD`
+
+The single row promoted to `RESULTS.csv` / the shared ledger is
+`epochs.sort_values("acc_OOD", ascending=False).iloc[0]` — rung 06's rule,
+unchanged (`context/RULES.md` §6; OOD is 50 % of the score). This is a **frozen
+choice, not a tuning knob**: a different criterion would be a second variable and
+this rung would stop being a single-variable A/B.
+
+🔴 Selecting by `bucket_mean` instead is not a cosmetic difference and is
+specifically forbidden here. The `number` margin is *measured* to regress across
+epochs while other buckets still rise (rung 02 +0.032 → +0.004; rung 06 +0.015 →
++0.000), so the headline-max checkpoint can be exactly the one that erased the
+most counting — the thing this wave exists to detect. No existing gate would
+catch that promotion. The full per-epoch table is written to `RESULTS_epochs.csv`
+either way, so a reader can see what any other rule would have picked.
+
+### Disk budget (pre-registered)
+
+| Item | Size |
+|---|---|
+| merged checkpoint, per epoch (8B bf16) | ~17 GB |
+| 3 epochs, if none were deleted | **~51 GB** |
+| pre-materialised augmented JPEGs (~14k, q=95) | ~1–2 GB |
+| LoRA adapters `ckpt/`, per epoch | ~0.1 GB |
+| **steady state with the deletion in place** | **~17 GB (one merge at a time)** |
+
+`merge_checkpoint` namespaces the merge per epoch
+(`experiments/02-lora-sft/_models/lora_sft_train.py:214-223`) precisely so that
+deleting it is the caller's job; the engine deletes nothing on its own. The
+notebook's per-epoch loop therefore removes each merged directory in a
+**`finally`** immediately after its `results.csv` has been scored and gated — on
+the exception path too, because the failure that actually fills the volume is an
+eval that raised (CUDA OOM, judge crash) and left 17 GB behind. Rung 12 hit
+exactly this and had to add the same discipline mid-run. Nothing after the loop
+reads the weights: `results.csv`, `predictions.json` and the registered
+`stratified.json` are already on disk, and a re-merge is one `swift export`.
+
 ## Stopping tiers
 
 | Tier | Trigger | Action |
@@ -166,6 +204,18 @@ headline row of `RESULTS.csv` names its checkpoint.
 
 Blur (Laplacian variance), specular fraction and mean luminance for every cached
 frame, joined to rung 06's committed per-question correctness.
+
+**Sources of the three scores.** `blur_lapvar` — Ali 2019 (`literature/preprocessing/
+FICHAS.md` Tier-1 #8 = `p08`) and Kim 2025 (Tier-2 #27 = `p27`); that corpus's own
+"What to steal" §1(a) pairs exactly those two for exactly this probe. `luminance` —
+Wang 2024 (Tier-2 #19 = `p19`), Illumination Variability. ⚠️ **`specular_frac`'s two
+thresholds (HSV `v > 0.85`, `s < 0.20`) are OURS, not from the literature** — they are
+rung 12's uncited constants (`12-image-processing/_models/enhance.py:46`), reused
+UNCHANGED so the two rungs' numbers are comparable, not because a paper prescribes them.
+Nie 2023 (Tier-2 #13 = `p13`) is the method-family reference and in fact argues against a
+fixed global pair (one global threshold either misses or over-segments across brightness
+regimes). Declared as ours per wave non-negotiable #9; it is a diagnostic input only and
+nothing in this wave tunes on it.
 
 🔴 **The primary statistic is the WITHIN-VIDEO contrast** — inside one video, the
 mean quality of correctly-answered questions minus that of incorrectly-answered

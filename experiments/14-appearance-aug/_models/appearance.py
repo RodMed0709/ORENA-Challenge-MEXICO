@@ -11,10 +11,10 @@ CONSTITUTION-adjacent wave rule #9: no hand-invented parameters)
 ──────────────────────────────────────────────────────────────────────────────
 Rung 12 applied transforms at INFERENCE on a model fine-tuned without them and
 measured −0.026 / −0.056 (monotone in dose). Medeiros 2026 (`literature/
-preprocessing/FICHAS.md` Tier-1 #3) names that mechanism — inference-only
-transforms cost up to −31.6 pts — and Jong 2025 (Tier-1 #1) shows the fix is to
-put the transform in TRAINING as augmentation: vendor enhancement settings swing
-endoscopic-AI sensitivity 9 pts / specificity 18 pts, and enhancement-based
+preprocessing/FICHAS.md` Tier-1 #3, `p03`) names that mechanism — inference-only
+transforms cost up to −31.6 pts — and Jong 2025 (preprocessing FICHAS Tier-1 #1,
+`p01`) shows the fix is to put the transform in TRAINING as augmentation: vendor
+enhancement settings swing endoscopic-AI sensitivity 9 pts / specificity 18 pts, and enhancement-based
 augmentation collapses that to 1–2 pts (P<0.001). This module is that transform.
 
 Scope, and what is deliberately absent:
@@ -23,12 +23,12 @@ Scope, and what is deliberately absent:
 * **No sharpening.** ``unsharp`` was measured −0.056 monotone on this exact
   model (rung 12). Re-introducing it as augmentation would confound the arm with
   a family we already know is negative here.
-* **No geometric ops, no crops.** Ramesh 2023 (*MedIA*, Tier-2 #12) is the only
+* **No geometric ops, no crops.** Ramesh 2023 (*MedIA*, preprocessing FICHAS Tier-2 #12, `p12`) is the only
   surgical augmentation ablation there is: low-resolution Multi-Crop views HURT
   on Cholec80 (−3.5 % phase F1 at 4 crops, −4.5 % at 8) because "discriminative
   cues may be scattered in the entire image". Our aggregation questions are
   exactly that case.
-* **No blur.** Wang 2024 (Tier-2 #19) separates "Illumination Variability" from
+* **No blur.** Wang 2024 (preprocessing FICHAS Tier-2 #19, `p19`) separates "Illumination Variability" from
   "Optical Distortions"; we take the illumination family only. Blur is also the
   primary axis of the zero-GPU quality diagnostic in ``quality_diag.py`` —
   augmenting it would confound the diagnostic with the arm.
@@ -40,7 +40,7 @@ Scope, and what is deliberately absent:
 THE TWO OPERATORS AND EVERY NUMBER IN THEM
 ──────────────────────────────────────────────────────────────────────────────
 1. **White-balance error emulation** (primary).
-   Afifi & Brown, ICCV 2019 (Tier-1 #9) — the doctrinal source for "augment,
+   Afifi & Brown, ICCV 2019 (preprocessing FICHAS Tier-1 #9, `p09`) — the doctrinal source for "augment,
    don't preprocess", and the explicit finding that *generic colour jitter does
    not model WB error*. Their emulator is driven by the WB-sRGB rendering set,
    whose five FIXED colour temperatures are, verbatim from the paper (§5,
@@ -66,13 +66,14 @@ THE TWO OPERATORS AND EVERY NUMBER IN THEM
    locus (a textbook colour-science formula, not a tuned parameter).
 
 2. **Illumination variability** (secondary).
-   Wang 2024 (Tier-2 #19) builds the endoscopy-calibrated corruption taxonomy
-   with five severity levels and states verbatim: *"We employ the severity
-   settings from the imagecorruptions library"* — i.e. Hendrycks & Dietterich's
+   Wang 2024 (preprocessing FICHAS Tier-2 #19, `p19`) builds the
+   endoscopy-calibrated corruption taxonomy with five severity levels and states
+   verbatim: *"We employ the severity settings from the imagecorruptions library"* — i.e. Hendrycks & Dietterich's
    ImageNet-C constants — and *"a severity level of 0 signifies that the
    original image remains uncorrupted"*. Its **Illumination Variability** family
    is (Brightness, Dark, Contrast). We take that family, at severities 1–2 only,
-   which is the dose ``FICHAS.md`` → "What to steal" §3(b) prescribes.
+   which is the dose ``literature/preprocessing/FICHAS.md`` → "What to steal"
+   §3(b) prescribes.
 
    ImageNet-C constants, copied exactly:
      - brightness  ``c = [0.1, 0.2, 0.3, 0.4, 0.5][sev-1]`` → additive on the
@@ -114,7 +115,8 @@ from PIL import Image
 AFIFI_WB_TEMPS_K: tuple[int, ...] = (2850, 3800, 5500, 6500, 7500)
 WB_ANCHOR_K: int = 5500
 
-# ImageNet-C / `imagecorruptions` constants, as used by Wang 2024 (Tier-2 #19).
+# ImageNet-C / `imagecorruptions` constants, as used by Wang 2024
+# (literature/preprocessing/FICHAS.md Tier-2 #19 = p19).
 IMAGENET_C_BRIGHTNESS: tuple[float, ...] = (0.1, 0.2, 0.3, 0.4, 0.5)
 IMAGENET_C_CONTRAST: tuple[float, ...] = (0.4, 0.3, 0.2, 0.1, 0.05)
 
@@ -152,8 +154,9 @@ class AugPolicy:
     # correct-WB image alongside the ten emulated variations.
     wb_temps_K: tuple[int, ...] = AFIFI_WB_TEMPS_K
 
-    # Wang 2024: severity 0 = uncorrupted; 1..5 progressive. FICHAS "What to
-    # steal" §3(b) prescribes a severity-1..2 draw → {0,1,2}, uniform, so 1/3 of
+    # Wang 2024 (preprocessing p19): severity 0 = uncorrupted; 1..5 progressive.
+    # literature/preprocessing/FICHAS.md "What to steal"
+    # §3(b) prescribes a severity-1..2 draw → {0,1,2}, uniform, so 1/3 of
     # rows take no illumination corruption. The uniform weighting is OURS.
     illum_severities: tuple[int, ...] = (0, 1, 2)
     illum_ops: tuple[str, ...] = ILLUM_OPS

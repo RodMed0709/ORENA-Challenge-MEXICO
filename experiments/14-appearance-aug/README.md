@@ -34,6 +34,12 @@ Colour and illumination **only**. No sharpening (`unsharp` is measured −0.056
 monotone on this exact model), no geometric ops, no crops (Ramesh 2023 measured
 low-resolution multi-crop *hurting* surgical tasks: −3.5 % / −4.5 % F1), no blur.
 
+Every citation below resolves against **`literature/preprocessing/FICHAS.md`** (ids `p01`–`p42`),
+not against the older, unrelated `literature/FICHAS.md` at the repo root:
+Jong 2025 = Tier-1 #1 `p01` · Medeiros 2026 = Tier-1 #3 `p03` · Afifi & Brown 2019 = Tier-1 #9
+`p09` · Ramesh 2023 = Tier-2 #12 `p12` · Wang 2024 = Tier-2 #19 `p19` · Ali 2019 = Tier-1 #8
+`p08` · Nie 2023 = Tier-2 #13 `p13` · Kim 2025 = Tier-2 #27 `p27`.
+
 | Operator | Parameter | Source |
 |---|---|---|
 | White-balance error (primary) | colour temperature ∈ {2850, 3800, **5500**, 6500, 7500} K, uniform | Afifi & Brown, ICCV 2019 §5 — the five fixed temperatures of the WB-sRGB rendering set. 5500 K is the identity anchor, so 1/5 of rows keep their white balance. |

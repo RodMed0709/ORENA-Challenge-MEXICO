@@ -26,25 +26,40 @@ never as the result. Reporting only the within-video number would be hiding the
 thing that would have looked exciting.
 
 ──────────────────────────────────────────────────────────────────────────────
-THE THREE SCORES  (each cited; none invented)
+THE THREE SCORES  (sources named exactly; where there is none, it says so)
 ──────────────────────────────────────────────────────────────────────────────
-``blur_lapvar``     variance of the Laplacian. Ali 2019 (FICHAS Tier-1 #8) scores
-                    per-frame endoscopic quality across 6 artefact classes with
-                    motion blur first among them; Kim 2025 (Tier-2 #27) uses a
+Citations below resolve against ``literature/preprocessing/FICHAS.md`` — NOT against
+the older, unrelated ``literature/FICHAS.md`` at the repo root, whose ``tier1_08`` is a
+different paper entirely. The pdf id (``p08``, ``p13`` …) is given so the reference is
+unambiguous.
+
+``blur_lapvar``     variance of the Laplacian. Ali 2019 (preprocessing FICHAS
+                    Tier-1 #8, ``p08``) scores per-frame endoscopic quality across
+                    6 artefact classes with motion blur first among them;
+                    Kim 2025 (preprocessing FICHAS Tier-2 #27, ``p27``) uses a
                     no-reference quality score to SELECT training frames and
-                    beats random sampling. Laplacian variance is the standard
-                    no-reference blur estimator both lines rest on.
+                    beats random sampling. That corpus's own "What to steal" §1(a)
+                    pairs exactly these two for exactly this probe.
 ``specular_frac``   fraction of pixels that are bright AND desaturated
-                    (HSV ``v > 0.85 & s < 0.20``). Threshold copied verbatim from
-                    rung 12's ``12-image-processing/_models/enhance.py:46``, which
-                    is itself the brightness-classified rule of Nie 2023
-                    (Tier-2 #13). Reused rather than re-tuned so the two rungs'
-                    numbers stay comparable.
-``luminance``       mean HSV V. Wang 2024 (Tier-2 #19) names illumination
-                    variability (Brightness / Dark / Contrast) as the first
-                    endoscopic corruption family; this is its scalar summary and
-                    it is the quantity rung 14's augmentation perturbs, so it
-                    doubles as a sanity read on the dose.
+                    (HSV ``v > 0.85 & s < 0.20``).
+                    ⚠️ **The two thresholds are OURS, not from the literature.**
+                    They are copied verbatim from rung 12's
+                    ``12-image-processing/_models/enhance.py:46``, where they carry
+                    no citation either, and they are reused UNCHANGED so the two
+                    rungs' numbers stay comparable — not because a paper prescribes
+                    them. Nie 2023 (preprocessing FICHAS Tier-2 #13, ``p13``) is the
+                    method-family reference for brightness-conditioned specular
+                    detection, and its actual finding argues the opposite of a fixed
+                    global pair: it says one global threshold either misses or
+                    over-segments across brightness regimes. This score is therefore
+                    a coarse proxy, declared as ours (non-negotiable #9 permits
+                    ours-and-declared), and it is a DIAGNOSTIC input only — nothing
+                    in this wave tunes on it.
+``luminance``       mean HSV V. Wang 2024 (preprocessing FICHAS Tier-2 #19, ``p19``)
+                    names illumination variability (Brightness / Dark / Contrast) as
+                    the first endoscopic corruption family; this is its scalar
+                    summary and it is the quantity rung 14's augmentation perturbs,
+                    so it doubles as a sanity read on the dose.
 
 ⚠️ Scope note for the write-up: there is **no inference-side frame-selection
 lever** in FRAME. The track hands us a single extracted frame
@@ -64,7 +79,11 @@ logger = logging.getLogger(__name__)
 
 SCORES = ("blur_lapvar", "specular_frac", "luminance")
 
-# rung 12 / Nie 2023 specular thresholds — copied, not re-tuned.
+# ⚠️ OURS, not a literature constant. Copied verbatim from rung 12's
+# `12-image-processing/_models/enhance.py:46` so the two rungs' specular_frac numbers
+# are comparable; that file carries no citation for them either. Nie 2023
+# (literature/preprocessing/FICHAS.md Tier-2 #13 = p13) is the method-family reference
+# and in fact argues AGAINST a fixed global pair — see the module docstring.
 _SPEC_V, _SPEC_S = 0.85, 0.20
 
 
