@@ -27,7 +27,13 @@ Same family of intervention, measured two ways:
 |---|---|
 | unsharp ×1, **inference only** (fine-tuned base) | **−0.0259** ID · −0.0109 OOD |
 | unsharp ×3, **inference only** (fine-tuned base) | **−0.0558** ID · −0.0582 OOD, both CIs exclude 0 |
-| edge map, **trained with it** (12c composite, 25 % subsample) | **+0.0209** ID · +0.0005 OOD (ns) |
+| edge map, **trained with it** (12c composite, 25 % subsample) | **+0.0207** ID · +0.0040 OOD (ns) |
+
+⚠️ The trained-with row read ~~+0.0209 ID · +0.0005 OOD~~ until 2026-07-23. Both come from
+`runs/12c_composite_v1/RESULTS_12c.json` (`delta_ID` 0.0206522, `delta_OOD` 0.0039886),
+recovered from the pod volume — the run completed 2026-07-22 but its dir was never
+committed, so this row was prose-only when the note was written. Neither value is
+significant and the verdict is unchanged.
 
 The sign flips when the measurement stops being biased. The inference-only arm is also
 **monotone in dose** — the signature of distribution shift, not of a bad operator.

@@ -40,10 +40,17 @@ So a gain `g` in `fo_class` propagates:
 
 (ID only = 0.710·g/4; both = (0.710·g + 0.826·g)/4.)
 
-**Worked example — 12c as measured.** `fo_class` margin +0.0209 ID, +0.0005 OOD ⇒
-0.710·0.0209/4 + 0.826·0.0005/4 = **+0.0038**: `bucket_mean` 0.5667 → **0.5705**. Moving the
+**Worked example — 12c as measured.** `fo_class` margin **+0.0207 ID, +0.0040 OOD** ⇒
+0.710·0.0207/4 + 0.826·0.0040/4 = **+0.0045**: `bucket_mean` 0.5667 → **0.5712**. Moving the
 headline by a perceptible +0.02 needs `fo_class` up **~+0.10** — five times an effect that was not
 significant.
+
+⚠️ ~~+0.0038 → 0.5705~~ was published first. It consumed the arm table's erroneous
+deltas (OOD reported as +0.0005 when the same table's columns give 0.1481 − 0.1442 =
++0.0040). Deltas above are the artifact's: `runs/12c_composite_v1/RESULTS_12c.json`
+(`delta_ID` 0.0206522, `delta_OOD` 0.0039886), recovered from the pod volume 2026-07-23.
+The conclusion is unchanged — both distributions sit below the pre-registered +0.04 bar
+and every paired CI includes zero.
 
 ## Verdict
 
