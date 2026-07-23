@@ -2,7 +2,31 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-20**.
+> Last updated: **2026-07-23**.
+
+## 🟢 2026-07-23 — 12c's artifacts are RECOVERED, and the rung-12 documents were audited.
+
+**12c's canonical artifacts were recovered from the pod volume on 2026-07-23 and are now
+committed** — `stratified.json` for **both** arms plus the pre-registration's `RESULTS_12c.json`,
+under `experiments/12-image-processing/runs/12c_{control,composite}_v1/`. Rung 12 is registered in
+the ledger; the 12c rows are no longer `needs_backfill`. The trained composite arm is a **NULL**
+(below), and that null is now reproducible from a commit rather than from prose.
+
+An audit of the campaign documents against those artifacts corrected four published numbers. All
+four leave their verdicts standing:
+
+1. **p99 is 0.352 s, not 0.196 s** → **~14×** headroom, not 25× (`06-vit-lora/RESULTS_arms.csv`,
+   `lat_p99_s` = 0.35367). `CAMPAIGN_LOG.md` §13 was the only place carrying the wrong value.
+2. **12c's `fo_class` OOD delta is +0.0040, not +0.0005** (0.1481 − 0.1442; `RESULTS_12c.json`
+   `delta_OOD` = 0.0039886). ID is +0.0207, not +0.0209. ⚠️ **Still a null** — an eighth of the
+   pre-registered +0.04 bar, CI [−0.0218, +0.0269] covers zero.
+3. **The headline-arithmetic table was wrong in both campaign documents** — it averaged the
+   71 %/83 % shares and divided by 4 as if one cell moved. An ID-only gain scales by **0.177**, a
+   gain in both distributions by **0.384**; the published +0.004/+0.010/+0.019 understated the
+   both-cells case by ~2×. Now matches [[headline-arithmetic-four-cells]].
+4. **`max_pixels`: quote the 15,213-frame census (56.6 % at 960×540), not the n=300 sample (52 %)**
+   — the sampling failure mode [[resolution-is-not-the-gap]] exists to prevent. `px_max` = 921,600
+   = the cap exactly, so the verdict is unchanged.
 
 ## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
 
@@ -34,8 +58,11 @@ below came from artifacts already committed.
    `sponge`/`gallstone`/`clip` work measures `object_recognition`, the bucket we **lead by
    +14.9**. It defends the advantage; it does not close the gap.
 2. **Post-hoc count calibration is DEAD** ([[count-calibration-dead]], probe 05c). Three
-   pre-registered rules fail. Mechanism: true values **2, 3 and 4 share the same modal prediction
-   (1)**, so a LUT trades one error for another. Not fixable with more data.
+   pre-registered rules fail. Mechanism: on the dominant template (*…foreign object instances…*,
+   n=830 — the matrix 05c printed) true values **2, 3 and 4 share the same modal prediction (1)**
+   and 5–8 share 4; pooled over all 2,094 `number` rows the collision shifts one step (3 and 4
+   share 2, 5–8 share 4). Either way a LUT trades one error for another. Not fixable with more
+   data. ⚠️ **Quote the scope** — the two readings look like a contradiction and are not.
 3. **The 5 s cap is POOLED, not per-question** ([[latency-budget-is-pooled]], read from the
    official submission template): `120 s setup + B × 5 s`, and the `latency` we emit is not
    scored. Measured p99 is **0.352 s**. **Self-consistency and higher `max_pixels` are
@@ -52,14 +79,16 @@ already been measured?"* over four sources. **Read it before proposing an experi
 because this session re-derived **four** pieces of already-committed work.
 
 ## Live fronts
-- **Leo (legokna)** → **rung 12 image processing: OPEN ON PURPOSE.** Branch A (unsharp ×3 at inference, on the fine-tuned model) is a **faithful NEGATIVE and monotonic in dose** — −0.056 ID / −0.058 OOD, both significant; the identity gate passed 50/50 byte-identical. 🔴 **The method correction it produced is the important part: any inference-only test of an INPUT intervention is biased toward the negative** on a model fine-tuned without it. That re-scopes branch A itself and, retroactively, rung 11 — it does **not** touch the output family (voting/calibration/enumeration), which died with no mismatch at all. **The rung stays open because branch B decides it** — the same two arms on the **ZERO-SHOT** model (~52 min of 5090, all code exists, only `model_path` changes), far less locked to our frames' appearance. ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**): read it for DIRECTION, never magnitude. 🔴 **But branch B cannot be the fair test either — it is still inference.** The honest test of the whole input-side family is to **TRAIN with the transform**, which is why **idea 2 (proportional subsampled-training harness, `local/hallazgos/ideas-mejora.md` §2) is escalated from convenience to ENABLER**: it takes a run from **7.5 h to ~1.5 h**, costs only CPU hours, and unblocks the input family and the re-scoped rung 11 alike. Subsample **questions within ALL videos** — dropping videos would destroy the effective n of 38. Its known limit: the LR optimum shifts with size, so it serves **relative** comparisons, not absolute values.
+- **Leo (legokna)** → **rung 12 image processing: the honest test RAN and it is a NULL** (12c, below — trained with the transform, `fo_class` +0.0207 ID / +0.0040 OOD, every CI covers zero). ⚠️ **Branch B (the same arms on the zero-shot model) was never run and is now moot** — it is still an *inference* test, and 12c answered the question the fair way. What survives from the rung is the method correction, not a transform. History below, unedited: Branch A (unsharp ×3 at inference, on the fine-tuned model) is a **faithful NEGATIVE and monotonic in dose** — −0.056 ID / −0.058 OOD, both significant; the identity gate passed 50/50 byte-identical. 🔴 **The method correction it produced is the important part: any inference-only test of an INPUT intervention is biased toward the negative** on a model fine-tuned without it. That re-scopes branch A itself and, retroactively, rung 11 — it does **not** touch the output family (voting/calibration/enumeration), which died with no mismatch at all. **The rung stays open because branch B decides it** — the same two arms on the **ZERO-SHOT** model (~52 min of 5090, all code exists, only `model_path` changes), far less locked to our frames' appearance. ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**): read it for DIRECTION, never magnitude. 🔴 **But branch B cannot be the fair test either — it is still inference.** The honest test of the whole input-side family is to **TRAIN with the transform**, which is why **idea 2 (proportional subsampled-training harness, `local/hallazgos/ideas-mejora.md` §2) is escalated from convenience to ENABLER**: it takes a run from **7.5 h to ~1.5 h**, costs only CPU hours, and unblocks the input family and the re-scoped rung 11 alike. Subsample **questions within ALL videos** — dropping videos would destroy the effective n of 38. Its known limit: the LR optimum shifts with size, so it serves **relative** comparisons, not absolute values.
   - 🆕 **12d (2026-07-21) — 32 transforms screened for ZERO GPU, and the load-bearing result is methodological** ([[context/12-image-processing/CONTEXT.md]]). `tophat` came **first** pooled (+0.0043) and collapses to **−0.0172 measured inside each video**: its advantage was between videos, because videos containing an object are videos that *look different*. 🔴 **Pooled screening of image transforms manufactures winners** — the same confound as rung 11, and the ≥3-videos gate does not prevent it. `within_video()` is now the standard gate and the primary metric. Against a raw-image separation of 0.2181: **every pipeline ending in an edge operator is strongly negative (−0.018 to −0.054)**, the only two survivors both **preserve** the image (`despec+clahe` +0.0052, `despec+bilateral+unsharp` +0.0031), and `homomorphic` was **mis-calibrated, not dead** (−0.032 → +0.0012 as it softens). **Nothing is validated** — `despec+clahe` is p=0.045 on one comparison out of 13 and fails Bonferroni. Two defects are recorded, not hidden: the negative class is **contaminated** (`scene_inventory` is `partial: true` on **100 %** of frames) and **conditional effects are averaged away**. The screen's record is **four candidates killed, none validated** → it is an instrument of **exclusion, not selection**.
   - ⚠️ **Also measured 12d:** of **8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. The dataset contains **no negative case** — an irreducible ceiling for any perception-side lever, and the reason a human reviewer finds frames with no visible object that the label still asserts.
   - 🆕 **12d bis (2026-07-21) — the "edge family is strongly negative" headline is RETRACTED, and it is a second instrument defect.** `wv_delta` ranks the **best of 18 descriptors** per cell (`idxmax`, `transform_bank.py:483`). Split max from mean: the edge family raises **every** descriptor (`identity` 0.1069 → 0.1245 `bilateral+morphgrad`, 0.1311 `despec+tophat`, 0.1380 `clahe+despec+morphgrad`) while lowering the best one. It does not destroy information — it **redistributes** it onto one axis, and a *maximum* reads compression as loss. Symmetrically the two "winners" barely move the mean (`despec+clahe` 0.1092): they rank first by **preserving** the standout descriptor, not by adding signal. ⇒ the negative stands as a claim about this statistic, **not** about information, and a VLM consumes pixels rather than one descriptor. **Only `homo+sobel` dies on both readings** (mean 0.088 **and** max 0.164, both below identity).
   - **Five transforms selected for the next stage (legokna):** `despec+clahe`, `despec+bilateral+unsharp`, `homo_soft`, `bilateral+morphgrad`, `homo_soft+morphgrad` — the last two are the edge-family rivals the two metrics disagree on, and the pair with `homo_soft` **isolates `morphgrad` as a single variable**. ⚠️ Ranks 4–5 of the screen are the **null anchors**: only 3 of 14 pipelines beat doing nothing. ⚠️ `clahe+despec+morphgrad` leads the *mean* metric (0.1380) and was passed over on the CLAHE vein-noise objection — it is the candidate that reading would pick. ⚠️ `despec+bilateral+unsharp` contains `unsharp`, the only bank member with a real model measurement (branch A **−0.056, monotone**): screen and model **disagree in sign**.
   - 🔴 **12e (2026-07-21) — the conditional hypothesis is a faithful NEGATIVE, and open point ② is closed.** It was the last cheap explanation for the rung: that `wv_delta` averages away a sign-flipping effect (helps on conspicuous objects, hurts on camouflaged ones), which would have explained branch A's −0.056 too. **First, the literal test is NOT MEASURABLE** — splitting 235 cells by the model's right/wrong verdict leaves **14** clearing the gate (19 using every format), because the model was asked about only **4,486 of the 15,213** indexed frames. That negative is recorded, not worked around. **Measured instead:** inside each video, does a transform's descriptor separate frames the model gets right from those it fails (37/38 videos, 3,977 frames, null band permuting the verdict within video, Bonferroni |z|>3.1)? **On the primary max statistic nothing clears the band and `null_jpeg` ranks FIRST** — the textbook signature of no effect. Two transforms clear on the *mean* statistic (`bilateral+morphgrad` +3.91σ, `homo_soft+morphgrad` +3.28σ) **but collapse when restricted to frames containing the class**, so the parsimonious reading is **class/scene composition, not conspicuity**. ⇒ **None of the five selected transforms has evidence of touching what the model actually gets wrong**, which *lowers* the case for spending pod on them as they stand. Does **not** close 12c, the train-with-transform test, or the contamination defect.
   - 🟢 **12c-res (2026-07-21) — the aux view can be sent at HALF resolution for free, zero GPU.** Settling this inside the training A/B would have been fatal (a negative composite arm could not be told from a map crippled by downscaling). `bilateral+morphgrad` Δ mean vs identity: full +0.0176, **half +0.0199**, quarter +0.0187, **1/16 −0.0113**. 🔴 **The control is what makes it readable:** the first run also said halving the *raw photograph* costs nothing (+0.0009), and the descriptors are tile statistics ≈ scale-invariant by construction — so the instrument was suspected blind before it was believed, and retested at an extreme dose. It is **not** blind (monotone to 1/16, where the map collapses): **plateau to 1/4, then a cliff**. ⇒ composite token penalty falls ~2× → **~1.25×**; compute the map at native resolution and **then** shrink (`half_post` +0.0199 vs `half_pre` +0.0165); and the map choice is scale-invariant, supporting `bilateral+morphgrad` alone. Also: the `aux_view` flag is in (`engine.py`/`config.py`, default OFF byte-identical, `gate.aux_view_payload_gate` green without a GPU).
-  - **Open, in priority order (2026-07-22):** ① **12c is untested** — the screen *replaces* the image with the edge map; the proposal is image **plus** map, the only configuration in which the edge family can still work. ② **Split by model right/wrong** — does the sign of a transform invert between frames the model already gets right and the ones it fails? Zero GPU, and it would explain the whole rung if appearance help lands where the model already succeeds. ③ **Negative-class contamination** — the most serious defect of the screen, with no known fix short of annotation.
+  - 🔴 **12c RAN (2026-07-22) and it is a faithful NULL — image PLUS map, trained with it.** Two arms on the byte-identical 25 % subsample, single variable = a second image (`aux_bimg_half`, `bilateral+morphgrad` at half resolution), epochs by `acc_OOD` (control ep2, composite ep3). `fo_class` margin: **ID +0.0207** [−0.0099, +0.0533] · **OOD +0.0040** [−0.0218, +0.0269] · `bucket_mean` 0.4792 → 0.4819. **Every CI covers zero and nothing approaches the pre-registered +0.04 bar.** Projected onto rung 06 the effect is worth **+0.0045** of headline. 🔴 **The method correction is what the rung bought:** the same family reads **−0.056 at inference** and **+0.021 trained with** ⇒ [[inference-only-input-tests-biased]]. And the frozen ViT was NOT blocking the map — control and composite give identical answers on **83.8 %** of questions (vs 79.5 % between rung 02 and rung 06, two different models); the bottleneck is **discrimination, not access**. ✅ **Artifacts recovered from the pod volume 2026-07-23 and committed** (`runs/12c_control_v1/`, `runs/12c_composite_v1/`); ⚠️ the OOD delta published as +0.0005 was an arithmetic slip — it is **+0.0040**, and the verdict does not move.
+  - **Open, in priority order (2026-07-23):** ① **Negative-class contamination** — the most serious defect of the screen (`scene_inventory` is `partial: true` on 100 % of frames), no known fix short of annotation. This is now the only one of the three still open. ② **The clean test of the map alone** — 12c's contingent **null arm** (frame + a shrunk copy of itself) was deferred because it only had value if the composite won. It did not, so the arm stays unrun and the "is it the map or is it two pictures" question is moot unless someone revives the family. ③ **Commit the within-video re-run of the single-operator bank** — the −0.0172 / 105-of-235 `tophat` collapse and the whole-frame `_mean` win-count diagnostic (published as 131-of-**234**; the committed cell count is **235** — the denominator convention is now stated in `CONTEXT.md`) are still **prose-only** ([[pooled-screening-manufactures-winners]]).
+    - ~~① 12c is untested~~ → **CLOSED 2026-07-22**, faithful NULL (above). ~~② Split by model right/wrong~~ → **CLOSED 2026-07-21** by 12e, faithful negative (`null_jpeg` ranks first on the primary statistic). ⚠️ This list previously listed ① and ② as open while the bullet directly above it already reported ② closed and both `CONTEXT.md` and `CAMPAIGN_LOG.md` reported 12c as a completed null. Struck, not deleted, so the ordering of what we believed when survives.
   - **On `task/image-processing`, pushed, deliberately NOT merged.**
 - **Closed by Leo, on `main`:** rung 06 ViT-LoRA (🟡 PARTIAL, `bucket_mean` 0.5667, `@ 9d2f1c7` — full account in `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`; ⚠️ do NOT read it as "the ViT was not the ceiling", `vit_lr` ran at the LLM's 2e-5 so it cannot separate ceiling from recipe, and [[checkpoint-selection-vs-number]] disconfirmed `vit_lr` as a next move) · rung 10 self-consistency (dead, see above) · rung 11 resolution (**dead at the gate, zero GPU** — the "100%/0%" partition was an n=50 artefact, and the axis is irresolvable anyway: 130 videos, 0 with more than one resolution, so resolution is perfectly confounded with video).
 - **Rodrigo** → the MLOps/consistency system (below) + planned **R1 CoA-format SFT** ([[next-move-rodrigo-coa-format]]).
@@ -107,8 +136,11 @@ because this session re-derived **four** pieces of already-committed work.
 - **Effective n ≈ 38 videos**, not 6252. `procedure_type`/`generation` reach the model but `procedure_type` as a model lever risks OOD (unseen procedures break it) → analysis-only stratifier.
 
 ## In progress
-- 🔶 **Rung 12 — image processing. OPEN. Branch A closed NEGATIVE; branch B is what decides it.**
+- 🔴 **Rung 12 — image processing. Branch A NEGATIVE, 12d/12e negative, 12c NULL. The rung is
+  DECIDED on the evidence and what it bought is a method correction, not a transform.**
   Branch `task/image-processing`, **not merged**. `experiments/12-image-processing/README.md`.
+  ⚠️ This bullet used to head *"OPEN — branch B is what decides it"*; branch B never ran and 12c
+  decided it instead, the fair way (trained with the transform). Struck, not deleted.
   - **A (fine-tuned base, rung 06 ckpt-1720):** unsharp at ×1 and ×3, inference only, measured on
     `fo_class`. **No arm rises; ×3 harms significantly in ID AND OOD** (−0.0558 [−0.0949,−0.0176] ·
     −0.0582 [−0.0887,−0.0277]) and the damage is **monotonic in dose**. Identity gate 50/50 byte for
@@ -123,12 +155,17 @@ because this session re-derived **four** pieces of already-committed work.
     enumerate-then-count), which died with no train/test mismatch. ⇒ **The honest test of the
     input-side family is to TRAIN with the transform**, which raises the value of a cheap
     subsampled-training harness from convenience to enabler.
-  - **B (next): the same arms on the ZERO-SHOT model**, far less locked to our frames' appearance.
-    ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**) — read it for direction,
-    never magnitude.
+  - ~~**B (next): the same arms on the ZERO-SHOT model**~~ — **NOT RUN, and superseded.** It was
+    still an inference test (`bucket_mean` 0.2557, below floor everywhere, direction only), and
+    **12c ran the honest version instead**: trained with the transform, `fo_class` margin
+    **+0.0207 ID / +0.0040 OOD**, both CIs covering zero, `bucket_mean` 0.4792 → 0.4819. Artifacts
+    committed 2026-07-23 (`runs/12c_control_v1/`, `runs/12c_composite_v1/`).
   - **Tooling built and reusable:** `_models/build_frame_index.py` — one entry per cached frame with
     its questions, their results in three runs, and photometric statistics. It killed two candidates
-    (global white-boost, CLAHE) for **zero GPU** before any arm ran.
+    (global white-boost and **bare `clahe`**) for **zero GPU** before any arm ran. ⚠️ That kill is
+    about **global CLAHE as a standalone fix**; it does **not** cover `despec+clahe`, which later
+    ranked first on the combo screen's within-video metric — two stages, two objects, see
+    `context/12-image-processing/CONTEXT.md` §"What the screen is actually for".
 - **Rung 10 — self-consistency: CLOSED, FAITHFUL NEGATIVE. Merged to `main` @ `e520dcf`.**
   `experiments/10-self-consistency/` + `context/10-self-consistency/CONTEXT.md`.
   - ✅ **The bit-identity gate PASSED** — `n_samples = 1` reproduces rung 06's `predictions.json`

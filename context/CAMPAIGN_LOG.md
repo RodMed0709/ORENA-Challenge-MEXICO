@@ -58,6 +58,16 @@ they exist only to be compared **against each other**.
 video-clustered CI includes zero (`fo_class` ID: [−0.0099, +0.0533]). It is a positive
 direction that the data cannot separate from noise, not a negative.
 
+**Source (recovered 2026-07-23 from the pod volume, now committed):** the canonical
+`stratified.json` of **both** arms, `experiments/12-image-processing/runs/12c_{control,composite}_v1/`,
+plus the pre-registration's own `RESULTS_12c.json` (`delta_ID` 0.0206522, `delta_OOD` 0.0039886).
+🔴 **The OOD delta is +0.0040, not +0.0005** — the +0.0005 that circulated in §8 and in
+`context/12-image-processing/CONTEXT.md` was a subtraction error on this table's own columns
+(0.1481 − 0.1442). At the bucket level the same arms read `margin_OOD` 0.06525 → 0.06900.
+⚠️ **The verdict does not move**: both distributions sit far below the pre-registered **+0.04**
+bar and every paired CI still covers zero. The correction makes the null less lopsided, not less
+null.
+
 ## 3. Accuracy by answer format
 
 | format | 00 | 02 | **06** | unsharp ×1 | unsharp ×3 | ctrl 25 % | comp 25 % |
@@ -125,9 +135,9 @@ and it is worth re-reading whenever a negative result tempts that conclusion.
 | stage | what it tested | result |
 |---|---|---|
 | **12b branch A** | unsharp ×1/×3 **at inference** | **−0.026 / −0.056**, monotone in dose |
-| **12d** | screen of 32 transforms, zero GPU | 4 killed, **none validated** |
+| **12d** | screen of **27 real candidates** (32 bank entries − 5 anchor slots), zero GPU | 4 killed, **none validated** |
 | **12e** | is the effect conditional on the model being right? | **no signal**; `null_jpeg` ranked first |
-| **12c** | edge map, **trained** with it | **+0.021 ID / +0.0005 OOD — CIs include 0** |
+| **12c** | edge map, **trained** with it | **+0.0207 ID / +0.0040 OOD — CIs include 0** |
 
 🔴 **The load-bearing result is methodological.** The same family measured two ways:
 **−0.056 at inference**, **+0.021 when trained with**. **Any inference-only test of an INPUT
@@ -159,7 +169,9 @@ at random. The bottleneck is **discrimination, not access**.
 * **The label moves ±0.86 between frames ≤1 s apart**, changing in **56.6 %** of pairs.
   Extremes: `8 → 14 → 6` in 690 ms, `7 → 7 → 1` in 270 ms.
 * **The model's mean absolute error is 1.01** — within ~1.2× of how much the target itself moves.
-* At **gold ≥7 accuracy is exactly 0.000**.
+* At **gold ≥7 accuracy is exactly 0.000** — in **both 12c arms** ([[number-is-an-annotation-ceiling]]).
+  On rung 06 itself the collapse is near-total but not literally zero (`context/ERROR_ANATOMY.md`:
+  gold ≥8, n=64, acc ~0.02). Scope matters here; do not quote the zero as a rung-06 number.
 * **Blind human check** (40 frames, gold hidden): a non-clinical observer scored **r = −0.17**
   against the gold; **the model scores +0.43**. The model beats an untrained human here, and the
   task needs clinical training to adjudicate.
@@ -171,8 +183,21 @@ stable at the timescale the model is asked to resolve.
 ## 11. Error anatomy (zero GPU, from the committed answers)
 
 * **`number` fails by COMPRESSION** — bias −0.66, accuracy 0.77 at gold 1 decaying to ~0 from
-  gold 5. Golds 3 and 4 share modal prediction 2, and 5–8 share 4 → **that is why a lookup table
-  cannot work**.
+  gold 5 (0.060 at gold 5, 0.023 at gold 6). Several true values collapse onto **one** modal
+  prediction → **that is why a lookup table cannot work**. ⚠️ **Quote the SCOPE, 2026-07-23:**
+  this line used to read *"golds 3 and 4 share modal prediction 2, and 5–8 share 4"* flatly, which
+  reads as a contradiction of [[count-calibration-dead]] / `context/NOW.md` (*"2, 3 and 4 share
+  modal prediction 1"*). They are the same finding measured on two different row sets:
+  * **Dominant template only** (*…foreign object instances…*, n=830) — the matrix 05c actually
+    printed and the only one reproducible from a committed artifact
+    (`experiments/05-bottleneck-audit/05c_count_confusion.ipynb`, cell 9, row-normalised %):
+    true 1→**1** (67), 2→**1** (39), 3→**1** (40), 4→**1** (34), 5→**4** (35), 6→**4** (47),
+    7→**4** (44), 8→**4** (62). ⇒ **golds 2, 3, 4 share prediction 1; golds 5–8 share 4.**
+  * **Pooled over all 2,094 `number` rows** (`context/ERROR_ANATOMY.md`) — golds 3 and 4 share
+    prediction 2, golds 5–8 share 4. Consistent with the pooled means (gold 3 → 2.12, gold 4 →
+    2.34): the `Clips` and `classes` templates pull the mode up one step.
+  🔴 **The pooled matrix is PROSE-ONLY** — `06-vit-lora/runs/…/eval_best/inspect.csv` is **not**
+  committed in this repo, so it cannot be recomputed here. The template-level one can. Prefer it.
 * **`fo_class` gets cardinality right and identity wrong** — it emits 1.24 classes against a gold
   of 1.25, but **`clip` is the attractor**: emitted 875 times against 615 golds (×1.42) while
   every other class is under-emitted.
@@ -183,18 +208,33 @@ stable at the timescale the model is asked to resolve.
 
 ## 12. 🔴 The headline arithmetic — what counts as a lever at all
 
-`fo_class` is 71 % of `object_recognition × ID` and 83 % of the OOD cell, so a format-specific
-gain is diluted twice:
+`bucket_mean` is the **unweighted mean of four cells** (`aggregation` × {ID,OOD},
+`object_recognition` × {ID,OOD}), and `fo_class` is **71.0 %** of `object_recognition × ID`
+(920 / 1,296) and **82.6 %** of the OOD cell (1,755 / 2,125) — counts read off
+`results/detailed.csv`, run `06_vit_lora_v1`. A format gain `g` is therefore diluted twice: by the
+format's share of its cell, then by the cell's 1/4 weight in the headline. **How many cells the
+gain lands in is the whole question**, so the table needs both rows:
 
-| gain in `fo_class` | → the cell | → **`bucket_mean`** |
+| gain in `fo_class` | **ID only** (× 0.177) | **both distributions** (× 0.384) |
 |---|---|---|
-| +0.02 | +0.015 | **+0.004** |
-| +0.05 | +0.038 | +0.010 |
-| +0.10 | +0.077 | +0.019 |
+| +0.02 | **+0.0035** | **+0.0077** |
+| +0.05 | +0.0089 | +0.0192 |
+| +0.10 | +0.0177 | +0.0384 |
+
+Arithmetic, in full: ID only = 0.710·g / 4 = **0.177·g**; both = (0.710·g + 0.826·g) / 4 =
+**0.384·g**. `fo_class` and `number` are disjoint across the two buckets, so neither format can
+ever reach more than the two cells of its own.
+
+⚠️ **Corrected 2026-07-23.** This table used to publish ONE column — **+0.004 / +0.010 / +0.019** —
+computed by taking the **average** of the 71 % and 83 % shares and then dividing by 4 **as if a
+single cell had moved**. Those values are the ID-only row wearing the label of the general case;
+they **understate the both-distributions case by ~2×**. Now agrees with
+[[headline-arithmetic-four-cells]]. **The conclusion is untouched:**
 
 **We spent weeks on `aggregation` (where the ceiling is) while half the headline lives in
 `object_recognition`, untouched.** The right question is not *"does it help?"* but
-***"does it move a whole cell?"***
+***"does it move a whole cell?"*** — and on either row, no `fo_class` lever under **+0.05 in both
+distributions** is worth a training run on its own.
 
 ## 13. Data findings (all zero GPU)
 
@@ -205,7 +245,12 @@ gain is diluted twice:
 * **90 % of questions carry secondary labels we had never read** — the pool grows 5,524 → 9,762
   (**+77 %**), but it is **89.6 % `fo_class` and 0 % `number`**.
 * 🔴 **The latency budget is POOLED, not per-question**: `120 s + B × 5 s`. Measured p99 is
-  0.196 s → ~25× headroom. Several levers had been closed against a ceiling that did not exist.
+  **0.352 s** → **~14×** headroom against the 5 s per-question figure
+  (`experiments/06-vit-lora/RESULTS_arms.csv`, `lat_p99_s` = 0.35367 · n=6252).
+  ⚠️ **Corrected 2026-07-23:** this line published **0.196 s → ~25×**, a number no artifact
+  carries; `context/INDEX.md`, `context/NOW.md` and [[latency-budget-is-pooled]] all already said
+  0.352. The conclusion is untouched — several levers had been closed against a per-question
+  ceiling that does not exist as modelled.
 * **Of 8,969 `fo_class` questions, ZERO have gold `none`** — the dataset contains no negative case.
 
 ## 14. Infrastructure built (reusable)
@@ -234,9 +279,9 @@ gain is diluted twice:
 |---|---|
 | Output family (voting / calibration / enumeration) | three negatives — the deficit is **upstream** |
 | Video resolution | irresolvable: 130 videos, none with two resolutions |
-| **`max_pixels`** | **does not exist as a lever**: 52 % of frames are 960×540 against a 921,600 px cap — **no frame exceeds it** |
+| **`max_pixels`** | **does not exist as a lever**: over the full 15,213-frame census **56.6 %** of frames are 960×540 and `px_max` = **921,600 = the cap exactly** — **no frame exceeds it** (`experiments/11-resolution/runs/11_resolution_v1/RESULTS_pixel_spread.csv`; the old "52 %" was an n=300 sample) |
 | Transformations at inference | −0.056, monotone |
-| Transformations, trained | null, and **+0.004** of headline even if real |
+| Transformations, trained | null, and **+0.0045** of headline as measured, even if it were real (§12) |
 | Synthetic counting data | poor prognosis: it teaches well-annotated visible objects; the real label moves ±0.86 |
 
 ## 16. Open, in priority order
@@ -254,4 +299,9 @@ gain is diluted twice:
 
 `docs/viewers/` — self-contained HTML, open in a browser:
 `clip_viewer.html` (what a Clip is, and how unstable the count is between adjacent frames),
-`transform_viewer.html` (18 single operators), `combo_viewer.html` (14 chained pipelines).
+`transform_viewer.html` (**18 bank entries = 15 real single operators** + `identity`, `null_jpeg`,
+`null_noise`), `combo_viewer.html` (**14 bank entries = 12 real chained pipelines** + `identity`,
+`null_jpeg`). ⚠️ **Convention, settled 2026-07-23:** quote *bank entries* when describing what the
+viewer renders and *real candidates* when counting what was screened — the anchors are controls,
+not candidates, and 15/12 is what the Bonferroni denominators should track. Rosters in
+`runs/12_transform_screen_v2/meta.json` and `runs/12_combo_screen_v1/meta.json`.

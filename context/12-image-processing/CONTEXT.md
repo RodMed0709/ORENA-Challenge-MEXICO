@@ -9,9 +9,16 @@
 
 Branch A measured ONE transform (`unsharp`) at two doses and it was negative. The open question
 was never "was that one good" but **"which transform is worth a training run at all"** — and
-guessing costs ~7.5 h of pod per guess. This is a **zero-GPU screen** over 32 candidates
-(18 single operators + 14 chained pipelines) on all 15,213 cached frames, ranking them by whether
-they make a foreign-object class more separable from its absence.
+guessing costs ~7.5 h of pod per guess. This is a **zero-GPU screen** over **27 real candidates**
+— **15** single operators and **12** chained pipelines — on all 15,213 cached frames, ranking them
+by whether they make a foreign-object class more separable from its absence.
+
+⚠️ **Counting convention, settled 2026-07-23.** The banks hold **18** and **14** entries
+(`runs/12_transform_screen_v2/meta.json`, `runs/12_combo_screen_v1/meta.json`), but three of the
+18 (`identity`, `null_jpeg`, `null_noise`) and two of the 14 (`identity`, `null_jpeg`) are the
+**null anchors** — controls, not candidates. Earlier text here said *"32 candidates (18 + 14)"*,
+which double-counts the anchors as things we were choosing between and inflates every
+multiple-comparison denominator. **Bank entries: 18 / 14. Real candidates: 15 / 12.** Say which.
 
 ## The method, in one paragraph
 
@@ -31,8 +38,18 @@ Measured inside each video it collapses to **−0.0172**, winning 105 of 235 cel
 coin. Its whole advantage was **between videos**: videos that contain a given object are videos
 that *look different*, so a whole-frame statistic separates them without ever touching the object.
 
-The diagnostic that exposed it: among winning descriptors, **`_mean` (whole-frame) wins 131 of 234
-times** — the winner mostly was not looking at any region at all.
+The diagnostic that exposed it: among winning descriptors, **`_mean` (whole-frame) wins 131 of the
+cells** — the winner mostly was not looking at any region at all.
+
+⚠️ **Cell-denominator convention, settled 2026-07-23.** The within-video cell count is **235**
+(class × video cells clearing the gate) — committed, identical for all 14 pipelines
+(`runs/12_combo_screen_v1/RESULTS_combo_rank.csv`, `wv_cells` / `n_cells` = 235). The prose above
+carried **234** for this one diagnostic and 235 everywhere else. **235 is the denominator**; the
+234 is not reproducible and neither is the 131 — the within-video re-run of the *single-operator*
+bank was never committed ([[pooled-screening-manufactures-winners]] records both as PROSE-ONLY, and
+asks for the commit). Until it lands, read this diagnostic as directional. Note also that the
+pooled screen's own `n_cells` = **13** is a *class*-level count, a different unit entirely — that
+mismatch is exactly how 234/235 drifted.
 
 This is the same confound that made the resolution axis irresolvable (rung 11), and the ≥3-videos
 gate did **not** prevent it — that gate drops cells with few videos, it does not remove the scene
@@ -46,12 +63,20 @@ gate. Any pooled ranking of image transforms in this project should be treated a
 
 Within-video separation of the **raw image** is **0.2181**. That is the bar.
 
-**Single operators (v2, 18 candidates).** Nothing survives. `tophat` refuted as above;
-`despecular` is the only one still slightly positive (+0.0032, 125/235 cells — chance).
-All four operators drawn from the endoscopic-imaging literature were negative except
-`despecular`: `dehaze` −0.009, `contrast_1s` −0.006, `homomorphic` −0.032 (worst of 18).
+**Single operators (v2, 15 real candidates + 3 anchors).** Nothing survives. `tophat` refuted as
+above; `despecular` is the only one still slightly positive **within video** (+0.0032, 125/235
+cells — chance).
 
-**Chained pipelines (v1, 14 candidates).**
+⚠️ **The literature four are ranked on POOLED numbers, not the primary metric.** `dehaze`
+**−0.0091**, `contrast_1s` **−0.0060**, `homomorphic` **−0.0324** (worst of the 18 entries) are
+`mean_delta` from `runs/12_transform_screen_v2/RESULTS_transform_rank.csv` — **that file has no
+within-video column**. By this note's own §"pooled screening manufactures winners" a pooled
+ranking is *unverified*, so read these three as **"not rescued by the pooled metric that flatters
+transforms"**, which is a weaker and safer statement than a within-video negative. `despecular`'s
++0.0032 above **is** within-video and is the one number in this paragraph on the primary metric.
+
+**Chained pipelines (v1, 12 real candidates + 2 anchors).** These ARE on the primary within-video
+metric (`wv_delta`, committed in `RESULTS_combo_rank.csv`).
 
 | pipeline | `wv_delta` | wins | sign-test p |
 |---|---|---|---|
@@ -99,10 +124,17 @@ second time this rung has caught its own instrument.
 | `clahe+despec+morphgrad` (10th) | 0.1997 | **0.1380** | 0.062 |
 | `homo+sobel` (14th) | 0.1643 | 0.0883 | 0.076 |
 
-**The edge family raises the separation of EVERY descriptor (0.107 → 0.124–0.138) while lowering
-that of the best one.** It does not destroy information — it **redistributes** it, collapsing 18
-diverse descriptors (brightness, whiteness, specularity, texture) onto one axis. A metric that is
-a *maximum* reads that compression as loss.
+**The edge family raises the MEAN descriptor (0.1069 → 0.116–0.138) while lowering the best one.**
+It does not destroy information — it **redistributes** it, collapsing 18 diverse descriptors
+(brightness, whiteness, specularity, texture) onto one axis. A metric that is a *maximum* reads
+that compression as loss.
+
+⚠️ **The range is 0.116–0.138, not 0.124–0.138** (corrected 2026-07-23): the family's floor is
+`homo_soft+morphgrad` at **0.1156** (see the selection table below), below the 0.124 previously
+published here, and the *whole-family* claim also needs its exception stated up front —
+`homo+sobel` **lowers** the mean to 0.0883, below `identity`. So the honest form is: **every
+edge pipeline except `homo+sobel` raises the mean descriptor, to 0.116–0.138.** That single
+exception is the one case that dies on both readings, which is exactly why it is the exception.
 
 Symmetrically, the two "winners" barely move anything: `despec+clahe` shifts the mean
 0.1069 → 0.1092. They rank first because they **preserve the geometry** of the descriptor that
@@ -116,7 +148,8 @@ as an information claim and stands only as a claim about this statistic.
 
 ## Selected for the next stage (2026-07-21, legokna)
 
-Four transforms carried forward, on the combined reading of both metrics and the eyeball pass:
+**Five** transforms carried forward, on the combined reading of both metrics and the eyeball pass
+(the table below lists five, and 12e reports on five; the header used to say "four"):
 
 | transform | why |
 |---|---|
@@ -126,11 +159,12 @@ Four transforms carried forward, on the combined reading of both metrics and the
 | `bilateral+morphgrad` | 9th on the max metric, but a large **mean-riser** (0.1245). Rescued by the defect above. The eyeball pass calls it the best edge enhancement *"when I have the original image as context"* — which is **12c stated literally**: image **plus** map, not map instead of image. |
 | `homo_soft+morphgrad` | The edge-family rival to the one above, and the **best of the edge family on the max metric** (0.2033 — above `bilateral+morphgrad`'s 0.2001) while sitting below it on the mean (0.1156 vs 0.1245): the two disagree, which is why both travel. 🔴 It also carries a design virtue: `homo_soft` alone is already selected, so this pair **isolates the `morphgrad` step as a single variable**. |
 
-⚠️ **Ranks 4 and 5 are the null anchors** (`identity`, `null_jpeg`). Only **3 of 14** pipelines
-beat doing nothing; there is no 4th and 5th candidate to pick on that metric.
+⚠️ **Ranks 4 and 5 are the null anchors** (`identity`, `null_jpeg`). Only **3 of the 12 real
+pipelines** beat doing nothing (this line used to say "3 of 14", counting the anchors as
+candidates); there is no 4th and 5th candidate to pick on that metric.
 
 ⚠️ **Not selected, but it leads the mean metric:** `clahe+despec+morphgrad` is the **largest
-mean-riser of all 14** (0.1380 vs `identity` 0.1069). It was passed over on the eyeball pass's
+mean-riser of the 14 bank entries** (0.1380 vs `identity` 0.1069). It was passed over on the eyeball pass's
 CLAHE objection (vein/vessel noise), the same objection carried against `despec+clahe`. If the
 mean metric is what the next stage trusts, this is the candidate that reading picks.
 
@@ -138,7 +172,9 @@ mean metric is what the next stage trusts, this is the candidate that reading pi
 
 - **Nothing is validated.** `despec+clahe` gives p=0.045 on a **single** comparison, but 13
   pipelines were tested; a Bonferroni threshold is 0.0038 and it does **not** clear it. It is the
-  best candidate, not a result.
+  best candidate, not a result. (**13**, not 12 or 14: every bank entry except `identity`, which is
+  the reference and has delta ≡ 0 by construction. `null_jpeg` is compared like any other, which is
+  the point of an anchor. Stated because 12/13/14 look like drift and are not.)
 - **The edge-map negative does NOT close 12c.** The screen *replaces* the image with the map; the
   two-image proposal is image **plus** map. That configuration is untested here.
 - **Order effects are confounded.** `despec+clahe` ranks top and `clahe+despec+…` rank negative,
@@ -158,8 +194,28 @@ mean metric is what the next stage trusts, this is the candidate that reading pi
 
 ## What the screen is actually for
 
-Its record: it has killed **three** candidates for zero GPU (global white-boost, CLAHE, `tophat`)
-plus one pipeline, `homo+sobel`, and **validated none**. 🔴 **The fourth kill was retracted** — the
+Its record: it has killed **three** candidates for zero GPU (global white-boost, **`clahe` alone**,
+`tophat`) plus one pipeline, `homo+sobel`, and **validated none**.
+
+🔴 **"CLAHE was killed" and "`despec+clahe` ranks first" are BOTH true — different stages, different
+objects.** They sat here as two flat contradictions; the reconciliation:
+
+* **The kill is from the frame-index stage** (`runs/12_index_v1`, `_models/build_frame_index.py`),
+  before any transform ran: `heico` is darker but carries **more** contrast (0.293 vs 0.225) and
+  **more** edge density (189 vs 118) than `lapchole` — *it does not lack what CLAHE supplies*
+  (`experiments/12-image-processing/README.md:30-31`). The same stage killed the global white-boost
+  (`white_frac` anticorrelated with sponge presence, README:26). Both kills are **global-CLAHE as a
+  standalone fix for the ID/OOD appearance gap**.
+* **The first rank is from the combo screen**, and it is not the same object: `despec+clahe` — CLAHE
+  *after* despecularisation, scored within video on class separability, **+0.0052**
+  (`RESULTS_combo_rank.csv`). `clahe` on its own is **negative even pooled** (−0.0041,
+  `RESULTS_transform_rank.csv`), consistent with the kill.
+* ⇒ **The kill stands for bare `clahe`; it never covered `despec+clahe`.** And the screen's own
+  selection table below carries the objection anyway (CLAHE lifts veins and crevices — countable
+  structures that are not the object), so nothing here promotes CLAHE. Two instruments, two scopes,
+  no conflict — but say the scope.
+
+🔴 **The fourth kill was retracted** — the
 "whole edge-replacement family" died only on a max-over-descriptors statistic and survives on the
 mean (see the second instrument defect above). Combined with its inability to resolve mild
 transforms — `unsharp_x1`, `null_jpeg` and `null_noise` are mutually indistinguishable — the
@@ -385,9 +441,21 @@ composite ep3). `fo_class`, margin over the template-aware floor:
 
 | | control | composite | Δ | paired CI (video-clustered) |
 |---|---|---|---|---|
-| ID | +0.1946 | +0.2152 | **+0.0209** | [−0.0099, +0.0533] |
-| OOD | +0.1442 | +0.1481 | +0.0005 | [−0.0218, +0.0269] |
+| ID | +0.19457 | +0.21522 | **+0.0207** | [−0.0099, +0.0533] |
+| OOD | +0.14416 | +0.14815 | **+0.0040** | [−0.0218, +0.0269] |
 | `bucket_mean` | 0.4792 | 0.4819 | +0.0027 | — |
+
+⚠️ **Corrected 2026-07-23 against the recovered artifacts.** This table published the OOD delta as
+**+0.0005**, which its own columns refute (0.1481 − 0.1442 = **+0.0040**) — an arithmetic slip, not
+a measurement. ID was published as +0.0209 and is **+0.0207**. Both arms' canonical
+`stratified.json` were recovered from the pod volume on 2026-07-23 and are now committed under
+`experiments/12-image-processing/runs/12c_{control,composite}_v1/`; the pre-registration's own
+`RESULTS_12c.json` had recorded `delta_ID` **0.0206522** and `delta_OOD` **0.0039886** all along.
+At bucket level the same pair reads `margin_OOD` 0.06525 → 0.06900.
+🔴 **This is a correction, not a rescue.** +0.0040 is an eighth of the pre-registered **+0.04** bar,
+the paired CI [−0.0218, +0.0269] still covers zero, and the verdict stays **NULL**. The only thing
+that changes is that the arm is no longer described as *flat* on OOD — it is small-and-positive on
+OOD, which is what a null with a positive point estimate looks like.
 
 **Every CI includes zero**, on every format. The pre-registered bar was +0.04 and nothing
 approaches it. ⚠️ The bar was itself conservative — it came from rung 10's noise floor on
@@ -427,8 +495,19 @@ but the bottleneck is discrimination, not access.
 ### 2. 🔴 `max_pixels` is NOT a lever — the frames are already below it
 
 Recorded because it was the most promising remaining hypothesis and it does not exist.
-Measured resolutions in `frames_cache` (n=300): **52 % are 960×540** (518k px), 35 % are
-1280×720 (922k px), the rest smaller. Config `max_pixels` = 1280×720 = **921,600 px**.
+Resolutions over the **full 15,213-frame census** — not a sample —
+(`experiments/11-resolution/runs/11_resolution_v1/RESULTS_pixel_spread.csv` +
+`RESULTS_dims_crosstab.csv`): **56.6 % are 960×540** (518,400 px — all 8,604 `heico` frames,
+one single resolution), **33.1 %** are 1280×720 (921,600 px), the remaining 10.3 % smaller
+(down to 640×360 = 230,400 px). `px_max` over the whole cache is **921,600**. Config
+`max_pixels` = 1280×720 = **921,600 px**.
+
+⚠️ **Sourcing corrected 2026-07-23:** this paragraph re-derived the spread from an **n=300
+sample** ("52 % are 960×540") while the full census had been committed at rung 11. This is
+**precisely the failure mode [[resolution-is-not-the-gap]] exists to prevent** — that decision
+died because a non-random **n=50** manufactured a "100 %/0 % partition" that the full census
+refutes. Do not sample a cache we have already counted. **The conclusion survives untouched**: the
+census `px_max` equals the 921,600 cap **exactly**, so the ceiling is real and never exceeded.
 
 **No frame exceeds it.** The model already receives every frame at full native resolution;
 raising the cap adds nothing. Whatever resolution was lost was lost at the source, not in
@@ -438,24 +517,47 @@ turn.
 ### 3. The headline arithmetic — why small format gains cannot matter
 
 `bucket_mean` averages **4 cells of equal weight** (aggregation × {ID,OOD},
-object_recognition × {ID,OOD}). `fo_class` is 71 % of object_recognition ID and 83 % of OOD,
-so a `fo_class`-only gain is diluted twice:
+object_recognition × {ID,OOD}). `fo_class` is **71.0 %** of object_recognition × ID
+(920 / 1,296) and **82.6 %** of the OOD cell (1,755 / 2,125) — `results/detailed.csv`, run
+`06_vit_lora_v1`. A `fo_class` gain is diluted twice, and **how many cells it lands in is the
+whole question**, so both rows have to be on the page:
 
-| gain in `fo_class` | → cell | → **`bucket_mean`** |
+| gain in `fo_class` | **ID only** (× 0.177) | **both distributions** (× 0.384) |
 |---|---|---|
-| +0.02 | +0.015 | **+0.004** |
-| +0.05 | +0.038 | +0.010 |
-| +0.10 | +0.077 | +0.019 |
+| +0.02 | **+0.0035** | **+0.0077** |
+| +0.05 | +0.0089 | +0.0192 |
+| +0.10 | +0.0177 | +0.0384 |
 
-The 12c effect *as measured*, projected: `bucket_mean` 0.5667 → **0.5705**. Moving the
-headline by a perceptible +0.02 needs `fo_class` up **~+0.10** — five times an effect that
-is not significant. ⚠️ **This arithmetic applies to any format-specific lever**, which is
-why "does it help?" is the wrong question and "does it move a whole cell?" is the right one.
+ID only = 0.710·g / 4 = **0.177·g**. Both = (0.710·g + 0.826·g) / 4 = **0.384·g**.
+
+⚠️ **Corrected 2026-07-23.** The table used to publish a single column — **+0.004 / +0.010 /
++0.019** — built by **averaging** the 71 % and 83 % shares and dividing by 4 **as if only one cell
+moved**. That is the ID-only case mislabelled as the general one; it **understates a gain in both
+distributions by ~2×**. Now agrees with [[headline-arithmetic-four-cells]].
+
+**The 12c effect as measured, projected onto rung 06:** the two deltas are unequal, so use the
+per-cell form — (0.710 × 0.0207 + 0.826 × 0.0040) / 4 = **+0.0045**, i.e. `bucket_mean`
+0.5667 → **0.5712**.
+⚠️ **This supersedes the published 0.5667 → 0.5705**, which was computed with the erroneous
++0.0005 OOD delta (and +0.0209 ID) corrected above. The two projections differ by 0.0007 and
+neither is significant. 🔴 [[headline-arithmetic-four-cells]] still carries the pre-correction
+worked example (`+0.0209 ID, +0.0005 OOD ⇒ 0.5705`) — **its table is right, that one line is
+stale**; fix it when that note is next touched.
+
+Moving the headline by a perceptible +0.02 needs `fo_class` up **~+0.05 in both distributions**
+(or ~+0.11 in ID alone) — five times an effect that is not significant either way.
+⚠️ **This arithmetic applies to any format-specific lever**, which is why "does it help?" is the
+wrong question and "does it move a whole cell?" is the right one.
 
 ### Does it help where counting is hard? Marginally, and never enough
 
 `number`, composite − control by gold count: gold 1 −0.071, gold 2 +0.095, gold 3 −0.036,
-gold 4 +0.015, gold 5–6 +0.013, **gold ≥7 exactly 0.000 in both arms**. Mean absolute error
+gold 4 +0.015, gold 5–6 **+0.013** (a *difference between arms*, so accuracy at gold 5–6 is
+nonzero in at least one — `context/INDEX.md` used to summarise rung 06 as **"0 % accuracy from
+gold ≥5"**, which is wrong and is now corrected there: `context/ERROR_ANATOMY.md` measures gold 5
+at **0.060** and gold 6 at **0.023**, a collapse *towards* zero, not zero),
+**gold ≥7 exactly 0.000 in both arms** (⚠️ these arms, not rung 06 — rung 06 scores ~0.02 at
+gold ≥8). Mean absolute error
 falls slightly at every level ≥3 (1.82→1.75, 2.58→2.56, 4.76→4.65) and the under-count bias
 softens (−0.766 → −0.729). Real, in the right direction, and far too small — and at gold ≥7
 nothing rescues it, matching the eyeball finding that camouflaged clips are not resolvable.
@@ -471,5 +573,6 @@ structurally consistent with this, and an irreducible ceiling on any perception-
 
 `_models/transform_bank.py` is the library (`TRANSFORMS`, `COMBOS`, `local_descriptors`,
 `separability`, `within_video`, `rank_within_video`, `null_band`). Full screen ≈ 30 min
-(18 single) / ≈ 47 min (14 chained) on 11 CPU workers, no GPU, frames from the local
-`frames_cache`. Seed 20260720.
+(18 bank entries = 15 single operators + 3 anchors) / ≈ 47 min (14 bank entries = 12 chained
+pipelines + 2 anchors) on 11 CPU workers, no GPU, frames from the local `frames_cache`.
+Seed 20260720.
