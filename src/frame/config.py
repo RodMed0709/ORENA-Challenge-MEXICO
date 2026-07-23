@@ -6,6 +6,7 @@ the RunPod volume layout (`/workspace/...`).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -35,6 +36,14 @@ class BaselineConfig:
     # the ID split's visual tokens.
     max_pixels: int = 1280 * 720
     answer_char_cap: int = 300  # OpenEnded/MultipleChoice hard limit in the SDK
+
+    # ── rung 15: map a structured generation back to a bare answer ────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None skips the call entirely (engine.py:129).
+    # Called as fn(answer, question) -> answer, and it is the ONLY hook before the
+    # SDK's format verification, which marks a format failure INCORRECT. A rung that
+    # trains on a structured target scores 0 by construction without it, so a silently
+    # unwired post-processor reads as "the intervention destroyed the capability".
+    answer_postprocess: Callable[[str, str], str] | None = None
 
     # ── sampling (self-consistency, rung 10) ─────────────────────────
     # DEFAULTS REPRODUCE GREEDY EXACTLY. n_samples <= 1 takes the same
