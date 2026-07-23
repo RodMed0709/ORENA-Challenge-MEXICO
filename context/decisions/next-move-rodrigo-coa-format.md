@@ -12,12 +12,22 @@ The highest-ROI single-variable move on the DATA/FORMAT front (the +16 lever) th
 local, needs **no external-data DUA**, and does not depend on rung 06's outcome.
 
 ## What it gave us
-- **RL first = NO.** CoA ablation: **SFT 65.7 → +RL 67.4 (+1.7) → +CoA-format 83.7 (+16.3)**. The
-  value is the **FORMAT**, not the RL. GRPO on 1×L40S is unvalidated (official recipes assume ~6
-  GPUs + server mode); the +1.7 exact-match RLVR variant was already killed.
-- **Validated cheap lever = CoA structured-reasoning format via plain SFT.** Its OOD thesis IS our
-  diagnosis: conventional SFT alters pretrained priors → less generalization; CoA preserves them.
-  OOD = 50% of the score.
+- ~~**RL first = NO.** CoA ablation: **SFT 65.7 → +RL 67.4 (+1.7) → +CoA-format 83.7 (+16.3)**. The
+  value is the **FORMAT**, not the RL.~~ 🔴 **The read was WRONG — corrected 2026-07-23,
+  [[coa-sft-published-null]].** The source's `+ Cold Start + SFT` row (scaffold, NO RL, our exact
+  backbone) scores **62.0 vs bare-gold SFT's 65.7** on EndoVis2018 (62.4 vs 58.7 on CholecT50):
+  the format alone is a wash, and it *loses* on EndoVis. **The value is the RL**, which the
+  "83.7 − 67.4 = +16.3" arithmetic mis-attributed by comparing two RL arms to each other. What
+  stands unchanged from this note: GRPO on 1×L40S is unvalidated (official recipes assume ~6 GPUs
+  + server mode), and the +1.7 exact-match RLVR variant was already killed — so **"RL first = NO"
+  survives as an INFRA/cost call, not as an evidence call.** R4 (GRPO on top of R1) gains value.
+- ~~**Validated cheap lever = CoA structured-reasoning format via plain SFT.**~~ **Not validated —
+  published as a wash.** Its OOD *thesis* still matches our diagnosis (conventional SFT alters
+  pretrained priors → less generalization), but the paper's own ablation shows the scaffold only
+  pays off under RLVR. R1 is **re-scoped, not cancelled**: answer-weighted loss, correctness
+  filter, both inference modes measured on the same checkpoint (the one genuinely empty cell in
+  the literature), class-balanced F1cls reported, booked as a **cold start for a later RLVR rung**.
+  Conditions and evidence: [[coa-sft-published-null]]. Decision reserved to Rodrigo.
 
 ## The plan Rodrigo owns (single-variable vs rung-02: bucket_mean 0.550, acc_OOD 0.592)
 - **R1 — own it.** Rebuild the 13.7k train QA into CoA-style scaffolds (reverse-generated **locally**
@@ -46,6 +56,8 @@ Oversample `number` (not a quantity problem — already 31% of train, mean 2.74)
 (latency-fatal).
 
 ## Sources
-- vlm-strategist review, 2026-07-17; `THE_MAP.md` §0 + §A2; Bloque-A / Block-A §7 (CoA);
+- vlm-strategist review, 2026-07-17; `THE_MAP.md` §0 + §A2; ~~Bloque-A / Block-A §7 (CoA)~~ →
+  superseded by the primary source, `literature/vlm-techniques/pdfs/v01_li_2026_chain-of-adaptation.pdf`
+  ([[coa-sft-published-null]]);
   `literature/FICHAS.md` tier2_01/08/09/11, tier1_04/07; `experiments/02-lora-sft`,
   `experiments/03-prompt-variants`, `experiments/05-bottleneck-audit`.

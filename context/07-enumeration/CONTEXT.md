@@ -54,8 +54,12 @@ This matters beyond the probe:
 - **It agrees with rung 03** (0 of 6 prompts won; `a5_baredigit`, a counting protocol, *hurt*) and with
   v1 (ignored 20/20). **Three independent attempts to change this model's behaviour by prompt or prefill
   have failed.** After 13.7k bare-answer examples, the output format is not up for negotiation.
-- ⇒ **If we want a reasoning format, the route is training (CoA via SFT), not decoding.** That is where
-  the literature puts the value anyway: CoA's ablation gives **+16.3 for the format, +1.7 for the RL**.
+- ⇒ **If we want a reasoning format, the route is training (CoA via SFT), not decoding.**
+  ~~That is where the literature puts the value anyway: CoA's ablation gives **+16.3 for the format,
+  +1.7 for the RL**.~~ 🔴 **Corrected 2026-07-23 ([[coa-sft-published-null]]):** the literature does
+  NOT put the value there. CoA's own no-RL scaffold row scores **62.0 vs bare-gold SFT's 65.7**
+  (EndoVis2018, our backbone) — a wash. The training route remains the only route (decoding is dead
+  three ways here), but it buys ≈0 without an RL objective on top.
 
 ## The paired analysis (independent of the probe, and it survives)
 

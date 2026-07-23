@@ -9,10 +9,23 @@ orthogonal to Leo's rung 06 (perception/ViT). Decision:
 `context/decisions/next-move-rodrigo-coa-format.md`.
 
 ## Why this format, the RL caveat, and the generator (updated 2026-07-18)
-- ⚠️ **The +16.3 is RL+format, not SFT+format** — there is no SFT-only-CoA row in the source
-  (`Bloque-A-Modelo.md:301-306`); R1 is that untested cell, and we emit only `<answer>` (the
-  paper emitted the full CoA) → the whole thesis is a **weights-level-regularizer bet** the pilot
-  exists to test. Retire the +16.3 prior. Full reasoning: [[coa-generator-qwen32b-onpod]].
+- 🔴 ~~**The +16.3 is RL+format, not SFT+format** — there is no SFT-only-CoA row in the source
+  (`Bloque-A-Modelo.md:301-306`); R1 is that untested cell.~~ **FALSIFIED 2026-07-23 —
+  [[coa-sft-published-null]].** The row exists. Read directly from the source PDF
+  (`literature/vlm-techniques/pdfs/v01_li_2026_chain-of-adaptation.pdf`, Tables 1–3, same
+  backbone Qwen3-VL-8B-Instruct, same 4-tag scaffold, ms-swift, cross-procedure OOD):
+  `+ Cold Start + SFT` (scaffold, NO RL) = **62.0 F1 EndoVis2018 vs bare-gold SFT's 65.7**, and
+  62.4 vs 58.7 CholecT50 — the paper's own words, *"only marginal gains"*. The +18.0 is RLVR's,
+  and RLVR **without any thinking tags** already beats SFT (67.4 vs 65.7). The `+16.3 = format`
+  split was backwards; it is retired. `Bloque-A-Modelo.md:301-306` is a second-hand summary — the
+  PDF supersedes it as the citation anchor.
+- **What survives, and it is the only original cell left:** we emit only `<answer>` where the
+  paper emitted the full CoA, and **no paper trains once on a scaffold then evaluates the same
+  checkpoint under both full-trace and answer-only generation on a perception benchmark**. R1 is
+  **re-scoped to that pairing** (plus answer-weighted loss, correctness filter, class-balanced
+  F1cls, booked as a cold start for a later RLVR rung) — not cancelled. Honest prior for a
+  standalone run: `bucket_mean` ≈ 0 (−0.02 to +0.02), downside risk on `number`/`fo_class`.
+  Decision reserved to Rodrigo. Generator reasoning (unaffected): [[coa-generator-qwen32b-onpod]].
 - **Generator = Qwen3-VL-32B, vision, zero-shot, ON-POD** ([[coa-generator-qwen32b-onpod]]).
   The path here moved through three positions: (1) our own 8B sees the frame — REJECTED (below
   floor, self-distills hallucinations); (2) text-only reverse-gen, no pixels — REJECTED (DUA:
@@ -65,3 +78,7 @@ Per training row we hand the generator: `question`, **`gold`**, `procedure_type`
   shaped per-arm, split it like rung 06 did (`RESULTS.csv` ledger-shaped + `RESULTS_arms.csv`).
 - **`number` erosion + acc_OOD selection** ([[checkpoint-selection-vs-number]]) — few epochs,
   number-aware selection at the training stage.
+- **No class-balanced metric is reported anywhere in our stack.** The CoA paper shows SFT raising
+  overall F1 while dropping class-balanced F1cls 20.7 → 15.3 (CholecT50) — our `clip` attractor,
+  published ([[coa-sft-published-null]]). Until F1cls (or an equivalent) is in `frame.metrics`,
+  `bucket_mean` cannot see this failure mode.

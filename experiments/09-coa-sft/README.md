@@ -5,13 +5,25 @@
 > in the gold** — instead of the bare gold — generalize better on OOD? Single variable vs
 > rung 02.
 >
-> ⚠️ **Expectation reset (adversarial gate, 2026-07-18 — [[coa-generator-qwen32b-onpod]]).**
-> The oft-quoted CoA "+16.3" (SFT 65.7 → +RL 67.4 → **+CoA-format 83.7**) is **format stacked
-> on RL** — there is NO `SFT+CoA-format, no-RL` row in the source; **R1 is exactly that untested
-> cell.** And the paper measured 83.7 while EMITTING the full CoA; we emit **only `<answer>`**
-> (5 s / ≤32-token budget), betting structured SFT is a **weights-level regularizer** that keeps
-> the gain — also untested. So **do NOT carry +16.3 into planning**; the honest prior is
-> "unknown, plausibly ~0." The pilot's whole value is measuring these two cells for ~$10.
+> 🔴 **PREMISE FALSIFIED — read [[coa-sft-published-null]] before planning this rung (2026-07-23).**
+> ~~The oft-quoted CoA "+16.3" (SFT 65.7 → +RL 67.4 → **+CoA-format 83.7**) is format stacked on RL
+> — there is NO `SFT+CoA-format, no-RL` row in the source; **R1 is exactly that untested cell.**~~
+> **That row exists.** The source paper (Chain-of-Adaptation, Li et al., arXiv:2603.20116, read
+> directly at `literature/vlm-techniques/pdfs/v01_li_2026_chain-of-adaptation.pdf`) reports
+> `+ Cold Start + SFT` — scaffold in the target, no RL, **on our exact backbone** — at **62.0 F1
+> on EndoVis2018 against bare-gold SFT's 65.7**, and 62.4 vs 58.7 on CholecT50. One worse, one
+> better, **net ≈ zero**; the paper calls it *"only marginal gains"*. The +18.0 headline is
+> **RLVR's**, and RLVR with **no reasoning tags at all** already beats SFT (67.4 vs 65.7). The
+> "+16.3 = format" decomposition was backwards and is retired for good.
+>
+> What survives from the old reset: we emit **only `<answer>`** while the paper emitted the full
+> CoA — and *that* cell is genuinely empty in the whole literature (no paper trains once on a
+> scaffold and evaluates the same checkpoint under both full-trace and answer-only generation on a
+> perception benchmark). **Honest prior for a standalone run: `bucket_mean` ≈ 0 (−0.02 to +0.02),
+> with real downside risk on `number`/`fo_class`.** The rung is **re-scoped, not cancelled** —
+> re-scope conditions (answer-weighted loss, correctness filter, both inference modes, booked as a
+> cold start for a later RLVR rung, class-balanced F1cls reported) in [[coa-sft-published-null]].
+> Owner Rodrigo has reserved the decision and will run it personally.
 
 ## Ladder
 
@@ -146,8 +158,20 @@ would kill a real winner. The clean A/B stays the full-set run.*
   **`CoA-2k − bare-2k`** (a matched 2k-bare-gold arm, same subset/seed/recipe/epochs) — paired,
   single-variable — NOT CoA-2k vs full-13.7k rung-02. Evaluate in **emit-only-`<answer>`**
   deployment mode (parse `<answer>` from generation); an emit-full-reasoning eval is
-  non-transferable. Retire the "+16.3" prior — it is RL+format, R1 tests the untested SFT-only
-  cell ([[coa-generator-qwen32b-onpod]]).
+  non-transferable. ~~Retire the "+16.3" prior — it is RL+format, R1 tests the untested SFT-only
+  cell.~~ **Correction (2026-07-23):** the SFT-only scaffold cell is NOT untested — it is published
+  and a wash (62.0 vs 65.7 EndoVis2018; 62.4 vs 58.7 CholecT50), see [[coa-sft-published-null]].
+  What R1 can still claim originality on is the **emit-vs-suppress** axis, which is why the
+  emit-only-`<answer>` eval must be run **paired against a full-trace eval on the same
+  checkpoint** — that pairing is now the point of the rung, not a detail of it.
+- **Answer-weighted loss + correctness filter are now REQUIRED, not optional**
+  ([[coa-sft-published-null]] re-scope conditions). Uniform token CE over a ~95%-prose target
+  reproduces the published null at our own expense (SCALe, `literature/vlm-techniques/FICHAS.md`
+  §v02); and every generated trace whose `<answer>` ≠ gold must be discarded and regenerated
+  (STaR, §v18) — free for us, we already hold the gold.
+- **Report class-balanced F1cls alongside F1/accuracy.** The same paper shows SFT lifting overall
+  F1 while *crushing* class-balanced F1cls (20.7 → 15.3 on CholecT50) — that is our `clip`
+  attractor published, and `bucket_mean` alone cannot see it.
 - **p99 latency gate BEFORE the full run.** The unmeasured L40S p99 with longer internal
   reasoning tokens is the hard unknown gating R1
   (`context/decisions/next-move-rodrigo-coa-format.md:38`). Measure p99 on a scaffold-trained
