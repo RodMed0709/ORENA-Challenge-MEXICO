@@ -104,8 +104,9 @@ def test_round_trip_over_every_real_template_and_gold() -> None:
 
 
 def test_malformed_inputs_degrade_and_never_raise() -> None:
-    """Perek 2026 (v02) measures 4.76 % malformation for vanilla CoT-SFT — this is the
-    behaviour under exactly that failure, enumerated."""
+    """Perek 2026 (``literature/vlm-techniques/FICHAS.md`` v02) measures 4.76 %
+    malformation for vanilla CoT-SFT — this is the behaviour under exactly that
+    failure, enumerated."""
     cases: dict[str, tuple[str, str]] = {
         # raw                                        -> (expected answer, expected status)
         '{"label": "Clips", "counts": 3}':            ("3", STATUS_STRUCTURED),
@@ -166,7 +167,11 @@ def _line(qid: str, answer: str, img: str) -> str:
     }, ensure_ascii=False) + "\n"
 
 
-def test_rewrite_touches_only_number_rows(tmp: Path) -> None:
+def test_rewrite_touches_only_number_rows(tmp_path: Path) -> None:
+    # NOTE: the parameter MUST be named `tmp_path` — that is pytest's built-in
+    # temp-dir fixture. Named anything else (it was `tmp`), pytest errors at SETUP
+    # and the test is reported as an error, not a failure: a load-bearing gate that
+    # never runs while the suite still says "passed".
     q_count = "How many Clips appear in this frame? Please provide a number."
     q_fo = "List all foreign objects that are visible in this video frame. Please provide the class names."
     specs = [
@@ -182,7 +187,7 @@ def test_rewrite_touches_only_number_rows(tmp: Path) -> None:
     assert json.loads(new[2])["messages"][2]["content"] == '{"label": "Clips", "counts": 0}'
     assert new[1] == base[1] and new[3] == base[3], "a non-`number` line was re-serialised"
 
-    bp, np_ = tmp / "base.jsonl", tmp / "new.jsonl"
+    bp, np_ = tmp_path / "base.jsonl", tmp_path / "new.jsonl"
     bp.write_text("".join(base), encoding="utf-8")
     np_.write_text("".join(new), encoding="utf-8")
     got = assert_nonnumber_lines_identical(bp, np_, specs)
@@ -191,8 +196,12 @@ def test_rewrite_touches_only_number_rows(tmp: Path) -> None:
     print("  rewrite: 2/4 rows rewritten, 2/2 other rows byte-identical, targets round-trip — OK")
 
 
-def test_misalignment_raises(tmp: Path) -> None:
-    """A silent off-by-one would attach counts to the wrong questions. It must RAISE."""
+def test_misalignment_raises(tmp_path: Path) -> None:
+    """A silent off-by-one would attach counts to the wrong questions. It must RAISE.
+
+    `tmp_path` is unused here but kept as pytest's fixture name so the signature can
+    never again request a fixture that does not exist (see the note above).
+    """
     q = "How many Clips appear in this frame? Please provide a number."
     specs = [RowSpec("d__1", "number", q, "3", "/f/a.jpg")]
     for bad, why in (

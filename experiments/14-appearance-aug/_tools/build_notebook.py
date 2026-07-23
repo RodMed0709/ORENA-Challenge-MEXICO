@@ -34,7 +34,12 @@ measured negative on this model), no geometry, no crops (Ramesh 2023 measured
 low-res multi-crop *hurting* surgical tasks). White-balance-error emulation over
 Afifi's five-temperature grid is the primary operator; ImageNet-C
 brightness/dark/contrast at severity 1–2, via Wang 2024's endoscopic corruption
-menu, is the secondary. Every dose is cited in `_models/appearance.py`.
+menu, is the secondary. Every dose is cited in `_models/appearance.py`, against
+**`literature/preprocessing/FICHAS.md`** (Jong 2025 = Tier-1 #1 `p01` · Medeiros 2026
+= Tier-1 #3 `p03` · Afifi & Brown 2019 = Tier-1 #9 `p09` · Ramesh 2023 = Tier-2 #12
+`p12` · Wang 2024 = Tier-2 #19 `p19`) — **not** the older, unrelated
+`literature/FICHAS.md` at the repo root. What is ours rather than a paper's is
+declared as ours in `context/14-appearance-aug/CONTEXT.md`.
 
 🔴 **The pre-registration is `context/14-appearance-aug/CONTEXT.md` and it was
 written before any number existed.** This notebook produces numbers. It decides
@@ -258,9 +263,20 @@ assert g1["trainable_params_M"] is None or g1["trainable_params_M"] < 100, \
 
 (MD, r"""## Per-epoch merge → eval → canonical scoring
 
-🔴 **Every epoch is merged, evaluated and reported.** No last-by-default, no
-`acc_OOD`-only selection: `checkpoint-selection-vs-number` measured that
-`acc_OOD` selection takes the checkpoint that erased more counting.
+🔴 **Every epoch is merged, evaluated and reported. Never last-by-default.**
+`checkpoint-selection-vs-number` measured that `acc_OOD` selection takes the
+checkpoint that erased more counting — so the `number` margin is printed for
+EVERY epoch, ID and OOD, and the trajectory is the deliverable.
+
+The ONE row that goes to the shared ledger is still selected by **`acc_OOD`**
+(`context/RULES.md` §6, and this rung's pre-registration): the selection rule is
+rung 06's, unchanged, because changing it would be a second variable. Selecting
+by `bucket_mean` instead would silently promote the very checkpoint this rung
+exists to flag.
+
+⚠️ **Disk budget.** 3 epochs × ~17 GB merged = ~51 GB if nothing is deleted, on
+top of ~14k augmented JPEGs. Each merge is removed in a `finally` right after its
+`results.csv` is scored, so the steady state is **one** merged checkpoint (~17 GB).
 
 Scoring is `frame.metrics.stratified_report` and nothing else (RULES §EVAL).
 Read **margins over the template-aware floor**, never raw accuracy.
@@ -268,6 +284,16 @@ Read **margins over the template-aware floor**, never raw accuracy.
 
 (CODE, r'''# ── Per-epoch merge + eval + canonical score. Resumable: progress is a file read
 # (frame.runstate), not a scrollback.
+#
+# 🔴 DISK. Each merged 8B bf16 checkpoint is ~17 GB and there are 3 epochs — 51 GB on
+# top of ~14k pre-materialised augmented JPEGs. `merge_checkpoint` namespaces the merge
+# per epoch (02-lora-sft/_models/lora_sft_train.py:214-223) precisely so that deleting
+# it is the CALLER's job, and nothing in the engine deletes on its own. So each merge is
+# removed the moment its results.csv is scored and gated — and the removal sits in a
+# `finally`, because the failure that fills the volume is an eval that RAISED (CUDA OOM,
+# judge crash) and left 17 GB behind. Rung 12 hit exactly this, mid-run.
+import shutil
+
 from frame.config import BaselineConfig
 from frame.run import run_baseline
 from frame import ledger, metrics, runstate
@@ -284,25 +310,32 @@ for ck in cks:
     m = cfg.merged_dir / ck.name
     if not (m.is_dir() and any(m.iterdir())):
         m = merge_checkpoint(cfg, ck)
-    bcfg = BaselineConfig(data_root=Path(DATA_ROOT), model_path=m, out_dir=cfg.run_dir,
-                          run_name=tag, max_pixels=cfg.max_pixels, seed=cfg.seed,
-                          n_eval=40 if SMOKE else None)
-    t0 = time.perf_counter()
-    run_baseline(bcfg)
-    rs.heartbeat(note=f"{tag} eval {(time.perf_counter()-t0)/60:.1f} min")
+    try:
+        bcfg = BaselineConfig(data_root=Path(DATA_ROOT), model_path=m, out_dir=cfg.run_dir,
+                              run_name=tag, max_pixels=cfg.max_pixels, seed=cfg.seed,
+                              n_eval=40 if SMOKE else None)
+        t0 = time.perf_counter()
+        run_baseline(bcfg)
+        rs.heartbeat(note=f"{tag} eval {(time.perf_counter()-t0)/60:.1f} min")
 
-    res = pd.read_csv(cfg.run_dir / tag / "results.csv")
-    missing = set(res["qID"]) - set(gold.dropna(subset=["answer"])["qID"])
-    assert not missing, f"GATE 0 {tag}: {len(missing)} qIDs without gold; margins would inflate"
-    metrics.assert_no_dup_qid(res); metrics.assert_ood_from_qid(res)
-    metrics.assert_all_rows_grouped(res)
-    s = metrics.stratified_report(res, gold=gold)
-    metrics.assert_floors_vs_eval_set(s)
-    strats[ck.name] = s
-    if not SMOKE:
-        ledger.register_run(cfg.run_dir / tag, s, experiment="14-appearance-aug",
-                            run=f"{cfg.run_name}__{tag}",
-                            model=f"Qwen3-VL-8B + LoRA r8 ViT+LLM + {POLICY.tag} ({ck.name})")
+        res = pd.read_csv(cfg.run_dir / tag / "results.csv")
+        missing = set(res["qID"]) - set(gold.dropna(subset=["answer"])["qID"])
+        assert not missing, f"GATE 0 {tag}: {len(missing)} qIDs without gold; margins would inflate"
+        metrics.assert_no_dup_qid(res); metrics.assert_ood_from_qid(res)
+        metrics.assert_all_rows_grouped(res)
+        s = metrics.stratified_report(res, gold=gold)
+        metrics.assert_floors_vs_eval_set(s)
+        strats[ck.name] = s
+        if not SMOKE:
+            ledger.register_run(cfg.run_dir / tag, s, experiment="14-appearance-aug",
+                                run=f"{cfg.run_name}__{tag}",
+                                model=f"Qwen3-VL-8B + LoRA r8 ViT+LLM + {POLICY.tag} ({ck.name})")
+    finally:
+        # ~17 GB, on the happy path AND on the exception path. `results.csv`,
+        # `predictions.json` and the registered `stratified.json` are already on disk,
+        # so nothing below this loop needs the weights; a re-merge is one `swift export`.
+        shutil.rmtree(m, ignore_errors=True)
+        print(f"merged weights deleted: {m}")
     rs.finish_stage()
 rs.finish("done")
 print("scored:", list(strats))
@@ -319,6 +352,10 @@ for name, s in strats.items():
     bf = pd.DataFrame(s["by_format"]); bb = pd.DataFrame(s["by_bucket"])
     r = {"checkpoint": name, "bucket_mean": s["bucket_mean"],
          "d_bucket_mean_vs_06": s["bucket_mean"] - R06["bucket_mean"],
+         # acc_ID/acc_OOD are carried because acc_OOD is the SELECTION criterion
+         # (context/RULES.md §6) — the table the checkpoint is picked from must show
+         # the quantity it is picked by.
+         "acc_ID": s["acc_ID"], "acc_OOD": s["acc_OOD"],
          "margin_ID": s["margin_ID"], "margin_OOD": s["margin_OOD"],
          "d_margin_OOD_vs_06": s["margin_OOD"] - R06["margin_OOD"]}
     for fmt in ("number", "fo_class", "binary", "open_ended", "multiple_choice"):
@@ -407,7 +444,17 @@ print(diag.to_string(index=False))
 (CODE, r'''# ── RESULTS.csv — ledger-shaped, ONE row (WAVE_SPEC #6: frame.ledger reads an
 # `arm` column as a run name, so per-arm detail goes to its own file).
 if not SMOKE:
-    best = max(strats, key=lambda k: strats[k]["bucket_mean"])   # reported, not "selected"
+    # Checkpoint selection = rung 06's rule, unchanged: max acc_OOD (context/RULES.md §6,
+    # and this rung's own pre-registration). Changing the criterion would be a SECOND
+    # variable. Every epoch is reported above regardless, so a reader can see what any
+    # other rule would have picked.
+    #
+    # 🔴 It was `max(bucket_mean)` here, and that is not a cosmetic difference: `number`
+    # margin is MEASURED to regress across epochs while other buckets still rise (rung 02
+    # +0.032 → +0.004, rung 06 +0.015 → +0.000). Selecting by the headline can promote to
+    # the shared ledger exactly the checkpoint this rung exists to flag as bad, and no
+    # existing gate would catch it.
+    best = epochs.sort_values("acc_OOD", ascending=False).iloc[0]["checkpoint"]
     s = strats[best]
     bf = pd.DataFrame(s["by_format"])
     fmt_acc = bf.groupby("answer_format").apply(

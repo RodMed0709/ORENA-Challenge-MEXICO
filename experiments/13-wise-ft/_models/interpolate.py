@@ -116,9 +116,10 @@ class WiSEConfig:
     # ── the 200-question identity probe (frozen, sha256-sidecarred) ──
     probe_n: int = 200
     probe_seed: int = 20260723
-    # Video-bounded so `run_baseline`'s existing `video_filter` can serve it — see
-    # `choose_probe`. 2 videos/dataset ≈ 660 candidate questions at rung 06's
-    # 6252/38 ≈ 165 per video, i.e. a ~3-minute gate instead of a 24-minute one.
+    # Drawn from a few videos so the gate stays a ~3-minute run rather than a
+    # 24-minute one — 2 videos/dataset ≈ 660 candidate questions at rung 06's
+    # 6252/38 ≈ 165 per video. The EVAL itself is bounded by `qid_filter`, so it
+    # scores exactly `probe_n` questions, not every question in those videos.
     probe_videos_per_dataset: int = 2
 
     # ── eval knobs (must match rung 06's eval_best protocol EXACTLY) ─
@@ -386,11 +387,16 @@ def choose_probe(
     single-dataset probe, and over ``answer_format`` because a probe that happened to be
     all-``binary`` could not detect a decoding difference that only shows in free text.
 
-    🔴 **Why it is video-bounded.** ``frame.run.run_baseline`` can restrict an eval by
-    VIDEO (``video_filter``, ``src/frame/run.py:158``) but not by qID. A probe spread over
-    all 38 videos would therefore cost a full-size eval — the gate would stop being cheap
-    and would be skipped, which is how gates die. Confining it to a few videos makes it a
-    ~3-minute run; :func:`probe_videos` hands the filter straight to ``run_baseline``.
+    🔴 **The eval is bounded by qID, not by video.** ``frame.run.run_baseline`` takes
+    ``qid_filter`` (``src/frame/run.py:158``), so Gate B scores EXACTLY these 200
+    questions — an identity gate must compare the same questions the control answered,
+    not a superset that happens to contain them.
+
+    The qIDs are still *drawn* from a few videos, but that is now a sampling choice
+    rather than a limit of the eval path: it keeps the decode to a handful of source
+    videos and the run to ~3 minutes, and a gate that is expensive is a gate that gets
+    skipped. :func:`probe_videos` remains available for anything that genuinely wants a
+    video filter; Gate B does not.
 
     ⚠️ Documented limit, recorded here rather than discovered later: the probe covers a
     handful of videos, so it is an **identity check and nothing else**. No CI, no margin
@@ -458,7 +464,11 @@ def choose_probe(
 
 def probe_videos(rows: pd.DataFrame) -> set[tuple[str, str]]:
     """``{(dataset, video_id)}`` for the frozen probe — the exact shape
-    ``frame.run.run_baseline(cfg, video_filter=...)`` expects (``src/frame/run.py:172``)."""
+    ``frame.run.run_baseline(cfg, video_filter=...)`` expects (``src/frame/run.py:172``).
+
+    Reported for context only. **Gate B filters by qID**, not by video, so that it scores
+    exactly the frozen 200 and not the superset of every question in these videos.
+    """
     return {(str(r.dataset), str(r.video)) for r in rows.itertuples(index=False)}
 
 
@@ -678,7 +688,8 @@ def interpolate_checkpoint(cfg: WiSEConfig, alpha: float, *, overwrite: bool = F
                 "accum_dtype": cfg.accum_dtype,
                 "n_tensors": n_tensors,
                 "formula": "(1-alpha)*base + alpha*finetuned",
-                "method": "WiSE-FT (Wortsman et al., CVPR 2022, arXiv:2109.01903) — FICHAS v23",
+                "method": ("WiSE-FT (Wortsman et al., CVPR 2022, arXiv:2109.01903) — "
+                           "literature/vlm-techniques/FICHAS.md v23"),
             },
             indent=2,
         ),

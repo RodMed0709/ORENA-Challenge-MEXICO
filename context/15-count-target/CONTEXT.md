@@ -215,10 +215,16 @@ The result must be attributed to one of two ceilings, and we say now which evide
    nonetheless part of the A1 arm and not of A0 — the comparison is
    *(bare target, no parser)* vs *(structured target, parser)*, as a package. Splitting them
    would need a third arm and is not pre-registered.
-6. **`count_answer_patch` monkeypatches `frame.run.QwenFrameEngine`** because `BaselineConfig`
-   has no answer-postprocess hook. It is scoped and restored in `finally`, and the clean fix
-   (a `BaselineConfig.answer_postprocess` callable) is proposed but deliberately not applied —
-   `src/frame` is shared with two sibling rungs building in the same worktree this wave.
+6. **The parser reaches the answer path through `BaselineConfig.answer_postprocess`**
+   (`src/frame/config.py:46`), applied by `QwenFrameEngine.predict` at `src/frame/engine.py:129`
+   — after generation, before `Response.content` is built and before the SDK's format
+   verification. `count_answer_hook` yields the callable and the parse log; flag OFF yields
+   `None`, which is the field's own default, so the control arm's answer path is byte-identical
+   and the notebook asserts the wiring matches `cfg.parse_answers`. This replaced a monkeypatch
+   of `frame.run.QwenFrameEngine`: the patch wrapped the same `predict` at the same point and was
+   functionally correct, but it was correct by coincidence of module-global resolution order, in
+   the one place where a post-processor that fails to wire is indistinguishable from a model that
+   cannot count.
 
 ## Results
 

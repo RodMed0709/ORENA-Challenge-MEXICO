@@ -101,8 +101,12 @@ raises, not a comment.
 
 **The probe:** 200 qIDs, 100 per dataset, proportional over `answer_format` inside each,
 drawn from 2 videos per dataset, frozen with a sha256 sidecar via
-`frame.subsample.freeze`. It is video-bounded because `run_baseline` can restrict an eval
-by video but not by qID, and a gate that costs a full eval is a gate that gets skipped.
+`frame.subsample.freeze`. **Gate B evaluates exactly those 200 qIDs**, via
+`run_baseline(..., qid_filter=...)` (`src/frame/run.py:158`) — an identity gate has to
+compare the same questions the control answered, not a superset that contains them, and
+the notebook asserts `n_compared == probe_n` so the binding cannot silently loosen. The
+draw is confined to a few videos only to keep the gate a ~3-minute run; a gate that costs
+a full eval is a gate that gets skipped.
 ⚠️ It covers 4 videos: it is an **identity check and nothing else**. No CI, no margin and
 no verdict is ever read off it.
 
