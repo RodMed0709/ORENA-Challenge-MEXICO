@@ -37,11 +37,25 @@ settled rejection of "generator sees the frame"?
   + **short scaffolds** (also protects latency + the `number` gradient).
 
 ## ⚠️ Required changes from the adversarial gate (2026-07-18) — before any GPU spend
-The +16.3 CoA figure is **RL+format, not SFT+format** (`Bloque-A-Modelo.md:301-306`); there is no
-SFT-only-CoA row — R1 is that untested cell. And the paper emitted the full CoA at inference; we
-emit only `<answer>`, betting structured SFT is a **weights-level regularizer**. Both are UNTESTED,
-so **retire the +16.3 expectation**; the pilot's prior is "unknown, plausibly ~0" and its whole
-value is measuring these two cells cheaply. Required design changes:
+🔴 ~~The +16.3 CoA figure is **RL+format, not SFT+format** (`Bloque-A-Modelo.md:301-306`); there is
+no SFT-only-CoA row — R1 is that untested cell.~~ **CORRECTED 2026-07-23 — the row exists and R1's
+cell is NOT untested: [[coa-sft-published-null]].** Read off the source PDF, `+ Cold Start + SFT`
+(scaffold, no RL, Qwen3-VL-8B-Instruct) scores **62.0 F1 on EndoVis2018 against bare-gold SFT's
+65.7** (62.4 vs 58.7 on CholecT50) — a published wash that *loses* on EndoVis. The +18.0 is RLVR's;
+RLVR with no thinking tags at all already beats SFT (67.4 vs 65.7). The "+16.3 = format" split is
+retired for good.
+
+**This does NOT change the generator verdict above — it strengthens it.** The paper's cold-start
+teacher was **Gemini-Flash-2.5, an external API** on 10,000 scraped surgical frames; our DUA
+forbids that ([[no-external-api-for-challenge-data]]), so their recipe is **not reproducible by
+us** and the on-pod Qwen3-VL-32B route is now independently justified rather than merely permitted.
+
+What remains untested is the *other* half: the paper emitted the full CoA at inference, we emit
+only `<answer>`, and **no paper evaluates the same scaffold-trained checkpoint under both modes on
+a perception benchmark**. That is the only original cell left, and the pilot's value is now
+measuring it — not measuring a "+16.3 that might survive". Prior: `bucket_mean` ≈ 0
+(−0.02 to +0.02). Required design changes (unchanged, plus the re-scope conditions in
+[[coa-sft-published-null]]):
 
 1. **Eyeball ~50 on-pod 32B-vision scaffolds FIRST**, over-sampling multi-object-OOD + single-Q
    frames — the true first kill-gate (frame-contradicting evidence poisons the exact target
@@ -66,7 +80,9 @@ no cheaper generator recovers coherence.
 
 ## Sources
 - vlm-specialist model-availability search + vlm-strategist adversarial gate, 2026-07-18.
-- `Bloque-A-Modelo.md` §6-7/§12 (CoA ablation is RL+format; SFT-only + emit-only-answer untested).
+- ~~`Bloque-A-Modelo.md` §6-7/§12 (CoA ablation is RL+format; SFT-only + emit-only-answer untested).~~
+  **Superseded by the primary source:** `literature/vlm-techniques/pdfs/v01_li_2026_chain-of-adaptation.pdf`
+  Tables 1–3 → [[coa-sft-published-null]]. Only the emit-vs-suppress half is untested.
 - `experiments/08-data-card/README.md` §4/§6 (multi-object collapse; `number` CI contains floor).
 - Related: [[next-move-rodrigo-coa-format]], [[checkpoint-selection-vs-number]],
   [[no-external-api-for-challenge-data]], [[eval-canonical]].

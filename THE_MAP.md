@@ -174,26 +174,35 @@ counting.** With a black image `number` sits at the majority floor (0.352). The 
 question is not "was the ViT the ceiling?" but "is the ViT the ceiling *for counting*?"** — which rung 06 (LoRA
 on the ViT) tests. Full report: `experiments/05-bottleneck-audit/`.
 
-### A2 — CoA: format, not RL (the convergence)
+### A2 — CoA: 🔴 the "format, not RL" read was WRONG (corrected 2026-07-23)
 
-> The old CoA premise died with the shortcut hypothesis. What survives, **independently**, is the ablation:
-> **RL = +1.7, FORMAT = +16.3** (SFT 65.7 → RLVR-no-format 67.4 → RLVR + CoA format 83.7).
+> ~~What survives, **independently**, is the ablation: **RL = +1.7, FORMAT = +16.3**
+> (SFT 65.7 → RLVR-no-format 67.4 → RLVR + CoA format 83.7).~~
+> **FALSIFIED by reading the source paper — [[coa-sft-published-null]].** The "+16.3 = format"
+> arithmetic compared **two RL arms to each other**. The source *does* contain the no-RL scaffold
+> row that this section assumed was missing: `+ Cold Start + SFT` (scaffold in the target, no RL,
+> **Qwen3-VL-8B-Instruct — our exact backbone**) = **62.0 F1 on EndoVis2018 against bare-gold
+> SFT's 65.7**, and 62.4 vs 58.7 on CholecT50. Net ≈ zero, *losing* on EndoVis; the paper calls it
+> *"only marginal gains"*. The +18.0 headline belongs to **RLVR**, which beats SFT even with **no
+> reasoning tags at all** (67.4 vs 65.7). Primary source, read directly:
+> `literature/vlm-techniques/pdfs/v01_li_2026_chain-of-adaptation.pdf`, Tables 1–3.
 
-Two independent surgical papers — one in our own backbone family — split the gain the same way:
+What still stands from this section:
 
-| Paper | format / instruction side | visual-adapter side |
+| Paper | what it actually splits | |
 |---|---|---|
-| **CoA** (2603.20116) | **+16.3** | RL +1.7 |
+| **CoA** (2603.20116) | RLVR **+18.0**; scaffold-in-SFT-target **≈0 (−3.7 EndoVis / +3.7 CholecT50)** | ⚠️ corrected |
 | **Surgical-LVLM / VP-LoRA** (2405.10948, Qwen-VL) | instruction-FT **+16** | VP-LoRA **+2** |
 
-**~+16 on format, ~+2 on the visual path — twice, different methods.** It matches our measurement (healthy
-encoder + poor `number` output → points at format, not the eyes). This **lowers rung 06's (ViT-LoRA) expected
-value but does NOT cancel it** — VP-LoRA (Mamba SS2D) ≠ plain LoRA on the ViT, so the +2 is the closest
-evidence, not a prediction. 🔴 **Do not pivot the roadmap without measuring** (that was the 2026-07-15 error:
-"correcting" on an unverified premise). The rising cheap question: **how much of the +16.3 survives with SFT on
-the CoA format, without RL?** — no RL, no new infra; cost is the data project of synthesising the reasoning
-fields for ~13.7k examples. Plain instruction-FT's +16 is **already spent** (rung 02); the live question is
-whether *better-structured* instruction data buys more on top.
+The Surgical-LVLM row is untouched and still says **plain instruction-FT ≫ the visual-adapter path** — and
+plain instruction-FT's +16 is **already spent** (rung 02). What is dead is the extrapolation that a
+*better-structured* SFT target buys more on top of it: two surgical papers (CoA; Surgery-R1) now say that is
+worth ≈1 point, and the payoff is in the **objective** (RLVR/RFT), not the target. It still **lowers rung 06's
+(ViT-LoRA) expected value but does NOT cancel it** — VP-LoRA (Mamba SS2D) ≠ plain LoRA on the ViT. 🔴 **Do not
+pivot the roadmap without measuring** (the 2026-07-15 error: "correcting" on an unverified premise — and this
+correction is itself the second instance of that same error, in the other direction). The live cheap question
+is no longer "how much of the +16.3 survives without RL" (answer: none of it) but **"does a scaffold-trained
+checkpoint score better with the trace suppressed than emitted?"** — the one cell nobody has run.
 
 ### The backbone is closed — but the 32B question is latency, not memory
 
@@ -212,7 +221,7 @@ latency on the L40S, and nobody has measured it** → a hard gate before any cap
 |---|---|---|
 | **2506.06232** — Challenging VLMs with Surgical Data *(DKFZ, our videos)* | VLMs do basic perception; **collapse when medical knowledge is needed.** Specialised medical VLMs underperform generalists. | 🔧 No comparable counting accuracy → cannot calibrate our 0.432. |
 | **2506.17337** — Generalist vs Specialist Medical VLMs | **Generalist + efficient FT ≥ specialist**, especially **transferring to OOD** → validates Qwen. | — |
-| **2603.20116** — Chain-of-Adaptation ⭐ | SFT *"can alter pretrained priors → reduced generalization"*. Ablation **SFT 65.7 → RL 67.4 → RL+format 83.7**. | Does **NOT** support RL as the lever (RL +1.7; **format +16.3**). Its shortcut premise was falsified by rung 05 — the format result stands alone. |
+| **2603.20116** — Chain-of-Adaptation ⭐ | SFT *"can alter pretrained priors → reduced generalization"*. Full ablation (**our backbone**): bare-gold SFT 65.7 → **scaffold-SFT no RL 62.0** → RLVR-no-tags 67.4 → RLVR+CoA 83.7. Also: SFT crushes class-balanced F1cls 20.7→15.3 (= our `clip` attractor, published). | 🔴 Does **NOT** support the format as the lever — ~~"format +16.3, RL +1.7"~~ was read off a table that does contain the no-RL scaffold row (62.0 < 65.7). **The lever is RLVR.** Its shortcut premise was falsified by rung 05; its teacher was Gemini-Flash-2.5 (DUA-forbidden for us). → [[coa-sft-published-null]] |
 | **2405.10948** — Surgical-LVLM / **VP-LoRA** ⭐ | **Qwen-VL backbone, our family.** Ablation: instruction-FT alone **+16** (72.48→88.53); **VP-LoRA adds only +2.** Own ficha `literature/FICHAS.md:61`. | 🔴 Does **NOT** support "unfreeze the aligner" — says the opposite. VP-LoRA (*Mamba SS2D in LoRA layers*) ≠ unfreezing anything. |
 | **2504.13837** — Does RL Really Incentivize…? | RLVR **sharpens** what the base can already do; does not expand the frontier. | — |
 | **2506.07218** — Perception-R1 | Naive RLVR **does not improve perception**; a perception-targeted reward does. | 🔧 Its reward needs **CoT-trajectory annotations + an LLM judge in the loop** — we have neither. |
