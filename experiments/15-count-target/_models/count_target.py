@@ -173,6 +173,14 @@ class CountTargetConfig(ViTLoRAConfig):
     # into a scratch dir and compares against that instead (slower, same guarantee).
     rung06_run_dir: Path | None = None
 
+    # 🔴 SMOKE must contain `number` rows — they are the ONLY rows this rung rewrites.
+    # The dataset-only sampler took the first k rows per dataset and the parquet order
+    # made all 16 of them non-`number`, so the first pod SMOKE exercised nothing and
+    # G-PARSE-1 fired on an empty set. Defaulted True here rather than left to the
+    # notebook: a smoke that cannot reach the code under test is worse than no smoke,
+    # because it reports success. Affects SMOKE only — the full run exports everything.
+    smoke_stratify_format: bool = True
+
     # The eval leg. Only read by the notebook; kept here so the whole run is one config.
     # Wire `parse_count` into the answer path at inference, via
     # `BaselineConfig.answer_postprocess` (src/frame/config.py:46 -> engine.py:129).
@@ -554,6 +562,8 @@ def assert_flag_off_identical(cfg: CountTargetConfig, scratch_dir: str | Path) -
             datasets=cfg.datasets, base_fps=cfg.base_fps,
             max_pixels=cfg.max_pixels, seed=cfg.seed, smoke=cfg.smoke,
             smoke_limit=cfg.smoke_limit,
+            # must match ours, or G-OFF compares two different samples and always fires
+            smoke_stratify_format=cfg.smoke_stratify_format,
             exp_dir=scratch, run_name="g_ref_rung06",
         )
         ctrl.run_dir.mkdir(parents=True, exist_ok=True)
@@ -758,11 +768,12 @@ def _row_specs(cfg: CountTargetConfig) -> list[RowSpec]:
     vs = sp.load_manifest(cfg.manifest_path)
     train_items = sp.apply_split(items, vs, "train")
     if cfg.smoke:
-        by_ds: dict[str, list] = defaultdict(list)
-        for it in train_items:
-            by_ds[it.dataset].append(it)
-        k = max(1, cfg.smoke_limit // max(1, len(by_ds)))
-        train_items = [it for ds in by_ds for it in by_ds[ds][:k]]
+        # CALL rung 02's sampler, never re-implement it: this function's whole job is to
+        # reproduce rung 02's item order, and a second copy of the subsampling rule is
+        # exactly how that guarantee rots.
+        import lora_sft_train as r02  # noqa: PLC0415
+
+        train_items = r02.smoke_subsample(train_items, cfg)
     train_items.sort(key=lambda it: (it.dataset, it.video_id, it.frame_index))
     return [
         RowSpec(
