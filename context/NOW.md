@@ -2,7 +2,69 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-20**.
+> Last updated: **2026-07-24**.
+
+## 🔴 2026-07-24 — Wave R2: literature-grounded levers, and two project premises falsified
+
+**The whole session's thesis.** Two paths were on the table — preprocess the image (Leo's rung 12
+line) or CoA (change the training target). A literature sweep (87 byte-verified PDFs, new corpora
+`literature/preprocessing/` + `literature/vlm-techniques/`) found that **both configurations we were
+about to run are published as wrong**, and re-scoped the plan onto the axes the literature says DO
+win. See [[coa-sft-published-null]] and [[inference-only-input-tests-biased]].
+
+### Running RIGHT NOW — pod `m7s3xq835y9hd4` (RTX 5090, EU-RO-1), unattended, self-stopping
+Driver → `r15` → `r14`; finisher then runs `r16`, rebuilds the ledger, commits+pushes `results/`,
+and stops the pod. ~10 h left. Details + the finisher's traps in [[lora-training-in-progress]].
+⚠️ GPU note: two prior pods hung in provisioning; the wave first ran on a PRO 6000 Workstation
+(27.5 s/step, the slow card — my error, [[train-on-powerful-gpu]] had the measurement) and was cut
+over to the 5090 (~12 s/step for ViT+LLM training).
+
+### The four R2 rungs — single-variable vs rung 06 (0.5667), pre-registered before any number
+
+| rung | the one variable | what it attacks | status |
+|---|---|---|---|
+| **13** `13-wise-ft` | interpolate weights base↔rung06 (no training) | recover `number` erased by training | 🔴 **DONE — NEGATIVE** |
+| **15** `15-count-target` | `number` target `"3"` → `{"label":…,"counts":3}` | counting collapse | 🔄 trained (100%), evaluating |
+| **14** `14-appearance-aug` | colour/WB augmentation DURING LoRA | the OOD half | ⏳ next |
+| **16** `16-generator-probe` | 32B answers with NO gold, scored canonically | is the CoA teacher a real perceiver? | ⏳ needs ≥80 GB — deferred |
+
+**rung 13 result (in the ledger):** all three α NO-WIN — α=0.50→0.5016, 0.70→0.5530, 0.85→0.5645
+(vs 0.5667). `number` margin never rises strictly in BOTH distributions and no paired video-clustered
+CI excludes 0. Interpolation does not buy back counting for free. Faithful negative, zero training GPU.
+
+### 🔴 The two falsified premises (the session's real product)
+
+1. **CoA-format SFT is a published wash — [[coa-sft-published-null]].** exp 09 asserted "there is NO
+   `SFT+CoA, no-RL` row in the source." **It exists**, in Chain-of-Adaptation (arXiv:2603.20116,
+   Qwen3-VL-8B, our exact scaffold, verified in the PDF): scaffold-SFT-without-RL scores **62.0 vs
+   bare-gold SFT 65.7** on EndoVis2018 — a wash that *loses*; **RLVR-with-no-tags already beats SFT
+   (67.4)**; the +18 is RLVR's. The false premise came from `Bloque-A-Modelo.md`, an untracked local
+   summary nobody could audit. ⇒ CoA is **re-scoped, not cancelled**: it is a cold start for a later
+   **RLVR** rung (the only thing with +18 on our backbone). Rodrigo reserved that decision.
+2. **rung 12's image-processing screen measured the wrong thing — [[inference-only-input-tests-biased]]**
+   + [[pooled-screening-manufactures-winners]]. It ranked descriptor separability, which Awad 2025
+   states does NOT predict downstream gain; and its inference-only test was biased-to-negative by a
+   design Jong 2025 / Medeiros 2026 already characterised. The three axes that DO win
+   (train-with-transform, geometry, frame-selection) — we tried one, badly, and two never. rung 14
+   is the honest version of the first.
+
+### Repo integrity fixed this session (numbers that existed only as prose)
+- **rung 12c recovered from the pod volume** — its trained A/B (`+0.021`) was never committed; now
+  reproducible. Corrected a mis-reported delta (OOD +0.0005 → **+0.0040**), verdict unchanged (null).
+- **Ledger de-poisoned** — rung 12's per-arm CSV injected 8 phantom rows, rung 10 appeared 3×; root
+  fix in `frame.ledger._tier1_rows_from_csv` (21→19 rows, dedup within file). Five decision notes +
+  six document corrections for Leo's campaign, on branch `task/audit-rung12`.
+- 🔴 **No archived result is bit-reproducible — [[archived-results-not-bit-reproducible]].** ~0.5 %
+  of stored answers change on a GPU swap (measured: rung 13's α=1.0 gate, 199/200 vs the 5090 while
+  the weights were bit-identical). Identity gates must build their control on the same machine.
+
+### Open / next (Rodrigo)
+- **rung 16 (32B blind perception probe)** — the gate for the whole CoA/RLVR line. Needs a ≥80 GB pod.
+  Everything built + pushed; on a big pod: `papermill 16_generator_probe.ipynb -p SMOKE False`.
+- **rung 15 caveat to read with its result:** it replicates Gautam 2025's structured count *format*
+  but NOT the *pointing* (coordinates) that drove the 9.86→0.26 — our dataset has no boxes. Partial
+  replication; if flat, pointing (via the 32B, or an external boxed dataset) is the next step.
+- 🔒 **Rotate the GitHub PAT** — it is in plaintext in the pod's git remote URL.
 
 ## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
 
