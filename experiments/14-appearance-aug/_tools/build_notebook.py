@@ -386,7 +386,10 @@ for name in strats:
     ours = pd.read_csv(cfg.run_dir / f"eval_{name}" / "results.csv")[
         ["qID", "correctness", "answer_format"]].rename(columns={"correctness": "correct_b"})
     j = ref.merge(ours, on="qID", how="inner")
-    assert len(j) == len(ref), f"{name}: arms not scored on the same questions ({len(j)} vs {len(ref)})"
+    # SMOKE evaluates a subset, so the control legitimately has rows the arm does not.
+    # Strict either way: nothing the arm scored may be missing from the join.
+    _need = len(ours) if SMOKE else len(ref)
+    assert len(j) == _need, f"{name}: arms not scored on the same questions ({len(j)} vs {_need})"
     j["dist"] = j["qID"].astype(str).str.split("__").str[0].map({"heico": "OOD", "lapchole": "ID"})
     for dist in ("ID", "OOD"):
         for fmt in [None, "number", "fo_class"]:

@@ -544,12 +544,20 @@ def compare_predictions(
 def assert_predictions_identical(
     control_path: Path | str, arm_path: Path | str, qids: set[str]
 ) -> dict:
-    """🔴 THE gate. α=1.0 must reproduce rung 06's ``predictions.json`` VERBATIM.
+    """🔴 THE gate. α=1.0 must reproduce the control's answers VERBATIM.
 
     Same weights + greedy decoding ⇒ the same string, question by question. A single
     mismatch means the interpolation, the write, or the load changed the model, and every
     α in the sweep is then measuring something other than θ(α). RAISES; never softened
     into a tolerance (`context/RULES.md` §7).
+
+    ⚠️ ``control_path`` must be a control evaluated on the SAME machine. Measured
+    2026-07-23: against rung 06's *archived* predictions this gate fires at 1/200 while
+    Gate A reports the α=1.0 weights bit-identical — the archive was generated on another
+    GPU, and bf16 reduction order differs across architectures, so a near-tied token
+    flips. That is hardware reproducibility, a strictly stronger claim than the identity
+    this gate exists to check. The notebook produces the control locally and reports the
+    cross-machine drift separately, without raising on it.
     """
     rep = compare_predictions(predictions_map(control_path), predictions_map(arm_path), qids)
     if rep["missing_in_control"] or rep["missing_in_arm"]:

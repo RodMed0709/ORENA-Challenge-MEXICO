@@ -219,8 +219,24 @@ run_baseline(bcfg, qid_filter=PROBE_QIDS)
 print(f"probe eval done in {(time.perf_counter()-t0)/60:.1f} min "
       f"(videos the probe lives in, for reference: {sorted(PROBE_VIDEOS)})")
 
+# 🔴 The control for Gate B is produced HERE, on THIS machine, from rung 06's merged
+# checkpoint — not read from its archived predictions.json. Measured 2026-07-23: the
+# archived answers were generated on a different GPU, and 1/200 of them do not
+# reproduce on this one ('Clip, Specimen, Specimen bag' -> 'Clip, Specimen bag'), because
+# bf16 matmul reduction order differs across architectures and a near-tied token flips.
+# Gate A had already proven the α=1.0 weights bit-identical, so that difference cannot be
+# the interpolation. Comparing across machines would test hardware reproducibility, which
+# is a stronger claim than "my interpolation is the identity" and is not satisfiable.
+cbcfg = BaselineConfig(
+    data_root=cfg.data_root, model_path=cfg.finetuned_path, out_dir=cfg.run_dir,
+    run_name="gate_control_probe", max_pixels=cfg.max_pixels, seed=cfg.seed,
+)
+t0 = time.perf_counter()
+run_baseline(cbcfg, qid_filter=PROBE_QIDS)
+print(f"control probe (merged rung 06, this machine) done in {(time.perf_counter()-t0)/60:.1f} min")
+
 gate_b = I.assert_predictions_identical(
-    cfg.control_eval_dir / "predictions.json",
+    cfg.run_dir / "gate_control_probe" / "predictions.json",
     cfg.run_dir / "gate_alpha1_probe" / "predictions.json",
     PROBE_QIDS,
 )
@@ -228,6 +244,20 @@ assert gate_b["n_compared"] == cfg.probe_n, (
     f"Gate B compared {gate_b['n_compared']} answers, not the frozen {cfg.probe_n} — "
     "the qid_filter did not bind the eval to the probe")
 print(f"OK Gate B: {gate_b['n_equal']}/{gate_b['n_compared']} answers verbatim")
+
+# Reported, never raised: how far this machine drifts from the archived control. It is a
+# property of the hardware, not of this rung, and it bounds how precisely ANY archived
+# result in the ledger can be re-verified on new hardware. Worth knowing before quoting a
+# 4-decimal number from a run nobody can reproduce bit-for-bit.
+drift = I.compare_predictions(
+    I.predictions_map(cfg.control_eval_dir / "predictions.json"),
+    I.predictions_map(cfg.run_dir / "gate_control_probe" / "predictions.json"),
+    PROBE_QIDS,
+)
+print(f"cross-machine drift vs archived rung 06: {drift['n_equal']}/{drift['n_compared']} "
+      f"identical ({100*(1-drift['n_equal']/max(1,drift['n_compared'])):.1f}% differ)")
+if drift["examples"]:
+    print("  example:", drift["examples"][0])
 """)
 
 code(r"""
