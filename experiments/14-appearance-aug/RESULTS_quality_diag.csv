@@ -1,0 +1,4 @@
+score,delta,ci_low,ci_high,n_videos,n_questions,excludes_zero,pooled_r_CONFOUNDED,n_pooled
+blur_lapvar,,,,0,0,False,,0
+specular_frac,,,,0,0,False,,0
+luminance,,,,0,0,False,,0
