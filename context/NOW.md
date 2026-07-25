@@ -2,7 +2,44 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-20**.
+> Last updated: **2026-07-25**.
+
+## 🟢 2026-07-25 — the first submission is UPLOADING, and the team's two rungs are read.
+
+**Submission 01 is going up** ([[submission-01-rung06]]): algorithm `Qwen3VL-8B-FT-ViT-LLM-v1`,
+the merged rung-06 checkpoint (ep2 / step 1720), 17 GB tarball, offline, built from the official
+template. **The leaderboard score is the distance-to-baselines number the whole campaign has
+lacked** — it decides whether levers of the +0.003 size are worth a 7.5 h run at all.
+
+🔴 **It nearly shipped broken.** The platform's algorithm interface declares `batch-frames` as a
+**ZIP at `/input/batch-frames.zip`**, while the organizers' own template documents
+**`/input/frames/<qID>.png`** and ships a plain-directory fixture. Our `inference.py` followed the
+template; had the ZIP arrived, the per-question `except` would have written a complete
+`answer.json` of **empty answers** — a silent zero costing 1 of 10 submissions. The container now
+**accepts both layouts** and **logs the `/input` inventory before loading weights**, so a failure
+names its own cause. Prompt verified **byte-identical** to the scored engine across all paths.
+
+🔴 **The team's rungs 14 and 15 do NOT beat rung 06 — and the ep3 comparison has no control**
+([[epoch-matched-control]]). Rung 14 (appearance-aug) is a faithful **NULL**: every epoch below
+rung 06, pre-registered `margin_OOD` +0.0078 with a video-clustered CI **[−0.0038, +0.0195]**.
+Rung 15 (count-target) ep3 reads **0.5699 vs 0.5667**, but it is **ID-driven** — `margin_OOD`
+**−0.0110**, `number` margin OOD **−0.0053 (below floor)**, its own pre-registered target — and
+**0 of 10** paired cells exclude zero. The structured target parsed perfectly (0.0 % malformed),
+so the **format worked and the counting did not**. ⚠️ **Correction to the 07-24 note:** the
+"rung 15 = 0.5612" reading was **epoch 2 of a still-running eval**, not the rung.
+
+🔴 **The load-bearing gap: rung 06 never evaluated its own ep3** while `eval_loss` was still
+falling (0.3204 → 0.2925 → 0.2782). Its `checkpoint-2580` adapter is on the volume, unmerged and
+unscored — so **both team rungs compare their ep3 against rung 06's ep2**, which is exactly where
+rung 15's only win lives. Closing it is **merge + eval, ~1 h, zero training**, and it settles both
+rungs at once. **Do it before any new training run**, especially before the proposed **14+15
+fusion** — which would combine two nulls, break single-variable attribution, and inherit the same
+missing control. New rule: **RULES §6b — every epoch evaluated, comparisons epoch-matched.**
+
+⚠️ **And the thing none of our tooling can currently answer: no run has EVER been repeated with a
+different seed.** We hold **no variance estimate**, so a +0.003 "effect" is formally
+indistinguishable from noise. This is the open question legokna raised for the next phase — the
+levers may be mis-aimed rather than the training wrong.
 
 ## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
 
@@ -52,7 +89,20 @@ already been measured?"* over four sources. **Read it before proposing an experi
 because this session re-derived **four** pieces of already-committed work.
 
 ## Live fronts
-- **Leo (legokna)** → **rung 12 image processing: OPEN ON PURPOSE.** Branch A (unsharp ×3 at inference, on the fine-tuned model) is a **faithful NEGATIVE and monotonic in dose** — −0.056 ID / −0.058 OOD, both significant; the identity gate passed 50/50 byte-identical. 🔴 **The method correction it produced is the important part: any inference-only test of an INPUT intervention is biased toward the negative** on a model fine-tuned without it. That re-scopes branch A itself and, retroactively, rung 11 — it does **not** touch the output family (voting/calibration/enumeration), which died with no mismatch at all. **The rung stays open because branch B decides it** — the same two arms on the **ZERO-SHOT** model (~52 min of 5090, all code exists, only `model_path` changes), far less locked to our frames' appearance. ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**): read it for DIRECTION, never magnitude. 🔴 **But branch B cannot be the fair test either — it is still inference.** The honest test of the whole input-side family is to **TRAIN with the transform**, which is why **idea 2 (proportional subsampled-training harness, `local/hallazgos/ideas-mejora.md` §2) is escalated from convenience to ENABLER**: it takes a run from **7.5 h to ~1.5 h**, costs only CPU hours, and unblocks the input family and the re-scoped rung 11 alike. Subsample **questions within ALL videos** — dropping videos would destroy the effective n of 38. Its known limit: the LR optimum shifts with size, so it serves **relative** comparisons, not absolute values.
+- **Leo (legokna)** → **submission 01 uploading** ([[submission-01-rung06]]); next, the **CoA rungs
+  delegated to us** (`experiments/09-coa-sft`, on the pod volume, not yet in this tree). Then the
+  question raised 07-25: **the levers may be mis-aimed rather than the training wrong** — every
+  model-side result lands inside a noise band we have never measured (no seed repeat, ever), while
+  the ceiling keeps pointing at the DATA (see [[rung12-dominated]] below and
+  [[epoch-matched-control]]).
+- **Team (RodMed)** → rungs 13–16 on branch `task/r2-lit-levers`. **13 WiSE-FT = NO-WIN** (3 α),
+  **14 appearance-aug = NULL**, **15 count-target = no win under the ID-AND-OOD conjunction**,
+  16 generator-probe open. A **14+15 fusion** is under discussion **and is theirs to decide** — our
+  input is [[epoch-matched-control]]: run the missing ep3 control first, and note that combining
+  two nulls breaks single-variable attribution.
+- 📕 **CLOSED — rung 12 image processing.** Kept below as the reasoning record; the input-side
+  family is **dominated by the ViT-unfreeze**, and its living heir (train-time augmentation) was
+  the team's rung 14, now measured NULL. Branch A (unsharp ×3 at inference, on the fine-tuned model) is a **faithful NEGATIVE and monotonic in dose** — −0.056 ID / −0.058 OOD, both significant; the identity gate passed 50/50 byte-identical. 🔴 **The method correction it produced is the important part: any inference-only test of an INPUT intervention is biased toward the negative** on a model fine-tuned without it. That re-scopes branch A itself and, retroactively, rung 11 — it does **not** touch the output family (voting/calibration/enumeration), which died with no mismatch at all. **The rung stays open because branch B decides it** — the same two arms on the **ZERO-SHOT** model (~52 min of 5090, all code exists, only `model_path` changes), far less locked to our frames' appearance. ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**): read it for DIRECTION, never magnitude. 🔴 **But branch B cannot be the fair test either — it is still inference.** The honest test of the whole input-side family is to **TRAIN with the transform**, which is why **idea 2 (proportional subsampled-training harness, `local/hallazgos/ideas-mejora.md` §2) is escalated from convenience to ENABLER**: it takes a run from **7.5 h to ~1.5 h**, costs only CPU hours, and unblocks the input family and the re-scoped rung 11 alike. Subsample **questions within ALL videos** — dropping videos would destroy the effective n of 38. Its known limit: the LR optimum shifts with size, so it serves **relative** comparisons, not absolute values.
   - 🆕 **12d (2026-07-21) — 32 transforms screened for ZERO GPU, and the load-bearing result is methodological** ([[context/12-image-processing/CONTEXT.md]]). `tophat` came **first** pooled (+0.0043) and collapses to **−0.0172 measured inside each video**: its advantage was between videos, because videos containing an object are videos that *look different*. 🔴 **Pooled screening of image transforms manufactures winners** — the same confound as rung 11, and the ≥3-videos gate does not prevent it. `within_video()` is now the standard gate and the primary metric. Against a raw-image separation of 0.2181: **every pipeline ending in an edge operator is strongly negative (−0.018 to −0.054)**, the only two survivors both **preserve** the image (`despec+clahe` +0.0052, `despec+bilateral+unsharp` +0.0031), and `homomorphic` was **mis-calibrated, not dead** (−0.032 → +0.0012 as it softens). **Nothing is validated** — `despec+clahe` is p=0.045 on one comparison out of 13 and fails Bonferroni. Two defects are recorded, not hidden: the negative class is **contaminated** (`scene_inventory` is `partial: true` on **100 %** of frames) and **conditional effects are averaged away**. The screen's record is **four candidates killed, none validated** → it is an instrument of **exclusion, not selection**.
   - ⚠️ **Also measured 12d:** of **8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. The dataset contains **no negative case** — an irreducible ceiling for any perception-side lever, and the reason a human reviewer finds frames with no visible object that the label still asserts.
   - 🆕 **12d bis (2026-07-21) — the "edge family is strongly negative" headline is RETRACTED, and it is a second instrument defect.** `wv_delta` ranks the **best of 18 descriptors** per cell (`idxmax`, `transform_bank.py:483`). Split max from mean: the edge family raises **every** descriptor (`identity` 0.1069 → 0.1245 `bilateral+morphgrad`, 0.1311 `despec+tophat`, 0.1380 `clahe+despec+morphgrad`) while lowering the best one. It does not destroy information — it **redistributes** it onto one axis, and a *maximum* reads compression as loss. Symmetrically the two "winners" barely move the mean (`despec+clahe` 0.1092): they rank first by **preserving** the standout descriptor, not by adding signal. ⇒ the negative stands as a claim about this statistic, **not** about information, and a VLM consumes pixels rather than one descriptor. **Only `homo+sobel` dies on both readings** (mean 0.088 **and** max 0.164, both below identity).
