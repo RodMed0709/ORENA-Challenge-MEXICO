@@ -14,15 +14,24 @@ The committed, git-native results store. `bucket_mean` (unweighted mean over the
 
 `needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is coalesced from its `RESULTS.csv`, and Tier 2/3 are empty for it until a pod pass of `stratified_report` over its saved predictions is registered via `frame.ledger.register_run`.
 
-_5 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
+_14 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 
 | experiment | run | model | bucket_mean | acc_ID | acc_OOD | margin_ID | margin_OOD | n_total | date | needs_backfill |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 15-count-target | 15_count_target_v1__checkpoint-2580 | Qwen3-VL-8B + LoRA r8 ViT+LLM, count target (checkpoint-2580) | 0.5699 | 0.5613 | 0.5968 | 0.2242 | 0.1370 | 6252 |  | false |
 | 06-vit-lora | 06_vit_lora_v1 | Qwen3-VL-8B-Instruct + LoRA r8 ViT+LLM (ckpt-1720) | 0.5667 | 0.5444 | 0.6078 | 0.2074 | 0.1480 | 6252 | 2026-07-18 | false |
+| 13-wise-ft | 13_wise_ft_v1__a0.85 | Qwen3-VL-8B WiSE-FT α=0.85 (base × rung06 ckpt-1720) | 0.5642 | 0.5426 | 0.6040 | 0.2056 | 0.1442 | 6252 | 2026-07-24 | false |
+| 14-appearance-aug | 14_appearance_aug_v1__eval_checkpoint-1720 | Qwen3-VL-8B + LoRA r8 ViT+LLM + wb_afifi5+illum_sev12 (checkpoint-1720) | 0.5642 | 0.5324 | 0.6155 | 0.1954 | 0.1558 | 6252 |  | false |
+| 15-count-target | 15_count_target_v1__checkpoint-1720 | Qwen3-VL-8B + LoRA r8 ViT+LLM, count target (checkpoint-1720) | 0.5612 | 0.5391 | 0.6022 | 0.2020 | 0.1425 | 6252 |  | false |
+| 14-appearance-aug | 14_appearance_aug_v1__eval_checkpoint-2580 | Qwen3-VL-8B + LoRA r8 ViT+LLM + wb_afifi5+illum_sev12 (checkpoint-2580) | 0.5611 | 0.5355 | 0.6055 | 0.1985 | 0.1458 | 6252 |  | false |
+| 13-wise-ft | 13_wise_ft_v1__a0.70 | Qwen3-VL-8B WiSE-FT α=0.70 (base × rung06 ckpt-1720) | 0.5533 | 0.5284 | 0.5952 | 0.1914 | 0.1355 | 6252 | 2026-07-24 | false |
 | 05-bottleneck-audit | a0_real |  | 0.5503 | 0.5244 | 0.5917 |  |  |  |  | true |
 | 02-lora-sft | 02_lora_sft_v1 | Qwen3-VL-8B-Instruct + LoRA r8 (ckpt-1720) | 0.5486 | 0.5209 | 0.5917 | 0.1838 | 0.1320 | 6252 | 2026-07-13 | false |
 | 06-vit-lora | 06_vit_lora_v1__ep1_full | b1_vit_lora epoch 1 (checkpoint-860) | 0.5345 | 0.5062 | 0.5785 | 0.1692 | 0.1188 | 6252 | 2026-07-18 | false |
+| 14-appearance-aug | 14_appearance_aug_v1__eval_checkpoint-860 | Qwen3-VL-8B + LoRA r8 ViT+LLM + wb_afifi5+illum_sev12 (checkpoint-860) | 0.5291 | 0.4947 | 0.5803 | 0.1576 | 0.1205 | 6252 |  | false |
 | 02-lora-sft | 02_lora_sft_v1__ep1_full | b0_baseline epoch 1 (checkpoint-860) | 0.5282 | 0.4876 | 0.5833 | 0.1505 | 0.1235 | 6252 | 2026-07-18 | false |
+| 15-count-target | 15_count_target_v1__checkpoint-860 | Qwen3-VL-8B + LoRA r8 ViT+LLM, count target (checkpoint-860) | 0.5274 | 0.5000 | 0.5707 | 0.1630 | 0.1110 | 6252 |  | false |
+| 13-wise-ft | 13_wise_ft_v1__a0.50 | Qwen3-VL-8B WiSE-FT α=0.50 (base × rung06 ckpt-1720) | 0.5008 | 0.4645 | 0.5507 | 0.1274 | 0.0910 | 6252 | 2026-07-24 | false |
 | 05-bottleneck-audit | a2_shuffled |  | 0.3338 | 0.2780 | 0.3812 |  |  |  |  | true |
 | 05-bottleneck-audit | a1_black |  | 0.2752 | 0.2673 | 0.2685 |  |  |  |  | true |
 | 00-baseline | 0 | Qwen3-VL-8B-Instruct | 0.2557 | 0.2487 | 0.2687 | -0.0884 | -0.1910 | 6252 | 2026-07-10 | false |
@@ -34,3 +43,14 @@ _5 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 | 03-prompt-variants | a4_negexem |  |  | 0.2602 | 0.2640 |  |  |  |  | true |
 | 03-prompt-variants | a5_baredigit |  |  | 0.2136 |  |  |  |  |  | true |
 | 03-prompt-variants | VERDICT |  |  |  |  |  |  |  |  | true |
+| 10-self-consistency | 10_self_consistency_v1 |  |  |  |  |  |  |  | 2026-07-20 | true |
+| 10-self-consistency | 10_self_consistency_v1 |  |  |  |  |  |  |  | 2026-07-20 | true |
+| 10-self-consistency | 10_self_consistency_v1 |  |  |  |  |  |  |  | 2026-07-20 | true |
+| 12-image-processing | arm1_x1 |  |  |  |  |  |  | 920 |  | true |
+| 12-image-processing | arm1_x1 |  |  |  |  |  |  | 1755 |  | true |
+| 12-image-processing | arm2_x3 |  |  |  |  |  |  | 920 |  | true |
+| 12-image-processing | arm2_x3 |  |  |  |  |  |  | 1755 |  | true |
+| 12-image-processing | arm1_x1 |  |  |  |  |  |  | 768 |  | true |
+| 12-image-processing | arm1_x1 |  |  |  |  |  |  | 1326 |  | true |
+| 12-image-processing | arm2_x3 |  |  |  |  |  |  | 768 |  | true |
+| 12-image-processing | arm2_x3 |  |  |  |  |  |  | 1326 |  | true |

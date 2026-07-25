@@ -63,6 +63,14 @@ class LoRAConfig:
     smoke: bool = False
     smoke_limit: int = 16               # QA pairs to export in SMOKE
     smoke_max_steps: int = 2
+    # Stratify the SMOKE sample by answer_format as well as by dataset.
+    # DEFAULT OFF IS BYTE-IDENTICAL — False takes the exact dataset-only path it always has.
+    # 🔴 Why it exists: the dataset-only sample takes the first k rows per dataset, and the
+    # parquet is ordered so those are all one format. Rung 15's first pod SMOKE exported
+    # 16 rows containing ZERO `number` rows — the only rows that rung rewrites — so its
+    # round-trip gate fired on an empty set. A smoke that cannot reach the code under test
+    # is not a smoke. Any rung whose variable is format-specific should set this True.
+    smoke_stratify_format: bool = False
 
     @property
     def run_dir(self) -> Path:
@@ -97,6 +105,45 @@ def _baseline_cfg(cfg: LoRAConfig):
     )
 
 
+def smoke_subsample(train_items: list, cfg: LoRAConfig) -> list:
+    """The SMOKE item subset. ONE implementation, so no rung can drift from it.
+
+    Stratifies across datasets so SMOKE exercises heico AND lapchole (path/fps/parquet),
+    not just the alphabetically-first dataset's first video. With
+    ``cfg.smoke_stratify_format`` it also spreads across ``answer_format`` — see the
+    field's comment for why. Order-preserving and deterministic in both modes; the
+    caller re-sorts by (dataset, video_id, frame_index) afterwards either way.
+
+    ⚠️ Any rung that re-derives rung 02's item order (e.g. rung 15's ``_row_specs``)
+    MUST call this rather than copy it, or its alignment gate is checking a fiction.
+    """
+    from collections import defaultdict
+
+    by_ds: dict[str, list] = defaultdict(list)
+    for it in train_items:
+        by_ds[it.dataset].append(it)
+    k = max(1, cfg.smoke_limit // max(1, len(by_ds)))
+
+    if not getattr(cfg, "smoke_stratify_format", False):
+        return [it for ds in by_ds for it in by_ds[ds][:k]]
+
+    out: list = []
+    for ds in by_ds:
+        by_fmt: dict[str, list] = defaultdict(list)
+        for it in by_ds[ds]:
+            by_fmt[str(it.reference._format)].append(it)
+        per_fmt = max(1, k // max(1, len(by_fmt)))
+        picked = [it for fmt in sorted(by_fmt) for it in by_fmt[fmt][:per_fmt]]
+        # top up from the dataset's head so the count still lands at k
+        for it in by_ds[ds]:
+            if len(picked) >= k:
+                break
+            if it not in picked:
+                picked.append(it)
+        out.extend(picked[:k])
+    return out
+
+
 def _export(cfg: LoRAConfig) -> Path:
     """Materialize the train-split frames + write the ShareGPT JSONL."""
     from frame.data import load_frame_items, FrameProvider, frame_cache_name
@@ -108,14 +155,7 @@ def _export(cfg: LoRAConfig) -> Path:
     vs = sp.load_manifest(cfg.manifest_path)                 # verifies sha256
     train_items = sp.apply_split(items, vs, "train")
     if cfg.smoke:
-        # stratify across datasets so SMOKE exercises heico AND lapchole (path/fps/parquet),
-        # not just the alphabetically-first dataset's first video.
-        from collections import defaultdict
-        by_ds: dict[str, list] = defaultdict(list)
-        for it in train_items:
-            by_ds[it.dataset].append(it)
-        k = max(1, cfg.smoke_limit // max(1, len(by_ds)))
-        train_items = [it for ds in by_ds for it in by_ds[ds][:k]]
+        train_items = smoke_subsample(train_items, cfg)
     # group by video so the decord reader cache holds one reader at a time
     train_items.sort(key=lambda it: (it.dataset, it.video_id, it.frame_index))
     qids = [it.request.qID for it in train_items]
