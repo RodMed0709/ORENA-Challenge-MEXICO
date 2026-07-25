@@ -1,0 +1,14 @@
+# FRAME submission — rung 06 (Qwen3-VL-8B + ViT-LoRA, merged).
+# torch 2.5.1 + torchvision come from the base image (pytorch/pytorch:2.5.1-cuda12.4).
+
+orena-focus>=0.3.4
+
+# Qwen3-VL hard floor: transformers 4.57 is the first release with Qwen3-VL.
+# Stay on the 4.57 line — do NOT jump to 5.x (breaks qwen-vl-utils / the SDK).
+transformers==4.57.*
+qwen-vl-utils>=0.0.14
+accelerate>=1.0.0          # device_map
+
+# Directly imported by inference.py (also transitive via orena-focus).
+numpy>=1.23.0
+pillow>=9.0
