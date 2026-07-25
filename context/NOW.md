@@ -2,10 +2,116 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-18**.
+> Last updated: **2026-07-25**.
+
+## 🟢 2026-07-25 — the first submission is UPLOADING, and the team's two rungs are read.
+
+**Submission 01 is going up** ([[submission-01-rung06]]): algorithm `Qwen3VL-8B-FT-ViT-LLM-v1`,
+the merged rung-06 checkpoint (ep2 / step 1720), 17 GB tarball, offline, built from the official
+template. **The leaderboard score is the distance-to-baselines number the whole campaign has
+lacked** — it decides whether levers of the +0.003 size are worth a 7.5 h run at all.
+
+🔴 **It nearly shipped broken.** The platform's algorithm interface declares `batch-frames` as a
+**ZIP at `/input/batch-frames.zip`**, while the organizers' own template documents
+**`/input/frames/<qID>.png`** and ships a plain-directory fixture. Our `inference.py` followed the
+template; had the ZIP arrived, the per-question `except` would have written a complete
+`answer.json` of **empty answers** — a silent zero costing 1 of 10 submissions. The container now
+**accepts both layouts** and **logs the `/input` inventory before loading weights**, so a failure
+names its own cause. Prompt verified **byte-identical** to the scored engine across all paths.
+
+🔴 **The team's rungs 14 and 15 do NOT beat rung 06 — and the ep3 comparison has no control**
+([[epoch-matched-control]]). Rung 14 (appearance-aug) is a faithful **NULL**: every epoch below
+rung 06, pre-registered `margin_OOD` +0.0078 with a video-clustered CI **[−0.0038, +0.0195]**.
+Rung 15 (count-target) ep3 reads **0.5699 vs 0.5667**, but it is **ID-driven** — `margin_OOD`
+**−0.0110**, `number` margin OOD **−0.0053 (below floor)**, its own pre-registered target — and
+**0 of 10** paired cells exclude zero. The structured target parsed perfectly (0.0 % malformed),
+so the **format worked and the counting did not**. ⚠️ **Correction to the 07-24 note:** the
+"rung 15 = 0.5612" reading was **epoch 2 of a still-running eval**, not the rung.
+
+🔴 **The load-bearing gap: rung 06 never evaluated its own ep3** while `eval_loss` was still
+falling (0.3204 → 0.2925 → 0.2782). Its `checkpoint-2580` adapter is on the volume, unmerged and
+unscored — so **both team rungs compare their ep3 against rung 06's ep2**, which is exactly where
+rung 15's only win lives. Closing it is **merge + eval, ~1 h, zero training**, and it settles both
+rungs at once. **Do it before any new training run**, especially before the proposed **14+15
+fusion** — which would combine two nulls, break single-variable attribution, and inherit the same
+missing control. New rule: **RULES §6b — every epoch evaluated, comparisons epoch-matched.**
+
+⚠️ **And the thing none of our tooling can currently answer: no run has EVER been repeated with a
+different seed.** We hold **no variance estimate**, so a +0.003 "effect" is formally
+indistinguishable from noise. This is the open question legokna raised for the next phase — the
+levers may be mis-aimed rather than the training wrong.
+
+## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
+
+**Self-consistency is measured dead** ([[self-consistency-dead]]). Three pre-registered arms on the
+full 2094 `number`: every one negative, and **k=16 significantly HARMS OOD** (−0.0430, CI excludes
+0). Doubling k doubled the harm — the signature of a mode sitting on the wrong value. On OOD the
+voted answer falls **below the trivial floor**. It died on **quality, not latency** (k=8 ≈ 1.15 s/q
+against a pooled budget that affords it).
+
+🔴 **The generalisation, and it is the important part.** This is the **third independent
+measurement** of one fact, after [[count-calibration-dead]] and [[naming-equals-counting]]:
+**the deficit is UPSTREAM of the output.** Anything that aggregates, re-encodes, re-ranks, votes on
+or remaps what the model has **already emitted** is closed by measurement. Of the six ideas in the
+group that owns the gap, **three are now dead** (voting, calibration, enumerate-then-count).
+**The next lever must attack perception or supervision — not the output.**
+
+⚠️ **Arm C was a trap the ID-AND-OOD conjunction caught**: +0.0284 in ID, within reach of the bar,
+while significantly damaging OOD. **Never relax that conjunction.**
+
+## 🔴 2026-07-19 — the strategy moved. Read these three before anything else.
+
+**A zero-GPU session relocated the target and killed a lever.** Nothing was trained; every number
+below came from artifacts already committed.
+
+1. **The gap is the `number` FORMAT, not the classes** ([[the-gap-is-the-number-format]]).
+   `aggregation × ID` is **80.4 % `number`**; `fo_class` does not appear in the bucket at all.
+   Answering 100 % of `binary` only reaches 0.4492 — **no path to the target avoids lifting
+   `number` 0.327 → ~0.482.** ⚠️ This **re-scopes [[class-imbalance-not-counting]]**: the
+   `sponge`/`gallstone`/`clip` work measures `object_recognition`, the bucket we **lead by
+   +14.9**. It defends the advantage; it does not close the gap.
+2. **Post-hoc count calibration is DEAD** ([[count-calibration-dead]], probe 05c). Three
+   pre-registered rules fail. Mechanism: true values **2, 3 and 4 share the same modal prediction
+   (1)**, so a LUT trades one error for another. Not fixable with more data.
+3. **The 5 s cap is POOLED, not per-question** ([[latency-budget-is-pooled]], read from the
+   official submission template): `120 s setup + B × 5 s`, and the `latency` we emit is not
+   scored. Measured p99 is **0.352 s**. **Self-consistency and higher `max_pixels` are
+   affordable** — both had been closed against a ceiling that does not exist as modelled.
+   🔴 **The risk inverts to COLD START:** imports + weight load + CUDA-graph capture all eat the
+   120 s setup allowance.
+
+Also: **the +77 % secondary-label pool is 89.6 % `fo_class` and 0 % `number`**
+([[secondary-labels-are-fo-class]]) — the top-ranked data lever adds nothing to the format that
+owns the gap, and survives only as a *multiplicity-transfer* hypothesis judged on `number`.
+
+**New:** 🤖 **`context/MEASURED.md`** — generated (`python -m frame.measured`), answers *"has this
+already been measured?"* over four sources. **Read it before proposing an experiment.** It exists
+because this session re-derived **four** pieces of already-committed work.
 
 ## Live fronts
-- **Leo (legokna)** → **rung 06 ViT-LoRA**: **TRAINED + EVALUATED + SCORED. Verdict 🟡 PARTIAL.** Selected `checkpoint-1720` (epoch 2) by acc_OOD — same index rung 02 selected. Canonical **`bucket_mean` 0.5667** (vs 02's 0.5486), `margin_ID` +0.0235 / `margin_OOD` +0.0160, registered in the ledger. The pre-registered target was `dice@2`, NOT bucket_mean: `number` moved (OOD Δ +0.091, CI [+0.009,+0.160]) but `fo_class` did not, and **no cell reached the +0.10 relevance threshold** → PARTIAL, one format only. All four cells had power. **Do NOT read this as "the ViT was not the ceiling"** — `vit_lr` ran at the LLM's 2e-5, so the run cannot separate ceiling from recipe. ⚠️ **But `vit_lr` is no longer the next move:** [[checkpoint-selection-vs-number]] disconfirmed its rationale. Full account: `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`. **On `main` @ `d902018`.**
+- **Leo (legokna)** → **submission 01 uploading** ([[submission-01-rung06]]); next, the **CoA rungs
+  delegated to us** (`experiments/09-coa-sft`, on the pod volume, not yet in this tree). Then the
+  question raised 07-25: **the levers may be mis-aimed rather than the training wrong** — every
+  model-side result lands inside a noise band we have never measured (no seed repeat, ever), while
+  the ceiling keeps pointing at the DATA (see [[rung12-dominated]] below and
+  [[epoch-matched-control]]).
+- **Team (RodMed)** → rungs 13–16 on branch `task/r2-lit-levers`. **13 WiSE-FT = NO-WIN** (3 α),
+  **14 appearance-aug = NULL**, **15 count-target = no win under the ID-AND-OOD conjunction**,
+  16 generator-probe open. A **14+15 fusion** is under discussion **and is theirs to decide** — our
+  input is [[epoch-matched-control]]: run the missing ep3 control first, and note that combining
+  two nulls breaks single-variable attribution.
+- 📕 **CLOSED — rung 12 image processing.** Kept below as the reasoning record; the input-side
+  family is **dominated by the ViT-unfreeze**, and its living heir (train-time augmentation) was
+  the team's rung 14, now measured NULL. Branch A (unsharp ×3 at inference, on the fine-tuned model) is a **faithful NEGATIVE and monotonic in dose** — −0.056 ID / −0.058 OOD, both significant; the identity gate passed 50/50 byte-identical. 🔴 **The method correction it produced is the important part: any inference-only test of an INPUT intervention is biased toward the negative** on a model fine-tuned without it. That re-scopes branch A itself and, retroactively, rung 11 — it does **not** touch the output family (voting/calibration/enumeration), which died with no mismatch at all. **The rung stays open because branch B decides it** — the same two arms on the **ZERO-SHOT** model (~52 min of 5090, all code exists, only `model_path` changes), far less locked to our frames' appearance. ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**): read it for DIRECTION, never magnitude. 🔴 **But branch B cannot be the fair test either — it is still inference.** The honest test of the whole input-side family is to **TRAIN with the transform**, which is why **idea 2 (proportional subsampled-training harness, `local/hallazgos/ideas-mejora.md` §2) is escalated from convenience to ENABLER**: it takes a run from **7.5 h to ~1.5 h**, costs only CPU hours, and unblocks the input family and the re-scoped rung 11 alike. Subsample **questions within ALL videos** — dropping videos would destroy the effective n of 38. Its known limit: the LR optimum shifts with size, so it serves **relative** comparisons, not absolute values.
+  - 🆕 **12d (2026-07-21) — 32 transforms screened for ZERO GPU, and the load-bearing result is methodological** ([[context/12-image-processing/CONTEXT.md]]). `tophat` came **first** pooled (+0.0043) and collapses to **−0.0172 measured inside each video**: its advantage was between videos, because videos containing an object are videos that *look different*. 🔴 **Pooled screening of image transforms manufactures winners** — the same confound as rung 11, and the ≥3-videos gate does not prevent it. `within_video()` is now the standard gate and the primary metric. Against a raw-image separation of 0.2181: **every pipeline ending in an edge operator is strongly negative (−0.018 to −0.054)**, the only two survivors both **preserve** the image (`despec+clahe` +0.0052, `despec+bilateral+unsharp` +0.0031), and `homomorphic` was **mis-calibrated, not dead** (−0.032 → +0.0012 as it softens). **Nothing is validated** — `despec+clahe` is p=0.045 on one comparison out of 13 and fails Bonferroni. Two defects are recorded, not hidden: the negative class is **contaminated** (`scene_inventory` is `partial: true` on **100 %** of frames) and **conditional effects are averaged away**. The screen's record is **four candidates killed, none validated** → it is an instrument of **exclusion, not selection**.
+  - ⚠️ **Also measured 12d:** of **8,969 `fo_class` questions, ZERO have gold `none`** although the prompt offers it. The dataset contains **no negative case** — an irreducible ceiling for any perception-side lever, and the reason a human reviewer finds frames with no visible object that the label still asserts.
+  - 🆕 **12d bis (2026-07-21) — the "edge family is strongly negative" headline is RETRACTED, and it is a second instrument defect.** `wv_delta` ranks the **best of 18 descriptors** per cell (`idxmax`, `transform_bank.py:483`). Split max from mean: the edge family raises **every** descriptor (`identity` 0.1069 → 0.1245 `bilateral+morphgrad`, 0.1311 `despec+tophat`, 0.1380 `clahe+despec+morphgrad`) while lowering the best one. It does not destroy information — it **redistributes** it onto one axis, and a *maximum* reads compression as loss. Symmetrically the two "winners" barely move the mean (`despec+clahe` 0.1092): they rank first by **preserving** the standout descriptor, not by adding signal. ⇒ the negative stands as a claim about this statistic, **not** about information, and a VLM consumes pixels rather than one descriptor. **Only `homo+sobel` dies on both readings** (mean 0.088 **and** max 0.164, both below identity).
+  - **Five transforms selected for the next stage (legokna):** `despec+clahe`, `despec+bilateral+unsharp`, `homo_soft`, `bilateral+morphgrad`, `homo_soft+morphgrad` — the last two are the edge-family rivals the two metrics disagree on, and the pair with `homo_soft` **isolates `morphgrad` as a single variable**. ⚠️ Ranks 4–5 of the screen are the **null anchors**: only 3 of 14 pipelines beat doing nothing. ⚠️ `clahe+despec+morphgrad` leads the *mean* metric (0.1380) and was passed over on the CLAHE vein-noise objection — it is the candidate that reading would pick. ⚠️ `despec+bilateral+unsharp` contains `unsharp`, the only bank member with a real model measurement (branch A **−0.056, monotone**): screen and model **disagree in sign**.
+  - 🔴 **12e (2026-07-21) — the conditional hypothesis is a faithful NEGATIVE, and open point ② is closed.** It was the last cheap explanation for the rung: that `wv_delta` averages away a sign-flipping effect (helps on conspicuous objects, hurts on camouflaged ones), which would have explained branch A's −0.056 too. **First, the literal test is NOT MEASURABLE** — splitting 235 cells by the model's right/wrong verdict leaves **14** clearing the gate (19 using every format), because the model was asked about only **4,486 of the 15,213** indexed frames. That negative is recorded, not worked around. **Measured instead:** inside each video, does a transform's descriptor separate frames the model gets right from those it fails (37/38 videos, 3,977 frames, null band permuting the verdict within video, Bonferroni |z|>3.1)? **On the primary max statistic nothing clears the band and `null_jpeg` ranks FIRST** — the textbook signature of no effect. Two transforms clear on the *mean* statistic (`bilateral+morphgrad` +3.91σ, `homo_soft+morphgrad` +3.28σ) **but collapse when restricted to frames containing the class**, so the parsimonious reading is **class/scene composition, not conspicuity**. ⇒ **None of the five selected transforms has evidence of touching what the model actually gets wrong**, which *lowers* the case for spending pod on them as they stand. Does **not** close 12c, the train-with-transform test, or the contamination defect.
+  - 🟢 **12c-res (2026-07-21) — the aux view can be sent at HALF resolution for free, zero GPU.** Settling this inside the training A/B would have been fatal (a negative composite arm could not be told from a map crippled by downscaling). `bilateral+morphgrad` Δ mean vs identity: full +0.0176, **half +0.0199**, quarter +0.0187, **1/16 −0.0113**. 🔴 **The control is what makes it readable:** the first run also said halving the *raw photograph* costs nothing (+0.0009), and the descriptors are tile statistics ≈ scale-invariant by construction — so the instrument was suspected blind before it was believed, and retested at an extreme dose. It is **not** blind (monotone to 1/16, where the map collapses): **plateau to 1/4, then a cliff**. ⇒ composite token penalty falls ~2× → **~1.25×**; compute the map at native resolution and **then** shrink (`half_post` +0.0199 vs `half_pre` +0.0165); and the map choice is scale-invariant, supporting `bilateral+morphgrad` alone. Also: the `aux_view` flag is in (`engine.py`/`config.py`, default OFF byte-identical, `gate.aux_view_payload_gate` green without a GPU).
+  - **Open, in priority order (2026-07-22):** ① **12c is untested** — the screen *replaces* the image with the edge map; the proposal is image **plus** map, the only configuration in which the edge family can still work. ② **Split by model right/wrong** — does the sign of a transform invert between frames the model already gets right and the ones it fails? Zero GPU, and it would explain the whole rung if appearance help lands where the model already succeeds. ③ **Negative-class contamination** — the most serious defect of the screen, with no known fix short of annotation.
+  - **On `task/image-processing`, pushed, deliberately NOT merged.**
+- **Closed by Leo, on `main`:** rung 06 ViT-LoRA (🟡 PARTIAL, `bucket_mean` 0.5667, `@ 9d2f1c7` — full account in `experiments/06-vit-lora/README.md` + `context/06-vit-lora/CONTEXT.md`; ⚠️ do NOT read it as "the ViT was not the ceiling", `vit_lr` ran at the LLM's 2e-5 so it cannot separate ceiling from recipe, and [[checkpoint-selection-vs-number]] disconfirmed `vit_lr` as a next move) · rung 10 self-consistency (dead, see above) · rung 11 resolution (**dead at the gate, zero GPU** — the "100%/0%" partition was an n=50 artefact, and the axis is irresolvable anyway: 130 videos, 0 with more than one resolution, so resolution is perfectly confounded with video).
 - **Rodrigo** → the MLOps/consistency system (below) + planned **R1 CoA-format SFT** ([[next-move-rodrigo-coa-format]]).
 
 ## Done this session (all on `main`, pushed)
@@ -16,6 +122,7 @@
 - **Margin/floor enrichment of the ledger (DONE, `task/results-margin`)** — the template-aware floor + normalisation are now ONE implementation in `frame.metrics` (`template_of` / `template_floor`); `build_card.py` (rung 08) imports them, so the card's §4b and `results/` cannot drift. `stratified_report(gold=…)` populates `floor`+`margin` on `by_format`/`by_bucket`/`by_bucket_format` and `floor_ID/OOD`, `margin_ID/OOD` at the top level; `assert_floors_vs_eval_set` now verifies floor∈[0,1] and `margin==acc−floor` (it no longer raises on a below-floor run — that is a finding, not malformed input). `results/summary.csv` gains `margin_ID`/`margin_OOD`, `results/detailed.csv` gains `floor`/`margin`, `RESULTS.md` leads with "read margin, not raw accuracy". Rescored 00-baseline + 02-lora offline (predictions local, gold = `ledger.gold_from_frame_parquets("external_data/orena-data")` from the S3 val parquets). This makes reading-rules 10–13 something `results/` SHOWS, not just says.
 
 ## Real numbers (canonical, recomputed offline via S3 — no pod)
+- **Epoch 1 of both arms measured on the full 6252 (T7, 2026-07-19): epoch 2 wins everywhere but `number`-OOD.** rung 02 ep1 0.5282 vs ep2 0.5486 · rung 06 ep1 0.5345 vs ep2 0.5667. `acc_OOD` selection was right; `RULES` §6 CONFIRMED, not qualified.
 - **rung-06 ViT-LoRA: `bucket_mean` 0.5667** (acc_ID 0.5444, acc_OOD 0.6078) — the ladder's best. **Real skill: margin_ID +0.207, margin_OOD +0.148** (+0.024 / +0.016 over rung 02).
   - ⚠️ **The headline is not the verdict.** The pre-registered target was `dice@2` per cell, and it says **PARTIAL** (one format only, nothing at the +0.10 relevance threshold). Reading 0.5486 → 0.5667 as "the ViT was the ceiling" is the misreading this rung exists to prevent.
   - The single variable, measured from the adapters: **+3,849,984 visual params** (21,823,488 → 25,673,472). Language side byte-identical between arms.
@@ -23,17 +130,87 @@
   - **Real skill (MARGIN over the template-aware floor): margin_ID +0.184, margin_OOD +0.132** (floors 0.337 ID / 0.460 OOD). By margin the model adds LESS on OOD even though acc_OOD > acc_ID — matches data card §4b.
 - **00-baseline zero-shot: `bucket_mean` 0.2557** — **below floor everywhere** (margin_ID −0.088, margin_OOD −0.191): a weak zero-shot model legitimately under the trivial constant.
 - rung-05 arms: a0_real 0.550 / a2_shuffled 0.334 / a1_black 0.275 (from committed CSVs).
+- 🔴 **`number` per TEMPLATE (new read, 2026-07-20, from rung 10's `RESULTS_templates.csv`).** The
+  2094 are not one block: **five templates are already maxed and 1947 questions carry the whole
+  fight.** Margin over the template-aware floor:
+
+  | template | n | distinct true | floor | acc | **margin** |
+  |---|---|---|---|---|---|
+  | *How many **Clips**…* | **681** | 12 | 0.239 | 0.266 | **+0.026** |
+  | *…foreign object **instances**…* | **830** | 11 | 0.286 | 0.336 | **+0.051** |
+  | *…foreign object **classes**…* | 436 | 4 | 0.608 | 0.665 | +0.057 |
+  | *How many Sponges…* | 83 | 2 | 0.904 | 0.928 | +0.024 |
+  | Drains / Needles / Bags / Specimens | 64 | 1 | 1.000 | ~0.99 | 0 (degenerate) |
+
+  **`Clips` is the single largest hole in the exam**: 681 questions, 12 distinct true values, and
+  the model beats "always answer the mode" by **+2.6 pts**. Read with rung 05 (black image returns
+  the `number` floor to 16 digits) the diagnosis is: **we are a good object RECOGNISER that does not
+  INDIVIDUATE instances** — and the exam weights individuation at 50 %.
 
 ## Key findings baked in (from the data card, rung 08)
+- 🔴 **We have never read `secondary_capabilities`** ([[unused-metadata]], 2026-07-19). 89.8% of train questions carry them, and **aggregation appears as a SECONDARY label on 4,238 more train questions (+77%)** — the supervision pool for the bucket we need to lift is **9,762, not 5,524**, at zero annotation cost. Ranking stays primary-only, so this changes what we can TRAIN on, not what we are SCORED on. Also unused: `generation` (automatic 78% / anchor 15% / manual 6.4%, same proportions in train and val). ⚠️ **`clinical_relevance` is all-False in BOTH splits** — a second landmine beside `ood`; never filter on either from public data.
+- 🔴 **`aggregation` IS the gap, and it is not a ceiling** ([[aggregation-is-the-gap]], 2026-07-19). First external reference (public leaderboard, a **participant** not a baseline): a **Qwen3.5-4B scores 0.5438 on `aggregation×ID` vs our 0.4188** — 12.5 pts ahead on the bucket worth 50% of the exam — while we lead `object_recognition` by +14.9. The split direction argues against a dataset artifact. **Matching their aggregation alone puts us at 59.1%.** Also: the leaderboard's `pre_evaluation_score` is the mean of **populated** buckets and **every OOD bucket is `null`** — the vara is currently ID-only.
+- 🔴 **The class set is OPEN and bigger than our data** ([[open-class-vocabulary]], 2026-07-19). `overview.md:17` says "such as … **and similar objects**"; the organizers' predefined list is **10 classes**, of which **`mesh` and `foreign object` have ZERO examples in train AND val**, and `silicone loop` exists only in train. **Our 8 classes are an artefact of our batch, never a definition of the task — do not optimise the training class mix against val frequencies.** Separately: `overview.md:125` says questions carry a class list, but **70% of ours carry none** → possible train/test regime mismatch, and an argument for open-vocabulary output (FICHAS lever #2, HIGH, untried).
+- 🔴 **The FO failure is per-CLASS, not per-count** ([[class-imbalance-not-counting]], 2026-07-19). `gallstone` recall **0.000** in both arms (14 training examples); `needle` 0.511; `sponge` 0.633 **with 558 examples**. Training carries a **phantom class** — `silicone loop`, 435 train examples, **zero in val** — emitted ~27 times as guaranteed false positives. `clip` precision 0.619 (212 of 327 FPs). **68% of omissions are on classes with >400 examples**, so data rebalancing has a low ceiling; the prize is `sponge` perception. Also: **the ViT LoRA raised `needle` recall +17.8 pts** — `bucket_mean` averaged that away.
 - **`acc_OOD > acc_ID` is an ARTIFACT** — the OOD floor is ~12 pts higher; read MARGIN over the template-aware floor. By margin the model adds *less* on OOD.
 - **`acc_number` is not interpretable** (8 templates, 4 degenerate) — use the hierarchical estimate.
 - **Effective n ≈ 38 videos**, not 6252. `procedure_type`/`generation` reach the model but `procedure_type` as a model lever risks OOD (unseen procedures break it) → analysis-only stratifier.
 
 ## In progress
-- _(nothing open on the results/margin front — see Done.)_
+- 🔶 **Rung 12 — image processing. OPEN. Branch A closed NEGATIVE; branch B is what decides it.**
+  Branch `task/image-processing`, **not merged**. `experiments/12-image-processing/README.md`.
+  - **A (fine-tuned base, rung 06 ckpt-1720):** unsharp at ×1 and ×3, inference only, measured on
+    `fo_class`. **No arm rises; ×3 harms significantly in ID AND OOD** (−0.0558 [−0.0949,−0.0176] ·
+    −0.0582 [−0.0887,−0.0277]) and the damage is **monotonic in dose**. Identity gate 50/50 byte for
+    byte; control reused from rung 06 and gated to its canonical `fo_class`.
+  - 🔴 **The generalisable part — appearance rarity is real and now quantified.** Rung 05 warned a
+    black frame degrades *"by rarity, not only by absence of information"*; this is the first clean
+    dose-response of it. ⚠️ **Therefore branch A does NOT show enhancement fails to help
+    perception** — it cannot separate that from the fine-tune penalising an unfamiliar appearance.
+  - 🔴 **Method consequence that reaches back:** **any inference-only test of an INPUT-side
+    intervention is biased toward negative** on a model fine-tuned without it. That applies to
+    **rung 11** too. It does **NOT** apply to the output-side family (voting, calibration,
+    enumerate-then-count), which died with no train/test mismatch. ⇒ **The honest test of the
+    input-side family is to TRAIN with the transform**, which raises the value of a cheap
+    subsampled-training harness from convenience to enabler.
+  - **B (next): the same arms on the ZERO-SHOT model**, far less locked to our frames' appearance.
+    ⚠️ Poor instrument (`bucket_mean` 0.2557, **below floor everywhere**) — read it for direction,
+    never magnitude.
+  - **Tooling built and reusable:** `_models/build_frame_index.py` — one entry per cached frame with
+    its questions, their results in three runs, and photometric statistics. It killed two candidates
+    (global white-boost, CLAHE) for **zero GPU** before any arm ran.
+- **Rung 10 — self-consistency: CLOSED, FAITHFUL NEGATIVE. Merged to `main` @ `e520dcf`.**
+  `experiments/10-self-consistency/` + `context/10-self-consistency/CONTEXT.md`.
+  - ✅ **The bit-identity gate PASSED** — `n_samples = 1` reproduces rung 06's `predictions.json`
+    **50/50 byte-for-byte across four independent model loads** on the GPU class that produced the
+    reference. The shared-code change in `src/frame/{engine,config,parsing}.py` is verified
+    flag-off-identical, so the A/B was single-variable and the branch was safe to merge.
+  - `src/frame/metrics.py` gained **`paired_delta_ci`** — an A/B on the same questions needs the
+    bootstrap of the paired DIFFERENCE; two independent CIs discard the pairing and read far too wide.
 
 ## Pending / blocked
-- **rung-06 follow-up: evaluate `checkpoint-860` (epoch 1) on the full 6252** (Leo) — **~24 min of GPU**, weights already merged on the volume. [[checkpoint-selection-vs-number]] found that `number` is best at epoch 1 in BOTH arms while acc_OOD selection took epoch 2; this checks whether we already own a better checkpoint. **The 7.5 h `vit_lr` re-run is NO LONGER the next step** — its rationale (the ViT LR degrades `number`) is disconfirmed: the decay happens with the ViT frozen too.
+- **Rung 06's successor: rung 10 ran and returned a faithful negative.** The two candidates cleared
+  on 07-18 (`vit_lr`, epoch-1 checkpoint) stay dead.
+- 🔴 **Rung 11 — the resolution axis (6b) is CLOSED too, at the gate, for zero GPU**
+  ([[resolution-is-not-the-gap]]). The "100 %/0 % partition" was an artefact of a non-random n=50:
+  over the full 15,213-frame cache `lapchole` (ID) has **six** resolutions and its minimum (230k px)
+  is **below** `heico`'s uniform 518k. **"OOD gets 56 % of ID's visual tokens" is wrong** — ~66 % by
+  mean, inverted in the tails. And **130/130 videos have exactly one resolution**, so resolution is
+  **perfectly confounded with video identity** and this dataset cannot answer the question at all.
+  Accuracy across resolution cells is non-monotonic. **6b, 11b and 11c die unrun.**
+- **Next lever: UNDECIDED, and the constraint has tightened.** It must act upstream of the output
+  (rung 10) — and rung 11 plus rung 05 (`number` returns its floor **to 16 digits** on a black
+  image) together argue that levers acting on the *image itself* have little to act on for the
+  format that owns the gap. ⚠️ **Phase 0 (offline Docker + first leaderboard submission) is still
+  open, and every lever is being judged against a score we have never confirmed transfers to the
+  organizers' hardware, engine and batching.**
+- **Superseded note — the old text of this bullet said:** "Next experiment for rung 06: UNDECIDED. Two candidates were cleared out of the way today, both cheaply: the 7.5 h `vit_lr` re-run (rationale disconfirmed — `number` decays with the ViT frozen too) and the epoch-1 checkpoint switch (**T7 measured it: epoch 2 is better in both arms, we did not own a better checkpoint**). **The two roadmaps are now reconciled in THE_MAP §"What comes next"** — they disagreed for three days and nobody could see it. Its read: **measuring p99 on a real L40S is the only step BOTH documents demand** (Bloque-A makes it a hard gate on the whole capacity branch; no question has ever run on the target hardware). The rank probe is single-sourced. 🔴 **Constrained decoding is measured dead** — `number` is 100% bare integers in all three rungs including zero-shot. See [[checkpoint-selection-vs-number]] **including its retraction**."
+  - ✅ **What still holds:** both dead candidates stay dead; constrained decoding stays measured dead.
+  - 🔴 **What changed 07-19:** *"measuring p99 on a real L40S is the only step BOTH documents
+    demand"* was answered from the **official template instead** — the budget is POOLED, and our
+    measured p99 is 0.352 s ([[latency-budget-is-pooled]]). L40S confirmation is now a
+    verification, **not a gate**. THE_MAP's capacity branch and its resolution branch were both
+    costed against a per-question ceiling that does not exist as modelled; **both need re-costing.**
 - **05-bottleneck-audit + 03-prompt-variants rescore** — their predictions are NOT on the volume (only notebook/logs) → stay `needs_backfill`.
 - **Phase 0** (offline Docker + first leaderboard submission) — still open. ⚠️ **Jul 15 was the pre-eval OPENING, not a deadline** — the real dates are **Sep 1** (pre-eval closes) and **Sep 8** (final submission). This line used to read "was due Jul 15", which made an open task look overdue.
 

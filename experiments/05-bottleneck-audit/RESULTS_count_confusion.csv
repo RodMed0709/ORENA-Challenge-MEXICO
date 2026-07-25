@@ -1,0 +1,2 @@
+oracle_gain_weighted,rule1_oracle_ge_0.05,transfer_gain_weighted,rule2_transfer_gt_0,rule3_argmax_injective_on_dominant,n,calibration_survives
+0.0263,False,-0.0164,False,False,2094,False

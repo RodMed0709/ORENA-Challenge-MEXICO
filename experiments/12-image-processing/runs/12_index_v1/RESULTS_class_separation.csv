@@ -1,0 +1,9 @@
+fo_class,dataset,status,n_frames,luminance_median,contrast_median,saturation_median,dark_frac_median,blown_frac_median,specular_frac_median,white_frac_median,edge_density_median
+Sponge,heico,present,1798,0.3565,0.2899,0.3935,0.3356,0.0371,0.0086,0.0064,221.785
+Sponge,heico,absent,3374,0.3377,0.2969,0.3662,0.3558,0.0365,0.0101,0.0079,160.0
+Sponge,lapchole,present,670,0.4018,0.2032,0.4017,0.0597,0.0136,0.008,0.0235,126.43
+Sponge,lapchole,absent,2286,0.407,0.2271,0.3517,0.1482,0.0209,0.0109,0.0348,86.905
+Clip,heico,present,2651,0.3464,0.2905,0.4036,0.3405,0.0397,0.0103,0.0081,204.09
+Clip,heico,absent,3115,0.3438,0.297,0.3674,0.3543,0.0345,0.0086,0.0069,166.06
+Clip,lapchole,present,2306,0.4037,0.2272,0.3891,0.1376,0.0222,0.0118,0.0286,133.555
+Clip,lapchole,absent,1575,0.4076,0.2195,0.3415,0.1224,0.0173,0.0092,0.0331,63.93

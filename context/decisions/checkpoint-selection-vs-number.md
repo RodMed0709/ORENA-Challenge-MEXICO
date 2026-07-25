@@ -1,12 +1,23 @@
-# Finding: training ERASES `number`, and acc_OOD selection picks the checkpoint that erased more
+---
+question: Does acc_OOD checkpoint selection choose against `number`?
+verdict: NO — on the full 6252 epoch 2 wins; RULES §6 is CONFIRMED, not qualified
+status: MEASURED
+date: 2026-07-18
+measured_in: experiments/06-vit-lora/06b_epoch1_eval.ipynb
+withdrawn: the selection claim — it was measured on the OOD slice only
+---
+# Finding: training erodes `number` on OOD — in BOTH arms, so it is not the ViT
 
-- **Status:** MEASURED (zero GPU, from artifacts we already had) · 2026-07-18
+*(Original title claimed acc_OOD selection picks the worse checkpoint. **Retracted** — see bottom.)*
+
+- **Status:** ⚠️ **PARTIALLY RETRACTED 2026-07-19** — the core measurement stands, the
+  selection claim does NOT. See "Retraction" at the bottom **before** citing this file.
+- **Status (original):** MEASURED (zero GPU, from artifacts we already had) · 2026-07-18
 - **Applies when:** choosing a checkpoint, choosing how many epochs to train, or reading
   `acc_OOD` as if it tracked the thing we are trying to fix.
-- ⚠️ **This is a measurement that QUALIFIES `context/RULES.md` §6** ("checkpoint selection
-  by acc_OOD, per-epoch"). It does not overturn it — §6 exists for a real reason (OOD is
-  ~50% of the score). It shows §6 has a cost nobody had priced. **Rule change, if any, is
-  Rodrigo's call; this file is the measurement his process asks for first.**
+- ⚠️ **The claim that this QUALIFIES `context/RULES.md` §6 is RETRACTED.** Measured on the
+  full 6252 (T7, 2026-07-19), §6 held up: acc_OOD selection picked the better checkpoint
+  on every headline metric. **§6 needs no change. Do not cite this file against it.**
 
 ## Question
 Rung 06's `number` came out worse than rung 02's, and the hypothesis on the table was
@@ -50,8 +61,10 @@ degradation.)
    actively removes what little skill is there. The bucket THE_MAP set as the target is
    being erased by the process meant to improve it.
 
-2. **`acc_OOD` selection systematically picks against `number`.** In BOTH arms the best
-   checkpoint for `number` is epoch 1, and both selected epoch 2:
+2. ~~**`acc_OOD` selection systematically picks against `number`.**~~ 🔴 **RETRACTED — see
+   bottom.** Measured on OOD only; on the full 6252 epoch 2 wins. Kept as written so the
+   error is legible. In BOTH arms the best checkpoint for `number` **on the OOD slice** is
+   epoch 1, and both selected epoch 2:
 
    ```
    rung 02   acc_OOD:  0.5833   0.5917 <- selected   0.5833
@@ -68,11 +81,9 @@ degradation.)
    against our own target bucket.
 
 ## Next move (cheapest first)
-1. **Evaluate rung 06's `checkpoint-860` (epoch 1) on the full 6252** — the merged weights
-   are already on volume `gf78k60nlt`, so this is **~24 min of GPU** (measured: full 6252
-   eval = 21m34s inference + 2m54s judge on a 5090), not a training run. It answers
-   whether epoch 1 is the better *model* overall, in which case we already own a better
-   checkpoint and never trained for it.
+1. ✅ **DONE (T7, 2026-07-19)** — evaluated epoch 1 of BOTH arms on the full 6252
+   (50m51s on a 5090, `06b_epoch1_eval.ipynb`). **Answer: no, epoch 2 is better.** See the
+   retraction at the bottom.
 2. Only then revisit epochs/selection. Any change to the selection criterion is a second
    variable against rung 02 and must be run as its own single-variable comparison.
 3. `vit_lr` drops down the queue. It was never supported by literature (VP-LoRA reports
@@ -83,4 +94,38 @@ degradation.)
 - `runs/{02_lora_sft_v1,06_vit_lora_v1}/sel/ood_checkpoint-*/results.csv` — per-epoch evals.
 - Floor + margin via `frame.metrics.template_floor` (RULES §1); gold coverage asserted.
 - Related: [[vit-lora-partial]] (the rung this came out of), [[eval-canonical]].
-- Qualifies: `context/RULES.md` §6.
+- ~~Qualifies~~ **CONFIRMS** `context/RULES.md` §6 — see the retraction.
+- T7 (the run that retracted it): `experiments/06-vit-lora/06b_epoch1_eval.ipynb`, `RESULTS_epoch1.csv`.
+
+
+---
+
+## ⚠️ Retraction (2026-07-19) — the selection claim was read off an OOD-only slice
+
+T7 (`06b_epoch1_eval.ipynb`) evaluated epoch 1 of BOTH arms on the **full 6252**. The
+result contradicts this file's second finding:
+
+| | `bucket_mean` | `margin_ID` | `margin_OOD` | `number` ID | `number` OOD |
+|---|---|---|---|---|---|
+| rung 02 ep1 | 0.5282 | 0.1505 | 0.1235 | +0.0495 | **+0.0317** |
+| rung 02 **ep2** ✅ | **0.5486** | **0.1838** | **0.1320** | **+0.0911** | +0.0226 |
+| rung 06 ep1 | 0.5345 | 0.1692 | 0.1188 | +0.0781 | **+0.0151** |
+| rung 06 **ep2** ✅ | **0.5667** | **0.2074** | **0.1480** | **+0.0859** | +0.0128 |
+
+**What survives.** `number`'s margin decays across epochs **on OOD**, in both arms —
+including the arm whose ViT was frozen. The OOD numbers reproduced exactly (+0.0317 /
++0.0226 / +0.0151 / +0.0128). The `vit_lr` hypothesis stays disconfirmed and the 7.5 h
+re-run stays unspent. That was this file's job and it did it.
+
+**What does NOT survive.** "The best checkpoint for `number` is epoch 1 in BOTH arms" and
+"acc_OOD selection picks against `number`". On the full set epoch 2 wins `number` on **ID**
+by more than epoch 1 wins on **OOD** (rung 02: +0.042 vs +0.009; rung 06: +0.008 vs
++0.002), and epoch 2 also wins `bucket_mean`, `margin_ID` and `margin_OOD` in both arms.
+**We did not own a better checkpoint.**
+
+**The error, kept because it is the instructive part.** The per-epoch evidence came from
+`runs/*/sel/`, which exists **only for OOD** — those evals were generated to select by
+acc_OOD and were never run on ID. Reading them as if they described checkpoint quality is
+the exact trap `RULES` §11 and the data card warn about (`acc_OOD` is not the model's
+quality), committed inside a file written to prevent misreadings. **An OOD-only slice
+cannot support a claim about a checkpoint; say which slice a number came from.**

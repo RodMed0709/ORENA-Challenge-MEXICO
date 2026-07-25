@@ -1,0 +1,9 @@
+{
+ "model_run": "experiments/06-vit-lora/runs/06_vit_lora_v1/eval_best/inspect.csv",
+ "n_frames": 3977,
+ "n_videos": 38,
+ "accuracy": 0.5873774201659543,
+ "seed": 20260720,
+ "primary_metric": "sep_max_delta + sep_mean_delta",
+ "note": "the literal right/wrong split of the screen is NOT measurable (14 cells)"
+}

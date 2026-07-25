@@ -1,3 +1,10 @@
+---
+question: Where should the second teammate attack without colliding with rung 06?
+verdict: CoA-format SFT (R1); RL is deferred
+status: ACTIVE_PLAN
+date: 2026-07-17
+measured_in: experiments/09-coa-sft/ (branch task/r1-coa-sft)
+---
 # Decision: Rodrigo owns "CoA-format SFT" (R1); RL is deferred
 
 - **Status:** ACTIVE PLAN · 2026-07-17 · owner: **Rodrigo** · complementary to Leo's rung 06

@@ -1,0 +1,28 @@
+{
+ "n_frames": 15213,
+ "seed": 20260720,
+ "pipelines": [
+  "identity",
+  "null_jpeg",
+  "clahe+despec+sobel",
+  "clahe+despec+morphgrad",
+  "homo+sobel",
+  "homo+morphgrad",
+  "homo_soft",
+  "homo_strong",
+  "homo_soft+morphgrad",
+  "despec+clahe",
+  "despec+tophat",
+  "bilateral+morphgrad",
+  "despec+homo+sobel",
+  "despec+bilateral+unsharp"
+ ],
+ "focus_classes": [
+  "Sponge",
+  "Clip",
+  "Needle",
+  "Specimen bag",
+  "External drain"
+ ],
+ "primary_metric": "wv_delta"
+}

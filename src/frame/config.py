@@ -27,10 +27,41 @@ class BaselineConfig:
     # ── model / generation ───────────────────────────────────────────
     device: str = "cuda"
     max_new_tokens: int = 64
-    # cap visual tokens to protect the 5 s FRAME budget; frames are already
-    # small (~0.5 MP) so this rarely bites, but keeps a hard ceiling.
+    # Hard ceiling on visual tokens. ⚠️ This was justified as "protecting the 5 s
+    # FRAME budget" — that premise is WRONG: the budget is POOLED (120 s setup +
+    # B × 5 s, see decisions/latency-budget-is-pooled.md), and measured p99 is
+    # 0.352 s. The cap is kept as a sane ceiling, NOT as a latency requirement;
+    # raising it is affordable and the OOD split is measured to receive ~56% of
+    # the ID split's visual tokens.
     max_pixels: int = 1280 * 720
     answer_char_cap: int = 300  # OpenEnded/MultipleChoice hard limit in the SDK
+
+    # ── sampling (self-consistency, rung 10) ─────────────────────────
+    # DEFAULTS REPRODUCE GREEDY EXACTLY. n_samples <= 1 takes the same
+    # do_sample=False branch as before, so every prior run stays byte-identical.
+    n_samples: int = 1  # k for self-consistency voting; 1 = greedy, flag OFF
+    temperature: float = 0.0  # only read when n_samples > 1
+    top_p: float = 1.0  # only read when n_samples > 1
+
+    # ── rung 12: image enhancement before the vision encoder ─────────────
+    # DEFAULT OFF IS BYTE-IDENTICAL. `enhance = None` skips the branch entirely
+    # — it does NOT run a zero-amplitude enhancement, which would still resample.
+    enhance: str | None = None  # None | "unsharp" | "specular"
+    enhance_amount: float = 1.0  # only read when enhance is not None
+
+    # ── rung 12c: composite input — the ORIGINAL frame plus a second view ─
+    # DEFAULT OFF IS BYTE-IDENTICAL. `aux_view = None` never builds the second
+    # branch of `_messages`, so an off run sends the identical single-image
+    # payload it always has.
+    # "identity" is the NULL ARM, not a no-op: it pays the cost of a second
+    # image with zero new information, so `map − identity` isolates the map's
+    # contribution from the mere fact of receiving two pictures.
+    # ⚠️ `max_pixels` above is PER IMAGE — a composite arm roughly doubles the
+    # visual tokens. Measure p99 before trusting a composite latency.
+    aux_view: str | None = None  # None (OFF) | "identity" | any transform_bank name
+    aux_view_text: str = (  # identical across arms, so it cancels in their difference
+        "The second image is a processed view of the same frame, provided as an aid."
+    )
 
     # ── evaluation ───────────────────────────────────────────────────
     judge_model: str = "Qwen/Qwen3-4B"  # real HF id (SDK default "Qwen3.5-4B" does not exist)
