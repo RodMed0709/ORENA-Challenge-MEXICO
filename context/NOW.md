@@ -2,7 +2,44 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-25**.
+> Last updated: **2026-07-25 (pm)**.
+
+## 🟢 2026-07-25 (pm) — the whole repo is consolidated onto `main`, and rung 16 → 17
+
+**`main` is now the single source of truth — it carries EVERYTHING** (merge commit `abdcbcf`,
+then `9d663e4`): submission 01 (rung 06), the **CoA line** (rung 09 — `gen_onpod.py`,
+`coa_scaffold_gen.py`), and the full **R2 wave** (experiments 13/14/15/16→17 + result CSVs +
+robustness analysis + the two literature corpora). No more sibling divergence — **everyone
+branches off `main` going forward** (Leo took over the CoA line; Rodrigo owns the rest).
+
+**How it happened.** Two entangled sibling branches existed — `task/r1-coa-sft` (Rodrigo, +12,
+held rung 09 alone) and `task/r2-lit-levers` (mostly Leo, +38, held the wave). Neither contained
+the other, and Leo had meanwhile moved to committing **directly on `main`** (31 commits incl.
+submission 01). Consolidation: FF `main → r1` (brought CoA + all of main), then merged `r2 → main`
+(brought the wave). Three brain conflicts were **union-resolved** (INDEX.md, RULES.md kept both
+sides; NOW.md kept both dated sections newest-first) — **brain polish is still deferred**, this is
+functional-not-pretty. PR #1 auto-marked MERGED.
+
+**Branches after the sweep.** Deleted (local + GitHub): `task/r1-coa-sft`, `task/r2-lit-levers`
+(their work is all in `main`), plus 12 fully-merged stale branches earlier the same day. **Kept,
+untouched:** `task/audit-rung12` (+32, decision pending), `origin/task/image-processing` (+28,
+🔒 do-not-touch per user), `origin/task/enumeration-probe` (+9). Local safety refs `backup/*`
+remain, deletable anytime.
+
+**Rung 16 → 17 renumber.** The CoA generator perception probe (`generator-probe`) moved from rung
+16 to **rung 17** (`experiments/17-generator-probe/`, notebook `17_generator_probe.ipynb`,
+`context/17-generator-probe/`) to **free the 16 slot for the 14/15 continuation work**. Pure
+renumber — folder + context + notebook + every internal label/path. **Agent-audited clean:** no
+dangling refs, NOW.md inbound links repointed, outbound dep `../09-coa-sft/_tools/gen_onpod.py`
+resolves, notebook JSON valid. The ladder now skips 16 (unused), normal for these skip-numbered
+ladders. Rung 17 is still **PRE-REGISTERED, UNRUN** (needs ≥80 GB).
+
+**Correction booked this session:** rung 14 (appearance-aug) is a **statistical** null, NOT
+"flat/did nothing" — its best checkpoint lifts `margin_OOD` **+0.0078** (OOD `fo_class` **+0.017**)
+at an ID cost of −0.0116, a real ID↔OOD robustness trade in the designed direction, just inside
+the noise band (CI [−0.0038, +0.0195] crosses 0). rung 15 lifts `number` **on ID only**
+(`number_margin_ID` +0.117 vs rung 06's ~0), evaporates OOD. Both are directional signals worth
+stacking/dosing, not dead ends — see [[epoch-matched-control]].
 
 ## 🟢 2026-07-25 — the first submission is UPLOADING, and the team's two rungs are read.
 
