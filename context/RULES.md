@@ -35,6 +35,13 @@
 6. **Checkpoint selection by acc_OOD, per-epoch.** Never last-epoch-by-default. Discard any
    checkpoint that wins ID but drops OOD (chole-overfit / OOD collapse). OOD = 50% of score.
 
+6b. **EVERY epoch must be evaluated, and cross-rung comparisons must be EPOCH-MATCHED.**
+   "Selected per-epoch" is not satisfied by scoring a subset: rung 06 never benchmarked its
+   own ep3 while `eval_loss` was still falling, so rungs 14 and 15 both compared *their* ep3
+   against rung 06's **ep2** — and rung 15's only apparent win lives exactly there. An
+   unevaluated epoch is a **missing control**, not a discarded one. Before quoting a delta,
+   check that the control was scored at the same epoch. See [[epoch-matched-control]].
+
 7. **Gates RAISE — never disable one.** A gate that fires is a FINDING, not an obstacle.
    NEVER change an expected value to make a broken number pass; fix the code. (Lesson from
    commit `881d057` — the reverted "fix" that papered over a real 964-row drop.)
