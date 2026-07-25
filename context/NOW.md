@@ -63,7 +63,7 @@ over to the 5090 (~12 s/step for ViT+LLM training).
 | **13** `13-wise-ft` | interpolate weights base↔rung06 (no training) | recover `number` erased by training | 🔴 **DONE — NEGATIVE** |
 | **15** `15-count-target` | `number` target `"3"` → `{"label":…,"counts":3}` | counting collapse | 🔄 trained (100%), evaluating |
 | **14** `14-appearance-aug` | colour/WB augmentation DURING LoRA | the OOD half | ⏳ next |
-| **16** `16-generator-probe` | 32B answers with NO gold, scored canonically | is the CoA teacher a real perceiver? | ⏳ needs ≥80 GB — deferred |
+| **17** `17-generator-probe` | 32B answers with NO gold, scored canonically | is the CoA teacher a real perceiver? | ⏳ needs ≥80 GB — deferred |
 
 **rung 13 result (in the ledger):** all three α NO-WIN — α=0.50→0.5016, 0.70→0.5530, 0.85→0.5645
 (vs 0.5667). `number` margin never rises strictly in BOTH distributions and no paired video-clustered
@@ -96,8 +96,8 @@ CI excludes 0. Interpolation does not buy back counting for free. Faithful negat
   the weights were bit-identical). Identity gates must build their control on the same machine.
 
 ### Open / next (Rodrigo)
-- **rung 16 (32B blind perception probe)** — the gate for the whole CoA/RLVR line. Needs a ≥80 GB pod.
-  Everything built + pushed; on a big pod: `papermill 16_generator_probe.ipynb -p SMOKE False`.
+- **rung 17 (32B blind perception probe)** — the gate for the whole CoA/RLVR line. Needs a ≥80 GB pod.
+  Everything built + pushed; on a big pod: `papermill 17_generator_probe.ipynb -p SMOKE False`.
 - **rung 15 caveat to read with its result:** it replicates Gautam 2025's structured count *format*
   but NOT the *pointing* (coordinates) that drove the 9.86→0.26 — our dataset has no boxes. Partial
   replication; if flat, pointing (via the 32B, or an external boxed dataset) is the next step.
@@ -159,7 +159,7 @@ because this session re-derived **four** pieces of already-committed work.
   [[epoch-matched-control]]).
 - **Team (RodMed)** → rungs 13–16 on branch `task/r2-lit-levers`. **13 WiSE-FT = NO-WIN** (3 α),
   **14 appearance-aug = NULL**, **15 count-target = no win under the ID-AND-OOD conjunction**,
-  16 generator-probe open. A **14+15 fusion** is under discussion **and is theirs to decide** — our
+  17 generator-probe open. A **14+15 fusion** is under discussion **and is theirs to decide** — our
   input is [[epoch-matched-control]]: run the missing ep3 control first, and note that combining
   two nulls breaks single-variable attribution.
 - 📕 **CLOSED — rung 12 image processing.** Kept below as the reasoning record; the input-side

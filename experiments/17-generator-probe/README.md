@@ -1,7 +1,7 @@
-# rung 16 — can the CoA generator actually see?
+# rung 17 — can the CoA generator actually see?
 
 > **Status: PRE-REGISTERED, UNRUN.** Inference only, no training, nothing merged.
-> Pre-registration: `context/16-generator-probe/CONTEXT.md`. Read it before the numbers.
+> Pre-registration: `context/17-generator-probe/CONTEXT.md`. Read it before the numbers.
 
 ## Ladder
 
@@ -10,7 +10,7 @@
 | `../00-baseline/00_zeroshot_qwen3vl.ipynb` | 00 | 0.2557 | our 8B zero-shot — **below floor everywhere** |
 | `../02-lora-sft/02_lora_sft.ipynb` | 02 | 0.5486 | LoRA, LLM only |
 | `../06-vit-lora/06_vit_lora.ipynb` | 06 | 0.5667 | LoRA, ViT+LLM — the ladder's best |
-| `16_generator_probe.ipynb` | **16** | _pending_ | 🚧 Qwen3-VL-32B, zero-shot, **as a perceiver** |
+| `17_generator_probe.ipynb` | **17** | _pending_ | 🚧 Qwen3-VL-32B, zero-shot, **as a perceiver** |
 
 *Headline = `bucket_mean` (`frame.metrics`), read as **MARGIN over the template-aware floor**
 (RULES §10). Floors: 0.337 ID / 0.460 OOD.*
@@ -49,7 +49,7 @@ under-states perception. **Read a negative as decisive, a positive as directiona
 | Path | What |
 |---|---|
 | `_models/probe.py` | engine: GPU-headroom gate, generation (delegates to rung 09), canonical scoring, the coded verdict |
-| `16_generator_probe.ipynb` | the only launcher |
+| `17_generator_probe.ipynb` | the only launcher |
 | `RESULTS.csv` | ledger-shaped row, written when it scores |
 
 Generation and selection are **rung 09's own** (`../09-coa-sft/_tools/gen_onpod.py`, stage

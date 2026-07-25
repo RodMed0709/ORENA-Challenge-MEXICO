@@ -1,4 +1,4 @@
-# CONTEXT — 16 generator perception probe
+# CONTEXT — 17 generator perception probe
 
 > **Status: PRE-REGISTERED, UNRUN.** Everything below is fixed before any number exists.
 > Owner: Rodrigo · branch `task/r2-lit-levers` · zero training, inference only.
