@@ -1,0 +1,15 @@
+template,distribution,n,accuracy,floor,margin,degenerate
+How many different foreign object instances appear in this frame? Please provide a number.,ID,343,0.24489795918367346,0.1749271137026239,0.06997084548104957,False
+How many Clips appear in this frame? Please provide a number.,ID,285,0.23859649122807017,0.1824561403508772,0.05614035087719296,False
+How many different foreign object classes appear in this frame? Please provide a number.,ID,122,0.6229508196721312,0.4672131147540984,0.1557377049180328,False
+How many Sponges appear in this frame? Please provide a number.,ID,12,0.8333333333333334,0.8333333333333334,0.0,False
+How many Specimens appear in this frame? Please provide a number.,ID,5,1.0,1.0,0.0,True
+How many Specimen bags appear in this frame? Please provide a number.,ID,1,1.0,1.0,0.0,True
+How many different foreign object instances appear in this frame? Please provide a number.,OOD,487,0.36960985626283366,0.3675564681724846,0.002053388090349051,False
+How many Clips appear in this frame? Please provide a number.,OOD,396,0.29797979797979796,0.2828282828282828,0.015151515151515138,False
+How many different foreign object classes appear in this frame? Please provide a number.,OOD,314,0.6878980891719745,0.6624203821656051,0.02547770700636942,False
+How many Sponges appear in this frame? Please provide a number.,OOD,71,0.9295774647887324,0.9154929577464789,0.014084507042253502,False
+How many External drains appear in this frame? Please provide a number.,OOD,45,0.9777777777777777,1.0,-0.022222222222222254,True
+How many Needles appear in this frame? Please provide a number.,OOD,9,1.0,1.0,0.0,True
+How many Specimen bags appear in this frame? Please provide a number.,OOD,3,1.0,1.0,0.0,True
+How many Specimens appear in this frame? Please provide a number.,OOD,1,1.0,1.0,0.0,True

@@ -125,8 +125,18 @@ class QwenFrameEngine:
         Signature and behaviour are unchanged: with the default ``n_samples = 1``
         this takes the identical greedy path it always has. Kept as the public
         entry point so every existing consumer is untouched.
+
+        ``cfg.answer_postprocess`` (rung 15) is the ONE hook between generation and
+        the SDK's format verification. DEFAULT OFF IS BYTE-IDENTICAL: ``None`` skips
+        the call entirely. It exists so a rung that trains on a structured target can
+        map the generation back to a bare answer without monkeypatching this class in
+        the eval path — ``focus.evaluation`` marks a format failure INCORRECT, so a
+        post-processor that never runs is indistinguishable from a model that cannot
+        count.
         """
-        return self.predict_samples(image, question)[0]
+        answer = self.predict_samples(image, question)[0]
+        fn = getattr(self._cfg, "answer_postprocess", None)
+        return answer if fn is None else fn(answer, question)
 
     @torch.no_grad()
     def predict_samples(self, image: Image.Image, question: str) -> list[str]:

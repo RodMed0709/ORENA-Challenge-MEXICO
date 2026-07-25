@@ -1,0 +1,290 @@
+{
+  "_meta": {
+    "experiment": "13-wise-ft",
+    "run": "13_wise_ft_v1__a0.70",
+    "model": "Qwen3-VL-8B WiSE-FT \u03b1=0.70 (base \u00d7 rung06 ckpt-1720)",
+    "date": "2026-07-24",
+    "n_total": 6252,
+    "extra": {
+      "alpha": 0.7,
+      "method": "WiSE-FT (Wortsman 2022, arXiv:2109.01903)"
+    }
+  },
+  "bucket_mean": 0.553317189276331,
+  "acc_ID": 0.5284191829484902,
+  "acc_OOD": 0.59525,
+  "acc_overall": 0.5711772232885477,
+  "floor_ID": 0.3370337477797513,
+  "floor_OOD": 0.45975,
+  "margin_ID": 0.1913854351687389,
+  "margin_OOD": 0.13549999999999995,
+  "number_estimate": {
+    "accuracy": 0.37210097208352905,
+    "ci_low": 0.3192735092101269,
+    "ci_high": 0.421478926013539,
+    "n": 2094
+  },
+  "by_bucket": [
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "accuracy": 0.4083769633507853,
+      "n": 955,
+      "floor": 0.3256544502617801,
+      "margin": 0.08272251308900525
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "accuracy": 0.5706666666666667,
+      "n": 1875,
+      "floor": 0.5445333333333333,
+      "margin": 0.026133333333333342
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "accuracy": 0.6172839506172839,
+      "n": 1296,
+      "floor": 0.3449074074074074,
+      "margin": 0.27237654320987653
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "accuracy": 0.6169411764705882,
+      "n": 2125,
+      "floor": 0.38494117647058823,
+      "margin": 0.23199999999999998
+    },
+    {
+      "capability_group": "temporal_grounding",
+      "distribution": "ID",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    }
+  ],
+  "by_bucket_format": [
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "binary",
+      "accuracy": 0.7897727272727273,
+      "n": 176,
+      "floor": 0.6590909090909091,
+      "margin": 0.13068181818181823
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "number",
+      "accuracy": 0.3229166666666667,
+      "n": 768,
+      "floor": 0.24088541666666666,
+      "margin": 0.08203125000000003
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.2727272727272727,
+      "n": 11,
+      "floor": 0.9090909090909091,
+      "margin": -0.6363636363636364
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "binary",
+      "accuracy": 0.7481751824817519,
+      "n": 548,
+      "floor": 0.7262773722627737,
+      "margin": 0.021897810218978186
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "number",
+      "accuracy": 0.497737556561086,
+      "n": 1326,
+      "floor": 0.46907993966817496,
+      "margin": 0.02865761689291102
+    },
+    {
+      "capability_group": "aggregation",
+      "distribution": "OOD",
+      "answer_format": "open_ended",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "fo_class",
+      "accuracy": 0.6065217391304348,
+      "n": 920,
+      "floor": 0.2891304347826087,
+      "margin": 0.31739130434782614
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "multiple_choice",
+      "accuracy": 0.8222222222222222,
+      "n": 90,
+      "floor": 0.36666666666666664,
+      "margin": 0.45555555555555555
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.5874125874125874,
+      "n": 286,
+      "floor": 0.5174825174825175,
+      "margin": 0.0699300699300699
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "fo_class",
+      "accuracy": 0.5931623931623932,
+      "n": 1755,
+      "floor": 0.36182336182336183,
+      "margin": 0.23133903133903133
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "multiple_choice",
+      "accuracy": 0.7589285714285714,
+      "n": 112,
+      "floor": 0.5,
+      "margin": 0.2589285714285714
+    },
+    {
+      "capability_group": "object_recognition",
+      "distribution": "OOD",
+      "answer_format": "open_ended",
+      "accuracy": 0.7170542635658915,
+      "n": 258,
+      "floor": 0.49224806201550386,
+      "margin": 0.22480620155038766
+    },
+    {
+      "capability_group": "temporal_grounding",
+      "distribution": "ID",
+      "answer_format": "open_ended",
+      "accuracy": 0.0,
+      "n": 1,
+      "floor": 1.0,
+      "margin": -1.0
+    }
+  ],
+  "by_format": [
+    {
+      "answer_format": "binary",
+      "distribution": "ID",
+      "accuracy": 0.7897727272727273,
+      "n": 176,
+      "ci_low": 0.6916302910052909,
+      "ci_high": 0.8753163580246913,
+      "floor": 0.6590909090909091,
+      "margin": 0.13068181818181823
+    },
+    {
+      "answer_format": "binary",
+      "distribution": "OOD",
+      "accuracy": 0.7481751824817519,
+      "n": 548,
+      "ci_low": 0.6462083541458542,
+      "ci_high": 0.8071998609942689,
+      "floor": 0.7262773722627737,
+      "margin": 0.021897810218978186
+    },
+    {
+      "answer_format": "fo_class",
+      "distribution": "ID",
+      "accuracy": 0.6065217391304348,
+      "n": 920,
+      "ci_low": 0.5587998596003285,
+      "ci_high": 0.6967966449925816,
+      "floor": 0.2891304347826087,
+      "margin": 0.31739130434782614
+    },
+    {
+      "answer_format": "fo_class",
+      "distribution": "OOD",
+      "accuracy": 0.5931623931623932,
+      "n": 1755,
+      "ci_low": 0.5346991761633014,
+      "ci_high": 0.6971576620497273,
+      "floor": 0.36182336182336183,
+      "margin": 0.23133903133903133
+    },
+    {
+      "answer_format": "multiple_choice",
+      "distribution": "ID",
+      "accuracy": 0.8222222222222222,
+      "n": 90,
+      "ci_low": 0.6706349206349206,
+      "ci_high": 0.9285714285714286,
+      "floor": 0.36666666666666664,
+      "margin": 0.45555555555555555
+    },
+    {
+      "answer_format": "multiple_choice",
+      "distribution": "OOD",
+      "accuracy": 0.7589285714285714,
+      "n": 112,
+      "ci_low": 0.5128372434017594,
+      "ci_high": 0.9418662430759205,
+      "floor": 0.5,
+      "margin": 0.2589285714285714
+    },
+    {
+      "answer_format": "number",
+      "distribution": "ID",
+      "accuracy": 0.3229166666666667,
+      "n": 768,
+      "ci_low": 0.2720075984225692,
+      "ci_high": 0.37211971313984193,
+      "floor": 0.24088541666666666,
+      "margin": 0.08203125000000003
+    },
+    {
+      "answer_format": "number",
+      "distribution": "OOD",
+      "accuracy": 0.497737556561086,
+      "n": 1326,
+      "ci_low": 0.40872101539313294,
+      "ci_high": 0.6210578252359759,
+      "floor": 0.46907993966817496,
+      "margin": 0.02865761689291102
+    },
+    {
+      "answer_format": "open_ended",
+      "distribution": "ID",
+      "accuracy": 0.5738255033557047,
+      "n": 298,
+      "ci_low": 0.537574842145483,
+      "ci_high": 0.6901598094074459,
+      "floor": 0.5335570469798657,
+      "margin": 0.04026845637583898
+    },
+    {
+      "answer_format": "open_ended",
+      "distribution": "OOD",
+      "accuracy": 0.7142857142857143,
+      "n": 259,
+      "ci_low": 0.6301394691330175,
+      "ci_high": 0.8382988962791593,
+      "floor": 0.4942084942084942,
+      "margin": 0.22007722007722008
+    }
+  ]
+}
