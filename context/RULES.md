@@ -35,6 +35,13 @@
 6. **Checkpoint selection by acc_OOD, per-epoch.** Never last-epoch-by-default. Discard any
    checkpoint that wins ID but drops OOD (chole-overfit / OOD collapse). OOD = 50% of score.
 
+6b. **EVERY epoch must be evaluated, and cross-rung comparisons must be EPOCH-MATCHED.**
+   "Selected per-epoch" is not satisfied by scoring a subset: rung 06 never benchmarked its
+   own ep3 while `eval_loss` was still falling, so rungs 14 and 15 both compared *their* ep3
+   against rung 06's **ep2** — and rung 15's only apparent win lives exactly there. An
+   unevaluated epoch is a **missing control**, not a discarded one. Before quoting a delta,
+   check that the control was scored at the same epoch. See [[epoch-matched-control]].
+
 7. **Gates RAISE — never disable one.** A gate that fires is a FINDING, not an obstacle.
    NEVER change an expected value to make a broken number pass; fix the code. (Lesson from
    commit `881d057` — the reverted "fix" that papered over a real 964-row drop.)
@@ -68,6 +75,15 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
     Qwen, documented use); it must only permit **using its outputs to train** our model. Full
     reasoning + retroactive flag (this session leaked annotations to DeepSeek via MCP):
     [[no-external-api-for-challenge-data]].
+## BEFORE proposing an experiment — check `context/MEASURED.md` (BINDING)
+Read **`context/MEASURED.md`** before proposing any measurement, probe or rung. It is
+**generated** (`python -m frame.measured`) from four sources — decision notes, the ladders,
+`RESULTS*.csv`, and the cuts already present in `stratified.json` — so it cannot drift.
+Rationale in [[measured-index]]: four sessions in a row re-derived work that was already
+committed and well written, including a complete probe spec whose run had closed.
+**A row marked ⚠️ has been narrowed or partly withdrawn — read its note, never the row alone.**
+New decision note → it MUST carry frontmatter (`question`/`verdict`/`status`); the gate
+`frame.measured.assert_decisions_indexed` RAISES otherwise, and is never disabled.
 
 ## Cross-tool instruction files — `AGENTS.md` ≡ `CLAUDE.md` (BINDING)
 The repo ships two agent-instruction files with **identical content**: `CLAUDE.md` (auto-loaded by

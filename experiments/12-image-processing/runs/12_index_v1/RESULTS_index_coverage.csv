@@ -1,0 +1,15 @@
+metric,value
+n_frames,15213
+n_questions,20000
+n_scored,6252
+frames_with_scored_q,4486
+frames_with_any_class,9990
+foclass_questions_gold_none,0
+class_Clip,4957
+class_Sponge,2468
+class_External_drain,1264
+class_Specimen,1220
+class_Specimen_bag,1065
+class_Silicone_loop,1025
+class_Needle,648
+class_Gallstone,63

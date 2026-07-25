@@ -1,0 +1,13 @@
+{
+ "n_frames": 15213,
+ "bank": [
+  "identity_eighth",
+  "identity_16th",
+  "bimg_16th_post",
+  "identity",
+  "bimg"
+ ],
+ "question": "how much of the MAP's separability survives downscaling",
+ "seed": 20260720,
+ "note": "NOT rung 11's question \u2014 the original frame is sent untouched"
+}

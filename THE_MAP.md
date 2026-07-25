@@ -238,6 +238,47 @@ buckets) · 100% of `binary` is `aggregation` · **NO SHORTCUT — the model loo
 question. **No evidence for:** "unfreezing the ViT unlocks perception" (must be measured — rung 06; expected
 value dropped) · 32B FP8 latency on the L40S (a research agent fabricated it) · how the 5 s are timed.
 
+### What comes next — the two roadmaps RECONCILED (2026-07-19)
+
+> **Why this section exists.** The Block-A fold (2026-07-16) brought over the *diagnosis*
+> but not the *roadmap*: `Bloque-A`'s A0→A4 step diagram and its pipeline diagram never
+> made it, so for three days two documents disagreed about what to do next and nobody
+> could see it. This reconciles them. Where they conflict, the conflict is named — not
+> silently resolved in favour of one.
+
+| Candidate | In Bloque-A? | In THE_MAP? | Status after rung 06 + T7 |
+|---|---|---|---|
+| **LoRA on the ViT** | A2 → capacity | Phase 3 **#1** | ✅ **RUN — PARTIAL.** Both cheap follow-ups closed: `vit_lr` (rationale disconfirmed) and epoch-1 checkpoint (loses to epoch 2) |
+| **Measure p99 on the REAL L40S** | **A4** + 🚦 **hard gate** on A2's capacity branch | Phase 1 (b), pending | ⬜ **OPEN — the only item BOTH documents demand.** Blocks 30B. Bloque-A also records that the 32B latency figure once cited was **fabricated** by an agent ("NO ENCONTRADO. r1 lo fabricó") |
+| **Rank probe r=8→32** | ❌ **ABSENT** | Phase 3 **#2** | ⬜ Open, but single-sourced. Attacks the "representation ceiling", which THE_MAP itself flags as an **n=1 conclusion** |
+| **Constrained decoding** | **A3**, standalone, "in parallel" | only inside Phase 0 as a serving detail | 🔴 **MEASURED DEAD (2026-07-19).** `number` answers are **100% bare integers in all three rungs, including zero-shot**; `engine.py:88-94` only strips + caps, so the model genuinely emits clean. The FRAME questions carry their own format instruction. **Expected gain ≈ 0** |
+| **Resolution (`max_pixels`)** | A2 → "ahora sí se puede pagar" | **demoted** to co-lever | ⚠️ **The two disagree.** THE_MAP's demotion is the later and better-argued call (untested assumption feeding a frozen encoder; headroom ~4× not 8×) |
+| **Bigger backbone** | A2 → "Qwen3-VL-**32B** FP8" | — | ⚠️ **Superseded by [[qwen-size-ladder]]: 30B-A3B-FP8**, and gated by [[vit-lora-partial]]. Bloque-A's "32B" is stale |
+| **`src/frame/serve` package** | **A4** — "HOY, sin GPU" | ❌ **ABSENT (0 mentions)** | ⬜ Open, no GPU. Lost in the fold |
+| **Data flywheel (error→mint-QA→retrain)** | ❌ **ABSENT (0 mentions)** | Phase 3, its main content | ⬜ Open. Lost in the *other* direction |
+| **Multi-frame** | ❌ absent | Phase 3 | ⚠️ THE_MAP elsewhere calls multi-frame **dead as an inference lever** (they hand us one image); it only affects training data |
+| **YOLO→ROI / visual prompts** | reserve | `[RESERVE]`, gated on LoRA missing the bar | ⬜ Reserve in both. Consistent |
+| **Offline Docker** | A4 — ⛔ template missing | Phase 0 | ⛔ Blocked by the organizers, not by us |
+
+**What the reconciliation actually says.**
+
+1. **`p99` on a real L40S is the only step both documents ask for**, and Bloque-A makes it a
+   **hard gate** on the whole capacity branch. Nothing has ever run on the target hardware —
+   the 0.59 s figure is from an A100, and the one 32B latency number that circulated was
+   fabricated. It is also unpaid Phase-1 debt. **Best-evidenced next move.**
+2. **The rank probe is single-sourced.** It exists to attack a "representation ceiling" that
+   THE_MAP itself labels an n=1 conclusion from one training configuration. Worth running —
+   but it is a weaker claim on the queue than a gate both documents demand.
+3. **A3 is dead and should stop being listed.** It was designed against an assumption
+   (the model rambles) that was never measured and is false.
+4. **Two items were lost in each direction** — `src/frame/serve` (Bloque-A only) and the
+   data flywheel (THE_MAP only). Neither is blocked; both were simply invisible to whoever
+   read the other document.
+
+⚠️ **Still not folded:** Bloque-A's two ASCII diagrams (the product pipeline §4 and the
+A0→A4 step map §5). They are *structure*, not prose, and the fold dropped every code block.
+`local/Bloque-A-Modelo.md` remains the only copy.
+
 ## 0 — Executive roadmap (v3, improved map · added 2026-07-14)
 
 > Canonical, self-contained plan with the strategy-notes improvements folded in. The sections
@@ -293,6 +334,8 @@ value dropped) · 32B FP8 latency on the L40S (a research agent fabricated it) �
   - **But it did NOT move the target this section set for it.** The line above says *"on the SDK's hierarchical estimator `number` sits at 0.3803 … that gap is what the ViT run has to move"*. It went the **wrong way: 0.3803 → 0.3714**, and the `number` margin over the template-aware floor SHRANK on both sides (ID +0.091 → +0.086; **OOD +0.023 → +0.013**). On `number` OOD the model is still not distinguishable from a constant at video level.
   - **The mechanism moved; the scoring did not follow.** `dice@2` rose in all four cells (the model reports more objects when there are 2) — but only `number` OOD's CI excludes zero, **no cell reached the pre-registered +0.10 relevance threshold**, and `number` ID *lost* accuracy at truth=2 (−0.079): it is overshooting 2→3. Pre-registered verdict = **PARTIAL** (one format only, which contradicts the single-defect diagnosis rather than confirming it).
   - 🔴 **This does NOT settle the ceiling question, in either direction.** `vit_lr` ran at the LLM's 2e-5 (ms-swift default falls back to `learning_rate`), so a weak result cannot separate *"the ViT is not the ceiling"* from *"the recipe was wrong for the ViT"* — and a vision tower degraded by too high an LR would look exactly like this (mechanism moves, accuracy drops). **Next: re-run experiment #1 with a lower `vit_lr` before advancing to #2 (rank probe).** Full account: `context/decisions/vit-lora-partial.md`, `experiments/06-vit-lora/README.md`.
+- **T7 (2026-07-19) — the epoch question, closed for ~50 min of GPU.** Epoch 1 of BOTH arms on the full 6252: rung 02 `bucket_mean` 0.5282 (vs ep2 0.5486), rung 06 0.5345 (vs ep2 0.5667). **Epoch 2 wins everywhere except `number`-OOD, where epoch 1's edge is +0.009/+0.002.** So `acc_OOD` selection picked correctly and RULES §6 is CONFIRMED. It also **retracts** the intermediate claim that selection was picking against `number` — that was read off an OOD-only slice (`runs/*/sel/` is generated for OOD selection and never runs on ID). What survives: `number` decays across epochs on OOD in BOTH arms, **including the frozen-ViT one**, so the decay is not a vision-tower effect and the 7.5 h `vit_lr` re-run stays unspent. See `context/decisions/checkpoint-selection-vs-number.md` **with its retraction**.
+- **Phase-3 order now:** #1 (LoRA on the ViT) is run and PARTIAL; two candidate follow-ups were cleared cheaply (`vit_lr`, epoch-1 switch). **#2 rank probe r=8→32 is next**, with A3 (constrained decoding) available in parallel and needing no GPU.
 - **Process fixes:** ✅ `val_dataset` added in rung 06 — the project's **first validation curve** (`eval_loss` 0.320 / 0.293 / 0.278, monotone, no collapse). ⬜ eval every half-epoch. ⬜ early-stop on acc_OOD — deliberately **replaced** in rung 06 by a broken-run guard (aborts only on NaN/inf or first `eval_loss` ≥ first `train_loss`); an early-stop would have made the A/B non-comparable against rung 02's uninterrupted run.
 - **Infra notes:** measured GPU throughput for THIS workload — RTX 5090 (7.5s/step) > RTX 4090 (11.5s) > RTX PRO 6000 (31s, Blackwell kernels immature); pick by measured s/step, not tier. `run.py` hardened for 32GB (frees the 8B before + the judge after eval, or the per-epoch merge OOMs). JupyterLab launcher at `/workspace/start_jupyter.sh` (kernel "ORENA (infer env)").
 

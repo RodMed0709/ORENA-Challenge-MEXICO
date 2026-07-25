@@ -1,0 +1,8 @@
+dataset,width,height,n_frames,n_dataset
+heico,960,540,8604,8604
+lapchole,1280,720,5036,6609
+lapchole,720,576,417,6609
+lapchole,720,480,398,6609
+lapchole,854,480,354,6609
+lapchole,640,360,336,6609
+lapchole,640,480,68,6609
