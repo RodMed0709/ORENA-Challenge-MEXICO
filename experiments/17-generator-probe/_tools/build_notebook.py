@@ -1,4 +1,4 @@
-"""Regenerate 16_generator_probe.ipynb from source strings. Diffable; never runs the rung."""
+"""Regenerate 17_generator_probe.ipynb from source strings. Diffable; never runs the rung."""
 
 import json
 from pathlib import Path
@@ -14,11 +14,11 @@ def code(src: str, tags: list[str] | None = None) -> None:
     CELLS.append(("code", src, tags or []))
 
 
-md(r"""# rung 16 — can the CoA generator actually see?
+md(r"""# rung 17 — can the CoA generator actually see?
 
 Inference only. No training, no checkpoint, nothing merged.
 
-The pre-registration is `context/16-generator-probe/CONTEXT.md` and it is fixed. This
+The pre-registration is `context/17-generator-probe/CONTEXT.md` and it is fixed. This
 notebook produces the number; **it does not decide the verdict** — `probe.verdict` applies the
 rule that was written before the number existed.
 
@@ -26,7 +26,7 @@ rule that was written before the number existed.
 |---|---|---|
 | 00-baseline (our 8B, zero-shot) | 0.2557 | −0.088 / −0.191 — **below floor everywhere** |
 | 06-vit-lora (our fine-tuned 8B) | 0.5667 | +0.207 / +0.148 |
-| **16 — Qwen3-VL-32B as a perceiver** | _this run_ | _this run_ |
+| **17 — Qwen3-VL-32B as a perceiver** | _this run_ | _this run_ |
 """)
 
 code(r"""SMOKE = True      # True -> 8 questions: proves the chain, decides nothing
@@ -95,7 +95,7 @@ print(pd.DataFrame(rep["by_format"])[["answer_format", "n", "accuracy", "floor",
 md(r"""## The pre-registered verdict
 
 Applied by code, from the rule written before the number existed. A human reads it against
-`context/16-generator-probe/CONTEXT.md` — this cell does not get to reinterpret it.""")
+`context/17-generator-probe/CONTEXT.md` — this cell does not get to reinterpret it.""")
 
 code(r"""print(P.verdict(rep))
 print()
@@ -105,7 +105,7 @@ print("   so a weak score UNDER-states perception. Negative = decisive. Positive
 """)
 
 code(r"""if not SMOKE:
-    ledger.register_run(rep, run_dir=cfg.run_dir, experiment="16-generator-probe",
+    ledger.register_run(rep, run_dir=cfg.run_dir, experiment="17-generator-probe",
                         run=cfg.run_name, model=str(cfg.model_id))
     print("registered in the ledger ->", cfg.run_dir / "stratified.json")
 else:
@@ -126,6 +126,6 @@ nb = {
     "nbformat": 4, "nbformat_minor": 5,
 }
 
-out = Path(__file__).resolve().parents[1] / "16_generator_probe.ipynb"
+out = Path(__file__).resolve().parents[1] / "17_generator_probe.ipynb"
 out.write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 print(f"wrote {out} ({len(CELLS)} cells)")

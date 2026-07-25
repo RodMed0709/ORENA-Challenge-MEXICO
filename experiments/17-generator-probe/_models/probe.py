@@ -1,4 +1,4 @@
-"""Rung 16 — can the CoA generator actually see?
+"""Rung 17 — can the CoA generator actually see?
 
 Importable engine. The notebook is the launcher; nothing here is hand-run.
 
@@ -44,8 +44,8 @@ class ProbeConfig:
 
     data_root: Path = Path("/workspace/repo/external_data/orena-data")
     frames_cache: Path = Path("/workspace/frames_cache")
-    exp_dir: Path = Path("/workspace/repo/experiments/16-generator-probe")
-    run_name: str = "16_generator_probe_v1"
+    exp_dir: Path = Path("/workspace/repo/experiments/17-generator-probe")
+    run_name: str = "17_generator_probe_v1"
     datasets: tuple[str, ...] = ("heico", "lapchole")
     base_fps: dict = field(default_factory=lambda: {"heico": 25, "lapchole": 30})
 
@@ -136,7 +136,7 @@ def score_canonically(cfg: ProbeConfig, results_csv: Path, gold) -> dict:
 
 def verdict(rep: dict) -> str:
     """The pre-registered rule, in code so it cannot be reinterpreted after the fact.
-    See context/16-generator-probe/CONTEXT.md."""
+    See context/17-generator-probe/CONTEXT.md."""
     m_id, m_ood = rep.get("margin_ID"), rep.get("margin_OOD")
     if m_id is None or m_ood is None:
         return "INDETERMINATE — a margin is missing; gold coverage is incomplete"
