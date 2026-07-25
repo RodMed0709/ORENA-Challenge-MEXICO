@@ -47,5 +47,14 @@ with the data we have.
 **Sources.** Pod volume `gf78k60nlt`: `repo/experiments/{14-appearance-aug,15-count-target}/`
 — `RESULTS_epochs.csv`, `RESULTS_paired_ci.csv`, `runs/15_count_target_v1/paired_delta.csv`,
 `parse_stats.json`. Control: `experiments/06-vit-lora/RESULTS.csv`, `RESULTS_arms.csv`,
-`RESULTS_epoch1.csv`. Both team `RESULTS.csv` headline files are **empty** — neither rung is
-closed in the ledger.
+`RESULTS_epoch1.csv`.
+
+⚠️ **Correction (2026-07-25).** An earlier version of this note ended "Both team `RESULTS.csv`
+headline files are **empty** — neither rung is closed in the ledger." The first clause was true,
+**the second was false.** Each rung's per-epoch `stratified.json` is versioned, so
+`frame.ledger._discover_stratified` ingests all six runs (3 epochs × 2 rungs) directly as Tier-1
+rows with `needs_backfill=False` — visible in `results/summary.csv`. The empty per-experiment
+`RESULTS.csv` never poisoned anything, because `_tier1_rows_from_csv` is a fallback that skips
+any `(experiment, run)` a `stratified.json` already covers. Both `RESULTS.csv` files have since
+been written from those same canonical artifacts, one row per run per
+`EXPERIMENT_REPO_STRUCTURE_SPEC.md`, with per-epoch detail left in `RESULTS_epochs.csv`.
