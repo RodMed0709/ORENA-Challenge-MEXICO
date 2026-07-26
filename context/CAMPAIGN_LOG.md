@@ -237,7 +237,8 @@ gain is diluted twice:
 | **`max_pixels`** | **does not exist as a lever**: 52 % of frames are 960×540 against a 921,600 px cap — **no frame exceeds it** |
 | Transformations at inference | −0.056, monotone |
 | Transformations, trained | null, and **+0.004** of headline even if real |
-| Synthetic counting data | poor prognosis: it teaches well-annotated visible objects; the real label moves ±0.86 |
+| Synthetic counting data | poor prognosis: it teaches well-annotated visible objects; the real label moves ±0.86. **Confirmed 2026-07-26** — [[synthetic-counting-reconciled]]: rung 15 ran the only half our labels support → null |
+| Point-then-count / v05 target grounding | **that IS rung 15** (`number` target `2` → `{"label","counts"}`): +0.0032 headline, `margin_OOD` −0.0110, `number`-OOD below floor, 0/10 cells exclude zero. The pointing arm needs localization labels the dataset does not have |
 
 ## 16. Open, in priority order
 

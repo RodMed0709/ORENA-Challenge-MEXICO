@@ -66,6 +66,13 @@ the mode floor on a black image, so training a counting circuit where counting i
 trivial may not fire on the hard cases. That tension is the next thing to resolve, and 05c does
 not resolve it.
 
+> ⚠️ **2026-07-26 — read [[synthetic-counting-reconciled]] before quoting the paragraph above.**
+> "Sole remaining lever" is survival **by elimination, not by merit**, and it has been read as
+> promotion at least twice. `CAMPAIGN_LOG.md:240` had already discarded synthetic counting on
+> prognosis (the gold count moves **±0.86** between frames <1 s apart), and rung 15 has since
+> run the only half of it our labels can support — **null** ([[epoch-matched-control]]).
+> The tension flagged in this paragraph was never resolved; it was **inherited**.
+
 ## Sources
 
 - `experiments/05-bottleneck-audit/README.md` §5c · `context/05-bottleneck-audit/CONTEXT.md`
