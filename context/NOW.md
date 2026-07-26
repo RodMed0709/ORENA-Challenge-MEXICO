@@ -4,6 +4,38 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-07-25 (pm)**.
 
+## 🔵 2026-07-26 — CoVT read in full, the scoring frame corrected, and the perceptual branch reopened via SAM 2
+
+**Zero GPU, zero pod, zero cost.** A reading session that ended with two decision notes.
+
+1. **[[covt-reduced-sam-route]] — CoVT as published = NO-GO.** Read end-to-end incl. supplementary.
+   On a Qwen backbone the gain is **Depth +14.0 / Dist +7.0 / Count +1.2**; the advertised
+   **+26.6% BLINK-count is LLaVA-13B vs Aurora**, not Qwen. Blockers: **774.6k-row** general
+   corpus, 17K steps, stages 1–2 not skippable (skipping → BLINK 53.8, *below* base), and a
+   pipeline **no recipe framework expresses** — ms-swift, LLaMA-Factory and Unsloth alike.
+2. 🔴 **The scoring frame was wrong, and it is corrected.** The headline is the **mean of the two
+   ID buckets** → `object_recognition × ID` is **50% of the score**, and `1d`/`1e`
+   spatial_localization live inside it. We *tie* 1st place there (0.4872 vs 0.4888) — a tie is
+   **not a ceiling**. **"The gap is counting" is true about the deficit and false about where
+   headline points are available.** Several sessions have been scoped against the wrong denominator.
+3. **[[synthetic-counting-reconciled]] — a week-old contradiction closed.** `CAMPAIGN_LOG:240`
+   discarded synthetic counting; `count-calibration-dead` called it "the sole remaining lever" —
+   survival **by elimination, not merit**. DISCARDED stands. And the missed fact: **rung 15 already
+   ran the label-supported half of v05 / point-then-count → null.**
+4. **Next front: a bespoke SAM 2 route** (not CoVT). Measured from the parquet: **15,213 frames /
+   20,000 questions**, 78.6% single-question, but **979 frames carry `fo_class` AND `number`** —
+   identity + cardinality on the same pixels, i.e. pseudo-masks checkable against two gold facts
+   **with no clinician**. SAM 2 is *visual*-promptable (text needs a detector in front, licence
+   unverified), does **video with streaming memory** — our data *is* video — and was itself built
+   by a **model-in-the-loop data engine**.
+5. 🎯 **The probe that goes first:** SAM 2 video-mode tracking across the **1,946 consecutive
+   same-video pairs** already in `ERROR_ANATOMY` (6.0% jump ≥3 within ≤0.5 s). Steady track +
+   jumping gold = **annotation noise**. This decomposes the **±0.86** that was declared
+   unmeasurable without clinical adjudication.
+
+🔴 **Blocked:** `external_data/` is parquet only (420 KB) — **no videos, no `frames_cache` in
+local.** The probe needs volume access.
+
 ## 🟢 2026-07-25 (pm) — the whole repo is consolidated onto `main`, and rung 16 → 17
 
 **`main` is now the single source of truth — it carries EVERYTHING** (merge commit `abdcbcf`,
