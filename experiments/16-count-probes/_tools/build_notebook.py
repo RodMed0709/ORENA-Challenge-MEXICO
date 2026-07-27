@@ -346,6 +346,132 @@ for arm in ARMS:
 '''
 
 
+OUT_16B = HERE.parent / "16b_detector_vs_gold.ipynb"
+
+MD_16B = """# 16b — is the gold count something ANY visual system can see in the frame?
+
+**This is the probe that bounds the other two.** Rung 06 ep3 is our best checkpoint and its
+**`number_margin_OOD` is 0.0 — exactly the trivial floor.** Three explanations license
+opposite work: the model cannot count; the model was never taught to; or **the label is not a
+count of frame-visible instances at all**.
+
+The third is not idle. `context/ERROR_ANATOMY.md` records the gold moving **±0.86 between
+frames ≤1 s apart**, "total instances" contradicting the sum of per-class counts on **≥11%** of
+frames, and a **blind human scoring r = −0.17** against the gold. Our own model scores
+**r = +0.43**. If a frozen open-vocabulary detector also fails to correlate, the quantity is not
+recoverable from the pixels — and rung 15's pre-registered annotation-ceiling question is
+answered.
+
+**Instrument.** Frozen **OWLv2** (`google/owlv2-base-patch16-ensemble`, Apache-2.0, on-pod —
+🔒 no challenge frame leaves the machine, per the DUA) over the **681 val `Clips`** questions.
+
+## 🔴 Pre-registered thresholds — fixed before any number is seen
+
+| outcome | verdict |
+|---|---|
+| **r ≥ 0.5 and MAE < 1.0** | the gold IS frame-visible → pointing learnable → proceed to a rung |
+| **r ≈ 0.2–0.5** | ambiguous → ~100 clinician-adjudicated frames before any training spend |
+| **r < 0.2** | not frame-visible → **NO-GO on pointing**, re-aim every `number` lever |
+
+## ⚠️ The confound, and the two mandatory mitigations
+
+A detector failure is also a detector **domain** failure — OWLv2 has never seen laparoscopic
+tissue. That is the trap rung 12 fell into three times. So: (1) a **positive control** query
+(`"a surgical instrument"`) the detector must be able to do — if that collapses too, the
+instrument is blind here and the honest result is **NOT MEASURABLE**, not a NO-GO; and (2) an
+eyeball subset, exported so a human can check whether the detector finds clips a person can see.
+"""
+
+CODE_16B_CONFIG = '''\
+# --- parameters (RAW LITERALS ONLY; papermill injects overrides directly below) --
+SMOKE = True
+SEED  = 0
+
+RUN           = "16b_detector_vs_gold_v1"
+DATA_ROOT     = "/workspace/orena-data"
+DETECTOR_DIR  = "/workspace/models/detectors/owlv2-base"
+TEMPLATE      = r"how many\\s+clips"
+THRESHOLD     = 0.15          # pre-registered; do NOT tune it after seeing r
+N_ITEMS_SMOKE = 24
+'''
+
+CODE_16B_DERIVE = '''\
+# --- derived (MUST live below the parameters cell) -------------------------------
+DATA_ROOT = Path(DATA_ROOT)
+RUN_DIR   = Path.cwd() / "runs" / RUN
+N_ITEMS   = N_ITEMS_SMOKE if SMOKE else None
+RUN_DIR.mkdir(parents=True, exist_ok=True)
+print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| threshold:", THRESHOLD,
+      "| n_items:", N_ITEMS or "ALL")
+'''
+
+CODE_16B_RUN = '''\
+# --- select items, run the frozen detector ---------------------------------------
+from frame.config import BaselineConfig
+from frame.data import load_frame_items
+import len_points as lp                 # reuse the template selector — one definition
+import detector_vs_gold as dvg
+
+items = load_frame_items(BaselineConfig(data_root=DATA_ROOT), splits=("test",))
+sel   = lp.select_number_items(items, template_re=TEMPLATE)
+if N_ITEMS:
+    sel = sel[:N_ITEMS]
+assert sel, f"no items matched {TEMPLATE!r}"
+print("items:", len(sel),
+      "| videos:", len({it.video_id for it, _ in sel}),
+      "| distinct golds:", sorted({g for _, g in sel}))
+
+det = dvg.Owlv2Counter(DETECTOR_DIR); det.load()
+rows = dvg.run(det, sel, threshold=THRESHOLD)
+'''
+
+CODE_16B_REPORT = '''\
+# --- score against the PRE-REGISTERED thresholds ---------------------------------
+import pandas as pd, json
+
+df = pd.DataFrame(rows); df.to_csv(RUN_DIR / "rows.csv", index=False)
+res  = dvg.correlate(rows, "n_clip")
+ctrl = dvg.correlate(rows, "n_control")
+(RUN_DIR / "score.json").write_text(json.dumps({"clip": res, "control": ctrl}, indent=2))
+
+print("=== CLIP vs gold ==="); print(pd.DataFrame(res).T.round(4).to_string())
+print(); print("=== CONTROL (surgical instrument) vs gold — sanity, not a hypothesis ===")
+print(pd.DataFrame(ctrl).T.round(4).to_string())
+print(); print("=== detector mean per gold value (a FLAT line means no signal) ===")
+print(pd.DataFrame(dvg.by_gold_value(rows)).T.to_string())
+
+r   = res["ALL"]["spearman_r"]; mae = res["ALL"].get("mae", float("nan"))
+zr  = res["ALL"].get("det_zero_rate", float("nan"))
+cz  = ctrl["ALL"].get("det_zero_rate", float("nan"))
+print()
+print(dvg.VERDICT)
+print()
+print(f"MEASURED: spearman r = {r:.4f} | MAE = {mae:.4f} | detector-zero rate = {zr:.3f}")
+print(f"reference points already in the repo: blind human r = -0.17 | our model r = +0.43")
+if cz > 0.9:
+    print("🔴 CONTROL COLLAPSED (detector finds no instrument on >90% of frames) -> "
+          "the instrument is blind in this domain. Report NOT MEASURABLE, not NO-GO.")
+elif r >= 0.5 and mae < 1.0:
+    print("VERDICT: gold IS frame-visible -> pointing is learnable")
+elif r < 0.2:
+    print("VERDICT: gold is NOT frame-visible -> NO-GO on pointing; re-aim every number lever")
+else:
+    print("VERDICT: ambiguous -> adjudicate ~100 frames before spending training compute")
+'''
+
+CODE_16B_INSPECT = '''\
+# --- eyeball export so a human can check the detector, not just its correlation ---
+eye = df.sample(min(40, len(df)), random_state=SEED)[
+    ["frame_key", "distribution", "gold", "n_clip", "maxscore_clip", "n_control"]
+]
+eye["frame_path"] = "/workspace/frames_cache/" + eye["frame_key"]
+eye.to_csv(RUN_DIR / "eyeball_40.csv", index=False)
+print(eye.head(15).to_string(index=False))
+print("\\nwrote", RUN_DIR / "eyeball_40.csv",
+      "— open the frames and judge whether the detector missed clips a person can see")
+'''
+
+
 def main() -> None:
     nb = {
         "cells": [
@@ -386,6 +512,23 @@ def main() -> None:
     }
     OUT_16C.write_text(json.dumps(nb16c, indent=1), encoding="utf-8")
     print("wrote", OUT_16C)
+
+    nb16b = {
+        "cells": [
+            cell_md(MD_16B, "t-title-16b"),
+            cell_code(CODE_BOOTSTRAP, "c-bootstrap-16b"),
+            cell_code(CODE_16B_CONFIG, "c-config-16b", tags=["parameters"]),
+            cell_code(CODE_16B_DERIVE, "c-derive-16b"),
+            cell_code(CODE_16B_RUN, "c-run-16b"),
+            cell_code(CODE_16B_REPORT, "c-report-16b"),
+            cell_code(CODE_16B_INSPECT, "c-inspect-16b"),
+        ],
+        "metadata": nb["metadata"],
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    OUT_16B.write_text(json.dumps(nb16b, indent=1), encoding="utf-8")
+    print("wrote", OUT_16B)
 
 
 if __name__ == "__main__":
