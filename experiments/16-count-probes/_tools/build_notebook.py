@@ -67,23 +67,36 @@ print("torch", torch.__version__, "| cuda", torch.cuda.is_available(),
       "|", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
 '''
 
+# 🔴 PARAMETERS CELL — RAW LITERALS ONLY, no derived values.
+# papermill injects its overrides in a NEW cell placed AFTER this one. Anything COMPUTED
+# here is computed from the pre-injection values and is never recomputed, so
+# `-p SMOKE False` would silently leave a derived `N_FRAMES_PER_CELL = 8` in place and the
+# "full" run would quietly re-run the smoke. That happened once here; the derive cell below
+# and its gate exist so it cannot happen again.
 CODE_CONFIG = '''\
-# --- config (inline, per EXPERIMENT_REPO_STRUCTURE_SPEC — no launcher scripts) ---
-SMOKE = True          # flip to False for the full probe
+# --- parameters (papermill injects overrides directly below this cell) ----------
+SMOKE = True          # flip to False (or -p SMOKE False) for the full probe
 SEED  = 0
 
-RUN          = "16a_zero_probe_v1"
+RUN            = "16a_zero_probe_v1"
+DATA_ROOT      = "/workspace/orena-data"
+FRAMES_CACHE   = "/workspace/frames_cache"
+MODEL_BASE     = "/workspace/models/qwen3-vl-8b"
+MODEL_FT       = "/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580"
+
+N_FRAMES_SMOKE = 8    # per distribution (ID, OOD)
+N_FRAMES_FULL  = 120
+MAX_NEW_TOKENS = 8    # "0" / "yes" need almost nothing
+'''
+
+CODE_DERIVE = '''\
+# --- derived (MUST live below the parameters cell — see the note in _tools) ------
+DATA_ROOT    = Path(DATA_ROOT)
+FRAMES_CACHE = Path(FRAMES_CACHE)
 RUN_DIR      = Path.cwd() / "runs" / RUN
-DATA_ROOT    = Path("/workspace/orena-data")
-FRAMES_CACHE = Path("/workspace/frames_cache")
+MODELS       = {"base": Path(MODEL_BASE), "ft": Path(MODEL_FT)}
 
-MODELS = {
-    "base": Path("/workspace/models/qwen3-vl-8b"),
-    "ft":   Path("/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580"),
-}
-
-N_FRAMES_PER_CELL = 8 if SMOKE else 120   # per distribution (ID, OOD)
-MAX_NEW_TOKENS    = 8                     # "0" / "yes" need almost nothing
+N_FRAMES_PER_CELL = N_FRAMES_SMOKE if SMOKE else N_FRAMES_FULL
 RUN_DIR.mkdir(parents=True, exist_ok=True)
 print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| frames/cell:", N_FRAMES_PER_CELL)
 '''
@@ -106,6 +119,15 @@ print(collections.Counter((p.distribution, p.arm, p.fmt) for p in probes))
 # The first smoke run built 0 questions (wrong Reference attribute) and still spent a full
 # 17 GB checkpoint load discovering nothing. Gates raise, never warn (RULES: gates RAISE).
 assert probes, "probe set is EMPTY — check zero_probe.answer_format against the SDK schema"
+# The gate that makes a silent smoke-as-full impossible: the realized frame count must match
+# the mode we think we are in. Without it, `-p SMOKE False` failing to take effect looks
+# exactly like a successful full run.
+_frames = len({p.frame_key for p in probes})
+_expect = 2 * N_FRAMES_PER_CELL   # two distributions
+assert _frames == _expect, (
+    f"SMOKE={SMOKE} implies {_expect} frames but the probe set has {_frames} — "
+    "a papermill parameter almost certainly did not take effect"
+)
 _cells = collections.Counter((p.distribution, p.arm) for p in probes)
 assert len(_cells) == 4, f"expected ID/OOD x absent/present = 4 cells, got {dict(_cells)}"
 _n_abs = sum(1 for p in probes if p.arm == "absent")
@@ -239,22 +261,28 @@ measures p99 at the longer `max_new_tokens`; it cannot bound the trained one.
 """
 
 CODE_16C_CONFIG = '''\
-# --- config (inline; papermill injects here via the `parameters` tag) ------------
+# --- parameters (RAW LITERALS ONLY; papermill injects overrides directly below) --
 SMOKE = True
 SEED  = 0
 
-RUN       = "16c_len_points_v1"
-RUN_DIR   = Path.cwd() / "runs" / RUN
-DATA_ROOT = Path("/workspace/orena-data")
-
+RUN        = "16c_len_points_v1"
+DATA_ROOT  = "/workspace/orena-data"
 # rung 06 ep3 — the current best checkpoint and the epoch-matched control (bucket_mean 0.5724)
-MODEL_PATH = Path("/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580")
+MODEL_PATH = "/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580"
 
-TEMPLATE  = r"how many\\s+clips"   # the 681-question hole; widen only with a reason
-ARMS      = ("a0", "a1", "a2")
-N_ITEMS   = 24 if SMOKE else None  # None = the whole template
+TEMPLATE      = r"how many\\s+clips"   # the 681-question hole; widen only with a reason
+ARMS          = ("a0", "a1", "a2")
+N_ITEMS_SMOKE = 24
+'''
+
+CODE_16C_DERIVE = '''\
+# --- derived (MUST live below the parameters cell) -------------------------------
+DATA_ROOT  = Path(DATA_ROOT)
+MODEL_PATH = Path(MODEL_PATH)
+RUN_DIR    = Path.cwd() / "runs" / RUN
+N_ITEMS    = N_ITEMS_SMOKE if SMOKE else None   # None = the whole template
 RUN_DIR.mkdir(parents=True, exist_ok=True)
-print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| arms:", ARMS)
+print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| arms:", ARMS, "| n_items:", N_ITEMS or "ALL")
 '''
 
 CODE_16C_BUILD = '''\
@@ -324,6 +352,7 @@ def main() -> None:
             cell_md(MD_TITLE, "t-title"),
             cell_code(CODE_BOOTSTRAP, "c-bootstrap"),
             cell_code(CODE_CONFIG, "c-config", tags=["parameters"]),
+            cell_code(CODE_DERIVE, "c-derive"),
             cell_code(CODE_BUILD, "c-build"),
             cell_code(CODE_RUN, "c-run"),
             cell_code(CODE_REPORT, "c-report"),
@@ -345,6 +374,7 @@ def main() -> None:
             cell_md(MD_16C, "t-title-16c"),
             cell_code(CODE_BOOTSTRAP, "c-bootstrap-16c"),
             cell_code(CODE_16C_CONFIG, "c-config-16c", tags=["parameters"]),
+            cell_code(CODE_16C_DERIVE, "c-derive-16c"),
             cell_code(CODE_16C_BUILD, "c-build-16c"),
             cell_code(CODE_16C_RUN, "c-run-16c"),
             cell_code(CODE_16C_REPORT, "c-report-16c"),
