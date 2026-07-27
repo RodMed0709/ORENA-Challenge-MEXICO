@@ -48,6 +48,42 @@ they are consistent:
   from the data. We cannot learn them from what we have.
 - **`silicone loop` is train-only** (1171 answers, none in val).
 
+## 🔴 The prompt's list and the SCORER's list disagree on their 10th element
+
+Both lists are individually documented correctly in this repo. They had never been **crossed**.
+
+| list | 10th element | source |
+|---|---|---|
+| **Scoring registry** — `FOType.names()` | **`Absorbable Hemostatic Agent`** | `vendor/orena-focus/src/focus/foreign_objects.py`, the `ABSORBABLE_HEMOSTATIC_AGENT = FOType(name="Absorbable Hemostatic Agent", ...)` entry at ~line 270; also recorded at `CONSTITUTION.md` §I.4 line 47 |
+| **The list the organizers put INSIDE the prompt** | **`foreign object`** | quoted at lines 35-37 above, from 9 corpus questions |
+
+The first nine elements agree (sponge, clip, specimen bag, silicone loop, external drain, needle,
+gallstone, specimen, mesh). **They differ in exactly the 10th element — in both directions.**
+
+**Why this is a landmine, not a curiosity.** `vendor/orena-focus/src/focus/foreign_objects.py:154-161`
+— `FOType.from_name()` **raises `ValueError`** on an unrecognised name:
+
+```python
+raise ValueError(
+    f"Unknown FO name {name!r}. "
+    f"Available: {', '.join(fo.name for fo in cls._registry.values())}"
+)
+```
+
+and `context/EXPERIMENT_DESIGNS.md:10-12` already records that each comma-separated `fo_class` token
+must be a **known class name** (or `none`), else `verify()` raises → auto-wrong.
+
+**So: if the hidden test offers `foreign object` in the prompt and the model answers it, the answer is
+not merely scored 0 — it can RAISE inside `verify()`.**
+
+**The symmetric hole.** `Absorbable Hemostatic Agent` **is** scoreable but has never been offered in
+any prompt we have seen; and per the table above, `mesh` and `foreign object` have **ZERO examples
+anywhere**. One class is scoreable-but-never-prompted, the other prompted-but-not-scoreable.
+
+⚠️ **Status — be honest: this is a CROSS-CHECK on documents we already hold, not an observation.**
+It is **unverified against the hidden test**; we have never seen `verify()` raise on this. It is
+recorded because the cost of being right is a burned submission slot.
+
 ## 🔴 What this retracts
 
 The proposal to **drop `silicone loop` from training** because it produces "guaranteed
@@ -86,8 +122,18 @@ untried**.
 3. Consider an open-vocabulary probe: does the model name a class correctly when the
    prompt lists it but training never showed it? `mesh` is the natural test case — zero
    training examples, and it is in the official list.
+4. **Guard the answer boundary against the 10th-element mismatch.** The operational
+   implication is a **suppression/mapping** step: never emit a class token outside
+   `FOType.names()` (map `foreign object` onto a scoreable name or drop it). It must stay
+   **config-driven off `FOType.names()`, never hard-coded** — consistent with
+   `CONSTITUTION.md` §I.4. Now carried as RULES §8b.
 
 ## Sources
 - `documentacion/overview.md` §17 (open set), §125 (question payload), §104 (unread Data tab).
 - Class counts via `frame.ledger.gold_from_frame_parquets(split="train"/"test")`.
+- `vendor/orena-focus/src/focus/foreign_objects.py:154-161` (`FOType.from_name()` raises
+  `ValueError` on an unknown name) and `:~270` (the `ABSORBABLE_HEMOSTATIC_AGENT` registry entry).
+  Vendored SDK — read-only, quoted not edited.
+- `CONSTITUTION.md` §I.4 line 47 (the 10 config-driven `FOType.names()` classes).
+- `context/EXPERIMENT_DESIGNS.md:10-12` (unknown `fo_class` token → `verify()` raises → auto-wrong).
 - Related: [[class-imbalance-not-counting]] (which this partially retracts), `literature/FICHAS.md` lever #2.

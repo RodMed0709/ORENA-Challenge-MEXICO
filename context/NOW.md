@@ -136,8 +136,11 @@ CI excludes 0. Interpolation does not buy back counting for free. Faithful negat
 - **rung 17 (32B blind perception probe)** — the gate for the whole CoA/RLVR line. Needs a ≥80 GB pod.
   Everything built + pushed; on a big pod: `papermill 17_generator_probe.ipynb -p SMOKE False`.
 - **rung 15 caveat to read with its result:** it replicates Gautam 2025's structured count *format*
-  but NOT the *pointing* (coordinates) that drove the 9.86→0.26 — our dataset has no boxes. Partial
-  replication; if flat, pointing (via the 32B, or an external boxed dataset) is the next step.
+  but NOT the *pointing* (coordinates) — our dataset has no boxes. ⚠️ **Corrected 2026-07-27:** the
+  pointing did **not** drive the 9.86→0.26; that is v05's **counting-ONLY** arm. Per its Table I the
+  joint count+point arm reaches only **1.52**, so dropping pointing is if anything **favourable** for
+  counting (different evaluation subsets, so not a strictly paired ablation). Partial replication of
+  the *format*, not a weakened copy of the better arm.
 - 🔒 **Rotate the GitHub PAT** — it is in plaintext in the pod's git remote URL.
 
 ## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.
