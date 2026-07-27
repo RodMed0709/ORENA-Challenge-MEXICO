@@ -2,7 +2,40 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-25 (pm)**.
+> Last updated: **2026-07-27**.
+
+## 🟢 2026-07-27 — the missing control was run: rungs 14 and 15 are CLOSED, and epoch 3 erases OOD counting
+
+**Rung 06 epoch 3 = `bucket_mean` 0.5724** (`experiments/06-vit-lora/06c_epoch3_eval.ipynb`, RTX
+5090, full 6252, protocol identical to `eval_best`, 31 min, **zero training**, ~$1 of pod). All
+gates green, gold 6252/6252, hybrid cross-check agrees with the vendor scorer. This is the number
+[[epoch-matched-control]] said had to exist before anything else could be read.
+
+🔴 **Both team rungs are closed.** Rung 15's 0.5699 was a win over rung 06's *wrong epoch*, not
+over rung 06: against the epoch-matched control it is +0.0017 ID / **−0.0078 OOD** with **0 of 6**
+paired video-clustered cells excluding zero. Rung 14 is now the only rung with a significant
+cell — `ID ALL −0.0239 [−0.0433, −0.0035]`, i.e. **significantly worse** than the control. The
+14+15 fusion is worse-motivated than when proposed: a measured-negative plus a measured-null.
+
+⚠️ **Rung 06 ep3 does NOT become the shipped checkpoint.** It is the ladder's best headline
+(+0.0057 over ep2) and a **statistical null** — 0 of 6 paired cells exclude zero. The standard
+that closes 14 and 15 closes this too. Submission 01's ep2 checkpoint stands.
+
+🔴 **The finding that outlives the adjudication:** at ep3 `number` on OOD scores
+**exactly the trivial floor to 16 digits** (0.46907993966817496 vs floor 0.46907993966817496) —
+the signature rung 05 recorded for a **black image**. Across epochs the OOD counting margin decays
+monotonically (+0.0151 → +0.0128 → **0.0000**) while ID counting climbs (+0.0781 → +0.0859 →
++0.1068). Training **erases** OOD counting, and epoch 3 is where the erasure completes.
+
+**Two repo defects surfaced, neither fixed here.** (1) `frame.ledger._discover_stratified` globs
+`runs/**/stratified.json` recursively and tier 1 does **not** dedup, so two `stratified.json` under
+one run dir produce two identical rows — triggered by an untracked stray
+`experiments/02-lora-sft/runs/02_lora_sft_v1/eval_best/`, which was parked (not deleted) for the
+ledger rebuild. (2) The rung-10/rung-12 phantom rows are **still in the committed ledger** on this
+branch (8 extra rows); the root fix lives on `task/audit-rung12`, **unmerged**.
+
+⚠️ Still no seed repeat, ever. Every delta above sits inside a variance band we have never
+measured. The user declined seed repeats this session.
 
 ## 🟢 2026-07-25 (pm) — the whole repo is consolidated onto `main`, and rung 16 → 17
 

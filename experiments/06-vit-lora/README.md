@@ -12,9 +12,41 @@
 | `../00-baseline/00_zeroshot_qwen3vl.ipynb` | 00 | 0.256 | baseline |
 | `../02-lora-sft/02_lora_sft.ipynb` | 02 | 0.549 | PASS — LoRA on the LLM |
 | `06_vit_lora.ipynb` | 06 | **0.567** | 🟡 **PARTIAL** — one format moved, neither reached relevance |
+| `06b_epoch1_eval.ipynb` | 06b | 0.535 (ep1) | epoch 2 wins — `acc_OOD` selection confirmed |
+| `06c_epoch3_eval.ipynb` | 06c | 0.572 (ep3) | 🟡 **NULL vs ep2** — best headline, 0/6 paired cells exclude zero |
 
 *Headline = `bucket_mean` (`frame.metrics`). But the headline is NOT the verdict here:
 the pre-registered target is `dice@2` per cell — see below.*
+
+## 06c — the epoch-3 control (2026-07-27), and what it settles
+
+Rungs 14 and 15 evaluated all three epochs; this rung had stopped at epoch 2 while
+`eval_loss` was still falling, so **both team rungs were comparing their ep3 against our
+ep2**. `06c_epoch3_eval.ipynb` closes that gap with merge + eval, zero training, on an RTX
+5090 — the same GPU model that produced rungs 14 and 15.
+
+**The epoch trajectory** (`RESULTS_epoch3.csv`; ep1 from `RESULTS_epoch1.csv`):
+
+| ckpt | `bucket_mean` | `margin_ID` | `margin_OOD` | `number` margin ID | `number` margin OOD |
+|---|---|---|---|---|---|
+| 860 (ep1) | 0.5345 | +0.1692 | +0.1188 | +0.0781 | +0.0151 |
+| 1720 (ep2) | 0.5667 | +0.2074 | **+0.1480** | +0.0859 | +0.0128 |
+| **2580 (ep3)** | **0.5724** | **+0.2225** | +0.1448 | **+0.1068** | **0.00000** |
+
+🔴 **`number` on OOD is exactly the trivial floor at epoch 3** — accuracy
+`0.46907993966817496` against a floor of `0.46907993966817496`, equal to 16 digits. Rung
+05 recorded that same signature when the model was shown a **black image**. The decay is
+monotone across epochs (+0.0151 → +0.0128 → 0.0000) while `number` ID climbs
+(+0.0781 → +0.0859 → +0.1068): training trades OOD counting away for ID counting, and by
+epoch 3 the model adds **nothing** over answering the mode on OOD counts.
+
+**The headline is the ladder's best and is still a NULL.** +0.0057 over ep2, and the
+paired video-clustered CIs (`RESULTS_epoch3_paired_ci.csv`, B=4000, seed 42) leave
+**0 of 6 cells** clear of zero: ID ALL +0.0151 [−0.0019, +0.0325], OOD ALL −0.0033
+[−0.0193, +0.0125]. ⚠️ **Not grounds to switch the shipped checkpoint.** The OOD half
+rests on **10 videos**, so those CIs are wide by construction.
+
+**What it settles for the team rungs** — see `../../context/decisions/epoch-matched-control.md`.
 
 ## Result — PARTIAL (pre-registered rule, `local/specs/vit-lora/spec.md`)
 
