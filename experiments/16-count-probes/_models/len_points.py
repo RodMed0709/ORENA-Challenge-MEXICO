@@ -153,11 +153,13 @@ def select_number_items(items, template_re: str = r"how many\s+clips", split: st
     over the template-aware trivial floor of only **+0.026** — the single largest hole in the
     exam. Pass a different regex to widen it.
     """
+    from zero_probe import answer_format  # same folder-private accessor, one definition
+
     pat = re.compile(template_re, re.I)
     out = []
     for it in items:
         ref, req = it.reference, it.request
-        if "number" not in str(getattr(ref, "answer_format", "") or "").lower():
+        if "number" not in answer_format(ref):
             continue
         if not pat.search(str(getattr(req, "question", "") or "")):
             continue
