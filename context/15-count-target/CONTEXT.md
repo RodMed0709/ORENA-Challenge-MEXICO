@@ -81,6 +81,12 @@ attempted.** This rung tests only the part of v05 our labels support: the struct
 label-bound count field. That is a real weakening of the v05 result and it is stated up front,
 not discovered afterwards.
 
+⚠️ **Retracted 2026-07-27 — the "real weakening" reading is backwards.** v05's Table I shows the
+counting-only arm is the **STRONGER** arm (Count MAE **0.26**, vs **1.52** for joint count+pointing
+in the same fine-tuned column), so omitting the pointing half copied the *better* arm, not a
+weakened one. Caveat: those rows are different evaluation subsets (n=105 vs n=98), so it is not a
+strictly paired ablation. See `literature/vlm-techniques/FICHAS.md` § v05.
+
 **One design choice is OURS, not a paper's,** and is declared as such: the parser's `salvaged`
 tier (if the generation contains exactly one integer anywhere, use it; two or more is ambiguous
 and degrades instead). Chosen because it is the strictest recovery rule that still catches a

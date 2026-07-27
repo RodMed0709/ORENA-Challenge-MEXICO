@@ -48,6 +48,15 @@
 
 8. **SMOKE must be stratified** across `heico`+`lapchole`, never a single-dataset prefix.
 
+8b. **NEVER emit a class token outside `FOType.names()`.** The predefined list the organizers
+   put INSIDE the prompt and the scoring registry disagree on their 10th element
+   (`foreign object` vs `Absorbable Hemostatic Agent`). An unrecognised token does not merely
+   score 0 — `FOType.from_name()` **RAISES** (`vendor/orena-focus/src/focus/foreign_objects.py:154-161`)
+   and `verify()` marks the answer wrong. Read the accepted set from `FOType.names()` at
+   runtime — **never hard-code it** — and suppress or map anything else at the answer
+   boundary. Applies to prompts, training targets and post-processors alike.
+   See [[open-class-vocabulary]].
+
 9. **Every result → the ledger.** Regenerate root `RESULTS.md` via `frame.ledger`; every
    number must be reproducible from a commit.
 

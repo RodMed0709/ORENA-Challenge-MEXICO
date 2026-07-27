@@ -28,7 +28,7 @@
 |---|---|---|---|
 | 1 | **A reasoning scaffold in the SFT target, without RL, buys ~nothing.** | CoA (v01): Cold-Start+SFT 62.0 vs plain SFT 65.7 F1 on EndoVis2018 and 62.4 vs 58.7 on CholecT50 — mixed, net ≈0; the +18.0 comes from RLVR. Surgery-R1 (v10): the two SFT variants (with/without CoT in the target) differ by ~1 pt in *both* directions; +RFT adds +8 ID and +10 OOD. | Our CoA-SFT experiment should be scoped as a **cold start for a later GRPO run**, not as a standalone win. Budget accordingly. |
 | 2 | **CoT/scaffolding actively hurts perception tasks — which is what FRAME is.** | Kancheti (v06): CoT −3% avg over 13 spatial benchmarks, 7/8 distilled reasoning models fail to beat their own backbone. Jin (v07): CoT reduces *visual grounding and object counting* specifically. Vo (v08): counting accuracy peaks ~40% with thinking tokens then **declines with overthinking**. | If we emit a scaffold at inference, **cap its length hard** and expect counting to be the first casualty. Emitting only `<answer>` is the safer default. |
-| 3 | **The counting collapse is a target/loss problem, not a "VLMs can't count" law.** | Gautam (v05): Qwen2.5-VL-7B + plain LoRA r=16, ViT frozen, 5 ep → **Count MAE 9.86 → 0.26**, and multi-task (count+point) improves it further. Zausinger (v12): CE treats numbers as a *nominal* scale — no gradient toward being *close*. Qwen3-VL (v14) ships counting as a pretrained grounding capability. | Our `number` bucket is being diluted, not destroyed. Attack the **loss** (number-token loss) and the **task mix**, not the decoder. |
+| 3 | **The counting collapse is a target/loss problem, not a "VLMs can't count" law.** | Gautam (v05): Qwen2.5-VL-7B + plain LoRA r=16, ViT frozen, 5 ep → **Count MAE 9.86 → 0.26** on the counting-ONLY task; multi-task (count+point) is measured **WORSE** for counting (**1.52**) — see the v05 ficha. Zausinger (v12): CE treats numbers as a *nominal* scale — no gradient toward being *close*. Qwen3-VL (v14) ships counting as a pretrained grounding capability. | Our `number` bucket is being diluted, not destroyed. Attack the **loss** (number-token loss) and the **task mix**, not the decoder. |
 | 4 | **Forgetting is fixable post-hoc, for free, on a checkpoint we already have.** | LiNeS (v13): layer-depth-scaled updates keep **99.8%** of fine-tuned task performance while restoring **97.9%** of pretrained performance on control tasks. WiSE-FT (v23): one interpolation coefficient. MoFO (v25): needs **no pretraining data and no extra loss term**. | Three zero-to-cheap experiments exist that we have not run, all on the epoch-3 checkpoint sitting on disk. |
 | 5 | **Our checkpoint-selection rule is a known, named bug.** | Xu (v37): validation-average criteria are "unstable under noisy evaluation signals" and hide per-capability collapse. CapTrack (v39) and EMT (v09) both show the erosion is monotone in epochs while the *average* stays flat or rises. | Stop selecting on `acc_OOD`. Select on **worst-cell margin** or on a per-format floor-relative vector. This is a one-line change with no GPU cost. |
 
@@ -124,11 +124,34 @@
 - **Backbone + adaptation**: **Qwen2.5-VL-7B-Instruct** + **LoRA rank 16**, **lr 2e-4** for the LoRA parameters, **ViT frozen**, adapters on **all LLM linear layers except the final `lm_head`**, **5 epochs**, AdamW, batch 4 with gradient accumulation, single A100 80 GB, standard cross-entropy over tokens, outputs emitted as **structured JSON** and parsed.
 - **Data**: **MedMultiPoints** — 10,600 images spanning endoscopy (polyps and **surgical instruments**) and microscopy (sperm cells), from no-findings frames to densely packed multi-object scenes. Five instruction–response pairs per image, one per task; count annotations stored as `{"counts": 3, "label": "polyp"}`.
 - **Eval**: Count MAE/MSE/RMSE, point MAE/RMSE, matching accuracy, zero-case point rate, mAP/mAP@50/@75/IoU — all in-distribution.
-- **Reported effect**: **Count MAE 9.86 (public Qwen2.5-VL) → 0.26 (fine-tuned)** on the counting-only task. Multi-task training (Counting + Pointing) *further* reduced Count MAE and raised matching accuracy relative to single-task. Trade-off honestly reported: more zero-case point predictions, i.e. worse edge-case reliability despite better aggregate numbers.
-- **The key trick**: force a **structured, parseable output** (JSON with explicit `counts` field) and train counting **jointly with localization**, so the count has to be consistent with an enumerable set of points.
-- **Transfer to us**: The highest-value positive result in this corpus, and it directly **contradicts the fatalistic reading of our own finding**. Same model family, same PEFT family, same scale of data, and counting went from catastrophic to near-perfect. Three differences explain the gap and each is an experiment: (a) their counting task is **not diluted** — five tasks per image, all quantitative, whereas our `number` questions are one of five *answer formats* competing for gradient; (b) their target is **structured JSON with a dedicated count field**, ours is bare text; (c) they pair counting with **pointing**, giving the count something to be consistent with. Caveats before we celebrate: all ID, no OOD split, no procedure-level held-out, and their labels are clean whereas ours move ±0.86 in a second. Also `lr 2e-4` is 10× ours.
+- **Reported effect**: **Count MAE 9.86 (public Qwen2.5-VL) → 0.26 (fine-tuned)** on the **counting-ONLY** task. Trade-off honestly reported: more zero-case point predictions, i.e. worse edge-case reliability despite better aggregate numbers.
+
+  🔴 **RETRACTED (2026-07-27) — the multi-task sentence this bullet used to carry was FALSE.** It previously claimed that multi-task training (Counting + Pointing) *further* **lowered** Count MAE and raised matching accuracy relative to single-task. **That inverts the paper's own Table I.** Root cause of our error: we copied the **abstract**, not the table. The abstract's *"reduces the Count MAE"* is fine-tuned-vs-**public** *inside* the multi-task task (**6.70 → 1.52**) — it is not a comparison **across** tasks.
+
+  What Table I (p.5) actually says. In the **fine-tuned** column, counting-only **0.26** beats counting+pointing **1.52** (**5.8×**) and counting+bounding **1.37**; point-only MAE **1.24** beats multi-task point MAE **17.78** (**14×**):
+
+  | task | n | metric | Qwen-public | Ours (fine-tuned) |
+  |---|---|---|---|---|
+  | Counting Only | 105 | Count MAE | 9.86 | **0.26** |
+  | Counting Only | 105 | Count MSE | 389.04 | 2.62 |
+  | Pointing Only | 91 | Point MAE | 52.50 | **1.24** |
+  | Pointing Only | 91 | Matching Accuracy | 0.43 | **0.99** |
+  | Pointing Only | 91 | Zero-case Points | 68 | **0** |
+  | Counting + Pointing | 98 | Count MAE | 6.70 | **1.52** |
+  | Counting + Pointing | 98 | Count MSE | 156.09 | 18.19 |
+  | Counting + Pointing | 98 | Point MAE | 92.42 | **17.78** |
+  | Counting + Pointing | 98 | Matching Accuracy | 0.25 | 0.91 |
+  | Counting + Pointing | 98 | Zero-case Points | 37 | **29** |
+  | Counting + Bounding | 99 | Count MAE | 9.63 | **1.37** |
+  | BBox Detection | 107 | mAP / @50 / @75 / IoU | 0.01 / 0.01 / 0.01 / 0.21 | 0.85 / 0.95 / 0.88 / 0.97 |
+
+  The paper concedes it in Discussion §VI-A, verbatim: *"While slight degradation was observed in multi-task scenarios compared to their single-task counterparts, especially in counting, our model still outperformed the public model by large margins."*
+
+  ⚠️ **Caveat — do not overstate the correction.** The rows are **different evaluation subsets** (n = 105 / 91 / 98 / 99), so this is **NOT a strictly paired ablation**. It is nevertheless the only evidence available, and it points **against** adding pointing supervision for counting.
+- **The key trick**: force a **structured, parseable output** (JSON with an explicit `counts` field). ⚠️ The second half of this trick as we originally read it — *train counting jointly with localization, so the count has to be consistent with an enumerable set of points* — does **not** survive Table I: the joint arm is what **costs** counting accuracy (1.52 vs 0.26). The structured target is the trick; the joint objective is the tax.
+- **Transfer to us**: The highest-value positive result in this corpus, and it directly **contradicts the fatalistic reading of our own finding**. Same model family, same PEFT family, same scale of data, and counting went from catastrophic to near-perfect. Three differences explain the gap and each is an experiment: (a) their counting task is **not diluted** — five tasks per image, all quantitative, whereas our `number` questions are one of five *answer formats* competing for gradient; (b) their target is **structured JSON with a dedicated count field**, ours is bare text; ~~(c) they pair counting with **pointing**, giving the count something to be consistent with~~ — 🔴 **(c) is RETRACTED as a lever and now points the OTHER way**: on this paper's own Table I, pairing counting with pointing **HURTS** counting (1.52 vs 0.26 in the fine-tuned column, subject to the different-subset caveat above). The two transferable levers are therefore **(a) task non-dilution** and **(b) the structured count field** — **not (c)**. Caveats before we celebrate: all ID, no OOD split, no procedure-level held-out, and their labels are clean whereas ours move ±0.86 in a second. Also `lr 2e-4` is 10× ours.
 - **Weights/license**: code, weights and scripts promised at `simula/PointDetectCount` — **verify availability and licence before use**.
-- **Verdict**: **STEAL** — the count+point joint objective and the structured count field are the two most concrete counting experiments available to us.
+- **Verdict**: **STEAL — the structured count field only** (JSON with an explicit `counts` field, bound to a class name). It is the most concrete counting experiment available to us. 🔴 **NOT stolen: the count+point joint objective — measured to DEGRADE counting in this paper's own Table I** (1.52 vs 0.26). The original verdict listed both; that half is withdrawn.
 
 ---
 
@@ -650,8 +673,11 @@ instead, which is the opposite intervention. Cost: **one training run + a custom
 Reformat `number` and `fo_class` training targets into a single structured object, e.g.
 `{"clip": 2, "sponge": 0, "specimen_bag": 1}`, derived deterministically from existing annotations —
 no VLM generation, no DUA exposure. Three independent lines converge on this: compositional counting
-fails because object-type binding fails (v28); joint count+localize training drove Count MAE 9.86 →
-0.26 (v05); and Qwen3-VL was pretrained on counting *as a grounding task* with a structured
+fails because object-type binding fails (v28); plain LoRA SFT on a **counting-ONLY** task with a
+**structured JSON count field** drove Count MAE 9.86 → 0.26 (v05) — ⚠️ *corrected 2026-07-27: this
+line previously credited "joint count+localize training", which is wrong; the joint count+localize
+arm reached only 1.52, so the evidence backs the structured target and specifically NOT the joint
+framing*; and Qwen3-VL was pretrained on counting *as a grounding task* with a structured
 convention (v14). It also attacks the `clip` attractor directly, because a zero for `clip` becomes
 an explicit trainable token rather than an absence. **Not killed** — this is a target-format change,
 not an inference transform or a post-hoc fix. Cost: **deterministic data rewrite + one training run.**
