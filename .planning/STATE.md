@@ -57,6 +57,7 @@ None yet.
 - Research flags open: Phase 4 (LoRA hyperparams vs OOD) and Phase 6 (FP8/vLLM p99 tuning on L40S) need a research pass when reached.
 - Calendar gates: Jul 15 (zero-shot number), Aug 15 (beat both baselines), Sep 1 (pre-eval closes), Sep 8 (final submission).
 - ✅ **Quick task 260727-jo9 is complete** (the GPU-stock block was cleared when the user provisioned a 5090). Rung 06 ep3 = 0.5724; rungs 14 and 15 both closed against the epoch-matched control. Two ledger defects surfaced and are recorded, not fixed — see the task SUMMARY.
+- ✅ **Quick task 260727-mg7 is complete.** Three verified discrepancies corrected in one commit. Found, NOT fixed (on the record): `python -m frame.measured` fails `assert_decisions_indexed` on five pre-existing notes lacking frontmatter (`coa-generator-qwen32b-onpod`, `coa-sft-published-null`, `epoch-matched-control`, `no-external-api-for-challenge-data`, `submission-01-rung06`), and it needs `encoding="utf-8"` pinned internally rather than depending on `PYTHONUTF8=1` — on Windows any diff carrying ⚠️/🔴 dies with `UnicodeDecodeError`. Worth one quick task.
 
 ⚠️ This file is stale from 2026-07-09. The project's live state lives in `context/NOW.md`; the quick-task table below is maintained, the rest is not.
 
@@ -65,6 +66,7 @@ None yet.
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
 | 260727-jo9 | Rung 06 checkpoint-2580 (epoch 3) — the missing epoch-matched control for rungs 14 and 15 | 2026-07-27 | d51e688 | Complete — 0.5724, both team rungs closed | [260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3](./quick/260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3/) |
+| 260727-mg7 | Correct three verified repo discrepancies found during the rung-16 literature sweep | 2026-07-27 | b4642e4 | Complete — v05 multi-task claim retracted at 6 sites, `~56%` token claim retired, class-list landmine ruled as RULES §8b | [260727-mg7-correct-three-verified-repo-discrepancie](./quick/260727-mg7-correct-three-verified-repo-discrepancie/) |
 
 ## Session Continuity
 
