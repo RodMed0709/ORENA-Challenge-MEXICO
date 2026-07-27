@@ -102,9 +102,19 @@ import collections
 print("questions:", len(probes), "| frames:", len({p.frame_key for p in probes}))
 print(collections.Counter((p.distribution, p.arm, p.fmt) for p in probes))
 
+# RAISING gates — an empty or lopsided probe set must abort BEFORE a model is loaded.
+# The first smoke run built 0 questions (wrong Reference attribute) and still spent a full
+# 17 GB checkpoint load discovering nothing. Gates raise, never warn (RULES: gates RAISE).
+assert probes, "probe set is EMPTY — check zero_probe.answer_format against the SDK schema"
+_cells = collections.Counter((p.distribution, p.arm) for p in probes)
+assert len(_cells) == 4, f"expected ID/OOD x absent/present = 4 cells, got {dict(_cells)}"
+_n_abs = sum(1 for p in probes if p.arm == "absent")
+_n_prs = sum(1 for p in probes if p.arm == "present")
+assert _n_abs == _n_prs, f"arms must be balanced: {_n_abs} absent vs {_n_prs} present"
+
 missing = [p.frame_path for p in probes if not Path(p.frame_path).exists()]
 assert not missing, f"{len(missing)} probe frames missing from the cache, e.g. {missing[:3]}"
-print("all probe frames present in the shared cache")
+print("gates passed: non-empty, 4 cells, arms balanced, all frames present")
 '''
 
 CODE_RUN = '''\

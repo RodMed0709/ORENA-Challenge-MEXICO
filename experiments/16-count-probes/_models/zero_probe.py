@@ -113,6 +113,24 @@ def _norm(name: str) -> str:
     return name.strip().lower().rstrip(".")
 
 
+def answer_format(ref) -> str:
+    """The SDK's `Reference` carries the format as `_format`, NOT `answer_format`.
+
+    Reading the wrong attribute is silent: `getattr(ref, "answer_format", "")` returns "",
+    every branch below misses, and the probe set comes out EMPTY rather than raising. That
+    is exactly how the first smoke run burned a model load on 0 questions. Fail loudly here
+    instead — an unknown schema is a bug, not an empty result.
+    """
+    for attr in ("_format", "answer_format"):
+        val = getattr(ref, attr, None)
+        if val:
+            return str(val).lower()
+    raise AttributeError(
+        f"{type(ref).__name__} exposes neither `_format` nor `answer_format` — "
+        "the SDK schema changed; fix this accessor rather than defaulting to empty."
+    )
+
+
 def build_inventory(items) -> dict[str, dict]:
     """Per-frame gold inventory: which classes the annotation asserts are present.
 
@@ -138,7 +156,7 @@ def build_inventory(items) -> dict[str, dict]:
             },
         )
         ref, req = it.reference, it.request
-        fmt = str(getattr(ref, "answer_format", "") or "").lower()
+        fmt = answer_format(ref)
         ans = str(getattr(ref, "answer", "") or "")
         if "fo_class" in fmt:
             for tok in ans.split(","):
