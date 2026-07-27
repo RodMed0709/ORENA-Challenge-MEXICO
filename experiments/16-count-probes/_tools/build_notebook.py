@@ -203,6 +203,121 @@ def cell_code(src: str, cid: str, tags: list[str] | None = None) -> dict:
     }
 
 
+OUT_16C = HERE.parent / "16c_len_points.ipynb"
+
+MD_16C = """# 16c — derive the count as `len(points)` instead of verbalising it
+
+**The finding.** Alghisi et al. 2026 (*Getting to the Point*, arXiv:2603.21746), Qwen2.5-VL-7B
++ LoRA r=32/α=64, exact-match count accuracy on their OOD split (count-range extrapolation —
+structurally our shape): direct count **23.41%**, point-then-count **verbalised** 14.04%,
+**`#Coord` = `len(points)` 94.96%**. The lever is not pointing. It is **refusing to let the
+model state the number** — taking the count as the length of its own coordinate list.
+
+**Why rung 15 did not test this.** Rung 15 replicated Gautam's structured count *format* and
+returned a null. And Gautam's Table I (re-verified from the repo PDF, p.5) shows the *joint*
+count+point objective **costs** counting — counting-only 0.26 vs count+point 1.52. So the
+structured target is the trick and the joint objective is the tax. `len(points)` is a third
+thing: a decoding-side derivation.
+
+⚠️ **The convention is a trap.** Qwen2-VL used `[0,1000]` → **Qwen2.5-VL switched to absolute
+pixels** → **Qwen3-VL switched back to `[0,1000]`, points as `point_2d` in JSON**. Gautam and
+Alghisi both ran Qwen2.5-VL, so *their exact serialisation is wrong for our backbone*. Arm
+`a1` matches our native convention on purpose.
+
+**Arms** (single variable = the answer target; image and question identical):
+`a0` bare integer (control) · `a1` `point_2d` JSON, count = `len()` · `a2` numbered points
+(Molmo), count = last index.
+
+**Scored on** the *Clips* template — 681 val questions, 12 distinct true values, margin over
+the template-aware floor only **+0.026**: the single largest hole in the exam. Read **margin**,
+never raw accuracy.
+
+🔴 **A null here is NOT decisive.** Alghisi report that prompt-only point-then-count is weak
+without fine-tuning, and that a black-screen substitution costs <2% — the count is read off the
+model's own text, not re-derived from pixels. This probe bounds the *prompt-only* path and
+measures p99 at the longer `max_new_tokens`; it cannot bound the trained one.
+"""
+
+CODE_16C_CONFIG = '''\
+# --- config (inline; papermill injects here via the `parameters` tag) ------------
+SMOKE = True
+SEED  = 0
+
+RUN       = "16c_len_points_v1"
+RUN_DIR   = Path.cwd() / "runs" / RUN
+DATA_ROOT = Path("/workspace/orena-data")
+
+# rung 06 ep3 — the current best checkpoint and the epoch-matched control (bucket_mean 0.5724)
+MODEL_PATH = Path("/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580")
+
+TEMPLATE  = r"how many\\s+clips"   # the 681-question hole; widen only with a reason
+ARMS      = ("a0", "a1", "a2")
+N_ITEMS   = 24 if SMOKE else None  # None = the whole template
+RUN_DIR.mkdir(parents=True, exist_ok=True)
+print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| arms:", ARMS)
+'''
+
+CODE_16C_BUILD = '''\
+# --- select the scored items (gold only; no model loaded yet) --------------------
+from frame.config import BaselineConfig
+from frame.data import load_frame_items
+import len_points as lp
+
+cfg   = BaselineConfig(data_root=DATA_ROOT)
+items = load_frame_items(cfg, splits=("test",))
+sel   = lp.select_number_items(items, template_re=TEMPLATE)
+if N_ITEMS:
+    sel = sel[:N_ITEMS]
+
+import collections
+golds = [g for _, g in sel]
+assert sel, f"no items matched {TEMPLATE!r} — check the template regex against the corpus"
+print("items:", len(sel), "| distinct golds:", sorted(set(golds)))
+print("distribution:", collections.Counter("OOD" if it.dataset == "heico" else "ID" for it, _ in sel))
+print("trivial floor (always answer the mode):", round(lp.template_floor(golds), 4))
+'''
+
+CODE_16C_RUN = '''\
+# --- run the three arms on ONE model load ---------------------------------------
+# All three arms differ only in the prompt suffix and max_new_tokens, so a single load
+# serves them all — and keeps the image path byte-identical across arms.
+import time, gc
+from frame.engine import QwenFrameEngine
+
+rows = []
+for arm in ARMS:
+    mcfg = BaselineConfig(data_root=DATA_ROOT, model_path=MODEL_PATH,
+                          max_new_tokens=lp.ARM_MAX_NEW_TOKENS[arm])
+    eng = QwenFrameEngine(mcfg); eng.load()
+    t0 = time.time()
+    rows += lp.run_arm(eng, sel, arm)
+    dt = time.time() - t0
+    print(f"arm {arm}: {len(sel)} questions in {dt:.0f}s  ({dt/max(len(sel),1):.3f} s/q)")
+    del eng; gc.collect(); torch.cuda.empty_cache()
+'''
+
+CODE_16C_REPORT = '''\
+# --- score: MARGIN over the template floor, never raw accuracy -------------------
+import pandas as pd, json
+
+df = pd.DataFrame(rows); df.to_csv(RUN_DIR / "rows.csv", index=False)
+res = lp.score(rows); (RUN_DIR / "score.json").write_text(json.dumps(res, indent=2))
+print(pd.DataFrame(res).T.round(4).to_string())
+print()
+print("parse methods:", df.groupby(["arm", "method"]).size().to_dict())
+print("Alghisi reference (Qwen2.5-VL-7B, their OOD): direct 0.2341 | verbalised 0.1404 | len() 0.9496")
+'''
+
+CODE_16C_INSPECT = '''\
+# --- eyeball: what did each arm actually emit? (user rule: error examples every run) ---
+for arm in ARMS:
+    sub = df[df.arm == arm].head(4)
+    print(f"--- {arm} ---")
+    for r in sub.itertuples():
+        print(f"  gold={r.gold} pred={r.value} ok={r.correct} | {str(r.raw)[:110]!r}")
+'''
+
+
 def main() -> None:
     nb = {
         "cells": [
@@ -224,6 +339,23 @@ def main() -> None:
     }
     OUT.write_text(json.dumps(nb, indent=1), encoding="utf-8")
     print("wrote", OUT)
+
+    nb16c = {
+        "cells": [
+            cell_md(MD_16C, "t-title-16c"),
+            cell_code(CODE_BOOTSTRAP, "c-bootstrap-16c"),
+            cell_code(CODE_16C_CONFIG, "c-config-16c", tags=["parameters"]),
+            cell_code(CODE_16C_BUILD, "c-build-16c"),
+            cell_code(CODE_16C_RUN, "c-run-16c"),
+            cell_code(CODE_16C_REPORT, "c-report-16c"),
+            cell_code(CODE_16C_INSPECT, "c-inspect-16c"),
+        ],
+        "metadata": nb["metadata"],
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    OUT_16C.write_text(json.dumps(nb16c, indent=1), encoding="utf-8")
+    print("wrote", OUT_16C)
 
 
 if __name__ == "__main__":
