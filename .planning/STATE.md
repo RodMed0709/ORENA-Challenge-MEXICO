@@ -56,7 +56,7 @@ None yet.
 - Requirement count corrected: REQUIREMENTS.md header said 27 v1 requirements but 30 IDs exist; all 30 are mapped. Traceability count updated to 30.
 - Research flags open: Phase 4 (LoRA hyperparams vs OOD) and Phase 6 (FP8/vLLM p99 tuning on L40S) need a research pass when reached.
 - Calendar gates: Jul 15 (zero-shot number), Aug 15 (beat both baselines), Sep 1 (pre-eval closes), Sep 8 (final submission).
-- 🔶 **Quick task 260727-jo9 is blocked on GPU stock**: no RTX 5090 in EU-RO-1, and the network volume pins the DC. Another card cannot substitute — cross-GPU drift (±0.003 on `bucket_mean`) is the size of the difference the run adjudicates. A watcher polls for stock; the declined fallback is re-evaluating all three ep3 checkpoints together on one A100 (~2.5 h, ~$3.50).
+- ✅ **Quick task 260727-jo9 is complete** (the GPU-stock block was cleared when the user provisioned a 5090). Rung 06 ep3 = 0.5724; rungs 14 and 15 both closed against the epoch-matched control. Two ledger defects surfaced and are recorded, not fixed — see the task SUMMARY.
 
 ⚠️ This file is stale from 2026-07-09. The project's live state lives in `context/NOW.md`; the quick-task table below is maintained, the rest is not.
 
@@ -64,7 +64,7 @@ None yet.
 
 | # | Description | Date | Commit | Status | Directory |
 |---|-------------|------|--------|--------|-----------|
-| 260727-jo9 | Rung 06 checkpoint-2580 (epoch 3) — the missing epoch-matched control for rungs 14 and 15 | 2026-07-27 | e8a8219 | Blocked (GPU stock) | [260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3](./quick/260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3/) |
+| 260727-jo9 | Rung 06 checkpoint-2580 (epoch 3) — the missing epoch-matched control for rungs 14 and 15 | 2026-07-27 | d51e688 | Complete — 0.5724, both team rungs closed | [260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3](./quick/260727-jo9-evaluate-rung-06-checkpoint-2580-epoch-3/) |
 
 ## Session Continuity
 
