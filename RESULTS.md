@@ -14,10 +14,11 @@ The committed, git-native results store. `bucket_mean` (unweighted mean over the
 
 `needs_backfill=true` = no committed `stratified.json` for that run: the Tier-1 row is coalesced from its `RESULTS.csv`, and Tier 2/3 are empty for it until a pod pass of `stratified_report` over its saved predictions is registered via `frame.ledger.register_run`.
 
-_14 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
+_15 rich run(s) with canonical stratified data; the rest are `needs_backfill`._
 
 | experiment | run | model | bucket_mean | acc_ID | acc_OOD | margin_ID | margin_OOD | n_total | date | needs_backfill |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 06-vit-lora | 06_vit_lora_v1__ep3_full | b1_vit_lora epoch 3 (checkpoint-2580) | 0.5724 | 0.5595 | 0.6045 | 0.2225 | 0.1448 | 6252 | 2026-07-27 | false |
 | 15-count-target | 15_count_target_v1__checkpoint-2580 | Qwen3-VL-8B + LoRA r8 ViT+LLM, count target (checkpoint-2580) | 0.5699 | 0.5613 | 0.5968 | 0.2242 | 0.1370 | 6252 |  | false |
 | 06-vit-lora | 06_vit_lora_v1 | Qwen3-VL-8B-Instruct + LoRA r8 ViT+LLM (ckpt-1720) | 0.5667 | 0.5444 | 0.6078 | 0.2074 | 0.1480 | 6252 | 2026-07-18 | false |
 | 13-wise-ft | 13_wise_ft_v1__a0.85 | Qwen3-VL-8B WiSE-FT α=0.85 (base × rung06 ckpt-1720) | 0.5642 | 0.5426 | 0.6040 | 0.2056 | 0.1442 | 6252 | 2026-07-24 | false |
