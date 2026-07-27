@@ -253,18 +253,38 @@ _NO = re.compile(r"^\s*no\b", re.I)
 
 
 def read_answer(raw: str, fmt: str) -> dict:
-    """Parse one raw model answer. Never raises — an unparseable answer is recorded, not dropped."""
+    """Parse one raw model answer. Never raises — an unparseable answer is recorded, not dropped.
+
+    🔴 Two different questions live here and the first smoke run conflated them:
+
+    * **What did the model MEAN?** -> `value` (lenient: a leading integer, so ``"1."`` reads 1).
+      This is what the zero-capability question needs.
+    * **Would the SDK SCORE it?** -> `sdk_valid` (strict: ``str.strip().isdigit()``, the exact
+      gate in `Number.verify`). ``"1."`` is **auto-incorrect** there.
+
+    The fine-tuned checkpoint emits ``"1."`` — with a trailing period — on question phrasings
+    outside the corpus templates. Counting that as "malformed" hid the actual finding (it said
+    ONE, not zero) behind a parse failure. Report both, never one.
+    """
     s = (raw or "").strip()
     if fmt == "number":
-        m = re.match(r"^\s*(\d+)\s*$", s)
+        strict = re.match(r"^\d+$", s) is not None
+        m = re.match(r"^\s*(\d+)", s)  # lenient: leading integer, trailing junk tolerated
         val = int(m.group(1)) if m else None
-        return {"raw": s, "value": val, "is_zero": val == 0, "parsed": m is not None}
+        return {
+            "raw": s,
+            "value": val,
+            "is_zero": val == 0,
+            "parsed": m is not None,
+            "sdk_valid": strict,
+        }
     yes, no = bool(_YES.match(s)), bool(_NO.match(s))
     return {
         "raw": s,
         "value": "yes" if yes else ("no" if no else None),
         "is_zero": no,  # "no" is the binary analogue of emitting 0
         "parsed": yes or no,
+        "sdk_valid": s.lower() in {"yes", "no"},
     }
 
 
@@ -296,6 +316,11 @@ def score(rows: list[dict]) -> dict:
             else 2 * acc_ab * acc_pr / (acc_ab + acc_pr)
         )
         mal = sum(not r["parsed"] for r in sel) / len(sel) if sel else float("nan")
+        # `sdk_invalid` is a SEPARATE, scored defect: the answer was understandable but the
+        # SDK's exact-match gate would reject it (e.g. "1." fails Number.verify's isdigit).
+        inv = (
+            sum(not r.get("sdk_valid", True) for r in sel) / len(sel) if sel else float("nan")
+        )
         return {
             "n": len(sel),
             "n_absent": len(ab),
@@ -305,7 +330,8 @@ def score(rows: list[dict]) -> dict:
             "acc_absent": acc_ab,
             "acc_present": acc_pr,
             "hmean": hm,
-            "malformed": mal,
+            "unparseable": mal,
+            "sdk_invalid": inv,
         }
 
     out = {"pooled": {}, "cells": {}}
