@@ -171,15 +171,23 @@ print(show.to_string(index=False))
 '''
 
 
-def cell_md(src: str) -> dict:
-    return {"cell_type": "markdown", "metadata": {}, "source": src.splitlines(keepends=True)}
+def cell_md(src: str, cid: str) -> dict:
+    return {
+        "cell_type": "markdown",
+        "id": cid,
+        "metadata": {},
+        "source": src.splitlines(keepends=True),
+    }
 
 
-def cell_code(src: str) -> dict:
+def cell_code(src: str, cid: str, tags: list[str] | None = None) -> dict:
+    # papermill injects overrides UNDER the cell tagged `parameters`; without that tag
+    # `-p SMOKE False` is silently ignored and the notebook keeps its inline default.
     return {
         "cell_type": "code",
+        "id": cid,
         "execution_count": None,
-        "metadata": {},
+        "metadata": {"tags": tags} if tags else {},
         "outputs": [],
         "source": src.splitlines(keepends=True),
     }
@@ -188,14 +196,14 @@ def cell_code(src: str) -> dict:
 def main() -> None:
     nb = {
         "cells": [
-            cell_md(MD_TITLE),
-            cell_code(CODE_BOOTSTRAP),
-            cell_code(CODE_CONFIG),
-            cell_code(CODE_BUILD),
-            cell_code(CODE_RUN),
-            cell_code(CODE_REPORT),
-            cell_code(CODE_DELTA),
-            cell_code(CODE_INSPECT),
+            cell_md(MD_TITLE, "t-title"),
+            cell_code(CODE_BOOTSTRAP, "c-bootstrap"),
+            cell_code(CODE_CONFIG, "c-config", tags=["parameters"]),
+            cell_code(CODE_BUILD, "c-build"),
+            cell_code(CODE_RUN, "c-run"),
+            cell_code(CODE_REPORT, "c-report"),
+            cell_code(CODE_DELTA, "c-delta"),
+            cell_code(CODE_INSPECT, "c-inspect"),
         ],
         "metadata": {
             "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
