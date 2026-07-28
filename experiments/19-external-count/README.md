@@ -86,12 +86,32 @@ downloading video.
 | 3 | **CholecInstanceSeg** | **41,933** | ✅ `group_id` instance IDs | ✅ **CC BY 4.0** (resolved at the Synapse host; the CC BY-NC-ND seen elsewhere is the *article* license) | real human lap-chole; ~5,328 genuine **zero-object** frames — a case our supervision has never contained. Caps at **4 objects/frame**. |
 | 4 | **MedMultiPoints** | 10,600 | ✅ integer `count` | ⚠️ not stated anywhere | the only **measured positive counting result on our own model family** — see below |
 | 5 | **SSG-VQA** | 960k QA / 25k scenes | ✅ QA pre-written, native `Counting` type | ⚠️ reported inconsistently | lap-chole, zero mask→QA engineering |
-| — | ~~ROBUST-MIS~~ | 10,040 | ✅ cleanest of all | CC BY-NC-SA | 🔴 **DISQUALIFIED for training** — see below |
+| 6 | **ROBUST-MIS 2019** | 10,040 | ✅ cleanest of all — `unique(mask)−1` | CC BY-NC-SA | 🟢 **USABLE, split-matched** — see below |
 
-🔴 **ROBUST-MIS is disqualified as training data and it is the least obvious trap here.** Its 30
-videos ARE our `heico` half, whose test split is our designated OOD holdout. Training on those
-frames silently destroys the only generalization read we trust. It remains legitimate for **19a**,
-where nothing is trained and the frames are already in `/workspace/frames_cache/`.
+🟢 **ROBUST-MIS is USABLE, and its split already matches ours exactly.** An earlier draft of this
+file called it disqualified; that was wrong — it confused "these are `heico` videos" with "these
+are our OOD videos", and only a third of them are. Measured against
+`experiments/splits/frame_ood_v1.csv`:
+
+| heico procedure | videos | our split | ROBUST-MIS release |
+|---|---|---|---|
+| Proctocolectomy | 10 | **train** | Training |
+| Rectal Resection | 10 | **train** | Training |
+| Sigmoid Resection | 10 | **val_ood** | Testing (`Stage_3`) |
+
+**ROBUST-MIS's own train/test partition is byte-for-byte our own** — procto+rectal in, Sigmoid out.
+So pulling only its **Training** release (`syn21870038`) touches **exclusively videos we already
+train on**: zero OOD contamination, by construction rather than by discipline. Its frames are
+already in `/workspace/frames_cache/`, so the download cost is masks only.
+
+🔴 **The one hard rule: never pull `syn21891314` (Testing).** Its `Stage_3` folder is `Sigmoid` —
+our `val_ood`. That single directory is the whole trap. **G-NO-OOD-BLEED** exists to catch it
+mechanically rather than by memory.
+
+⚠️ It still counts **instruments**, which the taxonomy excludes — so it is an *auxiliary
+enumeration task*, not foreign-object supervision, and any rows it produces must be phrased
+contrastively ("How many **surgical instruments**…" against "How many **foreign objects**…") or it
+risks reinforcing the instrument↔FO confusion that was the zero-shot baseline's top error.
 
 🟢 **MedMultiPoints is the strongest prior evidence**, independent of size: it is the only dataset
 with a *measured positive counting result on our own model family* — Qwen2.5-VL-7B + LoRA r16, ViT
