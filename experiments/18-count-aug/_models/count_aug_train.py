@@ -205,16 +205,16 @@ def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
     Returns ``{"per_device", "grad_accum", "peak_mib", "s_per_it", "ok", "error"}``. An OOM
     is a RESULT here, not an exception: the whole point is to find the ceiling cheaply.
     """
-    if effective_batch(cfg) % per_device:
-        raise ValueError(
-            f"per_device={per_device} does not divide the effective batch "
-            f"{effective_batch(cfg)} — the probe would measure a different recipe."
-        )
+    # Peak memory is a function of the MICRO-batch alone — gradient accumulation replays
+    # micro-batches sequentially and holds no extra activations — so a per_device that does
+    # not divide 16 (e.g. 6) is still a valid memory probe. It is NOT a valid speed probe at
+    # face value, which is why the timing is normalised to seconds-per-SAMPLE below rather
+    # than left as seconds-per-optimizer-step.
+    grad_accum = max(1, effective_batch(cfg) // per_device)
     probe = CountAugConfig(
         exp_dir=cfg.exp_dir, run_name=f"18_vram_pd{per_device}",
         model_path=cfg.model_path, model_type=cfg.model_type, attn_impl=cfg.attn_impl,
-        per_device_train_batch_size=per_device,
-        gradient_accumulation_steps=effective_batch(cfg) // per_device,
+        per_device_train_batch_size=per_device, gradient_accumulation_steps=grad_accum,
         smoke=True, smoke_max_steps=steps, run_guard=False,
     )
     # The probe trains on THIS run's data, so its memory reading reflects this run's
@@ -231,11 +231,16 @@ def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
     except Exception as exc:  # noqa: BLE001 — an OOM is the measurement, not a crash
         err = f"{type(exc).__name__}: {str(exc)[:200]}"
     peak = poller.stop()
+    s_it = read_speed(probe.train_log)
+    eff = effective_batch(probe)
     out = {
         "per_device": per_device,
         "grad_accum": probe.gradient_accumulation_steps,
+        "probe_eff_batch": eff,
         "peak_mib": peak,
-        "s_per_it": read_speed(probe.train_log),
+        "s_per_it": s_it,
+        # The comparable quantity across probes with different effective batches.
+        "s_per_sample": round(s_it / eff, 4) if s_it else None,
         "wall_s": round(time.perf_counter() - t0, 1),
         "ok": err is None,
         "error": err,
@@ -247,16 +252,16 @@ def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
     return out
 
 
-def project_hours(s_per_it: float | None, n_rows: int, cfg: CountAugConfig) -> float | None:
-    """Projected wall-clock for the full run from a measured steady-state s/it.
+def project_hours(s_per_sample: float | None, n_rows: int, cfg: CountAugConfig) -> float | None:
+    """Projected wall-clock for the full run, from a measured seconds-per-SAMPLE.
 
-    One optimizer step consumes ``effective_batch`` rows, and swift's progress counter ticks
-    per optimizer step — so the projection is ``epochs x rows / effective_batch x s/it``.
+    Per sample rather than per optimizer step, so probes whose effective batch differs (a
+    per_device that does not divide 16) stay comparable and the projection is always to the
+    run we would actually launch: ``epochs x rows x s/sample``.
     """
-    if not s_per_it:
+    if not s_per_sample:
         return None
-    steps = cfg.num_train_epochs * n_rows / effective_batch(cfg)
-    return round(steps * s_per_it / 3600.0, 2)
+    return round(cfg.num_train_epochs * n_rows * s_per_sample / 3600.0, 2)
 
 
 __all__ = [
