@@ -260,3 +260,38 @@ HeiCo videos were recorded at Heidelberg University Hospital. The test data was 
 than 5 centers not represented in the training data."* The hidden test comes from centres absent
 from training, and `:772` adds that **all labels are new**. The earlier worry recorded in this
 project was misplaced.
+
+## 🔴 RETRACTION 2026-07-28 — the fine-tuned model does NOT emit a low-count prior
+
+The recommendation above ("do not run 19b as designed") rested on an argument I made without
+evidence: that low-count external data cannot help because our failure band is 5–12. Measuring the
+**actual control** overturns it.
+
+The fine-tuned runs store only `correctness`, so the first analysis used rung 00 (zero-shot) — the
+only run with raw predictions on disk locally. `ep3_full/predictions.json` **does** exist on the
+pod volume and was pulled (619 KB, S3, no GPU). The two models behave oppositely:
+
+| statistic (gold ≥ 5, n=353) | rung 00 zero-shot | **rung 06 ep3 (the control)** |
+|---|---|---|
+| fraction predicting ≤ 3 | **98.9 %** | **33.1 %** |
+| Spearman vs gold | 0.052 | **0.487** |
+| Spearman, full range | −0.012 | **0.661** |
+| maximum prediction anywhere | 7 | **10** |
+| mean bias | −5.62 | **−2.07** |
+
+The confusion matrix has a clear diagonal ridge (gold 5 → mode 5; gold 6 → 5–6; gold 9 → 6–7).
+⇒ **The fine-tuned model tracks the gold and under-counts by ~2, compressing toward the middle.**
+That is a **resolution/calibration** failure, not "it does not know what counting is".
+
+**Consequence for the strategy.** The objection "external data tops out at 3, we fail at 5–12, so it
+cannot help" **does not follow**. A model that already ranks correctly at r≈0.49 in the high band
+and is merely short by ~2 is exactly the kind that sharper low-count supervision could plausibly
+improve. The user's position was right and mine was not.
+
+⚠️ Still open, and now the *right* question: does low-count training move a compression bias, or
+deepen it? That is what 19a should test, and it is answerable cheaply.
+
+🔴 **Repo defect this exposed:** `run_baseline` writes `predictions.json` into the run dir on the
+pod but our committed artifacts keep only `stratified.json`, so **no fine-tuned checkpoint's raw
+answers are reconstructible from the repo alone**. Every "how is it wrong" question has silently
+been answerable only for the zero-shot baseline. `ep3_full/predictions.json` is now local.
