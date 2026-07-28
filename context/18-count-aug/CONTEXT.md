@@ -64,6 +64,30 @@ scale even in SMOKE (a dose gate evaluated on 64 rows tests nothing).
 | L2 realized | stem **0.3989** (requested 0.40), tail-dropout **0.2605** (requested 0.25) over **4,929** `number` rows (4,262 real + 667 minted) |
 | final dataset | 14,415 rows (13,748 real + 667 minted), +4.9% |
 
+### 🔴 The PLAN's speed lever was measured and it was backwards
+
+The PLAN proposed `per_device 4 × grad_accum 4` for rung 06's `1 × 16` — same effective batch,
+on the theory that *"batch-1 wastes the card"*. On the 32 GB RTX 5090, paired inside one
+notebook run against this rung's real `train.jsonl` (`RESULTS_vram.csv`):
+
+| shape | peak GPU | s/it (eff. 16) | 3 epochs |
+|---|---|---|---|
+| **1 × 16** | **22,210 MiB** | **11.56** | **8.68 h** |
+| 2 × 8 | 26,370 MiB | 13.16 | 9.88 h |
+| 4 × 4 | **OOM** (32,076) | — | — |
+| 6 × 2 | **OOM** (31,002) | — | — |
+
+`4 × 4` does not fit at all, and batch-1 is **12% faster and 4.2 GB lighter** than `2 × 8`.
+FRAME sequences are dominated by a variable count of vision tokens, so a micro-batch of 2 pads
+to the longer sample and the padding waste exceeds the parallelism gain; a micro-batch of 1
+pads nothing. ⚠️ Card-specific — it does not generalise to the 80 GB boxes.
+
+⇒ The run goes at rung 06's own shape, which makes it strictly better on all three axes:
+faster, 10.4 GB of headroom instead of 5.7 over a nine-hour run, and **`diff_vs_rung06()`
+returns `{}`** — zero flags differ, so the A/B is purely the two data levers. The PLAN's
+"utilisation, not a recipe change" clause is retracted; the design it was defending got
+cleaner by losing it.
+
 ### 🟢 The finding worth keeping: the independent channel refutes far better than it confirms
 
 The 1,230 co-occurrence binaries are the only channel that does not read `fo_class`. Folding

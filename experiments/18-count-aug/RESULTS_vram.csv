@@ -1,5 +1,7 @@
-probe,per_device,grad_accum,probe_eff_batch,peak_mib,torch_peak_gib,s_per_it,s_per_sample,proj_h,headroom_mib,ok,note
-smoke2,2,8,16,26813,25.55,13.660172,0.8538,10.26,5296,True,the largest micro-batch this card takes
-smoke2,4,4,16,32076,,,,,33,False,"OOM: tried to allocate 3.64 GiB with 27.77 GiB already in use — this is the PLAN's per_device=4"
-smoke2,6,2,12,31002,,,,,1107,False,"OOM: tried to allocate 5.39 GiB with 29.91 GiB already in use"
-smoke3,2,8,16,26788,25.55,14.734671,0.9209,11.06,5321,True,independent repeat of the pd=2 probe — reproduces within 25 MiB
+probe,dataset,per_device,grad_accum,probe_eff_batch,peak_mib,torch_peak_gib,s_per_it,s_per_sample,proj_h,headroom_mib,ok,note
+full,14415-row train.jsonl,1,16,16,22210,21.04,11.557772,0.7224,8.68,10397,True,"CHOSEN — rung 06's own shape; fastest AND lightest, so zero flags differ from the control"
+full,14415-row train.jsonl,2,8,16,26370,25.04,13.159705,0.8225,9.88,6237,True,paired against pd=1 in the SAME notebook run — 12% slower and 4.2 GB heavier
+smoke,80-row export,2,8,16,26813,25.55,13.660172,0.8538,10.26,5794,True,first probe
+smoke,80-row export,4,4,16,32076,,,,,531,False,"OOM: tried to allocate 3.64 GiB with 27.77 GiB already in use — this is the PLAN's per_device=4"
+smoke,80-row export,6,2,12,31002,,,,,1605,False,"OOM: tried to allocate 5.39 GiB with 29.91 GiB already in use"
+smoke,80-row export,2,8,16,26788,25.55,14.734671,0.9209,11.06,5819,True,independent repeat of the pd=2 probe — reproduces within 25 MiB

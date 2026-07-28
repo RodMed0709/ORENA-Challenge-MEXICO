@@ -1,35 +1,44 @@
-"""Rung 18 — the training engine: rung 06's recipe, re-packed onto the card.
+"""Rung 18 — the training engine: rung 06's recipe, unchanged, because the measurement said so.
 
-**The recipe does not move.** Both of this rung's variables are DATA (`mint_zeros.py` and
-`paraphrase.py`); the LoRA hyper-parameters, the schedule, the optimizer, the seed and the
-freeze flags are rung 06's, imported rather than restated. This module exists to hold the
-ONE thing that does change and to prove it changes nothing else.
+**The recipe does not move at all.** Both of this rung's variables are DATA (`mint_zeros.py`
+and `paraphrase.py`); every LoRA hyper-parameter, the schedule, the optimizer, the seed, the
+freeze flags **and now the batch shape** are rung 06's, imported rather than restated.
+``diff_vs_rung06`` returns **{}**.
 
-## The one change, and why it is allowed inside a single-variable run
+## 🔴 The PLAN's speed lever was measured and it was BACKWARDS
 
-Rung 06 ran ``per_device_train_batch_size=1`` with ``gradient_accumulation_steps=16``:
-effective batch **16**, 7.5 h, and a batch of 1 that wastes the card. Rung 18 runs
-``per_device=4`` with ``grad_accum=4``: effective batch **16 — identical**. The learning
-rate, the schedule, the number of optimizer steps and the optimizer trajectory are therefore
-unchanged, and the run stays comparable to rung 06. This is GPU utilisation, not a recipe
-change, and it is the only reason it may ride along.
+The PLAN proposed ``per_device=4 x grad_accum=4`` in place of rung 06's ``1 x 16`` — same
+effective batch 16, on the theory that *"batch-1 wastes the card"*. Measured on the 32 GB
+RTX 5090 against this rung's real ``train.jsonl``, paired inside one notebook run:
 
-``diff_vs_rung06`` is what makes that a measurement instead of a promise: it captures rung
-06's REAL argv from rung 06's own engine and diffs it flag by flag. A hand-typed copy of the
-baseline command would be a claim.
+| per_device | grad_accum | peak GPU | s/it (eff. batch 16) | projected 3 epochs |
+|---|---|---|---|---|
+| **1** | **16** | **22,210 MiB** | **11.56** | **8.68 h** |
+| 2 | 8 | 26,370 MiB | 13.16 | 9.88 h |
+| 4 | 4 | OOM (32,076) | — | — |
+| 6 | 2 | OOM (31,002) | — | — |
+
+**Batch 1 is 12% FASTER and uses 4.2 GB less.** The premise is false on this hardware, and
+the likely mechanism is visible in the data: FRAME sequences are dominated by a variable
+number of vision tokens, so a micro-batch of 2 pads to the longer sample and the padding
+waste exceeds the parallelism gain. A micro-batch of 1 pads nothing.
+
+⇒ The run goes at ``1 x 16``. That is not a compromise, it is strictly better on all three
+axes: faster, 10.4 GB of headroom instead of 5.7 over a 9-hour run, and **zero flags
+differing from rung 06**, so the A/B is purely the two data levers. The utilisation clause
+in the PLAN is retracted.
 
 ⚠️ ``gradient_checkpointing`` stays **True**. Turning it off trades memory for speed and IS
-recipe-adjacent — it changes nothing mathematically, but it is the kind of "while we are
-here" edit that turns a clean A/B into an argument. ``measure_vram`` reports the headroom so
-the decision is made against a number; the default does not move on its own.
+recipe-adjacent — the kind of "while we are here" edit that turns a clean A/B into an
+argument — and there is now no speed problem to solve.
 
 ## Why VRAM is measured rather than assumed
 
-The card is a 32 GB RTX 5090 (sm_120), not the 80 GB dev box the recipe was written on. 8B
-bf16 + LoRA + activations at batch 4 is a fit-or-OOM question, and an OOM three hours into a
-run costs the whole run. ``measure_vram`` answers it in minutes by polling ``nvidia-smi``
-around a real 3-step ``swift sft`` — GPU-total, so it counts the allocator's reserve and the
-fragmentation, not just the tensors torch admits to.
+The card is a 32 GB RTX 5090 (sm_120), not the 80 GB box the recipe was written on. An OOM
+three hours into a run costs the whole run, and — as above — the intuition about which
+configuration is faster was simply wrong. ``measure_vram`` answers both questions in minutes
+by polling ``nvidia-smi`` around a real short ``swift sft``: GPU-total, so it counts the
+allocator's reserve and the fragmentation, not just the tensors torch admits to.
 """
 
 from __future__ import annotations
@@ -64,14 +73,20 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CountAugConfig(ViTLoRAConfig):
-    """Rung 06's config with the batch re-packed. Nothing else is redefined."""
+    """Rung 06's config, pointed at this rung's directory. Nothing else is redefined.
+
+    The batch fields are restated at rung 06's own values ON PURPOSE — as the record that
+    they were probed and left alone, not overlooked. ``assert_recipe_unchanged`` expects the
+    diff to be empty.
+    """
 
     exp_dir: Path = Path("/workspace/repo/experiments/18-count-aug")
     run_name: str = "18_count_aug_v1"
 
-    # 🎯 THE UTILISATION CHANGE — and the product of the two is rung 06's 16.
-    per_device_train_batch_size: int = 4
-    gradient_accumulation_steps: int = 4
+    # MEASURED, not inherited: 1x16 is both faster and lighter than 2x8 here (module
+    # docstring). 4x4 — the PLAN's proposal — does not fit the card at all.
+    per_device_train_batch_size: int = 1
+    gradient_accumulation_steps: int = 16
 
 
 def effective_batch(cfg) -> int:
@@ -113,11 +128,13 @@ def diff_vs_rung06(cfg: CountAugConfig) -> dict[str, tuple]:
 
 
 def assert_recipe_unchanged(cfg: CountAugConfig) -> dict:
-    """GATE — the recipe may differ from rung 06 ONLY in the batch re-pack, and the
-    effective batch must be unchanged. RAISES (RULES §7).
+    """GATE — the recipe may differ from rung 06 ONLY in the batch shape, and the effective
+    batch must be unchanged either way. RAISES (RULES §7).
 
-    The second half is the one that matters: differing in exactly those two flags is
-    worthless if their product moved, because then the learning rate is being applied to a
+    After the probe the diff should be **empty**; the two batch flags stay on the allow-list
+    so the gate keeps working if the shape is ever deliberately changed again. The second
+    half is the one that matters and it holds in both cases: differing in exactly those two
+    flags is worthless if their PRODUCT moved, because then the learning rate is applied to a
     different amount of gradient and the comparison to rung 06 is gone.
     """
     diff = diff_vs_rung06(cfg)
