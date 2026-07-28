@@ -67,11 +67,41 @@ batch size and let the denominator absorb it). Then **assert** that the first-st
 loss of the flag-on run is within a few percent of the control's. If the loss magnitude moved,
 the arm is measuring the LR and the run is void.
 
+## ✅ PRE-FLIGHT — done 2026-07-28, before a single line was written
+
+Three adversarial reviews were run against this PLAN and all three returned **NO-GO as
+written**, converging on one objection: *with `per_device=1`, if `seq2seq_trainer.py:196` is an
+unconditional overwrite, each micro-batch is already normalised by its own answer-token count,
+training is already per-sample, and this rung is a byte-identical no-op.* The PLAN cited lines
+196 and 202 without line **195**, `if num_items_in_batch is None:` — the guard that decides it.
+
+**Settled by measurement** (`RESULTS_preflight.json`, 3 steps, real recipe, 48 `compute_loss`
+calls): the `num_items_in_batch` the trainer receives is **83** in step 1 and **62** in step 2,
+each **exactly** the sum of that step's sixteen micro-batch answer-token counts, and identical
+across all 16 calls within a step. The chain that produces it:
+`trainer.py:5603 _get_num_items_in_batch` counts over the whole accumulation window, gated on
+`model_accepts_loss_kwargs`, which ms-swift sets `True` at `seq2seq_trainer.py:31`.
+
+⇒ **The mechanism is real. The rung has something to change.** Three further facts landed:
+
+- `max_grad_norm` is **1.0** (transformers' default; `_swift_args` never sets it). That is the
+  one channel a loss rescale is *not* invariant to — AdamW absorbs a global scale, the clip does
+  not. **The ±5 % first-step-loss gate is therefore the weaker instrument; gate on the logged
+  `grad_norm` and on the clip-trigger rate as well.**
+- `model_accepts_loss_kwargs` is *already* `True`, so installing a `compute_loss_func` does NOT
+  flip `count_num_items_in_batch` — the hook cannot smuggle in a second variable.
+- `compute_loss_func` is None and `label_smoother` is None at runtime, as assumed.
+
 ## Build order
 
-1. **Confirm the hook.** `swift/plugin/loss_scale/loss_scale.py` — subclass `LossScale`;
-   `compute_loss_func` is checked *before* the default branch (`seq2seq_trainer.py:189`), so it
-   is the cleanest insertion point. Read it before writing anything.
+1. ~~`swift/plugin/loss_scale/loss_scale.py`~~ — **that path does not exist in our ms-swift
+   4.4.1; there is no `swift/plugin/` at all.** The loss-scale plugin is `swift/loss_scale/` —
+   and it is the wrong hook regardless: it multiplies the per-token loss
+   (`seq2seq_trainer.py:167-168`) and leaves the denominator alone, i.e. it *is* the ~3.3×
+   magnitude-shrink trap below. Use **`compute_loss_func`**, threaded through `_prepare_inputs`
+   (`inputs['compute_loss_func'] = self.compute_loss_func`) and checked before the default
+   branch (`seq2seq_trainer.py:189`); it receives the per-token loss vector, the labels and
+   `num_items_in_batch`.
 2. `_models/sample_norm_loss.py` — the weight function. Flag OFF must be **byte-identical**
    arithmetic, not merely a similar number.
 3. `_tools/verify_gradient_share.py` — recompute the per-format gradient share **under the new
@@ -110,7 +140,19 @@ reported as one.
 
 ## Cost
 
-~8.5 h training (rung 18's measured 11.5 s/it at `1×16`, 6 epochs) + 3–6 per-epoch evals.
+🔴 **The original figure was wrong by 2×.** 14,415 rows ÷ effective batch 16 = **900.9
+steps/epoch**, and 3 × 900.9 = 2703 — which is `checkpoint-2703`, rung 18's own ep3 artefact,
+so the arithmetic is checkable against a file. At rung 18's measured 11.56 s/it:
+
+| epochs | steps | training |
+|---|---|---|
+| 3 (rung 18's, epoch-matched) | 2,703 | **8.68 h** |
+| 6 (as this PLAN proposed) | 5,406 | **17.36 h** |
+
+Plus a merge (~7 min) and a full eval (~31 min) **per epoch**. The 6-epoch version is a ~21 h
+commitment, not the "~8.5 h" written here first. ⚠️ And epoch 6 has no control: rung 18 stops
+at 3, so epochs 4–6 would be read against nothing (RULES §6b). **Three epochs is both the
+cheaper and the only epoch-matched option.**
 
 ## What this rung is NOT
 
