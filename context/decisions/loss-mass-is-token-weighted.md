@@ -69,6 +69,22 @@ the dose in *gradient*.
   from 100% to ~1%. Same physics, sixty times the magnitude — which is a large part of why
   scaffold-SFT is a published wash.
 
+## ✅ PRECONDITION DISCHARGED (2026-07-28) — confirmed in ms-swift's own source
+
+The note originally flagged that nobody had traced ms-swift's reduction path, and that the
+check gated any action. It has been read:
+
+```
+swift/trainers/seq2seq_trainer.py:196   num_items_in_batch = (labels != -100).sum()
+swift/trainers/seq2seq_trainer.py:202   loss = outputs.loss.sum() / num_items_in_batch
+```
+
+`labels != -100` is exactly the unmasked ANSWER tokens of the whole effective batch, so the
+reduction is sum-of-per-token-losses ÷ total-answer-tokens — token-mean, confirmed at the
+source rather than inferred from the `transformers` changelog. Neither branch that could
+re-normalise is taken in our configuration: `compute_loss_func` is None and `label_smoother`
+is None. **The finding stands and is now actionable** — see `experiments/21-loss-mass/PLAN.md`.
+
 ## The fix, if the precondition holds
 
 ms-swift exposes `--loss_scale` with a plugin hook (`swift/plugin/loss_scale/loss_scale.py`,
