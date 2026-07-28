@@ -140,6 +140,29 @@ replicated that paper's count *format* and got an ID-only lift; **we never repli
 ⚠️ From our own corrected ficha: do **not** add a pointing objective — Table I shows counting-only
 **0.26** beats counting+pointing **1.52** (5.8×), and the opposite claim was retracted 2026-07-27.
 
+## Measured 2026-07-28 — CholecInstanceSeg's range is narrower than reported
+
+All 41,933 annotations, zero GPU, 67 MB download (the 22 GB image set is NOT needed to count).
+
+| instances/frame | frames | share |
+|---|---|---|
+| 0 | 4,914 | **11.7 %** |
+| 1 | 14,794 | 35.3 % |
+| 2 | 16,715 | 39.9 % |
+| 3 | 5,509 | 13.1 % |
+| 4 | **1** | 0.0 % |
+
+🔴 **The effective ceiling is 3, not the 4 reported** — exactly one frame reaches 4. Our accuracy
+is zero in the **5–12** range, so this dataset **cannot teach the range we fail at**. Read any gain
+from it as "sharpens 0–3", never as a general counting fix.
+
+🟢 **What it uniquely offers: 4,914 zero-object frames.** Our training set contains **no numeric
+gold equal to zero anywhere** — the model has never seen "none" as an admissible count. That is a
+distinct, cheap gap this dataset closes and nothing else in the sweep does.
+
+Classes are all instruments (`grasper` 40,172, `hook` 19,429, `bipolar`, `irrigator`, `clipper`,
+`scissors`, `snare`) — no foreign objects, as expected. Reproduce with `_tools/cholecinstanceseg_probe.py`.
+
 ## Gates (all must pass before any number is read)
 
 | gate | what it proves |
