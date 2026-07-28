@@ -1,6 +1,6 @@
 ---
 question: Is the shipped submission container a source of lost points independent of model quality?
-verdict: PARTIALLY — one real defect fixed (a trailing period makes an otherwise-correct `number`/`binary` answer auto-incorrect; probe 16a measured 87% on off-template phrasings), and one theoretical risk measured to zero (0 adversarial-signal hits across 146,004 committed answers, so no output filter is warranted or wanted)
+verdict: PARTIALLY — one real defect fixed (a trailing period makes an otherwise-correct `number`/`binary` answer auto-incorrect, and the shipped container did no normalisation at all), and one theoretical risk measured to zero (0 adversarial-signal hits across 146,004 committed answers, so no output filter is warranted or wanted). ⚠️ The defect's trigger is an OUT-OF-DISTRIBUTION (class, question) pair, NOT paraphrasing: 16d measures 0.0000 illegal on real corpus questions across six variants and all three checkpoints, so the chance submission 01 actually lost points this way is low
 status: MEASURED
 date: 2026-07-28
 measured_in: experiments/06-vit-lora/_tools/submission/test_normalize_answer.py + a scan of 34 predictions.json files on the pod
@@ -15,8 +15,9 @@ measured_in: experiments/06-vit-lora/_tools/submission/test_normalize_answer.py 
 ## Why the container was audited at all
 
 Submission 01 shipped rung 06 **ep2** (`checkpoint-1720`). Probe 16a measured the **ep3**
-checkpoint emitting `"1."` — with a trailing period — on **86.7% (ID) / 87.5% (OOD)** of `number`
-questions phrased outside the corpus's own templates, against a base-model rate of **0.0000**.
+checkpoint emitting `"1."` — with a trailing period — on **86.7% (ID) / 87.5% (OOD)** of the
+`number` questions it asked, against a base-model rate of **0.0000**. (Those questions turned out
+to be out-of-distribution rather than merely reworded — see the correction below.)
 Those are different artifacts, so the shipped one had never been audited, and the container is
 the last thing standing between the model and the scorer.
 
