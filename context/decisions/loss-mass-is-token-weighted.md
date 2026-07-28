@@ -55,11 +55,9 @@ the dose in *gradient*.
   12–15% of the loss mass and a 1/5-to-1/15 discount. **Measured, it is 20.8% and 1.64×.**
   Real and material; not the order-of-magnitude effect the estimate implied. Quote the
   measurement, never the estimate.
-- **The reduction path was not read in our ms-swift version.** The `num_items_in_batch`
-  behaviour is documented for `transformers` >=4.46 and we pin 4.57, but nobody has traced
-  ms-swift's `loss_scale='default'` through to the reduction to confirm it is not re-normalised
-  somewhere. **That check is the precondition for acting on this note** and it is minutes of
-  reading, no GPU.
+- ~~The reduction path was not read in our ms-swift version.~~ ✅ **DISCHARGED the same day —
+  see the section below.** Left visible rather than deleted: this note was written as a strong
+  prior with an unmet precondition, and the shape of that is worth keeping.
 - **Not a claim that equalising it helps.** Up-weighting `number` takes gradient away from
   `fo_class`, which is 71% of `object_recognition` — the other scored bucket. This is a
   reallocation, not a free lunch, and the arm must be read on BOTH buckets.
