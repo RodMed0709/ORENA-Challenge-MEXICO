@@ -217,15 +217,16 @@ def regressions(scored: dict, control: str = "v0_verbatim", min_delta: float = 0
     rows = []
     for key, val in scored.items():
         mdl, fmt, var = key.split("|")
-        if mdl != "ft":
-            continue
+        if mdl == "base":
+            continue  # base is the reference, not a subject
         base = scored.get(f"base|{fmt}|{var}", {}).get("illegal_rate")
-        own0 = scored.get(f"ft|{fmt}|{control}", {}).get("illegal_rate")
+        own0 = scored.get(f"{mdl}|{fmt}|{control}", {}).get("illegal_rate")
         d_base = None if base is None else val["illegal_rate"] - base
         d_v0 = None if own0 is None else val["illegal_rate"] - own0
         if (d_base is not None and d_base >= min_delta) or (d_v0 is not None and d_v0 >= min_delta):
             rows.append(
                 {
+                    "model": mdl,
                     "fmt": fmt,
                     "variant": var,
                     "ft_illegal": round(val["illegal_rate"], 4),
