@@ -68,16 +68,36 @@ a **probe or auxiliary task, never direct supervision**.
 | 1 | **SAR-RARP50** | **16,250** | ⚠️ semantic → connected components | in-vivo **human** robotic prostatectomy | ⚠️ license unverified — UCL RDR 403s every automated fetch |
 | 2 | **Gauze (Sánchez-Brizuela)** | 4,003 | ⚠️ binary masks → CC | laparoscopic **simulator, pig organs** | ✅ **CC BY 4.0**, Zenodo, zero friction |
 
-**SAR-RARP50 is the find.** Classes `4 suturing needle`, `5 thread`, `8 clamps`, `9 catheter` are
-foreign objects by the challenge's own definition; `1,2,3,6,7` are instruments. It is the **only
-public dataset annotating needle, suture thread and clip/clamp pixels in in-vivo human
-endoscopy**. `clamps` occupies 0.15% ± 0.19% of pixels — small, metallic, discrete: the same
-visual regime as our clips.
+**SAR-RARP50 has the right classes** — `4 suturing needle`, `5 thread`, `8 clamps`, `9 catheter`
+are foreign objects by the challenge's own definition (`1,2,3,6,7` are instruments). It is the
+only public dataset annotating needle, suture thread and clamp pixels in in-vivo human endoscopy.
+🟢 **License resolved: CC BY-NC-SA 4.0** (figshare API, 2026-07-28) — no ND, eligible.
 
-⚠️ **Its decisive unknown is measurable without a GPU:** whether *multiple* clamps co-occur per
-frame. If `clamps` is almost always 0 or 1, this is **presence, not counting**, and the dataset is
-worth far less than its rank suggests. Settle that from the annotation masks alone before
-downloading video.
+🔴 **MEASURED 2026-07-28 — it does NOT yield counts. Killed as counting supervision.**
+
+One video (`video_34`, 101 masks, 241 MB, zero GPU) settles it. The masks are **semantic**, so an
+instance count needs connected components — and connected components over-counts here:
+
+| class | frames with ≥2 components | 2nd/1st component size (median) | median 2nd-component px |
+|---|---|---|---|
+| needle | 48 / 101 | 0.406 | 5,937 |
+| thread | 78 / 101 | 0.406 | 9,096 |
+| **clamps** | **17 / 101** | 0.518 | 3,285 |
+| catheter | 14 / 101 | 0.371 | 2,631 |
+
+A second component at 40 % of the first and thousands of pixels is not a speck — but it is not a
+second object either. It is the signature of **one elongated object split by an occluder**. Domain
+confirms it: SAR-RARP50 is the **DVC suturing phase**, where there is **one needle and one
+thread**. A naive read of the raw histogram gives "1–9 foreign objects per frame, mode 6" — that
+number is an artifact and must not be quoted.
+
+And `clamps`, the closest analogue to our clips, is **0 or 1 in 84 of 101 frames, max 2** — the
+degenerate case the pre-check existed to catch. ⇒ SAR-RARP50 supplies **presence of foreign
+objects, not counts of them**.
+
+⇒ **ROBUST-MIS is promoted to first**, for exactly the reason SAR-RARP50 fails: its annotations
+are **instance-level by construction** (each object carries a numbered ID), so the count is
+`unique(mask) − 1` with nothing inferred. Reproduce with `_tools/sar_rarp50_probe.py`.
 
 ### Tier B — countable INSTRUMENTS: probe or auxiliary task only
 
