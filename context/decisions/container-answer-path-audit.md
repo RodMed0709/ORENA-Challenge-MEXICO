@@ -79,6 +79,20 @@ container**, and nothing asserts the two paths agree. The container's docstring 
 "Mirrors QwenFrameEngine.predict()"; that claim is now one function out of date in the other
 direction, and should be kept honest whenever either side changes.
 
+## ⚠️ CORRECTION (2026-07-28) — the trigger is OOD questions, not paraphrasing
+
+Probe 16d asked **real corpus questions** under six surface variants across base, `ep2_shipped`
+and ep3: **0.0000 illegal answers, every model, every variant, every format** (smoke, n=6/format;
+full pending). 16a's 87% came from applying one *synthetic* template across all eight classes,
+five of which the model has almost never been asked to count (gallstone 4 training examples,
+specimen bag 11, silicone loop 17, needle 19). Those five score **1.0000** illegal; `Clip`
+(2,071 examples) scores 0.654.
+
+⇒ **The defect fires on out-of-distribution (class, question) pairs, not on rewording.** The fix
+below is still correct and still free, but the probability that submission 01 actually walked
+into it is **much lower** than this note first implied. The honest exposure: if the organizers
+ask a count for a class we barely trained on, we may emit an auto-incorrect string.
+
 ## ⚠️ What is still unmeasured
 
 **Whether ep2 — the actually-shipped checkpoint — exhibits the trailing-period defect.** 16a

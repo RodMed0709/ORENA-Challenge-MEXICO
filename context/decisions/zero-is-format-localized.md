@@ -76,7 +76,29 @@ noise of the minting proposal. Dose and sampling per [[the-negatives-dosing]] re
 adversarially sampled toward `Clip` and the never-seen classes, verified against the 1,008
 co-occurrence binaries, scored on both axes.
 
-### 3. 🔴 The bigger finding: fine-tuning introduced a FORMAT FRAGILITY the base does not have
+### 3. 🔴 Fine-tuning introduced a FORMAT FRAGILITY — ⚠️ NARROWER THAN FIRST WRITTEN
+
+> **CORRECTION (2026-07-28, from probe 16d).** This section first read *"on off-template
+> phrasings ft emits `1.` on 87% of number questions"*. **Paraphrasing is not the trigger.**
+> 16d asked the model REAL corpus questions under six surface variants and measured
+> **0.0000 illegal answers for base, ep2 and ep3, on every variant and every format.**
+> The real trigger is the question being **out of distribution**, which 16a's own rows show:
+
+| what was asked | illegal rate |
+|---|---|
+| class `Clip` (2,071 training examples) | 0.654 |
+| class `Sponge` (275) | 0.704 |
+| External Drain / Gallstone / Needle / Silicone Loop / Specimen (72 / 4 / 19 / 17 / 26) | **1.0000** |
+| ABSENT arm | 0.954 |
+| PRESENT arm | 0.788 |
+
+> So the defect fires when the (class, question) pair is rare or unseen in training — not when
+> the wording moves. 16a reached 87% because it applied one synthetic template across all eight
+> classes, including five the model has almost never been asked to count.
+> The exposure that remains is real but narrower: **if the organizers ask a count for a class we
+> barely trained on, we may emit an auto-incorrect string.** It is not a general paraphrase
+> fragility.
+
 
 On question phrasings outside the corpus templates, `ft` emits **`"1."`** — with a trailing
 period — on **86.7% (ID) / 87.5% (OOD)** of `number` questions. `Number.verify` gates on
