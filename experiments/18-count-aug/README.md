@@ -93,20 +93,32 @@ that already exist and do not touch each other.
 ⚠️ This does **not** recover a factorial design — an L1×L2 interaction is unattributable. It
 means a null is diagnosable rather than mute.
 
-## Speed — utilisation only, recipe untouched
+## 🔴 Speed — the PLAN's lever was measured, and it was backwards
 
-Rung 06: `per_device 1 × grad_accum 16` ⇒ effective batch 16, 7.5 h, batch-1 wastes the card.
-Rung 18: **`4 × 4` ⇒ effective batch 16 — identical**, so the learning rate, schedule, step
-count and optimizer trajectory are unchanged. `assert_recipe_unchanged` proves it against rung
-06's REAL argv (built by rung 06's own `_swift_args`) **and** asserts the product is unchanged
-— differing in exactly those two flags is worthless if the effective batch moved.
+The PLAN proposed `per_device 4 × grad_accum 4` in place of rung 06's `1 × 16` (same effective
+batch 16) on the theory that *"batch-1 wastes the card"*. Measured on the 32 GB RTX 5090
+against this rung's real `train.jsonl`, paired inside one notebook run (`RESULTS_vram.csv`):
 
-`measure_vram` reads peak GPU-total memory around real `swift sft` steps at
-`per_device ∈ {2,4,6}` before the card is committed. Peak memory is a function of the
-micro-batch alone, so a `per_device` that does not divide 16 is still a valid memory probe;
-the timing is normalised to seconds-per-sample so the probes stay comparable.
-`gradient_checkpointing` stays **True** — turning it off is recipe-adjacent and does not ride
-along for free.
+| per_device × grad_accum | peak GPU | s/it (eff. 16) | 3 epochs |
+|---|---|---|---|
+| **1 × 16** ⬅ chosen | **22,210 MiB** | **11.56** | **8.68 h** |
+| 2 × 8 | 26,370 MiB | 13.16 | 9.88 h |
+| 4 × 4 | **OOM** (32,076) | — | — |
+| 6 × 2 | **OOM** (31,002) | — | — |
+
+`4 × 4` does not fit the card, and **batch-1 is 12% faster and 4.2 GB lighter** than `2 × 8`.
+FRAME sequences are dominated by a variable number of vision tokens, so a micro-batch of 2
+pads to the longer sample and the padding waste exceeds the parallelism gain; a micro-batch of
+1 pads nothing.
+
+⇒ **The run goes at rung 06's own `1 × 16`** — faster, 10.4 GB of headroom instead of 5.7 over
+a 9-hour run, and **`diff_vs_rung06()` returns `{}`**, so the A/B is purely the two data
+levers. `assert_recipe_unchanged` proves that against rung 06's REAL argv (built by rung 06's
+own `_swift_args`) and separately asserts the effective batch is unchanged — differing in
+exactly those two flags would be worthless if their product had moved.
+
+`gradient_checkpointing` stays **True**: turning it off is recipe-adjacent, and there is now
+no speed problem to solve.
 
 ## Files
 

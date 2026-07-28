@@ -87,6 +87,25 @@ schedule and optimizer trajectory stay valid and the run stays comparable to run
 GPU utilisation, **not a recipe change**, and it is the only reason it is allowed in a
 single-variable run.
 
+> 🔴 **RETRACTED 2026-07-28 — measured, and backwards.** On the 32 GB RTX 5090, against this
+> rung's real `train.jsonl`, paired inside one notebook run (`RESULTS_vram.csv`):
+>
+> | per_device × grad_accum | peak GPU | s/it (eff. 16) | 3 epochs |
+> |---|---|---|---|
+> | **1 × 16** (rung 06's own) | **22,210 MiB** | **11.56** | **8.68 h** |
+> | 2 × 8 | 26,370 MiB | 13.16 | 9.88 h |
+> | 4 × 4 | **OOM** (32,076) | — | — |
+> | 6 × 2 | **OOM** (31,002) | — | — |
+>
+> `4 × 4` does not fit the card at all, and **batch-1 is 12% FASTER and 4.2 GB lighter** than
+> `2 × 8`. *"Batch-1 wastes the card"* is false here: FRAME sequences are dominated by a
+> variable number of vision tokens, so a micro-batch of 2 pads to the longer sample and the
+> padding waste exceeds the parallelism gain. A micro-batch of 1 pads nothing.
+>
+> ⇒ **The run goes at rung 06's own `1 × 16`.** Strictly better on all three axes — faster,
+> 10.4 GB of headroom instead of 5.7 over a 9-hour run, and **zero flags differing** from the
+> control, so the A/B is purely the two data levers. `diff_vs_rung06()` returns `{}`.
+
 - Keep: LoRA r=8 α=32 dropout 0.1, `all-linear`, `freeze_vit=False`, `freeze_aligner=True`,
   lr 2e-5 cosine, warmup 0.03, 3 epochs, bf16, sdpa, `gradient_checkpointing=True`, seed 42.
 - **Measure VRAM at `per_device` ∈ {2,4,6} on a few steps before committing.** 32 GB card, 8B bf16
