@@ -189,6 +189,40 @@ that is off-limits**. Stages 1 and 2 are procto/rectal, i.e. videos already insi
 split. So the usable pool is **Training + Stage 1 + Stage 2**, not the Training release alone.
 🔴 The prohibition narrows to exactly one folder: `syn21891314/Stage_3`.
 
+## 🔴 MEASURED 2026-07-28 — ROBUST-MIS does not reach our failure range either, and that closes the pattern
+
+683 masks over 2 of 16 training videos (Synapse download permission granted; the probe is
+`_tools/robustmis_probe.py`). Counts are `unique(mask) − 1` — instance IDs, nothing inferred.
+
+| count | ROBUST-MIS | our `number` gold |
+|---|---|---|
+| 1 | **61.9 %** | 35.2 % |
+| 2 | 30.7 % | 25.2 % |
+| 3 | 6.7 % | 13.2 % |
+| 4 | 0.4 % | 9.6 % |
+| 5 | 0.1 % | 7.2 % |
+| 6–12 | **0 %** | **9.7 %** |
+
+ROBUST-MIS is 92.6 % concentrated at 1–2 and effectively dies at 3. Our gold carries a long tail:
+**26.7 % of questions are ≥4**, and the 5–12 band where our accuracy is zero is **17.9 %** of it.
+ROBUST-MIS puts **0.5 %** there. (Consistent with the ROBUST-MIS paper's own ">70 % of frames have
+1–2 instruments".) ⚠️ Two of sixteen videos — the shape is pronounced and matches the published
+description, but a full run should confirm before this is treated as final.
+
+🔴 **This closes a pattern, not just a dataset.** All three instance-annotated candidates —
+SAR-RARP50, CholecInstanceSeg (max 3), ROBUST-MIS (max 5, 92.6 % at 1–2) — concentrate at 1–3 and
+none reaches 5–12. That is not bad luck with one source: **publicly annotated surgical scenes
+simply do not contain many simultaneous objects.** The external-counting lever, as scoped, cannot
+teach the range that owns our deficit.
+
+**What survives, and it is narrow but real:** CholecInstanceSeg's **4,914 zero-object frames**. Our
+training set contains **no numeric gold equal to zero anywhere**, and ROBUST-MIS has none either
+(0 zeros in 683 masks). That is a distinct, cheap gap and the only one external data clearly closes.
+
+⇒ **Recommendation: do not run 19b as designed.** Either re-scope rung 19 to the zero-count gap
+alone (small, honest, cheap), or move to the other step-change path — a bigger/newer backbone,
+which today's latency finding (0.79 s/q against a 5.06 ceiling, 6.4× headroom) unblocked.
+
 ## Gates (all must pass before any number is read)
 
 | gate | what it proves |
