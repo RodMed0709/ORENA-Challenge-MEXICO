@@ -1,7 +1,7 @@
 ---
 question: Where is our largest scoring gap against the external reference?
-verdict: `aggregation` — a 4B beats us by 12.5 pts there while we lead `object_recognition` by +14.9
-status: MEASURED
+verdict: `aggregation` — a 4B beats us there, CONFIRMED on identical questions 2026-07-27. ⚠️ The "+14.9 lead on `object_recognition`" is RETRACTED — on the same set it is a dead tie.
+status: MEASURED (partially RETRACTED 2026-07-27)
 date: 2026-07-19
 measured_in: results/summary.csv + the public leaderboard's single participant row
 question_derived: true
@@ -43,10 +43,34 @@ questions. Same observable, different cause.
 | **rung 06 ep2** | **0.4188** | **0.6373** | **0.5281** | **0.5667** |
 | **participant (4B)** | **0.5438** | **0.4888** | **0.5163** | — |
 
-## 🔴 The finding: we are not "close", we are SPLIT
+## ⚠️ RETRACTION 2026-07-27 — read this before the section below
 
-- `object_recognition` — **we lead by +14.9 pts**
-- `aggregation` — **we trail by −12.5 pts, to a 4B model**
+When this note was written we had **no platform score of our own**, so the comparison below put our
+**local val** number against their **platform** number. Submission 01 gave us ours, on the *same
+2000 questions* (proved by the shared denominators 754 and 1246 — see
+[[leaderboard-metric-vs-our-headline]]):
+
+| | ours (platform) | 4B (platform) | what this note assumed for us |
+|---|---|---|---|
+| `object_recognition_id` | **0.4872** (607/1246) | 0.4888 (609/1246) | 0.6373 ← *local val* |
+| `aggregation_id` | 0.4549 (343/754) | 0.5438 (410/754) | 0.4188 ← *local val* |
+| headline | **0.4710** | **0.5163** | 0.5281 |
+
+🔴 **"We lead `object_recognition` by +14.9" is FALSE.** On identical questions it is **607 vs 609
+— a two-question tie.** The apparent lead was our local val being easier, nothing else.
+
+✅ **What SURVIVES, and is now stronger:** the `aggregation` trail is real and is measured on
+identical questions — **343 vs 410 of 754, a 67-question deficit**. And the overall picture is
+worse than this note claimed: we do not "win one and lose one", we **lose overall to a 4B by 4.5
+points**, with the entire margin in `aggregation`.
+
+⇒ The strategic reading below ("we are SPLIT") is wrong. We are not split; we are behind, in one
+bucket. The prescription — attack `aggregation` — is unchanged and better supported.
+
+## ~~🔴 The finding: we are not "close", we are SPLIT~~ (superseded, kept as the reasoning record)
+
+- ~~`object_recognition` — **we lead by +14.9 pts**~~ ← **RETRACTED**, see above
+- `aggregation` — **we trail by −12.5 pts, to a 4B model** ← confirmed, now −8.9 on identical questions
 
 `aggregation` is **50% of the exam** and is our known weak bucket. A model less than half our
 size does it 12.5 points better.
