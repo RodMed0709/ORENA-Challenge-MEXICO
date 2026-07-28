@@ -69,6 +69,7 @@ None yet.
 | 260727-mg7 | Correct three verified repo discrepancies found during the rung-16 literature sweep | 2026-07-27 | b4642e4 | Complete — v05 multi-task claim retracted at 6 sites, `~56%` token claim retired, class-list landmine ruled as RULES §8b | [260727-mg7-correct-three-verified-repo-discrepancie](./quick/260727-mg7-correct-three-verified-repo-discrepancie/) |
 | 260727-n87 | Harden the FRAME submission container and prove it on the official template fixture | 2026-07-27 | 7d7a451 | Complete — first answer.json this container has ever produced; batch.json layout now read | [260727-n87-harden-the-frame-submission-container-ag](./quick/260727-n87-harden-the-frame-submission-container-ag/) |
 | 260727-qbn | Land the submission-forensics findings in the brain | 2026-07-27 | 8242285 | Complete — metric decoded, aggregation lead retracted, OOD provenance recorded | [260727-qbn-land-the-submission-forensics-findings-i](./quick/260727-qbn-land-the-submission-forensics-findings-i/) |
+| 260728-oda | Class-balanced (macro) F1 for `fo_class` in `frame.metrics` — the metric exact-set accuracy hides | 2026-07-28 | 0674f02 | Complete — reproduces probe0's rung 06 ep3 numbers exactly (n=920, exact 0.6391, macro 0.5116) | [260728-oda-add-class-balanced-macro-f1-for-fo-class](./quick/260728-oda-add-class-balanced-macro-f1-for-fo-class/) |
 
 ## Session Continuity
 
