@@ -472,6 +472,130 @@ print("\\nwrote", RUN_DIR / "eyeball_40.csv",
 '''
 
 
+OUT_16D = HERE.parent / "16d_format_audit.ipynb"
+
+MD_16D = """# 16d — the systematic finder: where does OUR fine-tuning emit SDK-illegal answers?
+
+**Where this came from.** 16a asked an off-template question and the fine-tuned checkpoint
+answered `"1."` — trailing period — on **87%** of `number` questions. `Number.verify` gates on
+`str.strip().isdigit()`, so all of those are **auto-incorrect**. Base: **0.0000**. We created it.
+That was luck. This notebook makes it a sweep.
+
+🟢 **It needs no ground truth.** "Would the SDK's verifier accept this string?" is a property of
+the model's OUTPUT alone, so any phrasing can be audited without annotating anything.
+
+🔴 **And that is why the defect was invisible.** Our scored eval only ever asks the corpus's own
+templates, so a fragility living outside them cannot appear in any number we report — by
+construction. The hidden test is the organizers' generator, not ours.
+
+**Design.** Real corpus questions, asked under meaning-preserving surface variants (`v0` is
+verbatim = the control). Per (model × format × variant): the illegal-answer rate and *which*
+violation occurred. The product is `regressions()` — the list of places where `ft` is more
+illegal than `base`, or more illegal than its own `v0`.
+
+⚠️ **This measures format legality, not correctness.** Every illegal answer is scored wrong
+regardless of whether the model knew the answer, so the rate is a **floor** on lost points.
+"""
+
+CODE_16D_CONFIG = '''\
+# --- parameters (RAW LITERALS ONLY; papermill injects overrides directly below) --
+SMOKE = True
+SEED  = 0
+
+RUN        = "16d_format_audit_v1"
+DATA_ROOT  = "/workspace/orena-data"
+MODEL_BASE = "/workspace/models/qwen3-vl-8b"
+MODEL_FT   = "/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580"
+
+FORMATS      = ("number", "binary", "fo_class")   # the exact-match formats; judge formats have no gate to mirror
+N_PER_FORMAT_SMOKE = 6
+N_PER_FORMAT_FULL  = 40
+MAX_NEW_TOKENS     = 32
+'''
+
+CODE_16D_DERIVE = '''\
+# --- derived (MUST live below the parameters cell) -------------------------------
+DATA_ROOT = Path(DATA_ROOT)
+RUN_DIR   = Path.cwd() / "runs" / RUN
+MODELS    = {"base": Path(MODEL_BASE), "ft": Path(MODEL_FT)}
+N_PER_FORMAT = N_PER_FORMAT_SMOKE if SMOKE else N_PER_FORMAT_FULL
+RUN_DIR.mkdir(parents=True, exist_ok=True)
+print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| n/format:", N_PER_FORMAT)
+'''
+
+CODE_16D_BUILD = '''\
+# --- select real corpus questions per format (gold not needed — see the header) ---
+from frame.config import BaselineConfig
+from frame.data import load_frame_items
+import format_audit as fa
+
+items = load_frame_items(BaselineConfig(data_root=DATA_ROOT), splits=("test",))
+items_by_fmt = {f: fa.select_by_format(items, f, N_PER_FORMAT, seed=SEED) for f in FORMATS}
+
+for f, v in items_by_fmt.items():
+    assert v, f"no items selected for format {f!r}"
+    print(f"{f:10s} n={len(v):3d} videos={len({i.video_id for i in v}):3d}")
+n_calls = sum(len(v) for v in items_by_fmt.values()) * len(fa.VARIANTS) * len(MODELS)
+print("variants:", list(fa.VARIANTS), "| total model calls:", n_calls)
+
+# show the variants on one real question so the transformation is reviewable, not implicit
+_q = str(items_by_fmt["number"][0].request.question)
+for name, fn in fa.VARIANTS.items():
+    print(f"  {name:14s} {fn(_q)[:90]}")
+'''
+
+CODE_16D_RUN = '''\
+# --- run both models over every (question x variant) -----------------------------
+import gc, time
+from frame.engine import QwenFrameEngine
+
+rows = []
+for tag, path in MODELS.items():
+    t0 = time.time()
+    eng = QwenFrameEngine(BaselineConfig(data_root=DATA_ROOT, model_path=path,
+                                         max_new_tokens=MAX_NEW_TOKENS))
+    eng.load()
+    rows += fa.run_audit(eng, items_by_fmt, model_tag=tag)
+    print(f"{tag}: done in {time.time()-t0:.0f}s")
+    del eng; gc.collect(); torch.cuda.empty_cache()
+'''
+
+CODE_16D_REPORT = '''\
+# --- the product: where fine-tuning made us MORE illegal --------------------------
+import pandas as pd, json
+
+df = pd.DataFrame(rows); df.to_csv(RUN_DIR / "rows.csv", index=False)
+res = fa.score(rows); (RUN_DIR / "score.json").write_text(json.dumps(res, indent=2))
+
+tbl = pd.DataFrame(res).T[["n", "illegal_rate", "top_violation"]]
+tbl.index = pd.MultiIndex.from_tuples([tuple(k.split("|")) for k in tbl.index],
+                                      names=["model", "fmt", "variant"])
+print("=== illegal-answer rate (lower is better; this is a FLOOR on lost points) ===")
+print(tbl.unstack("model")["illegal_rate"].round(4).to_string())
+print()
+print("=== REGRESSIONS: ft more illegal than base, or than its own v0 ===")
+regs = fa.regressions(res)
+if regs:
+    print(pd.DataFrame(regs).to_string(index=False))
+    pd.DataFrame(regs).to_csv(RUN_DIR / "regressions.csv", index=False)
+else:
+    print("none above the 0.10 threshold — a faithful negative, and worth recording as one")
+print()
+print("=== violation histogram (ft only) ===")
+print(df[(df.model == "ft") & (~df.sdk_legal)].violation.value_counts().to_string())
+'''
+
+CODE_16D_INSPECT = '''\
+# --- the fixable list: one real example per (fmt, violation) ----------------------
+bad = df[(df.model == "ft") & (~df.sdk_legal)]
+for (f, v), g in bad.groupby(["fmt", "violation"]):
+    r = g.iloc[0]
+    print(f"[{f} / {v}]  n={len(g)}")
+    print(f"    Q: {r.question[:100]}")
+    print(f"    A: {r.raw!r}")
+'''
+
+
 def main() -> None:
     nb = {
         "cells": [
@@ -529,6 +653,24 @@ def main() -> None:
     }
     OUT_16B.write_text(json.dumps(nb16b, indent=1), encoding="utf-8")
     print("wrote", OUT_16B)
+
+    nb16d = {
+        "cells": [
+            cell_md(MD_16D, "t-title-16d"),
+            cell_code(CODE_BOOTSTRAP, "c-bootstrap-16d"),
+            cell_code(CODE_16D_CONFIG, "c-config-16d", tags=["parameters"]),
+            cell_code(CODE_16D_DERIVE, "c-derive-16d"),
+            cell_code(CODE_16D_BUILD, "c-build-16d"),
+            cell_code(CODE_16D_RUN, "c-run-16d"),
+            cell_code(CODE_16D_REPORT, "c-report-16d"),
+            cell_code(CODE_16D_INSPECT, "c-inspect-16d"),
+        ],
+        "metadata": nb["metadata"],
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    OUT_16D.write_text(json.dumps(nb16d, indent=1), encoding="utf-8")
+    print("wrote", OUT_16D)
 
 
 if __name__ == "__main__":
