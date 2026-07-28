@@ -249,7 +249,11 @@ def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
     except Exception as exc:  # noqa: BLE001 — an OOM is the measurement, not a crash
         err = f"{type(exc).__name__}: {str(exc)[:200]}"
     peak = poller.stop()
-    s_it = read_speed(probe.train_log)
+    # 🔴 A FAILED probe has no speed. pd=6 OOMed before completing a step, `read_speed`
+    # picked up a stale tqdm value (0.70 s/it) and it projected the full run at 0.71 h —
+    # a nonsense number sitting in the results table next to the real ones. A measurement
+    # that did not happen must read as absent, never as fast.
+    s_it = read_speed(probe.train_log) if err is None else None
     eff = effective_batch(probe)
     out = {
         "per_device": per_device,
