@@ -833,7 +833,12 @@ def count_rank_report(
             return out
         work = ok.copy()
         work["_vkey"] = work.apply(_video_key, axis=1)
-        groups = [d for _, d in work.groupby("_vkey")]
+        # Held as plain numpy per video: the bootstrap resamples VIDEOS, and concatenating
+        # arrays is orders of magnitude cheaper than concatenating 2000 DataFrames.
+        groups = [
+            (d["_pred"].to_numpy(dtype=float), d["_gold"].to_numpy(dtype=float))
+            for _, d in work.groupby("_vkey")
+        ]
         out["n_videos"] = len(groups)
         if len(groups) < 3:
             return out
@@ -841,8 +846,10 @@ def count_rank_report(
         boots = []
         for _ in range(n_boot):
             pick = rng.integers(0, len(groups), size=len(groups))
-            samp = pd.concat([groups[i] for i in pick], ignore_index=True)
-            r = _spearman(samp["_pred"].to_numpy(), samp["_gold"].to_numpy())
+            r = _spearman(
+                np.concatenate([groups[i][0] for i in pick]),
+                np.concatenate([groups[i][1] for i in pick]),
+            )
             if not math.isnan(r):
                 boots.append(r)
         if boots:
