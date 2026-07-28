@@ -58,6 +58,12 @@ class RejudgeConfig:
     # optional: gold answers for the template-aware floors in stratified_report
     data_root: str | Path | None = None
     tags: dict = field(default_factory=dict)  # model id -> short column tag
+    # An arm whose results.csv already exists is NOT re-run. The two arms live in
+    # different venvs (Qwen3.5 needs a transformers newer than the 4.57 pin the VLM
+    # requires), so each env runs `main` and only its own arm actually executes.
+    skip_existing: bool = True
+    # Comparing requires every arm on disk; a single-arm invocation just returns.
+    compare: bool = True
 
 
 def _tag(model_id: str) -> str:
@@ -106,6 +112,11 @@ def main(cfg: RejudgeConfig) -> dict:
 
     for model_id in cfg.judge_models:
         tag = cfg.tags.get(model_id, _tag(model_id))
+        done = out_dir / tag / "results.csv"
+        if cfg.skip_existing and done.exists():
+            logger.info("=== judge %s (tag %s): results.csv exists, SKIPPING ===", model_id, tag)
+            per_judge[tag] = pd.read_csv(done)
+            continue
         logger.info("=== judge %s (tag %s) ===", model_id, tag)
         t0 = time.time()
         judge = TransformersJudge(model_name=model_id, device=cfg.device)
@@ -132,6 +143,11 @@ def main(cfg: RejudgeConfig) -> dict:
         except Exception:  # noqa: BLE001
             pass
         logger.info("judge %s done in %.1f min", tag, timings[tag] / 60)
+
+    missing = [t for t in (cfg.tags.get(m, _tag(m)) for m in cfg.judge_models) if t not in per_judge]
+    if missing or not cfg.compare:
+        logger.info("compare skipped (missing arms: %s)", missing)
+        return {"arms_done": sorted(per_judge), "arms_missing": missing}
 
     # ── gold for the template-aware floors ───────────────────────────
     gold = pd.DataFrame(
@@ -188,7 +204,7 @@ def main(cfg: RejudgeConfig) -> dict:
     summary = {
         "run_dir": str(run_dir),
         "judges": {t: cfg.judge_models[i] for i, t in enumerate(tags)},
-        "minutes": timings,
+        "minutes": {t: round(timings[t] / 60, 2) for t in timings},
         "bucket_mean": {t: reports[t]["bucket_mean"] for t in tags},
         "acc_ID": {t: reports[t]["acc_ID"] for t in tags},
         "acc_OOD": {t: reports[t]["acc_OOD"] for t in tags},
