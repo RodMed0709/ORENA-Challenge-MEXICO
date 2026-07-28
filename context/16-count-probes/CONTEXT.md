@@ -22,8 +22,8 @@ of them gated on a question nobody had measured. These probes measure the gates 
 |---|---|---|
 | **16a** `zero_probe` | Can the model emit `0` at all — and did our SFT take it away? | ✅ **DONE**, n=960 |
 | **16b** `detector_vs_gold` | Is the gold count something a detector can see in the frame? | 🔄 queued |
-| **16c** `len_points` | Does `len(predicted_points)` beat verbalising the count? | 🔄 running |
-| **16d** `format_audit` | Where else does fine-tuning emit SDK-illegal answers? | 🆕 built, unrun |
+| **16c** `len_points` | Does `len(predicted_points)` beat verbalising the count? | ✅ **DONE, NEGATIVE**, n=681 |
+| **16d** `format_audit` | Where else does fine-tuning emit SDK-illegal answers? | 🔄 queued |
 
 ⚠️ **The model under test is ep3 (`checkpoint-2580`), not ep2.** Verified from the run log, not
 assumed. Rung 06's older artifacts reference `checkpoint-1720` (ep2) — do not mix them.
@@ -93,6 +93,27 @@ says they carry).
 **Cheapest mitigation, zero training:** `answer_postprocess` already exists in `frame.config`
 (rung 15) and already runs between generation and SDK verification. Stripping a trailing `.` from
 a `number` answer is one line, flag-off byte-identical. **Measure it before anything else.**
+
+## 16c — what it gives us (n=681, the full Clips template, 37 videos)
+
+Full verdict: [[prompt-only-pointing-collapses]]. **Faithful negative.** Both pointing arms lose
+to the bare-integer control in every cell — a1 OOD margin **−0.1162**, a2 **−0.1389**, against the
+control's **−0.0025** — at 3.4× the latency for a1.
+
+🔴 **The mechanism is degenerate and visible: a2's `mean_pred` is exactly 1.0000 across all 681
+questions.** Asked to point at every clip and number them, the model emits **one** point, every
+time. So `len(points)` is not reading a count off an enumeration — it is reading a constant, which
+is why it *amplifies* the undercount (bias −2.52 vs the control's −0.66) instead of curing it.
+Same shape as [[naming-equals-counting]], one level out.
+
+🟢 **The probe validated its own instrument before it read anything new:** `a0`'s OOD margin
+(−0.0025) reproduces the epoch-matched control's `number_margin_OOD` = 0.0 on an independent code
+path.
+
+⚠️ **This bounds the prompt-only path, not the trained one** — Alghisi state training-free
+point-then-count is weak without task-specific supervision, and their 94.96% came *with*
+point-supervised LoRA. It stays open as a training target, **gated on 16b**: if the gold is not
+frame-visible, the trained version dies too.
 
 ## 16d exists because finding #3 was luck
 
