@@ -163,6 +163,32 @@ distinct, cheap gap this dataset closes and nothing else in the sweep does.
 Classes are all instruments (`grasper` 40,172, `hook` 19,429, `bipolar`, `irrigator`, `clipper`,
 `scissors`, `snare`) — no foreign objects, as expected. Reproduce with `_tools/cholecinstanceseg_probe.py`.
 
+## ROBUST-MIS access + obligations (recorded 2026-07-28)
+
+**Blocked on a permission, not a DUA.** The Synapse `accessRequirement` endpoint returns **0** for
+`syn18779624`, `syn21870038` and the file entities, yet `/entity/{id}/file` answers
+`"You lack DOWNLOAD permission"`. The project grants *view* to anyone and *download* only after
+registering on the Synapse project page. The same token downloaded CholecInstanceSeg with no
+friction, so this is specific to ROBUST-MIS. **Human step: accept the terms at
+https://www.synapse.org/Synapse:syn18779624.**
+
+**Two binding obligations if we use it** (from the challenge page):
+
+1. **Cite both papers** — Maier-Hein et al., *Scientific Data* 8:101 (2021), *Heidelberg colorectal
+   data set…*; and Roß et al., *Medical Image Analysis* 70:101920 (2021), *Comparative validation
+   of multi-instance instrument segmentation…*.
+2. *"The licensing of new creations must use the exact same terms as in the current version of the
+   data set."* ⇒ **any counting QA we derive must ship as CC BY-NC-SA.** That is compatible with
+   the challenge's own publish-your-annotations requirement and with the license the organizers
+   already use for HeiCo, so it costs us nothing — but it must be stated in the method write-up.
+
+**Their three-stage test design widens what we may use.** ROBUST-MIS validates in stages:
+Stage 1 = the same procedures as training · Stage 2 = same surgery type, unseen patient ·
+**Stage 3 = a different surgery type**. Stage 3 is Sigmoid — **our `val_ood`, and the only part
+that is off-limits**. Stages 1 and 2 are procto/rectal, i.e. videos already inside our `train`
+split. So the usable pool is **Training + Stage 1 + Stage 2**, not the Training release alone.
+🔴 The prohibition narrows to exactly one folder: `syn21891314/Stage_3`.
+
 ## Gates (all must pass before any number is read)
 
 | gate | what it proves |
