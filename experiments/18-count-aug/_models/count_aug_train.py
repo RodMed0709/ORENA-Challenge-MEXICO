@@ -144,8 +144,12 @@ def assert_recipe_unchanged(cfg: CountAugConfig) -> dict:
 
 # ── VRAM / speed probe ───────────────────────────────────────────────────────
 
-_SIT_RE = re.compile(r"([\d.]+)\s*s/it")
+_SIT_RE = re.compile(r"'train_speed\(s/it\)':\s*([\d.]+)")
 _ITS_RE = re.compile(r"([\d.]+)\s*it/s")
+# swift logs its own torch-side reading on every step: {'memory(GiB)': 25.55, ...}. Free, and
+# an independent cross-check on the nvidia-smi poller — if the two disagree by a lot, the
+# difference is allocator reserve + fragmentation, which is what decides the next batch size.
+_MEM_RE = re.compile(r"'memory\(GiB\)':\s*([\d.]+)")
 
 
 class _GpuPoller(threading.Thread):
@@ -156,12 +160,16 @@ class _GpuPoller(threading.Thread):
     fragmentation — which is the part that decides whether the NEXT batch size OOMs.
     """
 
+    # 🔴 NOT `self._stop`: `threading.Thread._stop` is a real internal method that
+    # `_bootstrap_inner` calls when the thread finishes. Shadowing it with an Event makes the
+    # thread raise `TypeError: 'Event' object is not callable` on exit — which is exactly
+    # what the first pod smoke did, inside the `except` that was meant to catch an OOM.
     def __init__(self, interval: float = 1.0) -> None:
         super().__init__(daemon=True)
-        self.interval, self.peak, self._stop = interval, 0, threading.Event()
+        self.interval, self.peak, self._halt = interval, 0, threading.Event()
 
     def run(self) -> None:
-        while not self._stop.is_set():
+        while not self._halt.is_set():
             try:
                 out = subprocess.run(
                     ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
@@ -170,19 +178,21 @@ class _GpuPoller(threading.Thread):
                 self.peak = max(self.peak, max(int(x) for x in out.stdout.split()))
             except Exception:  # noqa: BLE001 — a probe must never kill the thing it measures
                 pass
-            self._stop.wait(self.interval)
+            self._halt.wait(self.interval)
 
     def stop(self) -> int:
-        self._stop.set()
+        self._halt.set()
         self.join(timeout=5)
         return self.peak
 
 
 def read_speed(log_path: Path) -> float | None:
-    """Steady-state seconds/iteration from swift's own progress output, or None.
+    """Steady-state seconds/iteration from swift's own `train_speed(s/it)`, or None.
 
     The LAST reading, not the first: rung 06's first smoke read 110 s/it over 2 steps and
-    that number is dominated by warm-up — extrapolating it put the full run at ~79 h.
+    that number is dominated by warm-up — extrapolating it put the full run at ~79 h. Read
+    from swift's own running average rather than from the tqdm bar, whose text is rewritten
+    in place and interleaves stale values.
     """
     if not Path(log_path).exists():
         return None
@@ -192,6 +202,14 @@ def read_speed(log_path: Path) -> float | None:
         return float(sit[-1])
     its = _ITS_RE.findall(text)
     return 1.0 / float(its[-1]) if its and float(its[-1]) else None
+
+
+def read_torch_peak_gib(log_path: Path) -> float | None:
+    """The largest `'memory(GiB)'` swift reported — the torch-side view, for cross-check."""
+    if not Path(log_path).exists():
+        return None
+    vals = [float(v) for v in _MEM_RE.findall(Path(log_path).read_text(errors="replace"))]
+    return max(vals) if vals else None
 
 
 def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
@@ -238,6 +256,7 @@ def measure_vram(cfg: CountAugConfig, per_device: int, *, steps: int = 3,
         "grad_accum": probe.gradient_accumulation_steps,
         "probe_eff_batch": eff,
         "peak_mib": peak,
+        "torch_peak_gib": read_torch_peak_gib(probe.train_log),
         "s_per_it": s_it,
         # The comparable quantity across probes with different effective batches.
         "s_per_sample": round(s_it / eff, 4) if s_it else None,
@@ -266,6 +285,7 @@ def project_hours(s_per_sample: float | None, n_rows: int, cfg: CountAugConfig) 
 
 __all__ = [
     "CountAugConfig", "effective_batch", "rung06_args", "diff_vs_rung06",
-    "assert_recipe_unchanged", "measure_vram", "read_speed", "project_hours",
+    "assert_recipe_unchanged", "measure_vram", "read_speed", "read_torch_peak_gib",
+    "project_hours",
     "list_checkpoints", "merge_checkpoint", "read_g1", "_train",
 ]
