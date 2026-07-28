@@ -505,7 +505,14 @@ SEED  = 0
 RUN        = "16d_format_audit_v1"
 DATA_ROOT  = "/workspace/orena-data"
 MODEL_BASE = "/workspace/models/qwen3-vl-8b"
+# ep3 = the current best (bucket_mean 0.5724)
 MODEL_FT   = "/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-2580"
+# 🔴 ep2 = THE CHECKPOINT ACTUALLY SHIPPED IN SUBMISSION 01 (checkpoint-1720, step 1720).
+# 16a probed ep3 only, so the shipped artifact has never been audited for this defect. The
+# container does NOT normalise: `answer_one` does `.strip()` and nothing else
+# (`experiments/06-vit-lora/_tools/submission/inference.py:336`), so a "1." goes straight to
+# Number.verify and is auto-incorrect. This arm is the one that answers "did we already ship it?"
+MODEL_EP2  = "/workspace/repo/experiments/06-vit-lora/runs/06_vit_lora_v1/merged/checkpoint-1720"
 
 FORMATS      = ("number", "binary", "fo_class")   # the exact-match formats; judge formats have no gate to mirror
 N_PER_FORMAT_SMOKE = 6
@@ -517,7 +524,8 @@ CODE_16D_DERIVE = '''\
 # --- derived (MUST live below the parameters cell) -------------------------------
 DATA_ROOT = Path(DATA_ROOT)
 RUN_DIR   = Path.cwd() / "runs" / RUN
-MODELS    = {"base": Path(MODEL_BASE), "ft": Path(MODEL_FT)}
+# order matters only for readability; "ep2_shipped" is the arm that answers the submission question
+MODELS    = {"base": Path(MODEL_BASE), "ep2_shipped": Path(MODEL_EP2), "ft": Path(MODEL_FT)}
 N_PER_FORMAT = N_PER_FORMAT_SMOKE if SMOKE else N_PER_FORMAT_FULL
 RUN_DIR.mkdir(parents=True, exist_ok=True)
 print("run dir:", RUN_DIR, "| SMOKE:", SMOKE, "| n/format:", N_PER_FORMAT)
@@ -573,7 +581,7 @@ tbl.index = pd.MultiIndex.from_tuples([tuple(k.split("|")) for k in tbl.index],
 print("=== illegal-answer rate (lower is better; this is a FLOOR on lost points) ===")
 print(tbl.unstack("model")["illegal_rate"].round(4).to_string())
 print()
-print("=== REGRESSIONS: ft more illegal than base, or than its own v0 ===")
+print("=== REGRESSIONS: a fine-tuned model more illegal than base, or than its own v0 ===")
 regs = fa.regressions(res)
 if regs:
     print(pd.DataFrame(regs).to_string(index=False))
@@ -581,8 +589,21 @@ if regs:
 else:
     print("none above the 0.10 threshold — a faithful negative, and worth recording as one")
 print()
-print("=== violation histogram (ft only) ===")
-print(df[(df.model == "ft") & (~df.sdk_legal)].violation.value_counts().to_string())
+print("=== violation histogram, per model ===")
+print(df[~df.sdk_legal].groupby(["model", "fmt", "violation"]).size().to_string())
+
+# 🔴 The question this arm exists to answer.
+print()
+print("=== DID SUBMISSION 01 SHIP THIS DEFECT? (ep2_shipped = checkpoint-1720) ===")
+sub = df[(df.model == "ep2_shipped") & (df.fmt == "number")]
+off = sub[sub.variant != "v0_verbatim"]
+v0  = sub[sub.variant == "v0_verbatim"]
+print(f"  ep2 illegal rate, corpus phrasing (v0) : {1 - v0.sdk_legal.mean():.4f}  n={len(v0)}")
+print(f"  ep2 illegal rate, off-template phrasing: {1 - off.sdk_legal.mean():.4f}  n={len(off)}")
+print(f"  ep3 illegal rate, off-template phrasing: "
+      f"{1 - df[(df.model=='ft') & (df.fmt=='number') & (df.variant!='v0_verbatim')].sdk_legal.mean():.4f}")
+print("  NOTE: the shipped container does NOT normalise -- inference.py:336 is .strip() only,")
+print("  so any illegal string reaches Number.verify unchanged and is scored wrong.")
 '''
 
 CODE_16D_INSPECT = '''\
