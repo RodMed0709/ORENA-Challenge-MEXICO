@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adjudicación ciega — ¿cuántos clips ves?</title>
+<style>
+  :root{--bg:#0f1115;--fg:#e8eaed;--dim:#9aa0a6;--acc:#4da3ff;--ok:#3ddc84;--warn:#ffb74d;--card:#171a21;--line:#262b36}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  h1{font-size:15px;margin:0;font-weight:600}
+  .sp{flex:1}
+  .bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;width:180px}
+  .bar>i{display:block;height:100%;background:var(--ok);width:0}
+  button{background:#222735;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;cursor:pointer;font-size:14px}
+  button:hover{border-color:var(--acc)}
+  button.primary{background:var(--acc);color:#06121f;border-color:var(--acc);font-weight:600}
+  main{max-width:1100px;margin:0 auto;padding:16px}
+  .imgwrap{background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;justify-content:center;position:relative}
+  img{max-width:100%;max-height:66vh;display:block;cursor:zoom-in}
+  img.zoom{max-height:none;max-width:none;cursor:zoom-out}
+  .zoomnote{position:absolute;bottom:8px;right:10px;background:#0009;padding:3px 8px;border-radius:5px;font-size:12px;color:var(--dim)}
+  .keys{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+  .keys button{min-width:46px;font-size:16px;padding:9px 0}
+  .keys button.sel{background:var(--ok);color:#04240f;border-color:var(--ok);font-weight:700}
+  .keys button.na{min-width:auto;padding:9px 14px}
+  .keys button.na.sel{background:var(--warn);color:#2b1a00;border-color:var(--warn)}
+  .meta{color:var(--dim);font-size:13px;display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:8px;padding:12px 14px;margin:16px 0;color:var(--dim);font-size:14px}
+  .note b{color:var(--fg)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600}
+  .hide{display:none}
+  code{background:#0b0d12;padding:1px 5px;border-radius:4px;color:var(--acc)}
+</style>
+</head>
+<body>
+<header>
+  <h1>¿Cuántos <span style="color:var(--acc)">clips</span> ves en el frame?</h1>
+  <div class="bar"><i id="pi"></i></div>
+  <span id="prog" class="meta"></span>
+  <div class="sp"></div>
+  <button id="prev">← Anterior</button>
+  <button id="next">Siguiente →</button>
+  <button id="exp" class="primary">Exportar CSV</button>
+</header>
+
+<main>
+  <div class="note">
+    <b>Es a ciegas y eso es a propósito.</b> No verás la etiqueta del dataset hasta exportar —
+    si la vieras antes, tu conteo se anclaría a ella y la medición no valdría nada.
+    <br><br>
+    <b>«No se puede saber» es una respuesta válida y valiosa.</b> Si el frame está borroso, tapado,
+    o simplemente no se distingue, márcalo. Si resulta que una persona entrenada no puede contarlos,
+    <b>esa es la respuesta que buscamos</b>: significaría que la etiqueta no es recuperable de la
+    imagen y que todo el esfuerzo en <code>number</code> apunta a un techo.
+    <br><br>
+    Teclas: <b>0–9</b> cuenta · <b>+</b> para 10 o más · <b>N</b> no se puede saber ·
+    <b>←/→</b> navegar · clic en la imagen para zoom. Se guarda solo en tu navegador.
+  </div>
+
+  <div class="imgwrap">
+    <img id="im" alt="frame quirúrgico">
+    <span class="zoomnote">clic = zoom</span>
+  </div>
+
+  <div class="keys" id="keys"></div>
+  <div class="meta">
+    <span id="fname"></span><span id="dist"></span><span id="answered"></span>
+  </div>
+
+  <div id="done" class="hide">
+    <div class="note" style="border-left-color:var(--ok)">
+      <b>Listo.</b> Abajo tu conteo contra la etiqueta del dataset. La columna que importa es
+      <b>Δ</b>: si hay muchos desacuerdos grandes, la etiqueta no describe lo que se ve en el frame.
+    </div>
+    <div id="summary"></div>
+    <table id="tbl"></table>
+  </div>
+</main>
+
+<script>
+const KEY = 'orena_adjudicate_v1';
+let M = [], i = 0, ans = JSON.parse(localStorage.getItem(KEY) || '{}');
+
+function save(){ localStorage.setItem(KEY, JSON.stringify(ans)); }
+
+function buildKeys(){
+  const k = document.getElementById('keys'); k.innerHTML = '';
+  for (let n = 0; n <= 9; n++){
+    const b = document.createElement('button');
+    b.textContent = n; b.dataset.v = n;
+    b.onclick = () => set(n);
+    k.appendChild(b);
+  }
+  const p = document.createElement('button');
+  p.textContent = '10+'; p.dataset.v = '10plus'; p.className = 'na';
+  p.onclick = () => set('10plus'); k.appendChild(p);
+  const na = document.createElement('button');
+  na.textContent = 'No se puede saber'; na.dataset.v = 'NA'; na.className = 'na';
+  na.onclick = () => set('NA'); k.appendChild(na);
+}
+
+function set(v){
+  ans[M[i].img] = v; save(); render();
+  setTimeout(() => { if (i < M.length - 1) { i++; render(); } }, 130);
+}
+
+function render(){
+  const r = M[i];
+  document.getElementById('im').src = r.img;
+  document.getElementById('im').classList.remove('zoom');
+  document.getElementById('fname').textContent = `frame ${i+1} de ${M.length}`;
+  document.getElementById('dist').textContent = r.distribution === 'OOD' ? 'distribución: OOD' : 'distribución: ID';
+  const n = Object.keys(ans).length;
+  document.getElementById('answered').textContent = `contestados: ${n}`;
+  document.getElementById('prog').textContent = `${n}/${M.length}`;
+  document.getElementById('pi').style.width = (100 * n / M.length) + '%';
+  document.querySelectorAll('#keys button').forEach(b => {
+    b.classList.toggle('sel', String(ans[r.img]) === b.dataset.v);
+  });
+}
+
+document.getElementById('next').onclick = () => { if (i < M.length-1){ i++; render(); } };
+document.getElementById('prev').onclick = () => { if (i > 0){ i--; render(); } };
+document.getElementById('im').onclick = e => e.target.classList.toggle('zoom');
+
+document.addEventListener('keydown', e => {
+  if (e.key >= '0' && e.key <= '9') set(+e.key);
+  else if (e.key === '+') set('10plus');
+  else if (e.key.toLowerCase() === 'n') set('NA');
+  else if (e.key === 'ArrowRight') document.getElementById('next').click();
+  else if (e.key === 'ArrowLeft') document.getElementById('prev').click();
+});
+
+document.getElementById('exp').onclick = () => {
+  const rows = [['img','frame_key','distribution','video_id','gold','detector_n_clip','human','delta']];
+  let agree = 0, na = 0, scored = 0, absdiff = 0;
+  M.forEach(r => {
+    const h = ans[r.img];
+    let d = '';
+    if (h === 'NA' || h === undefined) { if (h === 'NA') na++; }
+    else {
+      const hv = h === '10plus' ? 10 : +h;
+      d = hv - (+r.gold); scored++; absdiff += Math.abs(d);
+      if (d === 0) agree++;
+    }
+    rows.push([r.img, r.frame_key, r.distribution, r.video_id, r.gold, r.n_clip,
+               h === undefined ? '' : h, d]);
+  });
+  const csv = rows.map(x => x.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'adjudicacion_humana.csv'; a.click();
+
+  document.getElementById('done').classList.remove('hide');
+  document.getElementById('summary').innerHTML =
+    `<div class="meta" style="font-size:15px">
+      <span><b>${scored}</b> contados</span>
+      <span><b>${na}</b> «no se puede saber» (${(100*na/M.length).toFixed(0)}%)</span>
+      <span>coinciden exacto: <b>${scored?(100*agree/scored).toFixed(0):0}%</b></span>
+      <span>error medio |Δ|: <b>${scored?(absdiff/scored).toFixed(2):'—'}</b></span>
+     </div>`;
+  const t = document.getElementById('tbl');
+  t.innerHTML = '<tr><th>frame</th><th>tu conteo</th><th>etiqueta</th><th>Δ</th><th>detector</th><th>dist</th></tr>' +
+    M.map(r => {
+      const h = ans[r.img];
+      const hv = (h === undefined || h === 'NA') ? h : (h === '10plus' ? 10 : +h);
+      const d = (typeof hv === 'number') ? hv - (+r.gold) : '';
+      const col = d === 0 ? 'var(--ok)' : (Math.abs(d) >= 2 ? 'var(--warn)' : 'var(--fg)');
+      return `<tr><td>${r.img}</td><td>${h ?? '—'}</td><td>${r.gold}</td>
+              <td style="color:${col}"><b>${d === '' ? '—' : (d>0?'+':'')+d}</b></td>
+              <td>${r.n_clip}</td><td>${r.distribution}</td></tr>`;
+    }).join('');
+  document.getElementById('done').scrollIntoView({behavior:'smooth'});
+};
+
+fetch('manifest.csv').then(r => r.text()).then(txt => {
+  const [h, ...ls] = txt.trim().split(/\r?\n/);
+  const cols = h.split(',');
+  M = ls.map(l => {
+    const v = l.split(',');
+    const o = {}; cols.forEach((c, j) => o[c] = v[j]); return o;
+  });
+  buildKeys(); render();
+}).catch(() => {
+  document.body.innerHTML = '<main><div class="note"><b>No pude leer manifest.csv.</b> ' +
+    'Algunos navegadores bloquean fetch sobre file://. Solución: en esta carpeta corre<br>' +
+    '<code>python -m http.server 8000</code><br>y abre <code>http://localhost:8000/contar.html</code></div></main>';
+});
+</script>
+</body>
+</html>
