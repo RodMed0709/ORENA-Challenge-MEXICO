@@ -1,115 +1,105 @@
-# Handoff — rung 19 (external counting data), 2026-07-28
+# Handoff — ORENA FRAME, session of 2026-07-27/28
 
-Paste the block at the bottom into a fresh session. Everything below it is context that
-session can re-derive from the repo; the block is what it needs to start.
+The prompt for the next session is the code block at the very bottom. Everything above it is
+context that session can also re-derive from the repo.
 
 ---
 
-## Where things actually stand
+## What this session changed
 
-**Branch `task/r3-rung16`, everything pushed.** ⚠️ A second Claude session works in the same
-tree on rungs 16/18 (counting probes with our own data) — coordinate, don't clobber.
+Five decision notes landed, three of them retract or overturn something the project believed.
 
-### The strategic picture (settled 2026-07-27/28)
+| note | what it settles |
+|---|---|
+| `context/decisions/leaderboard-metric-vs-our-headline.md` | Their metric ≠ ours; a 4B beats us; **the bucket that collapsed is `object_recognition`, not `aggregation`** |
+| `context/decisions/wrong-judge-model.md` | 🔴 **`Qwen/Qwen3.5-4B` exists** — every judged number in the repo used a substitute |
+| `context/decisions/counting-is-a-mapping-failure.md` | The model **sees** the objects and cannot **emit** the number; scalar low-count data does not transfer, point supervision does |
+| `context/decisions/cross-question-constraints.md` | Questions about one frame constrain each other — 495 usable pairs, free CoA ground truth |
+| `context/decisions/epoch-matched-control.md` | Rung 06 ep3 = 0.5724; rungs 14 and 15 both closed |
 
-- Leaderboard: **12/13, score 0.4710**. A **4B model beats us at 0.5163**; 1st is 0.5591 (Qwen3.6).
-- **The entire deficit is `aggregation`** — 67 questions of 754. `object_recognition` is a
-  two-question tie (607 vs 609). Proven on the *identical* 2000-question set via shared
-  denominators. See `context/decisions/leaderboard-metric-vs-our-headline.md`.
-- **Their metric ≠ ours.** `pre_evaluation_score` = unweighted mean of *populated* buckets; only 2
-  populate on pre-eval, both ID. Our `bucket_mean` averages 4. Right comparator = **mean-ID**.
-- **We need ~+0.07.** Best local checkpoint, minus the measured −0.057 transfer loss, lands ~0.489
-  — still under the 4B. **Swapping checkpoints cannot close this; only a step change can.**
-- Latency is a non-issue: 0.79 s/q against a 5.06 ceiling, **6.4× headroom**. Never re-raise it.
-- 🔒 **We do not know where the baselines sit** — beating both is the gate to the final stage and
-  no baseline row is visible. Worth asking the organizers.
+Plus `experiments/19-external-count/` (four datasets measured, all zero-GPU) and a hardened,
+fixture-tested submission container.
 
-### Rung 19 — what has been measured, all with ZERO GPU
+## The five numbers that should drive everything
 
-| dataset | verdict | evidence |
-|---|---|---|
-| **SAR-RARP50** | 🔴 **DEAD** — presence, not counts | semantic masks; connected components splits one elongated object into "2–3". Its `clamps` (our clip analogue) is 0 or 1 in 84/101 frames |
-| **CholecInstanceSeg** | 🟡 **narrow** — tops out at **3** instances (exactly 1 frame reaches 4) | measured over all 41,933 annotations. We fail in the **5–12** range, so it cannot teach it. **BUT it ships 4,914 zero-object frames (11.7%)** and our training set has **no numeric gold equal to zero anywhere** |
-| **ROBUST-MIS** | ⏳ **IN FLIGHT** — the histogram was running when the session ended | download permission **confirmed working** after the user registered on Synapse |
-| **MedMultiPoints** | license resolved **CC BY-NC 4.0**, not yet measured | the only dataset with a *published counting win on our own model family* (Qwen2.5-VL-7B + LoRA, Count MAE 9.86 → 0.26) |
+1. **Leaderboard 0.4710, 12th of 13.** A 4B scores 0.5163; first place 0.5591.
+2. **Per-bucket transfer:** `aggregation` local 0.4188 → platform **0.4549** (+0.036, went UP);
+   `object_recognition` local 0.6373 → platform **0.4872** (**−0.150**). Half the gate × −0.150 =
+   **−0.075**, numerically the entire gap we need to close. **No rung has ever targeted that bucket.**
+3. **376 of 1,296** `object_recognition` ID questions are LLM-judged — and **we used the wrong
+   judge**. Zero of 19 rungs targeted the judged formats.
+4. **Our model ranks counts correctly** (Spearman 0.661 full, 0.487 at gold ≥5) and under-counts by
+   ~2. The failure is symbolic mapping, not perception.
+5. **Latency has 6.4× headroom** (0.79 s/q vs a 5.06 ceiling). This un-gated the model-size ladder.
 
-🔴 **The fact that frames the whole rung:** no public dataset annotates applied surgical clips.
-Every option is a **transfer bet on a generic enumeration prior**. But we measured that this is
-less damaging than it sounds — **the largest single template is "how many different foreign object
-INSTANCES" at 830 of 2094 (39.6 %), class-agnostic**, with "how many classes" adding 436. So 60 %
-of counting questions are not clip-specific. (Clips are 681. Bags/drains/needles/specimens are 64
-and **degenerate** — always answer 1 — so there is no headroom there.)
+## Practical facts the next session will need
 
-### Credentials and access (all working, all stored)
+- Branch **`task/r3-rung16`**, everything pushed. ⚠️ **A second Claude session works in this same
+  tree** on rungs 16/18 (counting probes, own data). Coordinate; do not clobber.
+- `.secrets.env` (gitignored) holds `SYNAPSE_AUTH_TOKEN` (download permission **granted**),
+  `RUNPOD_*`, `HF_TOKEN`, `GITHUB_TOKEN`.
+- ⚠️ **Local disk ~99 % full.** Big downloads go to the pod volume.
+- ⚠️ **Repo defect:** only `stratified.json` is committed per run, so **no fine-tuned checkpoint's
+  raw answers are reconstructible from the repo**. `ep3_full/predictions.json` was pulled from the
+  volume and is now local — that is what made finding #4 possible. Consider committing these.
+- **Synapse gotcha:** `syn.get(downloadLocation=...)` silently returns `path=None`. Use
+  `GET /repo/v1/entity/{id}/file?redirect=false` and fetch with a **non-default User-Agent**.
+- 🔴 **Never pull `syn21891314/Stage_3`** — Sigmoid Resection = our `val_ood`.
+- The user has **rejected**: resubmitting a checkpoint for a marginal swap, and seed-repeat runs.
 
-`.secrets.env` (gitignored, verified) holds `SYNAPSE_AUTH_TOKEN`, `RUNPOD_API_KEY`, `HF_TOKEN`,
-`GITHUB_TOKEN`, `RUNPOD_S3_*`. Synapse download permission on ROBUST-MIS is **granted**.
+## Still open, cheap, nobody has done it
 
-⚠️ **Local disk is at 99 % — ~14 GB free.** Do not download CholecInstanceSeg's 22 GB image set
-locally; masks/annotations only, or send it to the pod volume.
-
-⚠️ **Synapse gotcha:** `syn.get(..., downloadLocation=...)` returns `path=None` and downloads
-nothing. Use the presigned URL instead — `GET /repo/v1/entity/{id}/file?redirect=false` — and fetch
-it with a **non-default User-Agent** (plain `urllib` gets 403 from S3). Working implementation in
-`scratchpad/robustmis_probe.py`.
-
-### The one hard prohibition
-
-**Never pull `syn21891314/Stage_3`** — it is Sigmoid Resection = our `val_ood`. ROBUST-MIS's
-Training + Stage_1 + Stage_2 are all procto/rectal, already inside our `train` split, so they are
-safe by construction. `G-NO-OOD-BLEED` exists to catch this mechanically.
-
-### Obligations if ROBUST-MIS is used
-
-Cite **Maier-Hein et al. 2021 (Sci Data)** and **Roß et al. 2021 (MedIA)**, and ship any derived
-QA under **CC BY-NC-SA** ("new creations must use the exact same terms"). Compatible with the
-challenge's own publish-your-annotations rule.
+**Ask the organizers where the baselines are.** Beating both is the gate to the final stage;
+`challenge_design.txt:375` says they would be "clearly identified" on the leaderboard and they are
+not there. It decides whether we need +0.02 or +0.09. Free.
 
 ---
 
 ## THE PROMPT — paste this into the new session
 
 ```
-Continuing the ORENA FRAME challenge on branch task/r3-rung16.
+Continuing the ORENA FRAME challenge, branch task/r3-rung16.
 
-Read these first, in order:
-  1. HANDOFF_RUNG19.md              (this handoff — the full state)
-  2. context/NOW.md                  (the 2026-07-27/28 entries)
+Read first, in this order:
+  1. HANDOFF_RUNG19.md
+  2. context/decisions/wrong-judge-model.md
   3. context/decisions/leaderboard-metric-vs-our-headline.md
-  4. experiments/19-external-count/README.md   (the three dataset measurements)
-  5. context/RULES.md §3, §4b, §4c, §4d
+  4. context/decisions/counting-is-a-mapping-failure.md
+  5. context/decisions/cross-question-constraints.md
+  6. context/RULES.md §3, §4b, §4c, §4d
 
-Note: a second Claude session works in this same tree on rungs 16/18. Do not clobber it.
+A second Claude session works in this same tree on rungs 16/18. Do not clobber it.
 
-IMMEDIATE TASK — finish the ROBUST-MIS kill-check.
+FIRST TASK — the $1 experiment that decides the next five weeks.
 
-scratchpad/robustmis_probe.py was mid-run when the last session ended (659 masks
-downloaded, ~2 KB each, working). Re-run it, then answer ONE question:
+Re-score rung 06's committed predictions under Qwen/Qwen3.5-4B (the SDK default, which
+DOES exist — our config comment claiming otherwise is false) and compare verdict-by-
+verdict against our Qwen3-4B judge, on the judged formats only (open_ended,
+multiple_choice, matching — 376 of the 1,296 object_recognition ID questions).
+ep3_full/predictions.json is already local; eval_best's is on the volume.
 
-  Does ROBUST-MIS's instance-count distribution resemble our own `number` gold?
+Report: agreement rate, and the delta on bucket_object_recognition_id under each judge.
 
-Compare its per-frame counts (`unique(mask) - 1`, range 0-7) against the gold
-distribution of our `number` questions from external_data/orena-data/*/data/frame/*.parquet.
-Report both histograms side by side. Then move the probe into
-experiments/19-external-count/_tools/ and commit the finding — negative or positive,
-the same way SAR-RARP50 and CholecInstanceSeg were recorded.
+  If they disagree materially -> the -0.150 platform collapse is substantially our
+  measuring stick plus a terse output policy. The cheap path is then a judge-aware
+  output policy (the judge's rubric is readable at vendor/.../judges.py:45-63 and
+  explicitly rewards the right core term inside extra text while ignoring formatting)
+  plus shipping normalize_answer in the container. No training.
 
-THEN, depending on the answer:
+  If they agree >=97% -> the collapse is real capability on unseen centres. Then the
+  move is a zero-shot screen of a newer-generation backbone (~$5): the leaderboard is
+  monotone in GENERATION and non-monotone in size (8B gen-3 0.4710 < 4B gen-3.5 0.5163
+  < gen-3.6 0.5591). Qwen3.6-35B-A3B and Qwen3.6-27B are both public before the
+  2026-07-15 eligibility cutoff.
 
-  If the distributions are comparable -> ask me before spending pod. The next step is
-  19a: score rung 06 ep3 (checkpoint-2580) zero-shot on ROBUST-MIS frames asking
-  "How many surgical instruments are visible?" against the exact counts. That is ~2
-  GPU-hours and it decides whether a ~20 GPU-hour training rung is worth running.
-  Report bias AND correlation, not just accuracy — a model emitting a prior and a
-  model perceiving badly fail differently.
+Ask me before spending pod on anything beyond the $1 re-judge.
 
-  If they are not comparable -> say so plainly, close the external-data lever, and
-  re-open the other path I want: a bigger/newer backbone. Qwen3-VL-32B is already on
-  the volume, and today's latency finding (0.79 s/q against a 5.06 ceiling, 6.4x
-  headroom) removed the objection that had gated the size ladder.
+Binding: single-variable A/B against the rung 06 ep3 control; the eval set and the
+organizers' ID/OOD split stay untouched; gates RAISE and are never disabled; score only
+via frame.metrics. Do not propose resubmitting a checkpoint for a marginal swap, and do
+not propose seed-repeat runs — I rejected both.
 
-Rules that bind you: single-variable A/B against the rung 06 ep3 control; the eval set
-and the organizers' ID/OOD split stay untouched; gates RAISE and are never disabled;
-score only via frame.metrics. Do not propose resubmitting a checkpoint to the
-leaderboard and do not propose seed-repeat runs — I rejected both.
+REFUSE, and say so if it comes up: any SFT for event_understanding or complex_reasoning
+coverage. Both buckets return null on the gating set — zero questions — and the gate is
+mean accuracy over populated buckets only.
 ```
