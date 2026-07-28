@@ -16,7 +16,8 @@ comparator (user's call, and 16a showed it is a zero attractor anyway).
 |---|---|---|
 | 16a | model says `no` fluently (0.82) but **never says `0`** (0.008/0.017); base is a zero attractor negating 83% of PRESENT | mint zeros **for `number` ONLY** — binary already has the concept |
 | 16a/16d | the model's format is glued to the literal string *"Please provide a number."*; strip it and it emits `"1."`, which `Number.verify` auto-fails | **paraphrase + format-instruction dropout** |
-| 16b + human | blind human **r = +0.72** vs gold; model **+0.43**; model has the right scale (bias −0.66) and the wrong ordering | **the target is DISCRIMINATION, not calibration** |
+| 16b + human | blind human **r = +0.72** vs gold — the frames are readable | **the target is DISCRIMINATION, not calibration** |
+| ⚠️ **re-measured 2026-07-28** | the *"model +0.43"* half was **gold 3–6 range-restricted**. Full `Clips` template: **0.5866**; on the human's own frames **0.8303 vs 0.7230** — the model **out-ranks** the human ([[model-out-ranks-the-blind-human]]) | the headroom argument is **withdrawn**; the comparator is **0.5866**, not 0.43 |
 | 16c | prompt-only pointing collapses to exactly 1 point on all 681 questions | pointing stays out of this run |
 | zero-GPU gate | `max_pixels` never meaningfully downscales | tiling stays out |
 
@@ -62,10 +63,19 @@ unattributable. It does mean a null is diagnosable rather than mute.
 Report as always: `bucket_mean`, per-cell margin over the template-aware floor, ID **and** OOD
 (the conjunction is never relaxed), paired video-clustered CI.
 
-🆕 **Add Spearman r of predicted count vs gold on the `Clips` template.** The human adjudication
-makes it the metric that matters: the model sits at **0.43** against a human's **0.72** under the
-same gold. Mean error hides this — the scale is already close. **Pre-register: the run is a win
-only if `r` rises AND `margin_OOD` does not fall.**
+🆕 **Add Spearman r of predicted count vs gold on the `Clips` template** — `frame.metrics.count_rank_report`,
+the single implementation. Mean error hides discrimination because the scale is already close.
+
+**Pre-registered comparator (re-baselined 2026-07-28):** rung 06 ep3 scores **r = 0.5866**
+pooled on the full `Clips` template (n=681, 37 videos, CI [0.467, 0.684]) — ID **0.6636**,
+OOD **0.4997**. ⚠️ **NOT 0.43.** That figure is the gold 3–6 range-restricted number
+(`ERROR_ANATOMY.md:158`), and against it this run would have "won" before it started
+([[model-out-ranks-the-blind-human]], RULES §13b).
+
+**Pre-register: the run is a win only if `r` rises AND `margin_OOD` does not fall.**
+⚠️ And per RULES §13c, a rise in `r` is reported as a rise in `r` — rung 06 ep3 already orders
+OOD at 0.4997 while adding **exactly 0.000000** `number` margin there, so rank does not cash
+into `bucket_mean` on its own.
 
 ## Speed — utilisation only, recipe untouched
 

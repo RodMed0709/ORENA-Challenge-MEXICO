@@ -108,6 +108,24 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
 13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
     videos); trust the video-level hierarchical CI for "will this hold on a new video?".
 
+13b. 🔴 **A rank correlation is a property of the SLICE, not of the model. Never compare two
+    `r` values computed on different gold ranges.** Range restriction attenuates Spearman
+    toward zero by construction, so the slice must be named every single time. Measured:
+    rung 06 ep3 on the `Clips` template scores **0.5866** over the full gold 1–12,
+    **0.4103** restricted to gold 3–6, and **0.8303** on the gold-stratified 16b sample —
+    one model, one gold, three numbers. This is how "a human orders better (0.72) than our
+    model (0.43)" got written down: a full-range human number against a range-restricted
+    model number. On the same frames the model scores **0.8303** and out-ranks the human.
+    Same discipline for bias, which moves −0.646 → −1.083 → −1.606 across those same slices.
+    Score rank ONLY via `frame.metrics.count_rank_report`, quoting `template_pattern` and n.
+    See [[model-out-ranks-the-blind-human]].
+
+13c. **Rank and score are different questions and must not be cashed into one another.** Rung
+    06 ep3 orders OOD counts at **r = 0.4997** while its `number` OOD margin is **exactly
+    0.000000** (accuracy 0.469080 == floor 0.469080). Ordering skill is real and does not
+    convert into exact-match points. ⇒ a lever that raises `r` has NOT thereby raised
+    `bucket_mean`; report the rise as a rise in `r`.
+
 ## COMPLIANCE — challenge data never leaves the secure environment (BINDING, DUA)
 
 14. **No challenge data — frames OR annotations (questions + gold) — to any external API.**

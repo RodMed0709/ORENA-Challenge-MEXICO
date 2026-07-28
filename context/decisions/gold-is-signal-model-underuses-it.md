@@ -8,6 +8,17 @@ measured_in: experiments/16-count-probes/RESULTS_16b_human.csv (n=106 counted + 
 
 # Decision: the gold is signal, and our model is leaving most of it on the table
 
+> 🔴 **PARTLY RETRACTED (2026-07-28) — see [[model-out-ranks-the-blind-human]].** The
+> "our model +0.43" in every table below is a **gold 3–6 range-restricted** number
+> (`ERROR_ANATOMY.md:158`), placed next to a **full-range** human number. Measured on the
+> human's OWN 109 frames the model scores **r = 0.8303** against the human's **0.7230**, and
+> on the full `Clips` template **0.5866**. **The model out-ranks the human.** Everything
+> below that reads "the model orders worse than a person", "the headroom is large", or
+> "the model emits the prior rather than the frame-to-frame signal" is **withdrawn**. What
+> stands: the frames are readable (2.8% "cannot tell"), so the annotation-ceiling reading
+> stays retired; and the target is still discrimination, now for a different reason — the
+> model DOES order (r ≈ 0.50 on OOD) and still scores exactly at the trivial floor.
+
 - **Status:** MEASURED · 2026-07-28 · **zero GPU** · blind human adjudication
 - **Applies when:** costing any `number` lever, or invoking "annotation ceiling" as a reason to
   abandon counting.
