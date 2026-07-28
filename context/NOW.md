@@ -4,6 +4,52 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-07-27**.
 
+## 🔴 2026-07-27 (pm) — submission 01's metrics decoded: a 4B beats us, and we were reading the wrong number
+
+**Read [[leaderboard-metric-vs-our-headline]] before quoting any number as "our score".**
+
+🔴 **We were comparing incomparable quantities.** `pre_evaluation_score` is an unweighted mean over
+**populated** buckets and only **two** populate on the pre-eval set, both ID — while our
+`bucket_mean` averages **four** (ID+OOD). The right local comparator is **mean-ID = 0.5281**, not
+0.5667, so the real local↔leaderboard gap is **−0.057**, not −0.096. Now RULES §4b.
+
+🔴 **On identical questions a 4B beats us 0.5163 vs 0.4710.** The exact rationals (`343/754`,
+`607/1246` ours; `410/754`, `609/1246` theirs) recover **B = 2000 over 20 videos** and prove the
+same set. The whole margin is `aggregation` — **67 questions** — and `object_recognition` is a
+**two-question tie**. ⇒ **[[aggregation-is-the-gap]]'s "+14.9 lead on `object_recognition`" is
+RETRACTED**; it had compared our local val against their platform score. The `aggregation`
+prescription survives and is better supported.
+
+🟢 **Latency is a non-issue and the alarm was arithmetic.** `mean_latency_s × throughput = 20.0`
+**exactly** (both teams) — one number, not two. Real cost **0.79 s/question** against a **5.06**
+ceiling: **6.4× headroom**. Corroborated by running the container on the organizers' fixture
+(0.78 s/q warm, 31.9 s setup of a 120 s allowance).
+
+🟢 **`heico`=OOD is the organizers' own design, not our invention** (RULES §3). Their public
+partition puts **Sigmoid Resection — a procedure absent from ALL training** — in `heico` test,
+which is exactly the official *"OOD tag with respect to procedure type"*. The empty `ood` column
+is a publication choice. ⇒ OOD work is **not** wasted: the final ranking weights ID and OOD
+**equally** (`challenge_design.txt:2001`), and it is **Copeland with significance tests**, so a
++0.003 lever buys nothing (RULES §4c).
+
+🔴 **Zero training examples for `event_understanding` and `complex_reasoning`** — two of five
+groups, `primary_capability` is only `1a,1c,1d,1e,2a,3a` across all 20,000 public questions
+(RULES §4d).
+
+⚠️ **Selection bias, unmeasured.** `val_id ∪ val_ood` IS the whole 6252 set; every rung selects by
+`idxmax(acc_ood)` over **10 videos** and then reports on a set containing those same questions.
+Biases absolute numbers upward; rung-vs-rung deltas largely cancel. `kfold_lopo` (`split.py:342`)
+exists and is unused.
+
+**The submission itself was NOT broken** — an adversarial audit cleared frames, prompt, generation,
+offline and Dockerfile. It has since been hardened anyway (`batch.json` layout now read,
+case-insensitive frame matching, loud failure, CUDA hard-fail) and has produced a real
+`answer.json` against the organizers' fixture for the first time.
+
+🔒 **Open:** we do **not** know where the baselines sit. `challenge_design.txt:453` gates the final
+stage on beating **both**, `:375` says they would be "clearly identified" on the leaderboard, and
+the visible leaderboard shows 13 rows, all participant teams. Worth asking the organizers.
+
 ## 🟢 2026-07-27 — the missing control was run: rungs 14 and 15 are CLOSED, and epoch 3 erases OOD counting
 
 **Rung 06 epoch 3 = `bucket_mean` 0.5724** (`experiments/06-vit-lora/06c_epoch3_eval.ipynb`, RTX

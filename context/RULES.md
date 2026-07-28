@@ -24,10 +24,44 @@
    `results_df["ood"]` — it is all-False on the public data (organizers populate it only
    in their private test split).
 
+   🟢 **This is a faithful reconstruction of the organizers' design, NOT a convention we
+   invented** — measured 2026-07-27, and worth knowing because it is the difference between
+   an arbitrary proxy and the official axis. `challenge_design.txt:1018` defines the tag as
+   *"In-distribution (ID) vs Out-of-distribution (OOD) **with respect to procedure type** and
+   question"*, and they encoded exactly that in how they partitioned the public data:
+
+   | dataset | train procedures | test procedure |
+   |---|---|---|
+   | `heico` | Proctocolectomy, Rectal Resection | **Sigmoid Resection — absent from ALL training** |
+   | `lapchole` | Lap. Cholecystectomy | Lap. Cholecystectomy (same) |
+
+   So `heico` test is genuinely unseen-procedure OOD and `lapchole` test is ID, by their own
+   definition. The empty `ood` column is a publication choice (they do not hand you the tag),
+   not an absence of design. `split.py` records it as `organizer:heico-test(Sigmoid Resection)`.
+
 4. **Headline = `bucket_mean`** (mean over the 4 real buckets; drop `temporal_grounding`
    n=1). `pre_evaluation_score` is REFERENCE ONLY — it is broken on our split: an
    unweighted bucket mean that a single n=1 question inflates (it lifted rung-02 from an
    honest **0.550** to a reported **0.708**).
+
+4b. 🔴 **`bucket_mean` and the leaderboard's `pre_evaluation_score` are DIFFERENT QUANTITIES.
+   Never quote one against the other.** `bucket_mean` averages **4** buckets (ID+OOD). The
+   leaderboard averages **populated** buckets, and on the pre-eval set only **2** populate,
+   both ID. Comparing them made a −0.057 gap look like −0.096. **The right local comparator
+   for any leaderboard number is mean-ID** (`aggregation_ID` + `object_recognition_ID`, /2).
+   ⚠️ A `null` bucket means EMPTY, not broken. See [[leaderboard-metric-vs-our-headline]].
+
+4c. **The FINAL ranking is not a mean at all.** It is **Copeland over buckets with pairwise
+   significance tests** — non-significant deltas collapse to the SAME rank
+   (`challenge_design.txt:1010-1040`) — weighting ID and OOD **equally** (`:2001`). Mean
+   accuracy applies only to clearing a baseline in pre-eval (`:1039`). ⇒ A lever worth +0.003
+   buys nothing under the final ranking, and OOD work is not wasted merely because the
+   pre-eval cannot see it.
+
+4d. ⚠️ **We hold ZERO training examples for `event_understanding` and `complex_reasoning`.**
+   Across all 20,000 public questions `primary_capability` is only `1a, 1c, 1d, 1e, 2a, 3a`.
+   The SDK defines five groups and the platform reports ten buckets. Any claim about those two
+   groups is **unmeasurable with the data we have** — do not assert one.
 
 5. **Trivial floors: vs the EVAL set, split ID/OOD.** Never against the train prior, never
    read off a suffix-collided merged dataframe.
