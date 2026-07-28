@@ -186,7 +186,17 @@ def assert_flag_off_identical(built: Path, reference: Path) -> None:
 
 # ── the build ────────────────────────────────────────────────────────────────
 
-def build(cfg: BuildConfig) -> dict:
+def load_items(cfg: BuildConfig):
+    """The full ``train``+``test`` item list. Split out so a notebook loads it ONCE and
+    hands the same objects to the flags-off control build, the real build and the probe-slice
+    gate — the parquet parse is the slow part and re-running it three times invites the two
+    builds to be compared across different loads."""
+    from frame.data import load_frame_items
+
+    return load_frame_items(_baseline_cfg(cfg), splits=("train", "test"))
+
+
+def build(cfg: BuildConfig, items=None) -> dict:
     """Materialize `train.jsonl` under both levers and return the stats + gate evidence.
 
     Order of operations is deliberate: every gold-only gate runs BEFORE a single frame is
@@ -195,12 +205,13 @@ def build(cfg: BuildConfig) -> dict:
     import mint_zeros as mz
     import paraphrase as pp
     from frame import split as sp
-    from frame.data import FrameProvider, frame_cache_name, load_frame_items
+    from frame.data import FrameProvider, frame_cache_name
     from frame.engine import SYSTEM_PROMPT
     from lora_sft_train import LoRAConfig, smoke_subsample
 
     bcfg = _baseline_cfg(cfg)
-    items = load_frame_items(bcfg, splits=("train", "test"))
+    Path(cfg.out_jsonl).parent.mkdir(parents=True, exist_ok=True)
+    items = load_items(cfg) if items is None else items
     video_split = sp.load_manifest(cfg.manifest_path)
     train_items = sp.apply_split(items, video_split, "train")
     train_items.sort(key=lambda it: (it.dataset, it.video_id, it.frame_index))
@@ -225,7 +236,16 @@ def build(cfg: BuildConfig) -> dict:
         mz.assert_dose(mint_stats)
         mz.assert_class_mix(mint_stats)
         assert_no_val_video(minted, video_split)
+        # The gate runs HERE, where `items` is in hand, so it cannot be forgotten by a
+        # caller: probe 16a is the instrument that READS L1, and a probe frame that leaked
+        # into training would have it measuring its own supervision.
+        assert_probe_slice_untouched(minted, probe_slice_frame_keys(items))
         stats["mint"] = mint_stats
+        # Provenance: every minted row, with the channel that licensed it. Small CSV, lives
+        # with the run (storage layout: the run OWNS its artifacts).
+        import pandas as pd  # noqa: PLC0415 — local: keep this module importable without it
+
+        pd.DataFrame(minted).to_csv(Path(cfg.out_jsonl).with_name("minted.csv"), index=False)
 
     # ── rows: (sort key, question, answer, frame identity) ────────────────
     rows: list[tuple] = []
@@ -303,7 +323,21 @@ def build(cfg: BuildConfig) -> dict:
     return stats
 
 
+def probe_slice_frame_keys(items, *, n_frames_per_cell: int = 120, seed: int = 0) -> set[str]:
+    """The frame identities probe 16a reads L1's zero-emission on.
+
+    Rebuilt from 16a's OWN ``build_probe_set`` rather than re-derived, and from the
+    organizers' ``test`` parquet only — the val half — so the gate compares the real
+    instrument's real slice. Defaults mirror 16a's full-probe configuration.
+    """
+    from zero_probe import build_probe_set
+
+    test_items = [it for it in items if getattr(it, "file", "test") == "test"]
+    probes = build_probe_set(test_items, n_frames_per_cell=n_frames_per_cell, seed=seed)
+    return {p.frame_key for p in probes}
+
+
 __all__ = [
-    "BuildConfig", "build", "sha256_of", "assert_no_val_video",
-    "assert_probe_slice_untouched", "assert_flag_off_identical",
+    "BuildConfig", "build", "load_items", "sha256_of", "assert_no_val_video",
+    "assert_probe_slice_untouched", "assert_flag_off_identical", "probe_slice_frame_keys",
 ]
