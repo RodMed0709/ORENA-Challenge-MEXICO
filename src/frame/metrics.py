@@ -49,6 +49,7 @@ results_df schema (Evaluator._make_row, evaluator.py:373-392):
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
@@ -712,3 +713,170 @@ def paired_delta_ci(
         "wins_b": int((work["_diff"] > 0).sum()),
         "wins_a": int((work["_diff"] < 0).sum()),
     }
+
+
+# ── count DISCRIMINATION: rank correlation vs gold (added for rung 18) ───────
+# Every `number` metric we have reported — accuracy, margin, the hierarchical estimate — is
+# an EXACT-MATCH metric, and exact match cannot see the difference between a model that has
+# learned the gold's marginal distribution and one that reads the frame. Rung 06 ep3 leaves
+# `number_margin_OOD` at exactly 0.0 (the trivial floor) while its mean prediction sits 0.66
+# below the mean gold: the scale is nearly right and the ordering is not.
+#
+# [[gold-is-signal-model-underuses-it]] made that the headline: on a stratified blind sample
+# a HUMAN scores Spearman r = +0.7230 against the same gold and our model +0.43. So the gold
+# carries frame-visible, ordered signal the model is not using, the target is DISCRIMINATION
+# rather than calibration, and the metric that reads it has to be a RANK metric.
+#
+# It lives here, in the canonical module, for the reason rule §EVAL-1 gives: a notebook that
+# re-derives it beside the module is exactly how the same defect came back in rung 07.
+# Spearman is computed as Pearson over average ranks (its definition) using pandas' own
+# tie-aware ranking — no scipy, so the module's "pure pandas/numpy, offline" contract holds.
+
+_LEADING_INT_RE = re.compile(r"^\s*(\d+)")
+
+
+def read_count(raw) -> float:
+    """Lenient integer read of one model answer, or NaN.
+
+    LENIENT ON PURPOSE, and it must not be confused with the SDK's gate. ``Number.verify``
+    requires ``str.strip().isdigit()``, so ``"1."`` is auto-INCORRECT there — that is a
+    scored FORMAT defect and rung 16d measures it separately. This function answers the
+    different question *what number did the model mean*, because a rank correlation computed
+    only over SDK-legal answers would silently drop exactly the rows the format defect hits
+    and report a discrimination score for a biased subsample. Mirrors the lenient ``value``
+    branch of probe 16a's ``read_answer``; the strict branch is not duplicated here.
+    """
+    m = _LEADING_INT_RE.match(str(raw))
+    return float(m.group(1)) if m else float("nan")
+
+
+def _spearman(x: np.ndarray, y: np.ndarray) -> float:
+    """Spearman rho = Pearson over average ranks. NaN when either side is constant."""
+    if len(x) < 3:
+        return float("nan")
+    rx = pd.Series(x).rank(method="average").to_numpy()
+    ry = pd.Series(y).rank(method="average").to_numpy()
+    if rx.std() == 0 or ry.std() == 0:
+        return float("nan")
+    return float(np.corrcoef(rx, ry)[0, 1])
+
+
+def count_rank_report(
+    predictions: pd.DataFrame,
+    gold: pd.DataFrame,
+    *,
+    template_pattern: str = r"^How many Clips appear in this frame\?",
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict:
+    """Spearman r of the PREDICTED count vs the gold count, on one question template.
+
+    ``predictions`` needs ``qID`` and a prediction column (``prediction`` / ``content`` /
+    ``answer_pred``), and MAY carry ``video`` — without it the CI is skipped rather than
+    computed wrong, since questions cluster on ~38 videos and an unclustered CI would be far
+    too narrow (RULES §13).
+
+    ``gold`` is ``[qID, answer, question]`` as ``ledger.gold_from_frame_parquets`` returns it.
+    ``template_pattern`` is matched against the timestamp-normalised template, so the default
+    selects the `Clips` per-class count template — the one the blind human adjudication was
+    run on, and therefore the only cell where our r and the human's 0.7230 are comparable.
+
+    Returns ``{"pooled": {...}, "ID": {...}, "OOD": {...}}``; each cell carries ``r`` with a
+    video-clustered percentile CI, ``n``, ``n_videos``, ``n_unreadable`` (answers with no
+    leading integer — reported, never silently dropped), ``mean_pred``, ``mean_gold``,
+    ``bias`` and ``exact``.
+    """
+    pcol = next(
+        (c for c in ("prediction", "content", "answer_pred", "pred") if c in predictions.columns),
+        None,
+    )
+    if pcol is None:
+        raise KeyError(
+            f"predictions needs one of prediction/content/answer_pred/pred; "
+            f"got {list(predictions.columns)}"
+        )
+    g = gold.copy()
+    if "template" not in g.columns:
+        if "question" not in g.columns:
+            raise KeyError("gold must carry a 'template' or 'question' column")
+        g["template"] = g["question"].map(template_of)
+    g = g[g["template"].str.match(template_pattern, na=False)]
+
+    keep = ["qID", pcol] + (["video"] if "video" in predictions.columns else [])
+    df = g.merge(predictions[keep].drop_duplicates("qID"), on="qID", how="inner")
+    df["_gold"] = df["answer"].map(read_count)
+    df["_pred"] = df[pcol].map(read_count)
+    df["distribution"] = df["qID"].map(_dist_from_qid)
+
+    def _cell(sub: pd.DataFrame) -> dict:
+        n_all = len(sub)
+        ok = sub[sub["_pred"].notna() & sub["_gold"].notna()]
+        out = {
+            "n": int(n_all),
+            "n_scored": int(len(ok)),
+            "n_unreadable": int(n_all - len(ok)),
+            "r": float("nan"), "ci_low": float("nan"), "ci_high": float("nan"),
+            "n_videos": 0,
+            "mean_pred": float(ok["_pred"].mean()) if len(ok) else float("nan"),
+            "mean_gold": float(ok["_gold"].mean()) if len(ok) else float("nan"),
+            "exact": float((ok["_pred"] == ok["_gold"]).mean()) if len(ok) else float("nan"),
+        }
+        out["bias"] = out["mean_pred"] - out["mean_gold"]
+        if len(ok) < 3:
+            return out
+        out["r"] = _spearman(ok["_pred"].to_numpy(), ok["_gold"].to_numpy())
+        if "video" not in ok.columns:
+            logger.info(
+                "count_rank_report: no `video` column — r reported without a CI (an "
+                "unclustered CI over ~38 videos would be far too narrow; RULES §13)."
+            )
+            return out
+        work = ok.copy()
+        work["_vkey"] = work.apply(_video_key, axis=1)
+        groups = [d for _, d in work.groupby("_vkey")]
+        out["n_videos"] = len(groups)
+        if len(groups) < 3:
+            return out
+        rng = np.random.default_rng(seed)
+        boots = []
+        for _ in range(n_boot):
+            pick = rng.integers(0, len(groups), size=len(groups))
+            samp = pd.concat([groups[i] for i in pick], ignore_index=True)
+            r = _spearman(samp["_pred"].to_numpy(), samp["_gold"].to_numpy())
+            if not math.isnan(r):
+                boots.append(r)
+        if boots:
+            out["ci_low"] = float(np.percentile(boots, 2.5))
+            out["ci_high"] = float(np.percentile(boots, 97.5))
+        return out
+
+    report = {"pooled": _cell(df)}
+    for dist in ("ID", "OOD"):
+        report[dist] = _cell(df[df["distribution"] == dist])
+    logger.info(
+        "count_rank_report [%s]: pooled r=%.4f (n=%d, %d unreadable) | ID r=%.4f | OOD r=%.4f",
+        template_pattern, report["pooled"]["r"], report["pooled"]["n"],
+        report["pooled"]["n_unreadable"], report["ID"]["r"], report["OOD"]["r"],
+    )
+    return report
+
+
+def predictions_frame(run_dir: str | Path, results_csv: str | Path | None = None) -> pd.DataFrame:
+    """``[qID, prediction, video]`` from a run's ``predictions.json`` (+ ``results.csv``).
+
+    ``run.run_baseline`` persists the raw model strings to ``predictions.json`` and the
+    scored rows — which carry ``video`` — to ``results.csv``. ``count_rank_report`` needs
+    both: the raw string, because correctness alone cannot express a rank; and the video,
+    because the CI has to cluster on it.
+    """
+    run_dir = Path(run_dir)
+    preds = json.loads((run_dir / "predictions.json").read_text(encoding="utf-8"))
+    df = pd.DataFrame(
+        [{"qID": p["qID"], "prediction": p.get("content", "")} for p in preds]
+    )
+    res_path = Path(results_csv) if results_csv else run_dir / "results.csv"
+    if res_path.exists():
+        res = pd.read_csv(res_path)
+        if "video" in res.columns:
+            df = df.merge(res[["qID", "video"]].drop_duplicates("qID"), on="qID", how="left")
+    return df
