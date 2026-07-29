@@ -190,7 +190,7 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     assert len(set(qids)) == len(qids), "duplicate qID across datasets — Evaluator would crash"
 
     # ── 2. inference ─────────────────────────────────────────────────
-    # rung 22: let a run supply a different backbone wrapper. DEFAULT OFF IS
+    # rung 23: let a run supply a different backbone wrapper. DEFAULT OFF IS
     # BYTE-IDENTICAL — with no `engine_factory` on the cfg this constructs exactly
     # the same QwenFrameEngine it always did. The hook exists because a
     # newer-generation backbone (`Qwen3_5ForConditionalGeneration`) needs a different

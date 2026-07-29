@@ -1,4 +1,4 @@
-# 22 — backbone screen: does a newer generation close the gap by itself?
+# 23 — backbone screen: does a newer generation close the gap by itself?
 
 ## Ladder
 
@@ -6,8 +6,8 @@
 |---|---|---|
 | `../00-baseline/` rung 00 | Qwen3-VL-8B, **zero-shot** | 0.2557 |
 | `../06-vit-lora/` rung 06 ep3 | Qwen3-VL-8B, **fine-tuned** — the control for every A/B | **0.5724** |
-| `22a` | `Qwen3.6-27B-FP8`, **zero-shot** | *pending* |
-| `22b` | `Qwen3.6-35B-A3B-FP8`, zero-shot | 🔒 gated on 22a |
+| `23a` | `Qwen3.6-27B-FP8`, **zero-shot** | *pending* |
+| `23b` | `Qwen3.6-35B-A3B-FP8`, zero-shot | 🔒 gated on 22a |
 
 ## Why this rung exists
 
@@ -56,12 +56,12 @@ byte-identical**.
 The comparison is **deliberately unfair to the challenger**: a zero-shot 27B against our
 *fine-tuned* 8B. So:
 
-- **22a lands near or above 0.5724 zero-shot** → the generation gap is real and large enough to
+- **23a lands near or above 0.5724 zero-shot** → the generation gap is real and large enough to
   justify the migration. Fine-tuning it should then clear our ceiling comfortably.
-- **22a lands well below but far above rung 00's 0.2557** → normal. The read is then the
+- **23a lands well below but far above rung 00's 0.2557** → normal. The read is then the
   *shape*: does it fix `object_recognition` **OOD**, the cell that collapsed? A backbone that
   is merely better on ID buys us nothing.
-- **22a lands near rung 00** → the generation story is wrong for this task and the migration is
+- **23a lands near rung 00** → the generation story is wrong for this task and the migration is
   dead for ~$3.
 
 **Primary target:** `object_recognition` × OOD, the cell the platform punished.
