@@ -18,7 +18,7 @@ rung 21 nor rung 22 is readable without it, because any reweighting that moves g
 | 1 | `class_f1_report` — per-class P/R/F1, macro-F1, exact-set acc, ID/OOD cells, video-clustered bootstrap CI | `src/frame/metrics.py` |
 | 2 | `read_fo_class` — `FOClass.read`'s semantics, returning `None` instead of raising on an illegal answer | `src/frame/metrics.py` |
 | 3 | `_load_fotype` — `FOType` imported the same offline-safe way as `Capability` | `src/frame/metrics.py` |
-| 4 | Reproduction gate against probe0's independently-produced numbers | `experiments/21-loss-mass/_tools/test_class_f1.py` |
+| 4 | Reproduction gate against probe0's independently-produced numbers | `experiments/22-loss-mass/_tools/test_class_f1.py` |
 
 ## The decisions inside it
 
