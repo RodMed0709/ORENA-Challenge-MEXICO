@@ -83,7 +83,19 @@ class GenericVLMEngine:
 
     @torch.no_grad()
     def predict_samples(self, image: Image.Image, question: str) -> list[str]:
-        """Greedy only — a screen has no business sampling."""
+        """Greedy only — a screen has no business sampling.
+
+        ⚠️ `enable_thinking=False` is LOAD-BEARING, not a tweak. The 2026 Qwen line is a
+        hybrid reasoning model that emits a chain of thought BY DEFAULT, so the first
+        bf16 smoke scored 0/24 with every answer looking like *"The user wants me to
+        identify… 1. **Analyze the image:**"* — `max_new_tokens=64` truncated the
+        reasoning before it ever reached the answer. That is a format failure read as
+        incapacity, the same trap G-INFER exists for.
+
+        Suppressing the trace is also the RIGHT default on the merits, not merely for
+        the token budget: four papers in `literature/vlm-techniques/` agree that CoT
+        degrades exactly what FRAME needs — grounding and object counting.
+        """
         try:
             inputs = self.processor.apply_chat_template(
                 self._messages(image, question),
@@ -91,6 +103,7 @@ class GenericVLMEngine:
                 tokenize=True,
                 return_dict=True,
                 return_tensors="pt",
+                enable_thinking=getattr(self._cfg, "enable_thinking", False),
             ).to(self.model.device)
             gen_ids = self.model.generate(
                 **inputs, max_new_tokens=self._cfg.max_new_tokens, do_sample=False

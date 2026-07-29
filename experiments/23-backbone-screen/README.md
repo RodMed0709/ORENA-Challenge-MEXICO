@@ -38,6 +38,29 @@ already names as the serving lever — so this is the planned path, not a workar
 ⚠️ FP8 also needs Ada / Hopper / Blackwell to be *native*. An A100 is Ampere and would emulate
 it, which is why the screen pod is a Blackwell RTX PRO 6000, not the cheaper A100.
 
+## 🔴 The screen runs bf16; the DEPLOYMENT question stays FP8 (measured 2026-07-29)
+
+The first two smokes both failed at the FP8 kernel, not at the model:
+
+| attempt | error | cause |
+|---|---|---|
+| 1 | `finegrained-fp8 kernel requires the 'kernels' package` | missing dependency |
+| 2 | `Triton Error [CUDA]: device kernel image is invalid` | the hub's prebuilt FP8 kernels carry no **sm_120** binary |
+
+The screen pod is an RTX PRO 6000 **Blackwell (sm_120)**, triton 3.7.1, torch 2.8.0+cu128. The
+`finegrained-fp8` kernels ship builds for Ada/Hopper, not for this card — so **FP8 could not
+run here for a hardware reason, not a model one**.
+
+⇒ The screen loads **bf16** instead (55.6 GB on a 96 GB card, no kernel dependency). That is
+sound because a screen measures **capability**, and bf16 is the *upper* bound of what the FP8
+build can score. It does **not** answer the deployment question: whether FP8 holds that quality
+on the L40S. That check is separate, belongs on Ada/Hopper where the kernels exist, and is a
+prerequisite before any submission — **not** before deciding whether this backbone is worth
+migrating to.
+
+⚠️ So a win here is provisional in one specific way: it would still need an FP8 confirmation
+run on the eval-class hardware before it can ship.
+
 ## Design
 
 Single variable: **the backbone**. The `SYSTEM_PROMPT` is imported from `frame.engine`, not
