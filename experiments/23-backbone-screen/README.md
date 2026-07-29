@@ -6,8 +6,22 @@
 |---|---|---|
 | `../00-baseline/` rung 00 | Qwen3-VL-8B, **zero-shot** | 0.2557 |
 | `../06-vit-lora/` rung 06 ep3 | Qwen3-VL-8B, **fine-tuned** — the control for every A/B | **0.5724** |
-| `23a` | `Qwen3.6-27B-FP8`, **zero-shot** | *pending* |
-| `23b` | `Qwen3.6-35B-A3B-FP8`, zero-shot | 🔒 gated on 22a |
+| `23a` | `Qwen3.6-27B` (bf16), **zero-shot** | **0.2913** — 🔴 NO-GO |
+| `23b` | `Qwen3.6-35B-A3B-FP8`, zero-shot | 🔒 **does not run** — its gate was 23a |
+
+## 🔴 RESULT (2026-07-29): the migration is dead, and it cost $4.40
+
+Three generations and 3.4× the parameters buy **+0.036** zero-shot; our own fine-tuning buys
+**+0.317**. Full table in `RESULTS.csv`, verdict in
+`context/decisions/backbone-generation-is-not-the-lever.md`.
+
+One result argues the other way and is kept: the lift is **not uniform** — `object_recognition`
+**OOD** gains **+0.090**, 2.5× the headline, and that is exactly the cell that collapsed on the
+platform. Better at what we fail at, just not enough to skip training.
+
+Free findings: a 27B runs at **p99 0.851 s**, *faster* than our fine-tuned 8B, so model size is
+not latency-bound for FRAME; and the zero-shot model emits `0` and names `Mesh` — two tokens our
+supervision contains no example of and therefore cannot teach.
 
 ## Why this rung exists
 
