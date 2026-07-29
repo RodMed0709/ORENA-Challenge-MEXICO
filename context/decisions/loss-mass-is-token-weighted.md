@@ -95,7 +95,7 @@ and the one template that overrides it to `False` (`template/templates/qwen.py:1
 denominator is the whole effective batch.
 
 **Measured on the pod rather than argued** (3 steps, real recipe, real `train.jsonl` sample —
-`experiments/21-loss-mass/RESULTS_preflight.json`, 48 `compute_loss` calls):
+`experiments/22-loss-mass/RESULTS_preflight.json`, 48 `compute_loss` calls):
 
 | step | `num_items_in_batch` received | Σ of the 16 micro-batches' own answer tokens |
 |---|---|---|
@@ -118,7 +118,7 @@ flip `count_num_items_in_batch` and therefore cannot smuggle in a second variabl
 at all: the loss-scale plugin is `swift/loss_scale/` (`base.py`, `mapping.py`) and the loss
 registry is `swift/loss/`. And `--loss_scale` is the WRONG hook for this: it multiplies the
 per-token loss (`seq2seq_trainer.py:167-168`) and leaves the denominator alone, which is
-precisely the ~3.3× magnitude shrink [[experiments/21-loss-mass/PLAN.md]] warns about. The right
+precisely the ~3.3× magnitude shrink [[experiments/22-loss-mass/PLAN.md]] warns about. The right
 hook is **`compute_loss_func`**, which ms-swift threads through `_prepare_inputs`
 (`inputs['compute_loss_func'] = self.compute_loss_func`) and checks *before* the default branch
 (`seq2seq_trainer.py:189`), handing the callback the per-token loss vector, the labels and
