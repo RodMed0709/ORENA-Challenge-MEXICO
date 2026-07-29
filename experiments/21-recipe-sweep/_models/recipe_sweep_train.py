@@ -88,6 +88,15 @@ class RecipeSweepConfig(ViTLoRAConfig):
     per_device_train_batch_size: int = 1
     gradient_accumulation_steps: int = 16
 
+    # ⚡ SPEED, NOT SCIENCE — and it has to earn that description. Checkpointing recomputes
+    # activations instead of storing them, so turning it OFF spends VRAM to buy wall-clock.
+    # It is *supposed* to be mathematically identical (PyTorch preserves the RNG state across
+    # the recomputation, so even dropout replays the same mask), which would make it the one
+    # flag that may move without being a second variable. "Supposed to" is not a measurement:
+    # `assert_checkpointing_evidence` refuses to let it go False unless a probe result on disk
+    # says the loss traces matched.
+    gradient_checkpointing: bool = True
+
     # The control's data, used as-is. NOT re-exported — see the module docstring.
     control_train_jsonl: Path = _CONTROL_RUN / "train.jsonl"
     control_sha256: str | None = None   # None = record it; a string = assert it
@@ -137,6 +146,59 @@ def control_cfg(cfg: RecipeSweepConfig, arm: str = "A_lr") -> RecipeSweepConfig:
     return replace(cfg, **BASELINES[arm])
 
 
+GC_EVIDENCE = Path("/workspace/tmp/gc_probe_result.json")
+_GC_OK = ("NEUTRAL", "NEAR-IDENTICAL")
+
+
+def assert_checkpointing_evidence(cfg: RecipeSweepConfig) -> dict:
+    """GATE — ``gradient_checkpointing false`` requires the measurement, on disk. RAISES.
+
+    The claim "it is mathematically identical" is a property of PyTorch's implementation, not
+    of our stack, our dtype or our model. This rung does not get to assert it: the probe runs
+    the SAME 20 steps twice, one flag apart, and compares the loss traces step by step. Without
+    that file saying the traces matched, the flag stays True and the run is simply slower.
+
+    True (the default) needs no evidence — it is the recipe every previous rung used.
+    """
+    if cfg.gradient_checkpointing:
+        return {"gradient_checkpointing": True, "evidence": "not required (incumbent)"}
+    if not GC_EVIDENCE.exists():
+        raise AssertionError(
+            f"gradient_checkpointing=False but {GC_EVIDENCE} does not exist. Turning it off is "
+            "only free if the loss trace is unchanged, and that has not been measured here."
+        )
+    import json  # noqa: PLC0415
+
+    ev = json.loads(GC_EVIDENCE.read_text())
+    verdict = str(ev.get("verdict", ""))
+    if not verdict.startswith(_GC_OK):
+        raise AssertionError(
+            f"gradient_checkpointing=False but the probe says {verdict!r} — it is a second "
+            "variable on this stack, so it stays ON and the run stays slower"
+        )
+    return {
+        "gradient_checkpointing": False,
+        "verdict": verdict,
+        "worst_abs_loss_diff": ev.get("worst_abs_loss_diff"),
+        "speedup_x": ev.get("speedup_x"),
+        "peak_mib_off": ev.get("peak_mib_off"),
+    }
+
+
+def swift_args_21(cfg: RecipeSweepConfig) -> list[str]:
+    """Rung 06's argv with this rung's one non-scientific override applied.
+
+    Rung 06 hard-codes ``--gradient_checkpointing true``. It is NOT edited there: that function
+    is the recipe every rung since 02 has been compared against, and rewriting it would silently
+    re-date every one of those comparisons. Rung 21 rewrites the single token in its own copy of
+    the argv instead, so rung 06's engine keeps producing exactly what it always produced.
+    """
+    args = list(_swift_args(cfg))
+    if not cfg.gradient_checkpointing:
+        args[args.index("--gradient_checkpointing") + 1] = "false"
+    return args
+
+
 def _as_map(args: list[str]) -> dict[str, str]:
     out, i = {}, 0
     while i < len(args):
@@ -155,7 +217,11 @@ def diff_vs_control(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict[str, tupl
     Both sides are built by rung 06's own ``_swift_args``, not hand-typed — if that function
     ever changes, both change together and the diff stays honest.
     """
-    a, b = _as_map(_swift_args(control_cfg(cfg, arm))), _as_map(_swift_args(cfg))
+    # The baseline's argv carries THIS run's checkpointing setting on purpose: the flag is
+    # allowed to move only because it has been measured not to change the result, so showing it
+    # as a difference would be noise in the one place that must stay signal.
+    a = _as_map(swift_args_21(control_cfg(cfg, arm)))
+    b = _as_map(swift_args_21(cfg))
     return {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
 
 
@@ -304,8 +370,15 @@ def train_with_vram(cfg: RecipeSweepConfig) -> dict:
     first: rung 06's first smoke read 110 s/it, all of it warm-up, and extrapolating it put
     the full run at ~79 h.
     """
+    import vit_lora_train as r06  # noqa: PLC0415
     from count_aug_train import _GpuPoller, read_speed, read_torch_peak_gib  # noqa: PLC0415
 
+    # Rung 06's `_train` calls `_swift_args` internally, so the checkpointing override has to be
+    # installed around it rather than passed in. Monkeypatching the argv builder is the same
+    # technique rung 06 itself uses to capture rung 02's real command — and it is scoped to this
+    # call, so nothing else in the process ever sees a modified rung 06.
+    _real_args = r06._swift_args
+    r06._swift_args = swift_args_21
     poller = _GpuPoller()
     poller.start()
     try:
@@ -315,9 +388,11 @@ def train_with_vram(cfg: RecipeSweepConfig) -> dict:
         ok, err = False, f"{type(exc).__name__}: {exc}"
     finally:
         peak = poller.stop()
+        r06._swift_args = _real_args
     return {
         "ok": ok,
         "error": err,
+        "gradient_checkpointing": cfg.gradient_checkpointing,
         "peak_mib": peak,
         "torch_peak_gib": read_torch_peak_gib(cfg.train_log),
         "s_per_it": read_speed(cfg.train_log) if ok else None,
@@ -346,8 +421,10 @@ __all__ = [
     "RecipeSweepConfig",
     "assert_control_is_rung18",
     "assert_dataset_is_the_controls",
+    "assert_checkpointing_evidence",
     "assert_single_variable",
     "control_cfg",
+    "swift_args_21",
     "train_with_vram",
     "diff_vs_control",
     "effective_batch",
