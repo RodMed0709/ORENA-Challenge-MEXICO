@@ -62,10 +62,18 @@ turned up four things the records did not have.
    **Status: built, not launched** (`3c1fcdc`, `18233d9`) — the notebook and G-COV runtime are owed,
    and the idle pod was stopped to stop paying for it.
 
-⚠️ **The shared volume has a cost nobody had measured.** The two live arms slowed **10.9 → ~24 s/it**
-across this session, monotonically, tracking heavy read traffic from the third pod (a `find` over
-253 GB, the ledger rebuild, ms-swift imports over a network FS). Heavy I/O on `/workspace` is not
-free for whoever is training. Check whether it recovered.
+⚠️ **The shared volume has a cost, and it is now MEASURED both ways.** The two live arms slowed
+**10.9 → ~24 s/it** across this session, monotonically, tracking heavy read traffic from the third
+pod (a `find` over 253 GB, the ledger rebuild, ms-swift imports over a network FS) — and recovered
+to **11.4 / 11.7 s/it** as soon as that traffic stopped. Not the provider, not coincidence: heavy
+I/O on `/workspace` costs real wall-clock to whoever is training. **Rule: while anyone is training,
+read the volume over the S3 gateway, not by walking the mounted FS.**
+
+🟢 **And a pod is not required to watch a run.** The volume's S3 API serves the live logs with no
+GPU billed: endpoint `https://s3api-eu-ro-1.runpod.io`, bucket = volume id `gf78k60nlt`, creds in
+`.secrets.env` / `~/.aws`. `HeadObject` 403s, so `get_object` directly; ranged GETs with `If-Match`
+412; `multipart_threshold` must be 6 GB. Measured through it at 23:40: `21_rank32_v1` **81.1%**
+(~1 h 40 left), `21_lr_2e4_v1` **70.9%** (~2 h 30) — **rung 24 launches on whichever frees first.**
 
 **Branches swept.** `task/label-noise-ceiling` → **`task/covt-sam-route`** (the name had been
 misaligned for three sessions). Deleted after verifying **by content, not by history**, that main
