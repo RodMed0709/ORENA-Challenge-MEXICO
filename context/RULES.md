@@ -91,6 +91,15 @@
    boundary. Applies to prompts, training targets and post-processors alike.
    See [[open-class-vocabulary]].
 
+8c. **A failed generation is NOT a wrong answer — G-INFER raises.** `engine.predict` swallows
+   every exception and returns `"Inference Error: …"` so one bad frame cannot kill a long run.
+   The cost is that a *total* engine failure also returns cleanly and scores as incapacity:
+   rung 23a's first smoke "completed" at `bucket_mean` 0.0000 because all 24 calls hit a
+   missing FP8 kernel, and the only tell was an impossible 19 q/s. `run_baseline` now counts
+   those sentinels before evaluation and raises above 1 % (`run.py`, G-INFER). **Never read a
+   score from a run whose error rate was not logged**, and never "fix" this gate by relaxing
+   the threshold — a run that trips it has no result to report.
+
 9. **Every result → the ledger.** Regenerate root `RESULTS.md` via `frame.ledger`; every
    number must be reproducible from a commit.
 
