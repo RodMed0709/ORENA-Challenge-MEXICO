@@ -37,6 +37,36 @@ turned up four things the records did not have.
    `lapchole` 91 GB) plus a 1.7 GB `frames_cache`. Step 1 (SAM 2 video-mode over the 1,946
    consecutive pairs) is runnable whenever a GPU is free.
 
+5. 🆕 **Rung 24 is built and pre-registered — `24-vit-lr-decouple`, the other half of the recipe.**
+   ms-swift falls back to `vit_lr = learning_rate` (`optimizers/multimodal.py:56`), so the tower has
+   trained at the LLM's rate for twenty-two rungs **by default rather than by choice** — and at
+   rung 21's 1e-4 it now runs **5× hotter than it ever has**. Control is **arm A itself**, all three
+   epochs, already scored: same `train.jsonl` in place (sha256 verified), so the control costs
+   **zero**. Two arms ×5 apart in log space, sequential against that shared control — `A_low`
+   `vit_lr` **2e-5**, then `B_high` **5e-4**, registered now with a later launch date so a null on
+   `A_low` cannot be written up as "`vit_lr` is dead".
+   🎯 **Either outcome ranks the two branches we have failed to order for three sessions:** a tower
+   that improves when decoupled is still teachable (perceptual — [[covt-reduced-sam-route]]); an
+   indifferent one is saturated w.r.t. our 14,415 examples (mapping — [[counting-is-a-mapping-failure]]).
+   ⚠️ Note the tension with "the model cannot see": rung 21 lifted `fo_class` macro-F1 **+0.174**
+   and Spearman r **+0.059** *without touching perception*.
+   🔴 **Three blocking gates, because every failure mode here is silent.** `--vit_lr` switches the
+   optimiser to `multimodal` (`trainers/arguments.py:249`), which partitions by prefix — **a
+   trainable parameter matching none of the three groups is dropped with no error**. `G-COV`'s
+   static leg is already measured off arm A's own adapter (**720 tensors = 504 LLM + 216 ViT +
+   0 aligner + 0 orphans**; the 216 matches `CAMPAIGN_LOG`); its runtime leg is a two-smoke
+   differential still owed. `G-EQUIV` is needed because arm A used the **default** optimiser
+   (`optimizer: None`, read from its `args.json`). And `assert_vit_is_trainable` guards the rung's
+   most flattering failure: with a frozen tower `vit_lr` applies to an empty group, both arms train
+   the identical model, and the **perfect** null reads like an unusually clean faithful negative.
+   **Status: built, not launched** (`3c1fcdc`, `18233d9`) — the notebook and G-COV runtime are owed,
+   and the idle pod was stopped to stop paying for it.
+
+⚠️ **The shared volume has a cost nobody had measured.** The two live arms slowed **10.9 → ~24 s/it**
+across this session, monotonically, tracking heavy read traffic from the third pod (a `find` over
+253 GB, the ledger rebuild, ms-swift imports over a network FS). Heavy I/O on `/workspace` is not
+free for whoever is training. Check whether it recovered.
+
 **Branches swept.** `task/label-noise-ceiling` → **`task/covt-sam-route`** (the name had been
 misaligned for three sessions). Deleted after verifying **by content, not by history**, that main
 holds the same or better: local `task/data-card` (its one unique hunk, a local timestamp regex, is
