@@ -190,7 +190,14 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     assert len(set(qids)) == len(qids), "duplicate qID across datasets — Evaluator would crash"
 
     # ── 2. inference ─────────────────────────────────────────────────
-    engine = QwenFrameEngine(cfg)
+    # rung 23: let a run supply a different backbone wrapper. DEFAULT OFF IS
+    # BYTE-IDENTICAL — with no `engine_factory` on the cfg this constructs exactly
+    # the same QwenFrameEngine it always did. The hook exists because a
+    # newer-generation backbone (`Qwen3_5ForConditionalGeneration`) needs a different
+    # model class and cannot load under the transformers 4.57 pin at all, so the
+    # alternative is forking this whole function to swap one line.
+    factory = getattr(cfg, "engine_factory", None) or QwenFrameEngine
+    engine = factory(cfg)
     engine.load()
     provider = FrameProvider(cfg)
     responses = _infer_all(cfg, items, engine, provider)
@@ -207,6 +214,26 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+    # ── G-INFER — a failed generation must not be scored as a wrong answer ────
+    # `engine.predict` deliberately never raises: it returns "Inference Error: …" so
+    # one bad frame cannot kill a 6-hour run. The cost is that a TOTAL failure also
+    # returns cleanly — rung 23a's first smoke "completed" with bucket_mean 0.0000
+    # because every single call hit a missing FP8 kernel, and only the 19 q/s rate
+    # gave it away. That is indistinguishable from a model that knows nothing, so it
+    # RAISES here (RULES §7: gates raise, never warn).
+    n_err = sum(1 for r in responses if r.content.startswith("Inference Error:"))
+    if n_err:
+        first = next(r.content for r in responses if r.content.startswith("Inference Error:"))
+        share = n_err / max(1, len(responses))
+        logger.error("G-INFER: %d/%d generations failed (%.1f%%) — first: %s",
+                     n_err, len(responses), 100 * share, first)
+        if share > 0.01:
+            raise RuntimeError(
+                f"G-INFER: {n_err}/{len(responses)} generations failed ({share:.1%}). "
+                f"First error: {first!r}. Scoring this run would report an engine "
+                f"failure as model incapacity."
+            )
 
     requests = [it.request for it in items]
     references = [it.reference for it in items]

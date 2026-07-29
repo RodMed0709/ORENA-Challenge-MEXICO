@@ -32,8 +32,25 @@ class BaselineConfig:
     # FRAME budget" — that premise is WRONG: the budget is POOLED (120 s setup +
     # B × 5 s, see decisions/latency-budget-is-pooled.md), and measured p99 is
     # 0.352 s. The cap is kept as a sane ceiling, NOT as a latency requirement;
-    # raising it is affordable and the OOD split is measured to receive ~56% of
-    # the ID split's visual tokens.
+    # raising it is affordable. ⚠️ The clause once written here — that the OOD split
+    # receives roughly half the ID split's visual tokens — is RETRACTED; see
+    # decisions/resolution-is-not-the-gap.md.
+    # MEASURED over the 15,213-frame cache (experiments/11-resolution/runs/
+    # 11_resolution_v1/RESULTS_dims_crosstab.csv): the cap engages on EXACTLY ONE
+    # resolution — lapchole 1280x720, 5,036 frames = 33.1% of the cache, all ID —
+    # because rounding to multiples of 28 lands on 1288x728 = 937,664 px, just over
+    # the cap, which then resizes to 1260x700: a 2.2% linear cost, negligible. The
+    # other 10,177 frames never engage it (their small dimension shifts are the
+    # multiple-of-28 rounding, not the cap). So NO frame reaches the ViT meaningfully
+    # downscaled — there is no resolution deficit for a tiling/upsampling lever to
+    # recover, and max visual tokens per frame is 1,125.
+    # The retracted figure looked right because at top resolution heico gets 646
+    # tokens vs lapchole's 1,125 = 57.4%. It is still wrong as a claim about the
+    # SPLITS: lapchole's own low end (640x360 -> 299 tokens) sits far BELOW heico's
+    # uniform 646 — the tails invert, exactly as resolution-is-not-the-gap states.
+    # ⚠️ The smart_resize arithmetic here is DERIVED (reimplemented; factor 28 =
+    # patch 14 x 2x2 merge), NOT run through qwen_vl_utils — confirm on-pod against
+    # the real processor. The frame dimensions themselves are measured + committed.
     max_pixels: int = 1280 * 720
     answer_char_cap: int = 300  # OpenEnded/MultipleChoice hard limit in the SDK
 
@@ -73,8 +90,23 @@ class BaselineConfig:
     )
 
     # ── evaluation ───────────────────────────────────────────────────
-    judge_model: str = "Qwen/Qwen3-4B"  # real HF id (SDK default "Qwen3.5-4B" does not exist)
+    # ⚠️ The SDK default is `Qwen/Qwen3.5-4B` and it DOES exist — the comment that
+    # once stood here claiming otherwise was false (HF, created 2026-02-27, 6.4M
+    # downloads). It almost certainly came from a load failure, not a lookup: that
+    # checkpoint declares `model_type: qwen3_5`, which `transformers` 4.57 — our hard
+    # floor for Qwen3-VL — does not register, so `AutoConfig` raises `KeyError`.
+    # MEASURED (decisions/judge-swap-is-not-the-gap.md): the two judges agree on
+    # 99.2% of all questions and move `bucket_mean` by −0.0014, so this substitute is
+    # kept deliberately — the whole ladder is comparable under it and no past number
+    # needs restating. Running the official judge needs its own venv on transformers 5.x.
+    judge_model: str = "Qwen/Qwen3-4B"
     enforce_latency: bool = True  # Track.FRAME → 5.0 s cap
+
+    # ── rung 23: swap the backbone wrapper ───────────────────────────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None makes `run_baseline` construct the same
+    # QwenFrameEngine it always did (run.py:193). Set it to a callable taking `cfg`
+    # to screen a model whose architecture the Qwen3-VL classes cannot load.
+    engine_factory: Callable[["BaselineConfig"], object] | None = None
 
     # ── run scope ────────────────────────────────────────────────────
     # None = full test set; an int caps total questions (SMOKE / sample).

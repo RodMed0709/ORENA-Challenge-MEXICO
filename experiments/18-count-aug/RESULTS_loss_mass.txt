@@ -1,0 +1,9 @@
+train.jsonl de rung 18:  14415 filas, 47381 tokens de respuesta
+
+formato            filas   %filas    tokens  %tokens   tok/fila
+fo_class            7343    50.9%     29564    62.4%       4.03
+number              4929    34.2%      9865    20.8%       2.00
+open_ended/mc        913     6.3%      5492    11.6%       6.02
+binary              1230     8.5%      2460     5.2%       2.00
+
+🔴 number: 34.2% de las FILAS pero 20.8% de la MASA DE LOSS  -> infra-pesado 1.64x

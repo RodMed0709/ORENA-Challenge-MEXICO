@@ -2,7 +2,120 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-25 (pm)**.
+> Last updated: **2026-07-29**.
+
+## 🔴 2026-07-29 — rung 21 is the RECIPE now, and it is training
+
+**The two optimiser rungs swapped places.** `21-loss-mass` became `22-loss-mass`; rung 21 is
+`21-recipe-sweep`. The argument is the leaderboard proxy, `mean(aggregation_ID,
+object_recognition_ID)`: loss-mass moves gradient from `fo_class` (71% of `object_recognition`)
+to `number` (80.4% of `aggregation`), so it is **structurally near-zero-sum on exactly the
+number that gates co-authorship** — its own pre-registration says the modal outcome is a wash.
+The recipe is not a trade: it adds optimisation distance to both buckets. And the ordering
+matters, because whether taking gradient from `fo_class` costs anything depends on whether
+`fo_class` has saturated, which is what lr and epochs move.
+
+**IN FLIGHT — arm A: `--learning_rate` 2e-5 → 1e-4.** One flag. 3 epochs, 2,703 steps, ~7.6 h
+at the measured 10.1 s/it, peak 22,210 MiB of 32,607. Run `21_lr_1e4_v1`, log
+`/workspace/tmp/21_full_A.log`. **Control = rung 18's already-scored per-epoch series**
+(0.5255 / 0.5488 / **0.5721**) on the **same `train.jsonl`, used in place**, sha256
+`180e28f0…8e8b` asserted. Zero data change. Score with `21b_epoch_eval.ipynb -p EPOCH n`.
+
+⚠️ **Named before it ran:** our LoRA reaches the ViT at the LLM's own LR while the Qwen3-VL
+default puts the tower 5–10× lower. A collapse in arm A may be the **tower**, not the recipe —
+the pre-registered diagnostic is **A2 = lr 1e-4 with `vit_lr` held at 2e-5**. Arm B (rank 8→32,
+α 32→128 so α/r stays 4) is **not launched until A is read**.
+
+🟢 **The loss-mass mechanism is now MEASURED, not inferred** (`22-loss-mass/RESULTS_preflight.json`):
+the trainer's `num_items_in_batch` equals the token sum of all 16 micro-batches, to the token,
+every step. ⚠️ The decision note's original "confirmed at the source" quotation was incomplete —
+`seq2seq_trainer.py:196` sits under `if num_items_in_batch is None:` and, had the guard been
+open, would have meant training was ALREADY per-sample and the whole 62.4/20.8 table an
+artefact. Free findings from the same probe: `max_grad_norm` is **1.0** (never set by us), and
+`swift/plugin/loss_scale/` **does not exist** in ms-swift 4.4.1 — the hook is `compute_loss_func`.
+
+🟢 **`frame.metrics.class_f1_report`** landed (`0674f02`) — class-balanced F1 on `fo_class`,
+validated against probe0 (rung 06 ep3 ID: n=920, exact 0.6391, macro 0.5116). It is what can
+see the tail that a 0.6478 headline hides (`Gallstone` recall 0.036).
+
+## 🔴 2026-07-27 (pm) — submission 01's metrics decoded: a 4B beats us, and we were reading the wrong number
+
+**Read [[leaderboard-metric-vs-our-headline]] before quoting any number as "our score".**
+
+🔴 **We were comparing incomparable quantities.** `pre_evaluation_score` is an unweighted mean over
+**populated** buckets and only **two** populate on the pre-eval set, both ID — while our
+`bucket_mean` averages **four** (ID+OOD). The right local comparator is **mean-ID = 0.5281**, not
+0.5667, so the real local↔leaderboard gap is **−0.057**, not −0.096. Now RULES §4b.
+
+🔴 **On identical questions a 4B beats us 0.5163 vs 0.4710.** The exact rationals (`343/754`,
+`607/1246` ours; `410/754`, `609/1246` theirs) recover **B = 2000 over 20 videos** and prove the
+same set. The whole margin is `aggregation` — **67 questions** — and `object_recognition` is a
+**two-question tie**. ⇒ **[[aggregation-is-the-gap]]'s "+14.9 lead on `object_recognition`" is
+RETRACTED**; it had compared our local val against their platform score. The `aggregation`
+prescription survives and is better supported.
+
+🟢 **Latency is a non-issue and the alarm was arithmetic.** `mean_latency_s × throughput = 20.0`
+**exactly** (both teams) — one number, not two. Real cost **0.79 s/question** against a **5.06**
+ceiling: **6.4× headroom**. Corroborated by running the container on the organizers' fixture
+(0.78 s/q warm, 31.9 s setup of a 120 s allowance).
+
+🟢 **`heico`=OOD is the organizers' own design, not our invention** (RULES §3). Their public
+partition puts **Sigmoid Resection — a procedure absent from ALL training** — in `heico` test,
+which is exactly the official *"OOD tag with respect to procedure type"*. The empty `ood` column
+is a publication choice. ⇒ OOD work is **not** wasted: the final ranking weights ID and OOD
+**equally** (`challenge_design.txt:2001`), and it is **Copeland with significance tests**, so a
++0.003 lever buys nothing (RULES §4c).
+
+🔴 **Zero training examples for `event_understanding` and `complex_reasoning`** — two of five
+groups, `primary_capability` is only `1a,1c,1d,1e,2a,3a` across all 20,000 public questions
+(RULES §4d).
+
+⚠️ **Selection bias, unmeasured.** `val_id ∪ val_ood` IS the whole 6252 set; every rung selects by
+`idxmax(acc_ood)` over **10 videos** and then reports on a set containing those same questions.
+Biases absolute numbers upward; rung-vs-rung deltas largely cancel. `kfold_lopo` (`split.py:342`)
+exists and is unused.
+
+**The submission itself was NOT broken** — an adversarial audit cleared frames, prompt, generation,
+offline and Dockerfile. It has since been hardened anyway (`batch.json` layout now read,
+case-insensitive frame matching, loud failure, CUDA hard-fail) and has produced a real
+`answer.json` against the organizers' fixture for the first time.
+
+🔒 **Open:** we do **not** know where the baselines sit. `challenge_design.txt:453` gates the final
+stage on beating **both**, `:375` says they would be "clearly identified" on the leaderboard, and
+the visible leaderboard shows 13 rows, all participant teams. Worth asking the organizers.
+
+## 🟢 2026-07-27 — the missing control was run: rungs 14 and 15 are CLOSED, and epoch 3 erases OOD counting
+
+**Rung 06 epoch 3 = `bucket_mean` 0.5724** (`experiments/06-vit-lora/06c_epoch3_eval.ipynb`, RTX
+5090, full 6252, protocol identical to `eval_best`, 31 min, **zero training**, ~$1 of pod). All
+gates green, gold 6252/6252, hybrid cross-check agrees with the vendor scorer. This is the number
+[[epoch-matched-control]] said had to exist before anything else could be read.
+
+🔴 **Both team rungs are closed.** Rung 15's 0.5699 was a win over rung 06's *wrong epoch*, not
+over rung 06: against the epoch-matched control it is +0.0017 ID / **−0.0078 OOD** with **0 of 6**
+paired video-clustered cells excluding zero. Rung 14 is now the only rung with a significant
+cell — `ID ALL −0.0239 [−0.0433, −0.0035]`, i.e. **significantly worse** than the control. The
+14+15 fusion is worse-motivated than when proposed: a measured-negative plus a measured-null.
+
+⚠️ **Rung 06 ep3 does NOT become the shipped checkpoint.** It is the ladder's best headline
+(+0.0057 over ep2) and a **statistical null** — 0 of 6 paired cells exclude zero. The standard
+that closes 14 and 15 closes this too. Submission 01's ep2 checkpoint stands.
+
+🔴 **The finding that outlives the adjudication:** at ep3 `number` on OOD scores
+**exactly the trivial floor to 16 digits** (0.46907993966817496 vs floor 0.46907993966817496) —
+the signature rung 05 recorded for a **black image**. Across epochs the OOD counting margin decays
+monotonically (+0.0151 → +0.0128 → **0.0000**) while ID counting climbs (+0.0781 → +0.0859 →
++0.1068). Training **erases** OOD counting, and epoch 3 is where the erasure completes.
+
+**Two repo defects surfaced, neither fixed here.** (1) `frame.ledger._discover_stratified` globs
+`runs/**/stratified.json` recursively and tier 1 does **not** dedup, so two `stratified.json` under
+one run dir produce two identical rows — triggered by an untracked stray
+`experiments/02-lora-sft/runs/02_lora_sft_v1/eval_best/`, which was parked (not deleted) for the
+ledger rebuild. (2) The rung-10/rung-12 phantom rows are **still in the committed ledger** on this
+branch (8 extra rows); the root fix lives on `task/audit-rung12`, **unmerged**.
+
+⚠️ Still no seed repeat, ever. Every delta above sits inside a variance band we have never
+measured. The user declined seed repeats this session.
 
 ## 🔵 2026-07-26 — CoVT read in full, the scoring frame corrected, and the perceptual branch reopened via SAM 2
 
@@ -168,8 +281,11 @@ CI excludes 0. Interpolation does not buy back counting for free. Faithful negat
 - **rung 17 (32B blind perception probe)** — the gate for the whole CoA/RLVR line. Needs a ≥80 GB pod.
   Everything built + pushed; on a big pod: `papermill 17_generator_probe.ipynb -p SMOKE False`.
 - **rung 15 caveat to read with its result:** it replicates Gautam 2025's structured count *format*
-  but NOT the *pointing* (coordinates) that drove the 9.86→0.26 — our dataset has no boxes. Partial
-  replication; if flat, pointing (via the 32B, or an external boxed dataset) is the next step.
+  but NOT the *pointing* (coordinates) — our dataset has no boxes. ⚠️ **Corrected 2026-07-27:** the
+  pointing did **not** drive the 9.86→0.26; that is v05's **counting-ONLY** arm. Per its Table I the
+  joint count+point arm reaches only **1.52**, so dropping pointing is if anything **favourable** for
+  counting (different evaluation subsets, so not a strictly paired ablation). Partial replication of
+  the *format*, not a weakened copy of the better arm.
 - 🔒 **Rotate the GitHub PAT** — it is in plaintext in the pod's git remote URL.
 
 ## 🔴 2026-07-20 — rung 10 is CLOSED, and it kills a whole FAMILY of levers.

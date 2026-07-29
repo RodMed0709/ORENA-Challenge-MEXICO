@@ -24,10 +24,44 @@
    `results_df["ood"]` — it is all-False on the public data (organizers populate it only
    in their private test split).
 
+   🟢 **This is a faithful reconstruction of the organizers' design, NOT a convention we
+   invented** — measured 2026-07-27, and worth knowing because it is the difference between
+   an arbitrary proxy and the official axis. `challenge_design.txt:1018` defines the tag as
+   *"In-distribution (ID) vs Out-of-distribution (OOD) **with respect to procedure type** and
+   question"*, and they encoded exactly that in how they partitioned the public data:
+
+   | dataset | train procedures | test procedure |
+   |---|---|---|
+   | `heico` | Proctocolectomy, Rectal Resection | **Sigmoid Resection — absent from ALL training** |
+   | `lapchole` | Lap. Cholecystectomy | Lap. Cholecystectomy (same) |
+
+   So `heico` test is genuinely unseen-procedure OOD and `lapchole` test is ID, by their own
+   definition. The empty `ood` column is a publication choice (they do not hand you the tag),
+   not an absence of design. `split.py` records it as `organizer:heico-test(Sigmoid Resection)`.
+
 4. **Headline = `bucket_mean`** (mean over the 4 real buckets; drop `temporal_grounding`
    n=1). `pre_evaluation_score` is REFERENCE ONLY — it is broken on our split: an
    unweighted bucket mean that a single n=1 question inflates (it lifted rung-02 from an
    honest **0.550** to a reported **0.708**).
+
+4b. 🔴 **`bucket_mean` and the leaderboard's `pre_evaluation_score` are DIFFERENT QUANTITIES.
+   Never quote one against the other.** `bucket_mean` averages **4** buckets (ID+OOD). The
+   leaderboard averages **populated** buckets, and on the pre-eval set only **2** populate,
+   both ID. Comparing them made a −0.057 gap look like −0.096. **The right local comparator
+   for any leaderboard number is mean-ID** (`aggregation_ID` + `object_recognition_ID`, /2).
+   ⚠️ A `null` bucket means EMPTY, not broken. See [[leaderboard-metric-vs-our-headline]].
+
+4c. **The FINAL ranking is not a mean at all.** It is **Copeland over buckets with pairwise
+   significance tests** — non-significant deltas collapse to the SAME rank
+   (`challenge_design.txt:1010-1040`) — weighting ID and OOD **equally** (`:2001`). Mean
+   accuracy applies only to clearing a baseline in pre-eval (`:1039`). ⇒ A lever worth +0.003
+   buys nothing under the final ranking, and OOD work is not wasted merely because the
+   pre-eval cannot see it.
+
+4d. ⚠️ **We hold ZERO training examples for `event_understanding` and `complex_reasoning`.**
+   Across all 20,000 public questions `primary_capability` is only `1a, 1c, 1d, 1e, 2a, 3a`.
+   The SDK defines five groups and the platform reports ten buckets. Any claim about those two
+   groups is **unmeasurable with the data we have** — do not assert one.
 
 5. **Trivial floors: vs the EVAL set, split ID/OOD.** Never against the train prior, never
    read off a suffix-collided merged dataframe.
@@ -48,6 +82,24 @@
 
 8. **SMOKE must be stratified** across `heico`+`lapchole`, never a single-dataset prefix.
 
+8b. **NEVER emit a class token outside `FOType.names()`.** The predefined list the organizers
+   put INSIDE the prompt and the scoring registry disagree on their 10th element
+   (`foreign object` vs `Absorbable Hemostatic Agent`). An unrecognised token does not merely
+   score 0 — `FOType.from_name()` **RAISES** (`vendor/orena-focus/src/focus/foreign_objects.py:154-161`)
+   and `verify()` marks the answer wrong. Read the accepted set from `FOType.names()` at
+   runtime — **never hard-code it** — and suppress or map anything else at the answer
+   boundary. Applies to prompts, training targets and post-processors alike.
+   See [[open-class-vocabulary]].
+
+8c. **A failed generation is NOT a wrong answer — G-INFER raises.** `engine.predict` swallows
+   every exception and returns `"Inference Error: …"` so one bad frame cannot kill a long run.
+   The cost is that a *total* engine failure also returns cleanly and scores as incapacity:
+   rung 23a's first smoke "completed" at `bucket_mean` 0.0000 because all 24 calls hit a
+   missing FP8 kernel, and the only tell was an impossible 19 q/s. `run_baseline` now counts
+   those sentinels before evaluation and raises above 1 % (`run.py`, G-INFER). **Never read a
+   score from a run whose error rate was not logged**, and never "fix" this gate by relaxing
+   the threshold — a run that trips it has no result to report.
+
 9. **Every result → the ledger.** Regenerate root `RESULTS.md` via `frame.ledger`; every
    number must be reproducible from a commit.
 
@@ -64,6 +116,24 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
     from 0.24 to 1.00 (4 degenerate). Use the SDK hierarchical estimate + per-template margins.
 13. **Effective n ≈ 38 videos, not 6252.** Questions are not independent (they cluster on 38
     videos); trust the video-level hierarchical CI for "will this hold on a new video?".
+
+13b. 🔴 **A rank correlation is a property of the SLICE, not of the model. Never compare two
+    `r` values computed on different gold ranges.** Range restriction attenuates Spearman
+    toward zero by construction, so the slice must be named every single time. Measured:
+    rung 06 ep3 on the `Clips` template scores **0.5866** over the full gold 1–12,
+    **0.4103** restricted to gold 3–6, and **0.8303** on the gold-stratified 16b sample —
+    one model, one gold, three numbers. This is how "a human orders better (0.72) than our
+    model (0.43)" got written down: a full-range human number against a range-restricted
+    model number. On the same frames the model scores **0.8303** and out-ranks the human.
+    Same discipline for bias, which moves −0.646 → −1.083 → −1.606 across those same slices.
+    Score rank ONLY via `frame.metrics.count_rank_report`, quoting `template_pattern` and n.
+    See [[model-out-ranks-the-blind-human]].
+
+13c. **Rank and score are different questions and must not be cashed into one another.** Rung
+    06 ep3 orders OOD counts at **r = 0.4997** while its `number` OOD margin is **exactly
+    0.000000** (accuracy 0.469080 == floor 0.469080). Ordering skill is real and does not
+    convert into exact-match points. ⇒ a lever that raises `r` has NOT thereby raised
+    `bucket_mean`; report the rise as a rise in `r`.
 
 ## COMPLIANCE — challenge data never leaves the secure environment (BINDING, DUA)
 
