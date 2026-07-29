@@ -1,15 +1,17 @@
 ---
 question: Is our LoRA recipe actually converged — or are we taking the low-learning-rate discount AND the low-epoch discount at the same time?
-verdict: WE ARE THE ONLY CONFIGURATION IN THE PUBLISHED GRID THAT TAKES BOTH. Every strong surgical-VQA result pairs lr 1e-5–2e-5 with 15–20 epochs, or 3–5 epochs with lr 1e-4–3e-4. We run lr 2e-5 for 3 epochs, i.e. roughly 1/5 to 1/10 of anyone's total optimisation distance. And rank 8 has never been swept, while the one published ablation on our exact setting measures rank 32→128 = +0.028 against model 7B→72B = −0.020. 🔴 This is the most likely explanation on file for "a 4B beats our 8B on identical questions"
-status: LITERATURE-GROUNDED, UNTESTED
+verdict: 🟢 CONFIRMED ON THE LR AXIS 2026-07-29 — see [[undertrained-was-real]]: lr 2e-5 -> 1e-4 alone moved bucket_mean 0.5721 -> 0.6305 with 21 of 30 paired cells excluding zero. The rank half is still running. The prior, as written: WE ARE THE ONLY CONFIGURATION IN THE PUBLISHED GRID THAT TAKES BOTH. Every strong surgical-VQA result pairs lr 1e-5–2e-5 with 15–20 epochs, or 3–5 epochs with lr 1e-4–3e-4. We run lr 2e-5 for 3 epochs, i.e. roughly 1/5 to 1/10 of anyone's total optimisation distance. And rank 8 has never been swept, while the one published ablation on our exact setting measures rank 32→128 = +0.028 against model 7B→72B = −0.020. 🔴 This is the most likely explanation on file for "a 4B beats our 8B on identical questions"
+status: MEASURED
 date: 2026-07-28
 measured_in: literature sweep (agent, ~40 tool calls over literature/ + web); our recipe read from experiments/06-vit-lora/_models/vit_lora_train.py + experiments/02-lora-sft/_models/lora_sft_train.py
 ---
 
 # Decision: we are under-trained on two axes at once, and we never noticed because we only ever changed data
 
-- **Status:** LITERATURE-GROUNDED · 2026-07-28 · ⚠️ **NOT yet measured on our data.** This note
-  records a strong prior and the experiment that would settle it, nothing more.
+- **Status:** 🟢 **CONFIRMED on our data, 2026-07-29** — the experiment this note designed was
+  run and the prior held. **Read [[undertrained-was-real]] for the result**; this note is kept
+  as the reasoning that produced it, and every number *in it* is still somebody else's.
+  ⚠️ Only the **LR** half is measured. The rank half (`21_rank32_v1`) is still running.
 - **Applies when:** proposing any new data lever, and when explaining the leaderboard gap.
 
 ## Why this was looked for
@@ -75,8 +77,10 @@ Two structural reasons, both worth recording:
 
 ## ⚠️ What this is NOT
 
-- **Not measured on our data.** Every number above is somebody else's. This note is a prior
-  and an experiment design, and it must not be cited as a result.
+- **Not measured on our data** — ⚠️ *was* true when written; the LR half was measured on
+  2026-07-29 ([[undertrained-was-real]]). Every number **in the table above** is still somebody
+  else's, and the **rank** row in particular is still an outside claim. Cite the result note
+  for our numbers and this one only for the reasoning.
 - **Not a claim that more training is free.** [[epoch-matched-control]] shows rung 06 erased
   counting monotonically across epochs, and rung 18's `eval_loss` **rose** at epoch 3
   (0.290 → 0.321) while its scored `bucket_mean` still improved. Longer training may buy the
@@ -94,10 +98,22 @@ Two structural reasons, both worth recording:
 
 **Arm B: lr 2e-5 → 1e-4, epochs 3 → 6, everything else rung 06's, evaluated every epoch.**
 
-Epochs are not a second variable here: we score every epoch regardless (RULES §6b), so a
+~~Epochs are not a second variable here: we score every epoch regardless (RULES §6b), so a
 6-epoch run *contains* the 3-epoch run as a prefix and yields the whole curve for the price of
-one. The LR is the single variable, and the control is rung 06's own per-epoch series, already
-measured.
+one.~~
+
+🔴 **That prefix claim is FALSE and was corrected on 2026-07-29.** The scheduler is `cosine`
+over the *planned* number of steps, so at epoch 3 of a **6**-epoch run the learning rate is
+around half of peak, while at epoch 3 of a **3**-epoch run it has annealed to **exactly 0.0**
+(read from arm A's own log). The two runs differ from step 1 and neither contains the other.
+Changing `--num_train_epochs` reshapes the whole LR trajectory; it is one flag, but it is not
+a free extension. ⇒ **"Resume from epoch 3 and keep going" cannot work either**: resuming
+restores `scheduler.pt` with lr = 0 and learns nothing, and resetting the schedule is a warm
+restart — a recipe none of the works in the table above use.
+
+The LR is the single variable, and the control is rung 18's own per-epoch series, already
+measured. (As run, arm A used **3** epochs, epoch-matched to the control, precisely because
+epochs 4–6 would have had no control to be read against.)
 
 Pre-registered read: `bucket_mean` and `margin_OOD` per epoch against rung 06's per-epoch
 series, plus class-balanced F1 (which we still do not compute — see
