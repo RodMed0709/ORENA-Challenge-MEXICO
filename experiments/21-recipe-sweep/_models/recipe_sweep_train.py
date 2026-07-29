@@ -102,14 +102,39 @@ def effective_batch(cfg: RecipeSweepConfig) -> int:
     return cfg.per_device_train_batch_size * cfg.gradient_accumulation_steps
 
 
-def control_cfg(cfg: RecipeSweepConfig) -> RecipeSweepConfig:
-    """The control's config: this arm's, with the recipe fields put back to rung 18's.
+# 🔴 Each arm names the recipe it is a single variable AGAINST — which is not always rung 18.
+# Arm A won (all three epochs, 21 of 30 paired cells excluding zero), so the recipe under test
+# moved: asking whether rank helps is now a question about rank *at the learning rate we would
+# actually ship*, not at one we have measured to be wrong. Arm B is therefore one flag off
+# ARM A, and must be read and reported against arm A — never against rung 18, which would make
+# it a two-variable comparison wearing a one-variable label.
+BASELINES: dict[str, dict] = {
+    "control": {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
+    "A_lr":    {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
+    "A2_lr":   {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
+    "B_rank":  {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
+}
+
+# Where each baseline's own weights live, so a gate can read what it ACTUALLY trained with
+# instead of trusting the table above. None = rung 18 (a different experiment's run dir).
+BASELINE_RUN: dict[str, Path | None] = {
+    "control": None,
+    "A_lr": None,
+    "A2_lr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
+    "B_rank": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
+}
+
+
+def control_cfg(cfg: RecipeSweepConfig, arm: str = "A_lr") -> RecipeSweepConfig:
+    """The baseline's config: this arm's, with the recipe fields put back to its BASELINE.
 
     Everything that is not the recipe — dirs, dataset, smoke settings, batch shape — is shared
     by construction, so `--dataset` and `--output_dir` are identical in both argvs and cannot
     mask a real difference.
     """
-    return replace(cfg, learning_rate=2e-5, lora_rank=8, lora_alpha=32)
+    if arm not in BASELINES:
+        raise ValueError(f"unknown arm {arm!r}; expected one of {sorted(BASELINES)}")
+    return replace(cfg, **BASELINES[arm])
 
 
 def _as_map(args: list[str]) -> dict[str, str]:
@@ -124,20 +149,22 @@ def _as_map(args: list[str]) -> dict[str, str]:
     return out
 
 
-def diff_vs_control(cfg: RecipeSweepConfig) -> dict[str, tuple]:
-    """Every flag where this arm's real argv differs from the control's real argv.
+def diff_vs_control(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict[str, tuple]:
+    """Every flag where this arm's real argv differs from its BASELINE's real argv.
 
     Both sides are built by rung 06's own ``_swift_args``, not hand-typed — if that function
     ever changes, both change together and the diff stays honest.
     """
-    a, b = _as_map(_swift_args(control_cfg(cfg))), _as_map(_swift_args(cfg))
+    a, b = _as_map(_swift_args(control_cfg(cfg, arm))), _as_map(_swift_args(cfg))
     return {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
 
 
 ARMS: dict[str, set[str]] = {
     "control": set(),
-    "A_lr": {"--learning_rate"},
-    "B_rank": {"--lora_rank", "--lora_alpha"},
+    "A_lr": {"--learning_rate"},                    # vs rung 18
+    "A2_lr": {"--learning_rate"},                   # vs arm A — is 1e-4 the optimum, or just
+                                                    # better than 2e-5? Only one value was tested
+    "B_rank": {"--lora_rank", "--lora_alpha"},      # vs arm A
 }
 
 
@@ -152,7 +179,7 @@ def assert_single_variable(cfg: RecipeSweepConfig, arm: str) -> dict:
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm {arm!r}; expected one of {sorted(ARMS)}")
-    diff = diff_vs_control(cfg)
+    diff = diff_vs_control(cfg, arm)
     unexpected = set(diff) - ARMS[arm]
     if unexpected:
         raise AssertionError(
@@ -166,7 +193,7 @@ def assert_single_variable(cfg: RecipeSweepConfig, arm: str) -> dict:
             "change — the arm would train the control and report it as the variable"
         )
 
-    ctrl = control_cfg(cfg)
+    ctrl = control_cfg(cfg, arm)
     ratio, ctrl_ratio = cfg.lora_alpha / cfg.lora_rank, ctrl.lora_alpha / ctrl.lora_rank
     if abs(ratio - ctrl_ratio) > 1e-9:
         raise AssertionError(
@@ -183,31 +210,61 @@ def assert_single_variable(cfg: RecipeSweepConfig, arm: str) -> dict:
     return {"arm": arm, "diff": diff, "alpha_over_rank": ratio, "effective_batch": eb}
 
 
-def assert_control_is_rung18(cfg: RecipeSweepConfig) -> dict:
-    """GATE — the control really is rung 18, read from rung 18's OWN config object.
+def assert_control_is_rung18(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict:
+    """GATE — this arm's BASELINE really is what we think it is. RAISES (RULES §7).
 
-    Without this the arm could be a clean single-variable A/B against a control that had
-    quietly stopped being the run whose per-epoch series we compare to. RAISES (RULES §7).
+    Two cases, because not every arm is a variable off rung 18 any more:
+
+    * **baseline = rung 18** (``control``, ``A_lr``) — checked against rung 18's OWN config
+      object, imported rather than retyped. Without this an arm could be a clean
+      single-variable A/B against a control that had quietly stopped being the run whose
+      per-epoch series we compare to.
+    * **baseline = an earlier arm of this rung** (``B_rank``, ``A2_lr``) — checked against the
+      ``args.json`` **ms-swift itself wrote** beside that arm's checkpoints. Not against a
+      table in this file: the weights are the baseline, and only the artifact can say what
+      produced them. This is the same rule the papermill mode gate follows — read the artifact,
+      never the declared variable — and it is the rule whose absence made 21b log ``lr=2e-05``
+      for a run trained at 1e-4.
     """
-    from count_aug_train import CountAugConfig  # noqa: PLC0415 — pod-only path
-
-    r18, ctrl = CountAugConfig(), control_cfg(cfg)
     fields = (
         "learning_rate", "lora_rank", "lora_alpha", "lora_dropout", "num_train_epochs",
         "per_device_train_batch_size", "gradient_accumulation_steps", "freeze_vit",
         "max_pixels", "seed", "model_type", "attn_impl",
     )
-    drift = {
-        f: (getattr(r18, f), getattr(ctrl, f))
-        for f in fields
-        if getattr(r18, f) != getattr(ctrl, f)
-    }
+    ctrl = control_cfg(cfg, arm)
+    run = BASELINE_RUN.get(arm)
+
+    if run is None:
+        from count_aug_train import CountAugConfig  # noqa: PLC0415 — pod-only path
+
+        ref, source = CountAugConfig(), "rung 18's own config object"
+        drift = {f: (getattr(ref, f), getattr(ctrl, f))
+                 for f in fields if getattr(ref, f) != getattr(ctrl, f)}
+    else:
+        import glob  # noqa: PLC0415
+        import json  # noqa: PLC0415
+
+        found = sorted(glob.glob(str(run / "ckpt" / "*" / "args.json")))
+        if not found:
+            raise FileNotFoundError(
+                f"arm {arm!r} is a variable off {run.name}, but no args.json exists under "
+                f"{run}/ckpt — that arm has not trained here, so there is nothing to be a "
+                "single variable against"
+            )
+        trained = json.loads(Path(found[-1]).read_text())
+        source = f"{run.name}/ckpt/.../args.json"
+        checked = ("learning_rate", "lora_rank", "lora_alpha", "lora_dropout",
+                   "per_device_train_batch_size", "gradient_accumulation_steps", "seed")
+        drift = {f: (trained.get(f), getattr(ctrl, f))
+                 for f in checked if trained.get(f) != getattr(ctrl, f)}
+        fields = checked
+
     if drift:
         raise AssertionError(
-            f"the control has drifted from rung 18 in {drift} — its per-epoch series is not a "
-            "valid comparator for this arm"
+            f"arm {arm!r}'s baseline does not match {source}: {drift} — the comparison it "
+            "claims to be a single variable against is not the run that produced those weights"
         )
-    return {"checked_fields": list(fields), "drift": {}}
+    return {"arm": arm, "baseline_source": source, "checked_fields": list(fields), "drift": {}}
 
 
 def assert_dataset_is_the_controls(cfg: RecipeSweepConfig) -> dict:
