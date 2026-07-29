@@ -311,17 +311,27 @@ def _tier1_rows_from_csv(root: Path, csv: Path, seen: set[tuple[str, str]]) -> l
     """Fallback Tier-1 rows from a committed RESULTS.csv (needs_backfill=True).
 
     Emits from whatever the heterogeneous CSV carries; never fabricates a missing
-    canonical number. Skips any (experiment, run) already covered by a stratified.json.
+    canonical number. Skips any (experiment, run) already covered by a stratified.json,
+    and any (experiment, run) it has already emitted from THIS file.
+
+    The within-file de-duplication matters: ``_ALIASES["run"]`` resolves an ``arm``
+    column (rungs 03 and 05 legitimately name their runs that way), so a CSV shaped
+    one-row-per-arm-per-format-per-distribution used to emit one Tier-1 row per CSV
+    row — rung 10 landed in the shared ledger three times over. The first row for a
+    given run wins; a run that needs several rows to be described belongs in a
+    ``RESULTS_arms.csv``, which this glob deliberately never reads.
     """
     experiment = csv.parent.name
     df = pd.read_csv(csv)
     commit = _source_commit(root, csv)
     rows: list[dict] = []
+    emitted: set[tuple[str, str]] = set()
     for _, r in df.iterrows():
         run = _first(r, *_ALIASES["run"])
         run = "" if run is None else str(run)
-        if (experiment, run) in seen:
+        if (experiment, run) in seen or (experiment, run) in emitted:
             continue
+        emitted.add((experiment, run))
         row = {
             "experiment": experiment,
             "run": run,

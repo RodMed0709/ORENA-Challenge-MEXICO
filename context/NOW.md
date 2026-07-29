@@ -2,7 +2,47 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-29**.
+> Last updated: **2026-07-29 (pm)**.
+
+## 🟢 2026-07-29 (pm) — the brain is reconciled, the ledger dedups, and the SAM 2 probe is unblocked
+
+**Zero GPU of our own; the two rung-21 arms kept running untouched.** A housekeeping session that
+turned up four things the records did not have.
+
+1. 🔴 **The rung-21 arm named `A2` is NOT the pre-registered `A2`.** This section and
+   [[undertrained-was-real]] both describe **A2 = lr 1e-4 with `vit_lr` held at 2e-5**, the
+   diagnostic that separates "the recipe" from "the vision tower". What is running under the name
+   `A2_lr` is `--learning_rate 0.0001 → 0.0002` (run `21_lr_2e4_v1`), printed by its own gate. The
+   name was reused and **the `vit_lr` diagnostic has never been launched.** It remains the open
+   question: at lr 1e-4 our LoRA drives the ViT at the LLM's rate while Qwen3-VL's default puts the
+   tower 5–10× lower, and nothing measured says which side the +0.058 came from.
+2. 🟢 **The tier-1 ledger de-duplication landed** (`src/frame/ledger.py`), cherry-picked from
+   `task/audit-rung12` rather than merging that branch — it sits 112 commits back and its
+   `summary.csv` carries 20 rows against main's 38, so a merge would drag the ledger backwards.
+   Rebuilt against the pod's full artifacts (22 `stratified.json`, not local's 16): rung 10's
+   triple row is gone and rung 12's `arm1_x1`/`arm2_x3` appear once each.
+   ⚠️ **The second defect is confirmed and still open.** `02-lora-sft/02_lora_sft_v1` emits
+   **twice**, because `_discover_stratified` recurses and the stray
+   `runs/02_lora_sft_v1/eval_best/stratified.json` resolves to the same `(experiment, run)` as the
+   run-root one. Both rows read 0.548623, so nothing published is wrong today. Not fixed here:
+   choosing which file wins is a real decision, not a dedup.
+3. 🔴 **`main` was contradicting itself on rung 12, and four orphan numbers are now corrected.**
+   The 2026-07-23 audit landed only partially. Fixed: `CAMPAIGN_LOG` latency p99
+   **0.196 s / ~25× → 0.352 s / ~14×** (the whole rest of the repo already said 0.352), the 12c row
+   **+0.021 ID / +0.0005 OOD → +0.0207 / +0.0040**, and the same delta in
+   `12-image-processing/CONTEXT.md`. A **fourth** site the audit branch never covered because it
+   postdates it: [[coa-sft-published-null]] had inherited the same 0.196/~25×.
+4. 🔓 **The SAM 2 temporal probe is no longer blocked.** [[covt-reduced-sam-route]] closes on
+   *"no videos in local"* — but the pod volume carries **253 GB** (`orena-data/heico` 162 GB +
+   `lapchole` 91 GB) plus a 1.7 GB `frames_cache`. Step 1 (SAM 2 video-mode over the 1,946
+   consecutive pairs) is runnable whenever a GPU is free.
+
+**Branches swept.** `task/label-noise-ceiling` → **`task/covt-sam-route`** (the name had been
+misaligned for three sessions). Deleted after verifying **by content, not by history**, that main
+holds the same or better: local `task/data-card` (its one unique hunk, a local timestamp regex, is
+superseded by `frame.metrics.template_of`) and `task/enumeration-probe`; remote
+`origin/task/image-processing`. ⚠️ The earlier note that those two locals were "already in main"
+was false — they held 1 and 9 unmerged commits; the verdict survived for a different reason.
 
 ## 🔴 2026-07-29 — rung 21 is the RECIPE now, and it is training
 

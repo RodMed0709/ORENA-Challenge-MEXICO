@@ -127,7 +127,7 @@ and it is worth re-reading whenever a negative result tempts that conclusion.
 | **12b branch A** | unsharp ×1/×3 **at inference** | **−0.026 / −0.056**, monotone in dose |
 | **12d** | screen of 32 transforms, zero GPU | 4 killed, **none validated** |
 | **12e** | is the effect conditional on the model being right? | **no signal**; `null_jpeg` ranked first |
-| **12c** | edge map, **trained** with it | **+0.021 ID / +0.0005 OOD — CIs include 0** |
+| **12c** | edge map, **trained** with it | **+0.0207 ID / +0.0040 OOD — CIs include 0** |
 
 🔴 **The load-bearing result is methodological.** The same family measured two ways:
 **−0.056 at inference**, **+0.021 when trained with**. **Any inference-only test of an INPUT
@@ -205,7 +205,12 @@ gain is diluted twice:
 * **90 % of questions carry secondary labels we had never read** — the pool grows 5,524 → 9,762
   (**+77 %**), but it is **89.6 % `fo_class` and 0 % `number`**.
 * 🔴 **The latency budget is POOLED, not per-question**: `120 s + B × 5 s`. Measured p99 is
-  0.196 s → ~25× headroom. Several levers had been closed against a ceiling that did not exist.
+  **0.352 s** → **~14×** headroom against the 5 s per-question figure
+  (`experiments/06-vit-lora/RESULTS_arms.csv`, `lat_p99_s` = 0.35367 · n=6252).
+  ⚠️ **Corrected 2026-07-23:** this line published **0.196 s → ~25×**, a number no artifact
+  carries; `context/INDEX.md`, `context/NOW.md` and [[latency-budget-is-pooled]] all already said
+  0.352. The conclusion is untouched — several levers had been closed against a per-question
+  ceiling that does not exist as modelled.
 * **Of 8,969 `fo_class` questions, ZERO have gold `none`** — the dataset contains no negative case.
 
 ## 14. Infrastructure built (reusable)

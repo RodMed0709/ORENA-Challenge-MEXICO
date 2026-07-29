@@ -385,8 +385,8 @@ composite ep3). `fo_class`, margin over the template-aware floor:
 
 | | control | composite | Δ | paired CI (video-clustered) |
 |---|---|---|---|---|
-| ID | +0.1946 | +0.2152 | **+0.0209** | [−0.0099, +0.0533] |
-| OOD | +0.1442 | +0.1481 | +0.0005 | [−0.0218, +0.0269] |
+| ID | +0.19457 | +0.21522 | **+0.0207** | [−0.0099, +0.0533] |
+| OOD | +0.14416 | +0.14815 | **+0.0040** | [−0.0218, +0.0269] |
 | `bucket_mean` | 0.4792 | 0.4819 | +0.0027 | — |
 
 **Every CI includes zero**, on every format. The pre-registered bar was +0.04 and nothing
