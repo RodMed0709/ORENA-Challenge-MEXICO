@@ -95,7 +95,7 @@ confounded with the extra inference-time computation the trace buys. §v06/§v07
 emitting the trace hurts perception. SCALe (§v02) implies the emit/suppress answer is downstream
 of a loss-weighting question and not independent of it. **That cell is empty, and it is the only
 original contribution left in this direction.** We are unusually well placed to fill it: latency
-is pooled (120 s + B×5 s) and our p99 is 0.196 s → ~25× headroom, so both inference modes cost
+is pooled (120 s + B×5 s) and our p99 is 0.352 s → ~14× headroom, so both inference modes cost
 us essentially nothing.
 
 **Re-scope, not cancellation (decision RESERVED to Rodrigo, who will run it personally).**

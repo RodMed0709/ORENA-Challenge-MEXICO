@@ -132,8 +132,11 @@ Then, and only then: the 979-frame seed set for the loop (metric = fraction of f
 satisfy both gold constraints), and last the perceptual integration — a **reduced 12-token design,
 SAM seg + depth only**, dropping PIDINet (licence) and DINO (measured negative on count).
 
-**🔴 Blocked on data:** `external_data/` holds parquet only (420 KB). **No videos and no
-`frames_cache` in local** — the probe needs volume access.
+**🟢 UNBLOCKED 2026-07-29.** This read *"blocked on data: `external_data/` holds parquet only
+(420 KB), no videos and no `frames_cache` in local — the probe needs volume access."* The volume
+has them: **`/workspace/orena-data/heico` 162 GB + `lapchole` 91 GB** (253 GB of video) and a
+1.7 GB `/workspace/frames_cache`. The probe is runnable whenever a GPU frees up; local absence was
+never the same thing as absence.
 
 ## Sources
 
