@@ -49,6 +49,7 @@ results_df schema (Evaluator._make_row, evaluator.py:373-392):
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
@@ -712,3 +713,421 @@ def paired_delta_ci(
         "wins_b": int((work["_diff"] > 0).sum()),
         "wins_a": int((work["_diff"] < 0).sum()),
     }
+
+
+# ── count DISCRIMINATION: rank correlation vs gold (added for rung 18) ───────
+# Every `number` metric we have reported — accuracy, margin, the hierarchical estimate — is
+# an EXACT-MATCH metric, and exact match cannot see the difference between a model that has
+# learned the gold's marginal distribution and one that reads the frame. Rung 06 ep3 leaves
+# `number_margin_OOD` at exactly 0.0 (the trivial floor) while its mean prediction sits 0.66
+# below the mean gold: the scale is nearly right and the ordering is not.
+#
+# [[gold-is-signal-model-underuses-it]] made that the headline: on a stratified blind sample
+# a HUMAN scores Spearman r = +0.7230 against the same gold and our model +0.43. So the gold
+# carries frame-visible, ordered signal the model is not using, the target is DISCRIMINATION
+# rather than calibration, and the metric that reads it has to be a RANK metric.
+#
+# It lives here, in the canonical module, for the reason rule §EVAL-1 gives: a notebook that
+# re-derives it beside the module is exactly how the same defect came back in rung 07.
+# Spearman is computed as Pearson over average ranks (its definition) using pandas' own
+# tie-aware ranking — no scipy, so the module's "pure pandas/numpy, offline" contract holds.
+
+_LEADING_INT_RE = re.compile(r"^\s*(\d+)")
+
+
+def read_count(raw) -> float:
+    """Lenient integer read of one model answer, or NaN.
+
+    LENIENT ON PURPOSE, and it must not be confused with the SDK's gate. ``Number.verify``
+    requires ``str.strip().isdigit()``, so ``"1."`` is auto-INCORRECT there — that is a
+    scored FORMAT defect and rung 16d measures it separately. This function answers the
+    different question *what number did the model mean*, because a rank correlation computed
+    only over SDK-legal answers would silently drop exactly the rows the format defect hits
+    and report a discrimination score for a biased subsample. Mirrors the lenient ``value``
+    branch of probe 16a's ``read_answer``; the strict branch is not duplicated here.
+    """
+    m = _LEADING_INT_RE.match(str(raw))
+    return float(m.group(1)) if m else float("nan")
+
+
+def _spearman(x: np.ndarray, y: np.ndarray) -> float:
+    """Spearman rho = Pearson over average ranks. NaN when either side is constant."""
+    if len(x) < 3:
+        return float("nan")
+    rx = pd.Series(x).rank(method="average").to_numpy()
+    ry = pd.Series(y).rank(method="average").to_numpy()
+    if rx.std() == 0 or ry.std() == 0:
+        return float("nan")
+    return float(np.corrcoef(rx, ry)[0, 1])
+
+
+def count_rank_report(
+    predictions: pd.DataFrame,
+    gold: pd.DataFrame,
+    *,
+    template_pattern: str = r"^How many Clips appear in this frame\?",
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict:
+    """Spearman r of the PREDICTED count vs the gold count, on one question template.
+
+    ``predictions`` needs ``qID`` and a prediction column (``prediction`` / ``content`` /
+    ``answer_pred``), and MAY carry ``video`` — without it the CI is skipped rather than
+    computed wrong, since questions cluster on ~38 videos and an unclustered CI would be far
+    too narrow (RULES §13).
+
+    ``gold`` is ``[qID, answer, question]`` as ``ledger.gold_from_frame_parquets`` returns it.
+    ``template_pattern`` is matched against the timestamp-normalised template, so the default
+    selects the `Clips` per-class count template — the one the blind human adjudication was
+    run on, and therefore the only cell where our r and the human's 0.7230 are comparable.
+
+    Returns ``{"pooled": {...}, "ID": {...}, "OOD": {...}}``; each cell carries ``r`` with a
+    video-clustered percentile CI, ``n``, ``n_videos``, ``n_unreadable`` (answers with no
+    leading integer — reported, never silently dropped), ``mean_pred``, ``mean_gold``,
+    ``bias`` and ``exact``.
+    """
+    pcol = next(
+        (c for c in ("prediction", "content", "answer_pred", "pred") if c in predictions.columns),
+        None,
+    )
+    if pcol is None:
+        raise KeyError(
+            f"predictions needs one of prediction/content/answer_pred/pred; "
+            f"got {list(predictions.columns)}"
+        )
+    g = gold.copy()
+    if "template" not in g.columns:
+        if "question" not in g.columns:
+            raise KeyError("gold must carry a 'template' or 'question' column")
+        g["template"] = g["question"].map(template_of)
+    g = g[g["template"].str.match(template_pattern, na=False)]
+
+    keep = ["qID", pcol] + (["video"] if "video" in predictions.columns else [])
+    df = g.merge(predictions[keep].drop_duplicates("qID"), on="qID", how="inner")
+    df["_gold"] = df["answer"].map(read_count)
+    df["_pred"] = df[pcol].map(read_count)
+    df["distribution"] = df["qID"].map(_dist_from_qid)
+
+    def _cell(sub: pd.DataFrame) -> dict:
+        n_all = len(sub)
+        ok = sub[sub["_pred"].notna() & sub["_gold"].notna()]
+        out = {
+            "n": int(n_all),
+            "n_scored": int(len(ok)),
+            "n_unreadable": int(n_all - len(ok)),
+            "r": float("nan"), "ci_low": float("nan"), "ci_high": float("nan"),
+            "n_videos": 0,
+            "mean_pred": float(ok["_pred"].mean()) if len(ok) else float("nan"),
+            "mean_gold": float(ok["_gold"].mean()) if len(ok) else float("nan"),
+            "exact": float((ok["_pred"] == ok["_gold"]).mean()) if len(ok) else float("nan"),
+        }
+        out["bias"] = out["mean_pred"] - out["mean_gold"]
+        if len(ok) < 3:
+            return out
+        out["r"] = _spearman(ok["_pred"].to_numpy(), ok["_gold"].to_numpy())
+        if "video" not in ok.columns:
+            logger.info(
+                "count_rank_report: no `video` column — r reported without a CI (an "
+                "unclustered CI over ~38 videos would be far too narrow; RULES §13)."
+            )
+            return out
+        work = ok.copy()
+        work["_vkey"] = work.apply(_video_key, axis=1)
+        # Held as plain numpy per video: the bootstrap resamples VIDEOS, and concatenating
+        # arrays is orders of magnitude cheaper than concatenating 2000 DataFrames.
+        groups = [
+            (d["_pred"].to_numpy(dtype=float), d["_gold"].to_numpy(dtype=float))
+            for _, d in work.groupby("_vkey")
+        ]
+        out["n_videos"] = len(groups)
+        if len(groups) < 3:
+            return out
+        rng = np.random.default_rng(seed)
+        boots = []
+        for _ in range(n_boot):
+            pick = rng.integers(0, len(groups), size=len(groups))
+            r = _spearman(
+                np.concatenate([groups[i][0] for i in pick]),
+                np.concatenate([groups[i][1] for i in pick]),
+            )
+            if not math.isnan(r):
+                boots.append(r)
+        if boots:
+            out["ci_low"] = float(np.percentile(boots, 2.5))
+            out["ci_high"] = float(np.percentile(boots, 97.5))
+        return out
+
+    report = {"pooled": _cell(df)}
+    for dist in ("ID", "OOD"):
+        report[dist] = _cell(df[df["distribution"] == dist])
+    logger.info(
+        "count_rank_report [%s]: pooled r=%.4f (n=%d, %d unreadable) | ID r=%.4f | OOD r=%.4f",
+        template_pattern, report["pooled"]["r"], report["pooled"]["n"],
+        report["pooled"]["n_unreadable"], report["ID"]["r"], report["OOD"]["r"],
+    )
+    return report
+
+
+def _load_fotype():
+    """``FOType``, imported the same defensive way as ``Capability``.
+
+    ``focus/foreign_objects.py`` is stdlib-only, but ``focus/__init__.py`` eagerly
+    imports transformers/datasets — so on a laptop the package import fails while the
+    module itself is perfectly loadable. Mirrors ``_load_capability`` rather than
+    duplicating a class list, because RULES §8b forbids hard-coding the accepted set:
+    the prompt's 10-item list and the scorer's disagree on their 10th element, and an
+    unrecognised token RAISES in ``verify()`` instead of scoring 0.
+    """
+    try:
+        from focus.foreign_objects import FOType  # noqa: PLC0415
+
+        return FOType
+    except Exception as exc:  # noqa: BLE001
+        import importlib.util  # noqa: PLC0415
+        import sys  # noqa: PLC0415
+
+        for p in sys.path:
+            cand = Path(p) / "focus" / "foreign_objects.py"
+            if cand.exists():
+                spec = importlib.util.spec_from_file_location(
+                    "focus._foreign_objects_standalone", cand
+                )
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)  # type: ignore[union-attr]
+                logger.debug("loaded stdlib-only foreign_objects directly from %s", cand)
+                return mod.FOType
+        raise ImportError(
+            "focus.foreign_objects is required for fo_class scoring but could not be "
+            "imported and no standalone foreign_objects.py was found on sys.path."
+        ) from exc
+
+
+_FO_NONE = "None"  # FOClass.NONE (formats.py:161) — absence, and it is a real answer state
+
+
+def read_fo_class(raw, valid_lower: dict[str, str]) -> frozenset[str] | None:
+    """One ``fo_class`` answer → the canonical set, or ``None`` if SDK-ILLEGAL.
+
+    Byte-for-byte the semantics of ``FOClass.read``/``verify`` (formats.py:171-196):
+    comma-split, strip, case-insensitive match against the registered names, ``"none"``
+    only on its own, comparison by exact set equality. It differs in ONE deliberate way —
+    the SDK RAISES on an unrecognised token and this returns ``None`` — because an illegal
+    answer is a measurement here (rung 16d), not a crash. Illegal rows are counted and
+    reported, never silently dropped.
+    """
+    parts = [p.strip() for p in str(raw).split(",") if p.strip()]
+    if not parts:
+        return None
+    out = set()
+    for part in parts:
+        low = part.lower()
+        if low == "none":
+            if len(parts) > 1:
+                return None  # "'none' cannot be combined with other classes"
+            out.add(_FO_NONE)
+            continue
+        if low not in valid_lower:
+            return None
+        out.add(valid_lower[low])
+    return frozenset(out)
+
+
+def _f1_counts(rows: list[tuple[frozenset[str], frozenset[str] | None]]) -> dict:
+    """Per-class TP/FP/FN over (gold_set, pred_set) pairs; ``None`` pred = illegal.
+
+    Multi-label by construction: one answer may name several classes, so a row
+    contributes to as many classes as it mentions. An illegal prediction contributes FN
+    to every gold class and FP to none — it is a miss, not a wrong guess.
+    """
+    stats: dict[str, dict[str, int]] = {}
+
+    def _cell(name: str) -> dict[str, int]:
+        return stats.setdefault(name, {"tp": 0, "fp": 0, "fn": 0, "n_gold": 0})
+
+    for gold, pred in rows:
+        p = pred if pred is not None else frozenset()
+        for c in gold:
+            _cell(c)["n_gold"] += 1
+            if c in p:
+                _cell(c)["tp"] += 1
+            else:
+                _cell(c)["fn"] += 1
+        for c in p - gold:
+            _cell(c)["fp"] += 1
+    return stats
+
+
+def _macro_f1(stats: dict) -> tuple[float, dict]:
+    """Class-balanced F1 = unweighted mean of per-class F1 over SUPPORTED classes.
+
+    Supported = ``n_gold > 0``. A class the eval set never asks about would otherwise
+    enter the mean at F1 = 0 (or 1) and turn the headline into a property of the class
+    registry rather than of the model. Classes emitted but never gold still show up in
+    the per-class table with their FPs, where they belong.
+    """
+    per = {}
+    for name, s in sorted(stats.items()):
+        prec = s["tp"] / (s["tp"] + s["fp"]) if (s["tp"] + s["fp"]) else 0.0
+        rec = s["tp"] / (s["tp"] + s["fn"]) if (s["tp"] + s["fn"]) else 0.0
+        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
+        per[name] = {
+            "n_gold": s["n_gold"], "tp": s["tp"], "fp": s["fp"], "fn": s["fn"],
+            "precision": prec, "recall": rec, "f1": f1,
+        }
+    supported = [v["f1"] for v in per.values() if v["n_gold"] > 0]
+    return (float(np.mean(supported)) if supported else float("nan")), per
+
+
+def class_f1_report(
+    predictions: pd.DataFrame,
+    gold: pd.DataFrame,
+    *,
+    results_df: pd.DataFrame | None = None,
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> dict:
+    """Class-balanced (macro) F1 on the ``fo_class`` format — the metric exact-set
+    accuracy hides.
+
+    🔴 **Why this exists.** ``fo_class`` accuracy is exact set equality, so it is dominated
+    by the head of a long-tailed class distribution: rung 18 ep3 scores 0.6478 accuracy on
+    `fo_class` × ID while `Gallstone` (n=28) recalls 0.036 and `External Drain` (n=24)
+    0.208 — a collapse the headline cannot see. [[coa-sft-published-null]] measures the
+    same effect published on our exact backbone (SFT crushes F1cls 20.7 → 15.3), and
+    [[loss-mass-is-token-weighted]] needs it because any reweighting that moves gradient
+    *within* `fo_class` lands on class-name length, which is a function of class identity.
+
+    ``predictions`` needs ``qID`` and a prediction column (``prediction``/``content``/
+    ``answer_pred``/``pred``) and MAY carry ``video`` — without it the CI is skipped rather
+    than computed wrong (questions cluster on ~38 videos; RULES §13).
+    ``gold`` is ``[qID, answer, question]`` as ``ledger.gold_from_frame_parquets`` returns.
+
+    Row selection: ``results_df['answer_format'] == 'fo_class'`` when a ``results_df`` is
+    given (the authoritative label), otherwise the rows whose GOLD parses as a legal FO set
+    — which is the format's own definition, and cannot admit a ``number``/``binary`` gold.
+
+    Returns ``{"pooled": {...}, "ID": {...}, "OOD": {...}}``; each cell carries
+    ``macro_f1`` (+ video-clustered percentile CI), ``exact_set_acc`` (the SDK's own
+    correctness, recomputed here only so the two are read side by side), ``n``,
+    ``n_illegal`` and a ``per_class`` table.
+    """
+    pcol = next(
+        (c for c in ("prediction", "content", "answer_pred", "pred") if c in predictions.columns),
+        None,
+    )
+    if pcol is None:
+        raise KeyError(
+            f"predictions needs one of prediction/content/answer_pred/pred; "
+            f"got {list(predictions.columns)}"
+        )
+    valid_names = tuple(_load_fotype().names())
+    valid_lower = {n.lower(): n for n in valid_names}
+
+    keep = ["qID", pcol] + (["video"] if "video" in predictions.columns else [])
+    df = gold.merge(predictions[keep].drop_duplicates("qID"), on="qID", how="inner")
+
+    if results_df is not None and "answer_format" in results_df.columns:
+        fo_ids = set(
+            results_df.loc[results_df["answer_format"] == "fo_class", "qID"].astype(str)
+        )
+        df = df[df["qID"].astype(str).isin(fo_ids)]
+        selection = "results_df.answer_format"
+    else:
+        selection = "gold parses as a legal FO set"
+
+    df = df.copy()
+    df["_gold_set"] = df["answer"].map(lambda a: read_fo_class(a, valid_lower))
+    n_gold_illegal = int(df["_gold_set"].isna().sum())
+    if results_df is None:
+        df = df[df["_gold_set"].notna()]
+    elif n_gold_illegal:
+        # A gold the SDK's own reader rejects is a data defect, not a model result: scoring
+        # it would price the model against a target it can never legally emit (RULES §8b).
+        raise ValueError(
+            f"{n_gold_illegal} rows labelled answer_format=='fo_class' carry a gold that "
+            f"FOClass.read rejects against FOType.names()={valid_names}"
+        )
+    df["_pred_set"] = df[pcol].map(lambda a: read_fo_class(a, valid_lower))
+    df["distribution"] = df["qID"].map(_dist_from_qid)
+
+    def _cell(sub: pd.DataFrame) -> dict:
+        rows = list(zip(sub["_gold_set"], sub["_pred_set"]))
+        macro, per = _macro_f1(_f1_counts(rows))
+        out = {
+            "n": int(len(sub)),
+            "n_illegal": int(sub["_pred_set"].isna().sum()),
+            "n_classes_supported": int(sum(1 for v in per.values() if v["n_gold"] > 0)),
+            "macro_f1": macro,
+            "ci_low": float("nan"), "ci_high": float("nan"),
+            "n_videos": 0,
+            "exact_set_acc": (
+                float(np.mean([g == (p if p is not None else frozenset()) for g, p in rows]))
+                if rows else float("nan")
+            ),
+            "per_class": per,
+        }
+        if not rows or "video" not in sub.columns:
+            if rows:
+                logger.info(
+                    "class_f1_report: no `video` column — macro_f1 reported without a CI "
+                    "(an unclustered CI over ~38 videos would be far too narrow; RULES §13)."
+                )
+            return out
+        work = sub.copy()
+        work["_vkey"] = work.apply(_video_key, axis=1)
+        groups = [
+            list(zip(d["_gold_set"], d["_pred_set"])) for _, d in work.groupby("_vkey")
+        ]
+        out["n_videos"] = len(groups)
+        if len(groups) < 3:
+            return out
+        rng = np.random.default_rng(seed)
+        boots = []
+        for _ in range(n_boot):
+            pick = rng.integers(0, len(groups), size=len(groups))
+            resampled = [r for i in pick for r in groups[i]]
+            m, _unused = _macro_f1(_f1_counts(resampled))
+            if not math.isnan(m):
+                boots.append(m)
+        if boots:
+            out["ci_low"] = float(np.percentile(boots, 2.5))
+            out["ci_high"] = float(np.percentile(boots, 97.5))
+        return out
+
+    report = {"pooled": _cell(df)}
+    for dist in ("ID", "OOD"):
+        report[dist] = _cell(df[df["distribution"] == dist])
+    report["_meta"] = {
+        "selection": selection,
+        "valid_names": list(valid_names),
+        "n_gold_illegal": n_gold_illegal,
+    }
+    logger.info(
+        "class_f1_report [%s]: pooled macro_f1=%.4f (n=%d, %d illegal, exact=%.4f) | "
+        "ID %.4f | OOD %.4f",
+        selection, report["pooled"]["macro_f1"], report["pooled"]["n"],
+        report["pooled"]["n_illegal"], report["pooled"]["exact_set_acc"],
+        report["ID"]["macro_f1"], report["OOD"]["macro_f1"],
+    )
+    return report
+
+
+def predictions_frame(run_dir: str | Path, results_csv: str | Path | None = None) -> pd.DataFrame:
+    """``[qID, prediction, video]`` from a run's ``predictions.json`` (+ ``results.csv``).
+
+    ``run.run_baseline`` persists the raw model strings to ``predictions.json`` and the
+    scored rows — which carry ``video`` — to ``results.csv``. ``count_rank_report`` needs
+    both: the raw string, because correctness alone cannot express a rank; and the video,
+    because the CI has to cluster on it.
+    """
+    run_dir = Path(run_dir)
+    preds = json.loads((run_dir / "predictions.json").read_text(encoding="utf-8"))
+    df = pd.DataFrame(
+        [{"qID": p["qID"], "prediction": p.get("content", "")} for p in preds]
+    )
+    res_path = Path(results_csv) if results_csv else run_dir / "results.csv"
+    if res_path.exists():
+        res = pd.read_csv(res_path)
+        if "video" in res.columns:
+            df = df.merge(res[["qID", "video"]].drop_duplicates("qID"), on="qID", how="left")
+    return df

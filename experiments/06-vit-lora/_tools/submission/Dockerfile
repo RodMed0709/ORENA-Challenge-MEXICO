@@ -31,6 +31,19 @@ RUN python -m pip install \
     --no-color \
     --requirement /opt/app/requirements.txt
 
+# Fail the BUILD, not the submission. `--user` installs to ~/.local, which takes
+# precedence over the base image's site-packages — so a transitive dependency that
+# drags in its own torch wheel would silently replace the CUDA build we rely on, and
+# nothing would notice until the container was already scored. This asserts that torch
+# is still CUDA-enabled and still on the 2.5 line, and echoes the versions that a
+# future run's build log can be diffed against.
+RUN python -c "\
+import torch, transformers, numpy;\
+print('torch', torch.__version__, 'cuda', torch.version.cuda);\
+print('transformers', transformers.__version__, '| numpy', numpy.__version__);\
+assert torch.version.cuda, 'torch lost its CUDA build — a --user wheel shadowed the base image';\
+assert torch.__version__.startswith('2.5'), f'unexpected torch {torch.__version__}'"
+
 # ── Model definition + weights ────────────────────────────────────────────────
 # resources/ holds the model definition (model.py) and a small committed dummy
 # checkpoint (dummy_weights.pt). For a real submission, replace dummy_weights.pt
