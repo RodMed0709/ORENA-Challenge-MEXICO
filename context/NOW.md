@@ -2,7 +2,41 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-27**.
+> Last updated: **2026-07-29**.
+
+## 🔴 2026-07-29 — rung 21 is the RECIPE now, and it is training
+
+**The two optimiser rungs swapped places.** `21-loss-mass` became `22-loss-mass`; rung 21 is
+`21-recipe-sweep`. The argument is the leaderboard proxy, `mean(aggregation_ID,
+object_recognition_ID)`: loss-mass moves gradient from `fo_class` (71% of `object_recognition`)
+to `number` (80.4% of `aggregation`), so it is **structurally near-zero-sum on exactly the
+number that gates co-authorship** — its own pre-registration says the modal outcome is a wash.
+The recipe is not a trade: it adds optimisation distance to both buckets. And the ordering
+matters, because whether taking gradient from `fo_class` costs anything depends on whether
+`fo_class` has saturated, which is what lr and epochs move.
+
+**IN FLIGHT — arm A: `--learning_rate` 2e-5 → 1e-4.** One flag. 3 epochs, 2,703 steps, ~7.6 h
+at the measured 10.1 s/it, peak 22,210 MiB of 32,607. Run `21_lr_1e4_v1`, log
+`/workspace/tmp/21_full_A.log`. **Control = rung 18's already-scored per-epoch series**
+(0.5255 / 0.5488 / **0.5721**) on the **same `train.jsonl`, used in place**, sha256
+`180e28f0…8e8b` asserted. Zero data change. Score with `21b_epoch_eval.ipynb -p EPOCH n`.
+
+⚠️ **Named before it ran:** our LoRA reaches the ViT at the LLM's own LR while the Qwen3-VL
+default puts the tower 5–10× lower. A collapse in arm A may be the **tower**, not the recipe —
+the pre-registered diagnostic is **A2 = lr 1e-4 with `vit_lr` held at 2e-5**. Arm B (rank 8→32,
+α 32→128 so α/r stays 4) is **not launched until A is read**.
+
+🟢 **The loss-mass mechanism is now MEASURED, not inferred** (`22-loss-mass/RESULTS_preflight.json`):
+the trainer's `num_items_in_batch` equals the token sum of all 16 micro-batches, to the token,
+every step. ⚠️ The decision note's original "confirmed at the source" quotation was incomplete —
+`seq2seq_trainer.py:196` sits under `if num_items_in_batch is None:` and, had the guard been
+open, would have meant training was ALREADY per-sample and the whole 62.4/20.8 table an
+artefact. Free findings from the same probe: `max_grad_norm` is **1.0** (never set by us), and
+`swift/plugin/loss_scale/` **does not exist** in ms-swift 4.4.1 — the hook is `compute_loss_func`.
+
+🟢 **`frame.metrics.class_f1_report`** landed (`0674f02`) — class-balanced F1 on `fo_class`,
+validated against probe0 (rung 06 ep3 ID: n=920, exact 0.6391, macro 0.5116). It is what can
+see the tail that a 0.6478 headline hides (`Gallstone` recall 0.036).
 
 ## 🔴 2026-07-27 (pm) — submission 01's metrics decoded: a 4B beats us, and we were reading the wrong number
 
