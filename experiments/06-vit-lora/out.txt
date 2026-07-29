@@ -1,0 +1,40 @@
+--- cell 5 code ---
+# G-loss — the val set for eval_loss. THE_MAP:169 has asked for this since Jul 14:
+# "add a val_dataset to swift sft (track eval_loss — we currently have NO val curve)".
+# The `NO ERA EL TECHO` branch of the rule cites a loss that did not exist until now.
+#
+# Held out from OUR val split, never carved from train: verified on ms-swift 4.4.1 that
+# split_dataset_ratio defaults to 0.0 and is bypassed when --val_dataset is passed, so the
+# training data is byte-identical to rung 02's.
+import json
+
+from frame.config import BaselineConfig
+from frame.data import load_frame_items, FrameProvider, frame_cache_name
+from frame.engine import SYSTEM_PROMPT
+from frame import split as sp
+
+bcfg = BaselineConfig(data_root=cfg.data_root, model_path=cfg.model_path,
+                      datasets=cfg.datasets, base_fps=cfg.base_fps,
+                      max_pixels=cfg.max_pixels, seed=cfg.seed)
+items = load_frame_items(bcfg, splits=("train", "test"))
+val_items = sp.apply_split(items, sp.load_manifest(cfg.manifest_path), "val_ood")
+val_items = sorted(val_items, key=lambda it: (it.dataset, it.video_id, it.frame_index))[:256]
+
+provider = FrameProvider(bcfg)
+with open(cfg.val_jsonl, "w", encoding="utf-8") as fh:
+    for it in val_items:
+        provider.ensure_reader(it)
+        img = cfg.frames_dir / frame_cache_name(it)
+        if not img.exists():
+            provider.get_frame(it).save(img, quality=95)
+        fh.write(json.dumps({
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"<image>{it.request.question}"},
+                {"role": "assistant", "content": str(it.reference.answer)},
+            ],
+            "images": [str(img)],
+        }, ensure_ascii=False) + "\n")
+provider.close()
+print(f"val.jsonl -> {cfg.val_jsonl} ({len(val_items)} examples, held out, NOT carved from train)")
+

@@ -102,7 +102,7 @@ class BaselineConfig:
     judge_model: str = "Qwen/Qwen3-4B"
     enforce_latency: bool = True  # Track.FRAME → 5.0 s cap
 
-    # ── rung 22: swap the backbone wrapper ───────────────────────────
+    # ── rung 23: swap the backbone wrapper ───────────────────────────
     # DEFAULT OFF IS BYTE-IDENTICAL: None makes `run_baseline` construct the same
     # QwenFrameEngine it always did (run.py:193). Set it to a callable taking `cfg`
     # to screen a model whose architecture the Qwen3-VL classes cannot load.
