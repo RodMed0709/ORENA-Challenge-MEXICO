@@ -190,7 +190,14 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     assert len(set(qids)) == len(qids), "duplicate qID across datasets — Evaluator would crash"
 
     # ── 2. inference ─────────────────────────────────────────────────
-    engine = QwenFrameEngine(cfg)
+    # rung 22: let a run supply a different backbone wrapper. DEFAULT OFF IS
+    # BYTE-IDENTICAL — with no `engine_factory` on the cfg this constructs exactly
+    # the same QwenFrameEngine it always did. The hook exists because a
+    # newer-generation backbone (`Qwen3_5ForConditionalGeneration`) needs a different
+    # model class and cannot load under the transformers 4.57 pin at all, so the
+    # alternative is forking this whole function to swap one line.
+    factory = getattr(cfg, "engine_factory", None) or QwenFrameEngine
+    engine = factory(cfg)
     engine.load()
     provider = FrameProvider(cfg)
     responses = _infer_all(cfg, items, engine, provider)

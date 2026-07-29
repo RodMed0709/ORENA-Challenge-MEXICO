@@ -90,8 +90,23 @@ class BaselineConfig:
     )
 
     # ── evaluation ───────────────────────────────────────────────────
-    judge_model: str = "Qwen/Qwen3-4B"  # real HF id (SDK default "Qwen3.5-4B" does not exist)
+    # ⚠️ The SDK default is `Qwen/Qwen3.5-4B` and it DOES exist — the comment that
+    # once stood here claiming otherwise was false (HF, created 2026-02-27, 6.4M
+    # downloads). It almost certainly came from a load failure, not a lookup: that
+    # checkpoint declares `model_type: qwen3_5`, which `transformers` 4.57 — our hard
+    # floor for Qwen3-VL — does not register, so `AutoConfig` raises `KeyError`.
+    # MEASURED (decisions/judge-swap-is-not-the-gap.md): the two judges agree on
+    # 99.2% of all questions and move `bucket_mean` by −0.0014, so this substitute is
+    # kept deliberately — the whole ladder is comparable under it and no past number
+    # needs restating. Running the official judge needs its own venv on transformers 5.x.
+    judge_model: str = "Qwen/Qwen3-4B"
     enforce_latency: bool = True  # Track.FRAME → 5.0 s cap
+
+    # ── rung 22: swap the backbone wrapper ───────────────────────────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None makes `run_baseline` construct the same
+    # QwenFrameEngine it always did (run.py:193). Set it to a callable taking `cfg`
+    # to screen a model whose architecture the Qwen3-VL classes cannot load.
+    engine_factory: Callable[["BaselineConfig"], object] | None = None
 
     # ── run scope ────────────────────────────────────────────────────
     # None = full test set; an int caps total questions (SMOKE / sample).
