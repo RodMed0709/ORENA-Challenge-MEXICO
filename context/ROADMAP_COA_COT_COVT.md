@@ -4,7 +4,7 @@
 > number looks wrong, a gate looks weak, or a phase looks mis-ordered, **edit this file** rather
 > than settling it in chat. Every claim below carries its source so it can be checked.
 >
-> Status: **phase 0 complete, phase 2 started** (all zero-GPU). Everything remaining needs a pod.
+> Status: **phase 0 COMPLETE (0.4 closed 2026-07-30), phase 2 started**. Everything remaining needs a pod.
 > Last updated 2026-07-29. Personal working copy: `local/tasks/roadmap-coa-cot-covt.md` (Spanish).
 
 ## Why one document for three routes
@@ -81,7 +81,7 @@ Phases 0–2 are independent of the fork. Do them regardless.
 | 0.1 | **TOST equivalence** at a pre-declared ε over `paired_delta_ci` | v49 | ✅ `frame.metrics.equivalence_verdict` |
 | 0.2 | **flip ratio** — what a delta fixed vs what it broke | v52 | ✅ `frame.metrics.flip_report` |
 | 0.3 | **class-balanced F1 mandatory**, gated | v01 | ✅ `assert_class_f1_reported`, RULES §9b |
-| 0.4 | **de-shortcut eval** | v11 | 🟡 part 1 measured (rung 26); part 2 needs inference |
+| 0.4 | **de-shortcut eval** | v11 | ✅ both parts measured — [[margin-is-vision-not-phrasing]] |
 
 Why 0.1 mattered: rung 24's pre-registered rule says *"a tower that is **indifferent** ⇒ the branch
 is mapping"* and **"indifferent" had no numeric definition** — the same hole that lost rungs 14 and
