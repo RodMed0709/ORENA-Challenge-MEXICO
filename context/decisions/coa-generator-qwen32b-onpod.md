@@ -1,3 +1,11 @@
+---
+question: Which model generates R1's CoA scaffolds — a text-only reverse-generator, or a frame-seeing VLM?
+verdict: Qwen3-VL-32B, VISION, zero-shot, ON-POD. Supersedes the text-only "no pixels" line; the on-pod constraint is forced by the DUA, not chosen.
+status: SETTLED
+date: 2026-07-18
+measured_in: experiments/09-coa-sft/README.md + the adversarial GO-WITH-CHANGES gate of 2026-07-18
+question_derived: false
+---
 # Decision: R1's scaffold generator = Qwen3-VL-32B (vision, ZERO-SHOT, ON-POD) — supersedes the text-only "no pixels" line
 
 - **Status:** SETTLED · 2026-07-18 · owner: Rodrigo · supersedes the text-only generator described

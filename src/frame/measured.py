@@ -120,7 +120,7 @@ def _parse_frontmatter(text: str) -> dict[str, str | list[str]]:
 def read_decisions(repo: Path = REPO) -> list[Measurement]:
     rows = []
     for path in sorted((repo / "context" / "decisions").glob("*.md")):
-        fm = _parse_frontmatter(path.read_text())
+        fm = _parse_frontmatter(path.read_text(encoding="utf-8"))
         if not fm:
             continue
         rows.append(
@@ -246,7 +246,7 @@ def read_ladders(repo: Path = REPO) -> tuple[list[Measurement], list[str]]:
     """
     rows, skipped = [], []
     for readme in sorted((repo / "experiments").glob("*/README.md")):
-        text = readme.read_text()
+        text = readme.read_text(encoding="utf-8")
         block = re.search(r"^## Ladder\n(.*?)(?=\n## )", text, re.S | re.M)
         if block is None:
             skipped.append(str(readme.relative_to(repo)))
@@ -326,7 +326,7 @@ def read_artifacts(repo: Path = REPO) -> list[Measurement]:
     rows = []
     for path in paths:
         try:
-            keys = sorted(json.loads(path.read_text()).keys())
+            keys = sorted(json.loads(path.read_text(encoding="utf-8")).keys())
         except (OSError, json.JSONDecodeError):
             continue
         rows.append(
@@ -354,7 +354,7 @@ def assert_decisions_indexed(repo: Path = REPO) -> None:
     problems: list[str] = []
 
     for path in notes:
-        fm = _parse_frontmatter(path.read_text())
+        fm = _parse_frontmatter(path.read_text(encoding="utf-8"))
         if not fm:
             problems.append(f"{path.name}: no frontmatter")
             continue
@@ -463,7 +463,10 @@ def render(index: Index) -> str:
 
 def main(repo: Path = REPO) -> Path:
     target = repo / "context" / "MEASURED.md"
-    target.write_text(render(build(repo)))
+    # encoding is explicit on BOTH sides: the notes carry emoji status markers, and on
+    # a cp1252 console `write_text` truncates the file mid-render instead of failing
+    # clean. That is how this generator sat unrunnable for nine days.
+    target.write_text(render(build(repo)), encoding="utf-8")
     return target
 
 

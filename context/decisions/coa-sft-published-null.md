@@ -1,3 +1,11 @@
+---
+question: Is the "untested cell" experiment 09 was designed on actually untested?
+verdict: NO — scaffold-SFT without RL is a published wash on our exact backbone (62.0 vs bare-gold SFT's 65.7 on EndoVis2018). The +16.3 belongs to RLVR. Rung 09 is RE-SCOPED, not cancelled.
+status: MEASURED
+date: 2026-07-23
+measured_in: arXiv:2603.20116 (our exact backbone) + Surgery-R1 replication — measured by someone else, in print
+question_derived: false
+---
 # Finding: the "untested cell" R1 was built on is NOT untested — scaffold-SFT without RL is a published wash
 
 - **Status:** MEASURED (by someone else, in print) · 2026-07-23 · owner: Rodrigo
