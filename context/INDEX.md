@@ -18,6 +18,7 @@
 
 ## STRATEGY — the north star
 - **`THE_MAP.md`** — unified FRAME strategy: the 4 buckets, Block A/B, §0 roadmap + Phase-3 status, Block-A diagnosis (folded from the retired `BLOCK_A_MODEL.md`).
+- **`context/ROADMAP_COA_COT_COVT.md`** — 🆕 **the shared plan for the reasoning-target branch, and the document to argue with.** Five phases with gates, the fork (rung 24), and the finding that reorders the whole branch: **the corpus is not anti-CoT, it is anti-EMITTING** — every negative result measures generating the trace at inference on perception, every positive one measures training on traces and suppressing them. Also: which three of CoVT's five blockers fall, and the three-negatives-and-a-+1.0 risk phase 4 must answer first. **Edit it rather than settling things in chat.**
 - **`ATTACK_LADDER.md`** — original master ladder (recipes valid; THE_MAP supersedes the sequencing).
 - **`CONSTITUTION.md`** — hard rules, version pins, structure §VIII–IX.
 
