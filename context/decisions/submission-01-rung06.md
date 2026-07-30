@@ -1,3 +1,11 @@
+---
+question: How far are we from the two baselines — and does our container actually run on the platform?
+verdict: Shipped (Qwen3VL-8B-FT-ViT-LLM-v1). It exposed a conflict between the platform interface (batch-frames.zip) and the organizers' own template (frames/<qID>.png); the container now accepts both. The baselines are still not identified on the leaderboard.
+status: MEASURED
+date: 2026-07-25
+measured_in: the submitted Docker image + adapter_config.json of rung 06, read directly
+question_derived: false
+---
 # Submission 01 — rung 06, and the frame-interface conflict it exposed
 
 **Question.** Ship the first real submission, and answer the one thing the whole campaign has

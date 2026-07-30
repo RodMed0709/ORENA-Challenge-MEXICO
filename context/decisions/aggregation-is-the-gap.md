@@ -1,8 +1,10 @@
 ---
 question: Where is our largest scoring gap against the external reference?
 verdict: `aggregation` — a 4B beats us there, CONFIRMED on identical questions 2026-07-27. ⚠️ The "+14.9 lead on `object_recognition`" is RETRACTED — on the same set it is a dead tie.
-status: MEASURED (partially RETRACTED 2026-07-27)
+status: MEASURED
 date: 2026-07-19
+withdrawn: PARTIALLY RETRACTED 2026-07-27 — the "+14.9 lead on object_recognition" compared our local val against their platform score; on identical questions it is a two-question tie and we are behind overall by 4.5 pts. The aggregation trail survives.
+amended_by: [leaderboard-metric-vs-our-headline]
 measured_in: results/summary.csv + the public leaderboard's single participant row
 question_derived: true
 ---
