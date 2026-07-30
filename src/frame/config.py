@@ -108,6 +108,13 @@ class BaselineConfig:
     # to screen a model whose architecture the Qwen3-VL classes cannot load.
     engine_factory: Callable[["BaselineConfig"], object] | None = None
 
+    # ── rung 26 part 2: vary the QUESTION, hold frame and gold ───────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None and `run_baseline` never enters the rewrite
+    # branch (run.py). `(qID, question) -> question`, applied after both filters. It
+    # reaches `request` only — the gold lives on `reference` and stays untouched, which
+    # is what makes two arms a paired manipulation instead of two different evals.
+    question_rewriter: Callable[[str, str], str] | None = None
+
     # ── run scope ────────────────────────────────────────────────────
     # None = full test set; an int caps total questions (SMOKE / sample).
     n_eval: int | None = None
