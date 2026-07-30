@@ -244,10 +244,27 @@ def part_a_rung05_self_consistency() -> None:
 # ── PART B — pod-gated ───────────────────────────────────────────────────────
 
 def _find_rung02_results() -> Path | None:
+    """The canonical rung-02 eval: ``eval_best/results.csv``, and ONLY that one.
+
+    🔴 Fixed 2026-07-29. The previous body fell back to ``sorted(runs.glob("**/results.csv"))[0]``,
+    and that recursive glob does not return the canonical file — it returns whichever
+    sibling eval directory sorts first, which on a full clone is ``ep1_full`` (``"ep1" <
+    "eval"``). So the assertions below were being checked against **epoch 1**
+    (bucket_mean 0.5282) instead of the OOD-selected checkpoint-1720 (0.5486), and Part B
+    failed on every clone that actually had the artifacts. It "passed" only where the
+    artifacts were missing and the whole part SKIPped.
+
+    This is the SAME root cause as the open tier-1 ledger defect (`context/NOW.md` §2:
+    ``_discover_stratified`` recurses and resolves ``eval_best/stratified.json`` to the
+    same (experiment, run) as the run-root file). Second instance of "a recursive glob
+    picks up a sibling eval directory". Unlike the ledger case, there is no decision to
+    make here: this test's docstring names the numbers it reproduces, and ``eval_best``
+    is the only file that produces them.
+    """
     runs = _ROOT / "experiments" / "02-lora-sft" / "runs"
     if not runs.exists():
         return None
-    hits = sorted(runs.glob("*/results.csv")) + sorted(runs.glob("**/results.csv"))
+    hits = sorted(runs.glob("*/eval_best/results.csv"))
     return hits[0] if hits else None
 
 
@@ -295,6 +312,77 @@ def part_b_rung02_repro() -> None:
           f"margin_ID={r['margin_ID']:+.4f}, margin_OOD={r['margin_OOD']:+.4f}  PASS")
 
 
+def part_a_equivalence_tost():
+    """The four states of ``equivalence_verdict``, plus the two ways it must refuse.
+
+    The point of the instrument is that INCONCLUSIVE and EQUIVALENT are different
+    answers; a test that only checked "returns a string" would let the defect it exists
+    to prevent walk straight back in.
+    """
+    ev = m.equivalence_verdict
+
+    # EQUIVALENT — tight CI inside the margin, containing 0. This is a TIE.
+    r = ev({"delta": 0.001, "ci_low": -0.008, "ci_high": 0.010}, epsilon=0.02)
+    assert r["verdict"] == "EQUIVALENT", r
+    assert r["within_margin"] and not r["excludes_zero"]
+
+    # INCONCLUSIVE — same delta, wide CI. Contains 0 but is wider than the margin, so it
+    # is NOT a tie. Under the old read this and the case above were both "null".
+    r = ev({"delta": 0.001, "ci_low": -0.055, "ci_high": 0.058}, epsilon=0.02)
+    assert r["verdict"] == "INCONCLUSIVE", r
+    assert abs(r["epsilon_min"] - 0.058) < 1e-12, r
+    assert "NOT a tie" in r["reason"]
+
+    # TRIVIAL_DIFFERENCE — excludes 0 (a real effect) yet sits wholly inside the margin.
+    r = ev({"delta": 0.011, "ci_low": 0.004, "ci_high": 0.018}, epsilon=0.02)
+    assert r["verdict"] == "TRIVIAL_DIFFERENCE", r
+    assert r["within_margin"] and r["excludes_zero"]
+
+    # DIFFERENT — rung 21 arm A shaped: big, clears the margin, excludes 0.
+    r = ev({"delta": 0.0584, "ci_low": 0.031, "ci_high": 0.086}, epsilon=0.02)
+    assert r["verdict"] == "DIFFERENT", r
+
+    # A boundary that must NOT be called equivalent: the CI touches ±epsilon exactly.
+    # Strict inequality, so "as wide as the margin" is not "inside the margin".
+    r = ev({"delta": 0.0, "ci_low": -0.02, "ci_high": 0.02}, epsilon=0.02)
+    assert r["verdict"] == "INCONCLUSIVE", r
+
+    # UNDEFINED — paired_delta_ci returns NaNs on an empty slice by design; that must
+    # surface as its own state, never silently as a tie.
+    r = ev(m.paired_delta_ci(pd.DataFrame()), epsilon=0.02)
+    assert r["verdict"] == "UNDEFINED", r
+
+    # REFUSALS. No default epsilon exists, and a non-positive one is a bug not a choice.
+    for bad in (0, -0.01):
+        try:
+            ev({"ci_low": -0.01, "ci_high": 0.01}, epsilon=bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"epsilon={bad} must raise")
+    try:
+        ev({"ci_low": 0.05, "ci_high": -0.05}, epsilon=0.02)  # reversed bounds
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("reversed CI bounds must raise, not invert the verdict")
+
+    # Tuple form, and the end-to-end wrapper on a real frame: two videos, arm B wins
+    # every question, so the delta is +1.0 and nothing about it is a tie.
+    assert ev((-0.005, 0.005), epsilon=0.02)["verdict"] == "EQUIVALENT"
+    df = pd.DataFrame({
+        "qID": [f"lapchole__{i}" for i in range(8)],
+        "video": ["v1"] * 4 + ["v2"] * 4,
+        "correct_a": [0.0] * 8,
+        "correct_b": [1.0] * 8,
+    })
+    r = m.paired_equivalence(df, epsilon=0.02, n_boot=200)
+    assert r["verdict"] == "DIFFERENT" and abs(r["delta"] - 1.0) < 1e-12, r
+    assert r["n"] == 8 and r["n_videos"] == 2, r
+
+    print("  [A]  equivalence_verdict: 4 states + boundary + UNDEFINED + refusals  PASS")
+
+
 def main() -> int:
     print("PART A - OFFLINE (synthetic + committed CSVs):")
     part_a_synthetic_bucket_mean()
@@ -302,6 +390,7 @@ def main() -> int:
     part_a_gates()
     part_a_hybrid_crosscheck()
     part_a_template_floor_margin()
+    part_a_equivalence_tost()
     part_a_rung05_self_consistency()
     print("PART B - POD-GATED (rung-02 saved predictions):")
     part_b_rung02_repro()
