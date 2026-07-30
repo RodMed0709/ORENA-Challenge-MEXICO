@@ -1,6 +1,6 @@
 ---
 question: Does a newer-generation backbone close the gap by itself?
-verdict: NO. Three generations of backbone buy +0.036 zero-shot; our own fine-tuning buys +0.317. Migration is NOT justified — but the gain concentrates 2.5x in the one cell that collapsed.
+verdict: NO. Three generations of backbone buy +0.036 zero-shot; our own fine-tuning buys +0.317. And the zero-shot 27B sits BELOW the template-aware floor in both halves (margin_ID -0.0666, margin_OOD -0.1367), so that +0.036 is movement beneath the floor, not skill.
 status: MEASURED
 date: 2026-07-29
 measured_in: experiments/23-backbone-screen/RESULTS.csv (runs/23a_qwen36_27b_bf16)
@@ -24,6 +24,27 @@ full 6,252-question eval set — same prompt, same message shape, same greedy de
 
 **Three generations and 3.4× the parameters buy +0.036. Our own fine-tuning buys +0.317** —
 nearly 9× more. A zero-shot gen-3.6 27B does not reach half of our fine-tuned 8B.
+
+## 🔴 AMENDED 2026-07-29 — the margins are negative, and that is the real verdict
+
+The table above reports raw accuracy. It was written before this rung's canonical
+`stratified.json` existed, so it never carried the template-aware floors — the one reading
+RULES §10 makes binding. With gold supplied:
+
+| | margin_ID | margin_OOD |
+|---|---|---|
+| **rung 23a zero-shot 27B** | **−0.0666** | **−0.1367** |
+| rung 06 ep3 fine-tuned 8B | +0.2225 | +0.1448 |
+
+**The zero-shot 27B scores BELOW the trivial floor in both halves** — worse than a baseline that
+emits each template's modal answer. So the +0.036 "generation lift" is movement *beneath the
+floor*, which is not skill, and the +0.090 on `object_recognition` OOD must be read the same way:
+better than another sub-floor model, still sub-floor.
+
+This does not change the NO-GO. It makes it stronger, and it removes the one datum that pointed
+the other way as evidence of capability. The lesson is procedural: **a rung that ships raw
+accuracy without its floor has not been read yet**, and this one shipped a decision note before
+its canonical report existed.
 
 ⇒ **NO-GO on the migration**, exactly as pre-registered before the run ("lands near rung 00 →
 the generation story is wrong for this task and the migration is dead for ~$3"). The price was
