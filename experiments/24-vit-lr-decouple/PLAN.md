@@ -75,8 +75,36 @@ Three points, **×5 apart in log space**, so the axis reads as a curve rather th
 | arm | `learning_rate` | `vit_lr` | ratio ViT/LLM | status |
 |---|---|---|---|---|
 | **control** | 1e-4 | (arm A: fallback ⇒ 1e-4) | 1.0× | ✅ run and scored |
-| **A_low** | 1e-4 | **2e-5** | **0.2×** | 🎯 **launches first** |
-| **B_high** | 1e-4 | **5e-4** | **5.0×** | ⏸ **pre-registered, launches when a pod frees** |
+| **A_low** | 1e-4 | **2e-5** | **0.2×** | ⏸ order NOT fixed — see below |
+| **B_high** | 1e-4 | **5e-4** | **5.0×** | ⏸ order NOT fixed — see below |
+
+> ### 🔄 Which arm goes first is DEFERRED to rung 21's `2e-4` arm (added 2026-07-29)
+>
+> An earlier draft launched `A_low` first, on the prior that the tower is *suffering* at 1e-4 and
+> wants slowing down. **A duplicate-work check against the two in-flight arms weakened that prior**,
+> and the finding belongs here because it is free evidence about this rung's own variable.
+>
+> 🔑 **`21_lr_2e4_v1` already runs the tower at 2e-4** — not by design, but because ms-swift falls
+> back (`vit_lr = learning_rate`) and that arm passes no `--vit_lr`. Verified from its own log: the
+> argv carries `--learning_rate 0.0002` and no `--vit_lr`/`--aligner_lr`, and
+> `multimodal.py:58`'s `vit_lr: … llm_lr: …` line appears **zero** times, so the default optimiser
+> ran and every parameter took 2e-4. That is **10× the tower's original 2e-5**.
+>
+> **It does not collapse.** Loss at matched steps against arm A: 0.3027 vs 0.2932 (step 900),
+> 0.2221 vs 0.2030 (1500), **0.2003 vs 0.1866 (1800)** — same shape, slightly higher, and
+> `grad_norm` *lower* (3.83 vs 6.95). No divergence, no instability.
+>
+> ⇒ **Weakens `A_low`'s motivation** (a fragile tower would have shown it at 2e-4) and
+> **strengthens `B_high`** (a tower fine at 2e-4 coupled may want more).
+>
+> ⚠️ **Loss is not score, and this is explicitly a weak signal.** A tower can degrade its
+> representations while total loss looks healthy because the LLM compensates — which is the whole
+> reason this rung exists. It is enough to *defer* the ordering, never enough to *skip* an arm.
+>
+> **The rule, fixed now:** read `21_lr_2e4_v1`'s scored per-epoch series first — it costs nothing,
+> since this rung cannot launch until a pod frees anyway — then pick the first arm. If 2e-4 wins,
+> `B_high` goes first and the whole rung re-reads against the new LLM rate (§What this rung is NOT).
+> If 2e-4 loses or is a wash, `A_low` goes first as originally planned.
 
 **Why the high arm is not filler.** Our prior says it loses — nobody trains the tower faster than
 the LLM — and that is precisely its value: it is the arm that can falsify us, and rung 21's own
