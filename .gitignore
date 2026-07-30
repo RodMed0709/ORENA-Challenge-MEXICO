@@ -65,3 +65,10 @@ __pycache__/
 # called from there, never duplicated into the repo. The instrument itself is versioned at
 # experiments/16-count-probes/_tools/contar.html; only this scratch copy is ignored.
 local/adjudicate/
+
+# Submission packages: the recipe is versioned, the 17 GB of merged weights and the
+# built tarball are not. `submissions/<id>/README.md` documents how to regenerate both.
+submissions/*/resources/
+submissions/*/test/
+submissions/*/*.tar.gz
+submissions/*/__pycache__/

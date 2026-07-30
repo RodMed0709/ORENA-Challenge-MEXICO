@@ -1,0 +1,44 @@
+# FRAME submission 02 — rung 21 arm A2 (Qwen3-VL-8B + LoRA on ViT and LLM, merged).
+# Checkpoint: 21_lr_2e4_v1/ckpt/v0-20260729-172404/checkpoint-2703 (lr 2e-4, rank 8, ep3).
+# torch 2.5.1 + torchvision come from the base image (pytorch/pytorch:2.5.1-cuda12.4).
+#
+# Versions below were OBSERVED in the environment that ran this exact inference.py
+# end-to-end against the organizers' own fixture (pod hiluiqc4y0f6dk, 2026-07-27,
+# 3/3 answers, VERIFY_OK). ⚠️ That environment is NOT the container: it runs
+# torch 2.8.0+cu128, while the image's base pins torch 2.5.1. So the two packages
+# whose version can silently change our BEHAVIOUR are pinned exactly, and the three
+# whose version only needs to stay compatible with torch 2.5.1 carry upper bounds
+# instead of an exact pin imported from a different environment.
+#
+# A build that resolves something unexpected must fail at BUILD time, not at
+# submission time — see the version-echo step in the Dockerfile.
+
+# 🔴 EXACT. `orena-focus` owns the Request/Response dataclasses AND
+# assets/FO_definitions.txt, which is pasted verbatim into our system prompt. A minor
+# bump can change the prompt or add a Request field (load_requests does Request(**row),
+# so an unexpected key is an unhandled TypeError that kills the run).
+orena-focus==0.3.4
+
+# 🔴 EXACT. Qwen3-VL hard floor: 4.57 is the first release with Qwen3-VL. Stay on the
+# 4.57 line — do NOT jump to 5.x (breaks qwen-vl-utils / the SDK). Pinned to the patch
+# because tokenizer/processor changes move generations.
+transformers==4.57.6
+
+# 🔴 EXACT. Owns process_vision_info — the image preprocessing path.
+qwen-vl-utils==0.0.14
+
+# Compatibility-only: used for device_map. Bounded rather than pinned to the observed
+# 1.14.0, which was resolved against torch 2.8 rather than the image's torch 2.5.1.
+accelerate>=1.0.0,<2.0
+
+# 🔴 TIGHTENED for submission 02: was `>=1.23.0,<3.0`, which resolves numpy 2.x against a
+# torch-2.5.1 base that predates broad numpy-2 hardening — and the build guard printed numpy
+# without asserting anything about it, so the mismatch would have surfaced at score time with
+# a slot already spent. The guard now asserts numpy 1.x; this bound makes the resolver agree
+# with it instead of failing the build.
+#
+# Compatibility-only otherwise. ⚠️ The observed numpy (2.5.1) came from a torch-2.8 environment;
+# the torch 2.5.1 base image resolves an older numpy. Bounded, not pinned, so the build
+# picks what its own torch needs.
+numpy>=1.23.0,<2.0
+pillow>=9.0,<14.0
