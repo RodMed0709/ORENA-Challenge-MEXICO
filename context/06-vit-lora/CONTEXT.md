@@ -96,12 +96,39 @@ is not part of this run.
   `RESULTS_arms.csv`.** They are split because `frame.ledger` treats an `arm` column as a
   run name, which would file this experiment's baseline arm as a run of its own.
 
+## 🔻 Update 2026-07-30 — the `vit_lr` follow-up ran, and it did not settle the question
+
+Rung 21's arm A3 ran the lever this section asks for: `vit_lr 2e-5` under an LLM lr of 2e-4
+(`experiments/21-recipe-sweep/`, run `21_vitlr_v1`). **It lost** — proxy −0.0278, four of
+thirty paired cells excluding zero, all four favouring the control.
+
+⚠️ **But it does not close this rung's question, for two reasons.**
+
+1. **A3 moved TWO flags.** `--optimizer multimodal` is emitted iff `vit_lr` is set, and the
+   control it was compared against (arm A2) **never passed it**. So "lower `vit_lr`" and "a
+   different optimiser" changed together. The defensible reading is *lowering `vit_lr` under
+   the multimodal optimiser costs 0.028*, not *the tower wants the high rate*.
+   ⇒ **[[vit-lora-partial]] stays OPEN.** The fix is a 20-step optimiser probe (~$0.30).
+2. **Two points, 10× apart.** Nothing between 2e-5 and 2e-4 ran.
+
+🔴 **The operational trap this uncovered is worth more than the arm.** `--vit_lr` is a
+**silent no-op unless `--optimizer multimodal` is also passed** (ms-swift 4.4.1). A run that
+sets `--vit_lr` alone trains the tower at the LLM's rate and reports nothing — so **this rung's
+"`vit_lr` left at default" caveat was accidentally correct**, and any earlier plan to "just set
+`--vit_lr`" would have produced a fake null.
+
+🟢 **What DID change here:** rung 21 showed the whole recipe was under-trained
+([[undertrained-was-real]]), which re-frames this rung's weak-positive. The tower was being
+driven at 2e-5 — one fifth of what the campaign now runs — so "weak positive" was partly a
+statement about the learning rate, not about the tower's capacity.
+
 ## Next
-1. **Lower `vit_lr`** — the cheapest unspent lever, and the one that disambiguates
-   "ceiling" from "recipe". A pre-trained vision tower driven at the LLM's learning rate
-   is a plausible cause of a weak-positive.
-2. Until (1) is done, **do not read this run as "the ViT was not the ceiling"** — the
-   pre-registered rule does not support that branch, and neither does the evidence.
+1. 🔴 **The optimiser probe** — 20 steps of arm A2's config with and without
+   `--optimizer multimodal` at `vit_lr == learning_rate`, comparing loss traces. Until it
+   runs, the A3 result cannot be attributed and this rung's question stays open.
+2. Until (1) is done, **do not read this run as "the ViT was not the ceiling"**, and do not
+   read A3 as "the ViT wants the high LR" either — the pre-registered rule supports neither
+   branch, and neither does the evidence.
 3. The capacity branch (`context/decisions/qwen-size-ladder.md`) stays gated: it requires
    the 8B to plateau AND the cheap levers to be spent. Neither holds today.
 4. `05-bottleneck-audit` and `03-prompt-variants` remain `needs_backfill` in the ledger —
