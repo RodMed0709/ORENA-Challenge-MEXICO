@@ -715,6 +715,126 @@ def paired_delta_ci(
     }
 
 
+# ── equivalence: reading a null as a TIE, not as "we saw nothing" (rung 24) ───
+# ``paired_delta_ci`` answers *"is B different from A?"*. It cannot answer *"are they
+# the SAME?"* — a CI containing 0 is equally consistent with a true tie and with an
+# effect we lacked the power to see. We have read it as if it could, twice: rungs 14
+# and 15 were written up as nulls, and rung 24's pre-registered rule says *"a tower
+# that is INDIFFERENT ⇒ the branch is mapping"* while never defining indifferent. A
+# decision rule whose most likely outcome has no numeric definition is not a rule.
+#
+# The fix is the standard two-one-sided-tests framing (MoE-Sieve, `literature/
+# vlm-techniques/FICHAS.md` §v49, which declares ±2 pp *before* looking): equivalence
+# at a margin ε is established when the WHOLE CI lies inside [−ε, +ε]. Crossed with
+# the ordinary superiority read (does the CI exclude 0?) this gives FOUR states rather
+# than two, and the two extra ones are the honest descriptions of where our results
+# actually land — "real but smaller than we said we cared about", and "we could not
+# tell". Collapsing those into "null" is how a faithful negative and an underpowered
+# run came to look identical in our own records.
+#
+# This is not an imported convention. The challenge's FINAL ranking is Copeland over
+# buckets with **pairwise significance tests**, where non-significant deltas collapse
+# to the SAME rank (RULES §4c, `challenge_design.txt:1010-1040`) — "indistinguishable"
+# is already a first-class outcome in how we will be scored, so we should be able to
+# write it down.
+#
+# ε is REQUIRED and has no default, deliberately. A default is a margin nobody
+# declared, and the entire value of the instrument is that the margin is fixed before
+# the number is seen (RULES §7: a gate that fires is a finding, not an obstacle).
+
+EQUIVALENCE_VERDICTS = (
+    "EQUIVALENT",           # CI inside ±ε and contains 0 — a tie, established
+    "TRIVIAL_DIFFERENCE",   # CI inside ±ε but excludes 0 — real, below the margin
+    "DIFFERENT",            # CI excludes 0 and is not contained in ±ε
+    "INCONCLUSIVE",         # CI wider than ±ε and contains 0 — underpowered
+    "UNDEFINED",            # empty slice (paired_delta_ci returned NaNs)
+)
+
+
+def equivalence_verdict(ci, *, epsilon: float) -> dict:
+    """TOST-style equivalence read of a paired delta, at a PRE-DECLARED margin ``epsilon``.
+
+    ``ci`` is the dict ``paired_delta_ci`` returns, or any ``(ci_low, ci_high)`` pair.
+    ``epsilon`` is the largest delta we agreed, in advance, to call "no practical
+    difference" — in the same units as the delta (a proportion, so 0.02 is 2 pp).
+
+    Returns the four-state ``verdict`` plus the two booleans it is built from, so a
+    caller can report the reasoning rather than the label alone. ``epsilon_min`` is the
+    smallest margin at which THIS CI could have established equivalence
+    (``max(|ci_low|, |ci_high|)``) — read it as the honest power statement: declaring an
+    ε below it can only ever return INCONCLUSIVE, no matter what the true effect is.
+    v49's own failing row is the warning (OLMoE/Spider: ∆ +0.30 pp, CI [−2.04, +2.64],
+    inconclusive at ±2 pp *with 8 seeds*).
+
+    ⚠️ Equivalence is a statement about the CI, and the CI here is the video-clustered
+    paired bootstrap (RULES §13 — effective n is ~38 videos, not 6252). It is NOT a
+    variance estimate over re-runs: we hold zero seed repeats, and
+    [[seed-variance-is-small-when-clean]] bounds that band from a published clean-data
+    task, it does not measure ours.
+    """
+    if not (epsilon > 0):
+        raise ValueError(
+            f"epsilon must be > 0 (got {epsilon!r}). It is the pre-declared margin of "
+            "practical indifference; there is no sensible default and no zero margin."
+        )
+
+    if isinstance(ci, dict):
+        low, high = float(ci.get("ci_low", float("nan"))), float(ci.get("ci_high", float("nan")))
+        delta = float(ci.get("delta", float("nan")))
+        passthrough = {k: ci[k] for k in ("n", "n_videos") if k in ci}
+    else:
+        low, high = (float(v) for v in ci)
+        delta, passthrough = float("nan"), {}
+
+    out = {
+        **passthrough,
+        "delta": delta,
+        "ci_low": low,
+        "ci_high": high,
+        "epsilon": float(epsilon),
+    }
+
+    if np.isnan(low) or np.isnan(high):
+        return {**out, "verdict": "UNDEFINED", "within_margin": False,
+                "excludes_zero": False, "epsilon_min": float("nan"),
+                "reason": "empty slice — paired_delta_ci returned NaN bounds"}
+
+    if low > high:  # a caller passing (high, low) would silently invert every verdict
+        raise ValueError(f"ci_low ({low}) > ci_high ({high}) — bounds are reversed")
+
+    within = bool(low > -epsilon and high < epsilon)
+    excludes_zero = bool(low > 0 or high < 0)
+    epsilon_min = float(max(abs(low), abs(high)))
+
+    if within and not excludes_zero:
+        verdict = "EQUIVALENT"
+        reason = f"CI [{low:+.4f}, {high:+.4f}] lies inside ±{epsilon:g} and contains 0"
+    elif within:
+        verdict = "TRIVIAL_DIFFERENCE"
+        reason = (f"CI [{low:+.4f}, {high:+.4f}] excludes 0 but lies inside ±{epsilon:g} — "
+                  "a real effect smaller than the pre-declared margin")
+    elif excludes_zero:
+        verdict = "DIFFERENT"
+        reason = f"CI [{low:+.4f}, {high:+.4f}] excludes 0 and is not contained in ±{epsilon:g}"
+    else:
+        verdict = "INCONCLUSIVE"
+        reason = (f"CI [{low:+.4f}, {high:+.4f}] contains 0 AND exceeds ±{epsilon:g} — "
+                  f"underpowered; the smallest establishable margin here is "
+                  f"±{epsilon_min:.4f}. NOT a tie.")
+
+    return {**out, "verdict": verdict, "within_margin": within,
+            "excludes_zero": excludes_zero, "epsilon_min": epsilon_min, "reason": reason}
+
+
+def paired_equivalence(df: pd.DataFrame, *, epsilon: float, **kwargs) -> dict:
+    """``paired_delta_ci`` then ``equivalence_verdict`` — the one call a rung should make.
+
+    Exists so the margin travels with the delta. Reporting a bare delta and deciding the
+    margin afterwards is exactly the failure mode this instrument is for.
+    """
+    return equivalence_verdict(paired_delta_ci(df, **kwargs), epsilon=epsilon)
+
+
 # ── count DISCRIMINATION: rank correlation vs gold (added for rung 18) ───────
 # Every `number` metric we have reported — accuracy, margin, the hierarchical estimate — is
 # an EXACT-MATCH metric, and exact match cannot see the difference between a model that has
