@@ -383,6 +383,78 @@ def part_a_equivalence_tost():
     print("  [A]  equivalence_verdict: 4 states + boundary + UNDEFINED + refusals  PASS")
 
 
+def part_a_flip_report():
+    """The decomposition must separate two arms that share a delta but not a character."""
+    fr = m.flip_report
+
+    # Same net delta (+0.02 over 100), completely different composition. The whole point.
+    quiet = pd.DataFrame({  # fixed 2, broke 0 — a clean, narrow win
+        "correct_a": [0.0] * 2 + [1.0] * 50 + [0.0] * 48,
+        "correct_b": [1.0] * 2 + [1.0] * 50 + [0.0] * 48,
+    })
+    churny = pd.DataFrame({  # fixed 21, broke 19 — same delta, 20x the movement
+        "correct_a": [0.0] * 21 + [1.0] * 19 + [1.0] * 30 + [0.0] * 30,
+        "correct_b": [1.0] * 21 + [0.0] * 19 + [1.0] * 30 + [0.0] * 30,
+    })
+    q, c = fr(quiet).iloc[0], fr(churny).iloc[0]
+    assert q["fixed"] == 2 and q["broke"] == 0 and abs(q["delta"] - 0.02) < 1e-12, q.to_dict()
+    assert c["fixed"] == 21 and c["broke"] == 19 and abs(c["delta"] - 0.02) < 1e-12, c.to_dict()
+    assert abs(q["delta"] - c["delta"]) < 1e-12, "the two arms must SHARE the headline delta"
+    assert c["churn"] == 0.40 and q["churn"] == 0.02, (c["churn"], q["churn"])
+    # A clean win breaks nothing: ratio 0.0. The churny arm sits just under 1 — almost as
+    # much broken as fixed — and that is the number `bucket_mean` cannot show you.
+    assert q["flip_ratio"] == 0.0, q["flip_ratio"]
+    assert abs(c["flip_ratio"] - 19 / 21) < 1e-12, c["flip_ratio"]
+    assert c["flip_ratio"] > 0.9, "the fragile arm must read as near-parity churn"
+
+    # flip_ratio is NaN when fixed == 0 — "nothing was fixed", not "infinitely bad".
+    only_broke = pd.DataFrame({"correct_a": [1.0, 1.0], "correct_b": [0.0, 1.0]})
+    r = fr(only_broke).iloc[0]
+    assert r["fixed"] == 0 and r["broke"] == 1 and pd.isna(r["flip_ratio"]), r.to_dict()
+
+    # delta must equal the plain mean difference, always — this is the anchor that keeps
+    # the decomposition honest against paired_delta_ci's point estimate on one video.
+    for d in (quiet, churny, only_broke):
+        assert abs(fr(d).iloc[0]["delta"]
+                   - float((d["correct_b"] - d["correct_a"]).mean())) < 1e-12
+
+    # Grouped: the artefact shape. One stratum carries the entire delta on ONE flip while
+    # the other does not move -- rung 21's `+0.174` macro-F1, in miniature.
+    strat = pd.DataFrame({
+        "answer_format": ["number"] * 4 + ["fo_class"] * 4,
+        "correct_a": [0.0, 1.0, 1.0, 0.0] + [0.0, 1.0, 1.0, 0.0],
+        "correct_b": [1.0, 1.0, 1.0, 0.0] + [0.0, 1.0, 1.0, 0.0],
+    })
+    g = fr(strat, by="answer_format").set_index("answer_format")
+    assert g.loc["number", "fixed"] == 1 and g.loc["number", "broke"] == 0
+    assert g.loc["fo_class", "fixed"] == 0 and g.loc["fo_class", "broke"] == 0
+    assert g.loc["fo_class", "churn"] == 0.0, "an unmoved stratum must read as zero churn"
+    assert list(g.index)[0] == "number", "rows sort by churn, so the moving stratum leads"
+    assert len(fr(strat, by=["answer_format"])) == 2
+
+    # Refusals: a missing arm column or a bad grouping key is a bug, not a NaN.
+    for bad in (pd.DataFrame({"correct_a": [1.0]}), ):
+        try:
+            fr(bad)
+        except KeyError:
+            pass
+        else:
+            raise AssertionError("missing correct_b must raise")
+    try:
+        fr(strat, by="nope")
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("unknown grouping column must raise")
+
+    # Consistency with paired_delta_ci: wins_b/wins_a ARE the fixed/broke counts.
+    paired = churny.assign(qID=[f"lapchole__{i}" for i in range(len(churny))], video="v1")
+    ci = m.paired_delta_ci(paired, n_boot=50)
+    assert ci["wins_b"] == c["fixed"] and ci["wins_a"] == c["broke"], (ci, c.to_dict())
+
+    print("  [A]  flip_report: same delta / different composition, NaN ratio, strata, refusals  PASS")
+
+
 def main() -> int:
     print("PART A - OFFLINE (synthetic + committed CSVs):")
     part_a_synthetic_bucket_mean()
@@ -391,6 +463,7 @@ def main() -> int:
     part_a_hybrid_crosscheck()
     part_a_template_floor_margin()
     part_a_equivalence_tost()
+    part_a_flip_report()
     part_a_rung05_self_consistency()
     print("PART B - POD-GATED (rung-02 saved predictions):")
     part_b_rung02_repro()

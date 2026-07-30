@@ -835,6 +835,102 @@ def paired_equivalence(df: pd.DataFrame, *, epsilon: float, **kwargs) -> dict:
     return equivalence_verdict(paired_delta_ci(df, **kwargs), epsilon=epsilon)
 
 
+# ── flip ratio: what a delta FIXED vs what it BROKE (rung 24 companion) ───────
+# A delta is a NET number, and a net number hides its own composition. +0.02 can be
+# "fixed 40, broke 0" or "fixed 400, broke 360" — the same headline, two completely
+# different models, and only the second one is fragile. We have been reading the first
+# kind of statement and getting the second kind of surprise.
+#
+# The instrument is the flip ratio from FICHAS §v52: negative flips (A right → B wrong)
+# over positive flips (A wrong → B right). The paper is weak for us — 32B text LLMs on
+# AIME, budgets 400× ours — but the ratio is backend-free and computable over any two
+# checkpoints we have already scored, at zero GPU.
+#
+# 🔴 This is the lens that would have caught the rung-21 `+0.174` macro-F1 artefact when
+# it was written rather than six days later: 82% of it was ONE `Needle` question
+# (n_gold = 1, 1/7 of an unweighted macro) flipping, while `Gallstone` did not move at
+# all (recall still 0.036). A single flip cannot survive being counted.
+#
+# The counts already exist — ``paired_delta_ci`` returns them as ``wins_a``/``wins_b``,
+# which ARE the negative and positive flips. What was missing is the ratio, the churn,
+# and a report that reads them per stratum, because that is where a fragile win shows.
+
+
+def flip_report(
+    df: pd.DataFrame,
+    *,
+    correct_a: str = "correct_a",
+    correct_b: str = "correct_b",
+    by: str | list[str] | None = None,
+) -> pd.DataFrame:
+    """Decompose ``b - a`` into what it FIXED and what it BROKE, optionally per stratum.
+
+    ``df`` is the same paired frame ``paired_delta_ci`` takes (one row per question, both
+    arms scored on the SAME questions). ``by`` is a column or list of columns to group on
+    — ``"answer_format"``, ``["distribution", "answer_format"]``, a template, whatever the
+    rung is arguing about. ``None`` returns a single overall row.
+
+    Columns: ``n``, ``fixed`` (A wrong → B right), ``broke`` (A right → B wrong),
+    ``delta`` (= (fixed − broke)/n, identical to the unclustered mean difference),
+    ``flip_ratio`` = broke/fixed, and ``churn`` = (fixed + broke)/n.
+
+    Read them together:
+      * ``flip_ratio`` **< 1** means the change fixes more than it breaks. **≥ 1** with a
+        positive delta is impossible; **> 1** means the arm is net-negative here.
+      * ``flip_ratio`` near 1 with a small delta is the fragile case — lots of movement,
+        no direction. A "null" of that shape is NOT the same as a null with zero churn,
+        and `bucket_mean` cannot tell them apart.
+      * ``churn`` high with ``delta`` near 0 says the two arms disagree constantly and
+        happen to tie; that is a warning about seed/order sensitivity, not a tie.
+      * ``fixed`` or ``broke`` in the low single digits means the cell's delta rests on a
+        handful of questions — quote the count, never the delta alone.
+
+    ``flip_ratio`` is NaN when ``fixed == 0`` (division by zero is not "infinitely bad";
+    it is "nothing was fixed", which the ``fixed`` column already says).
+
+    ⚠️ This is a DESCRIPTIVE decomposition, not an inference. It carries no CI and is not
+    clustered by video — for "will this hold on a new video?" the answer is still
+    ``paired_delta_ci`` / ``equivalence_verdict`` (RULES §13). Use the two together: the
+    CI says whether the delta is real, this says what it is made of.
+    """
+    need = [correct_a, correct_b]
+    missing = [c for c in need if c not in df.columns]
+    if missing:
+        raise KeyError(f"flip_report needs {missing} — both arms must be scored on the same rows")
+
+    keys = [by] if isinstance(by, str) else list(by or [])
+    for k in keys:
+        if k not in df.columns:
+            raise KeyError(f"flip_report: grouping column {k!r} not in df")
+
+    work = df.copy()
+    a = work[correct_a].astype(float)
+    b = work[correct_b].astype(float)
+    work["_fixed"] = ((a <= 0) & (b > 0)).astype(int)
+    work["_broke"] = ((a > 0) & (b <= 0)).astype(int)
+
+    def _row(sub: pd.DataFrame) -> dict:
+        n = int(len(sub))
+        fixed, broke = int(sub["_fixed"].sum()), int(sub["_broke"].sum())
+        return {
+            "n": n,
+            "fixed": fixed,
+            "broke": broke,
+            "delta": (fixed - broke) / n if n else float("nan"),
+            "flip_ratio": (broke / fixed) if fixed else float("nan"),
+            "churn": (fixed + broke) / n if n else float("nan"),
+        }
+
+    if not keys:
+        return pd.DataFrame([_row(work)])
+
+    rows = []
+    for gkey, sub in work.groupby(keys, dropna=False, sort=True):
+        gvals = gkey if isinstance(gkey, tuple) else (gkey,)
+        rows.append({**dict(zip(keys, gvals)), **_row(sub)})
+    return pd.DataFrame(rows).sort_values("churn", ascending=False).reset_index(drop=True)
+
+
 # ── count DISCRIMINATION: rank correlation vs gold (added for rung 18) ───────
 # Every `number` metric we have reported — accuracy, margin, the hierarchical estimate — is
 # an EXACT-MATCH metric, and exact match cannot see the difference between a model that has
