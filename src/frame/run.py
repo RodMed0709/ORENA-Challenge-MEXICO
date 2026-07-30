@@ -168,6 +168,11 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     what an identity gate needs: the gate must compare the SAME questions the control
     answered, not a superset that happens to contain them. Both filters compose;
     ``qid_filter`` applies second.
+
+    ``cfg.question_rewriter`` (optional ``(qID, question) -> question``, rung 26) rewrites
+    the question text after both filters. Default absent = byte-identical. The gold is
+    never touched, which is what makes the arms a paired manipulation rather than a
+    different eval.
     """
     run_dir = Path(cfg.out_dir) / cfg.run_name
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -181,6 +186,20 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     if qid_filter is not None:
         items = [it for it in items if it.request.qID in qid_filter]
         logger.info("qid_filter: kept %d of %d requested qIDs", len(items), len(qid_filter))
+    # rung 26 part 2: let a run vary the QUESTION while holding frame and gold fixed.
+    # DEFAULT OFF IS BYTE-IDENTICAL — with no `question_rewriter` on the cfg nothing below
+    # runs. A construct-validity probe (is our margin phrasing or vision?) is the one thing
+    # `qid_filter` cannot express: it selects questions, it cannot re-ask them. The rewrite
+    # lands here, AFTER filtering, so the arm answers exactly the filtered set, and it
+    # touches `request` only — `reference` carries the gold and is never in scope.
+    rewriter = getattr(cfg, "question_rewriter", None)
+    if rewriter is not None:
+        n_changed = 0
+        for it in items:
+            new_q = rewriter(it.request.qID, it.request.question)
+            n_changed += new_q != it.request.question
+            it.request.question = new_q
+        logger.info("question_rewriter: %d of %d questions rewritten", n_changed, len(items))
     if cfg.n_eval:
         items = items[: cfg.n_eval]
         logger.info("SMOKE/sample: capped to %d items", len(items))
