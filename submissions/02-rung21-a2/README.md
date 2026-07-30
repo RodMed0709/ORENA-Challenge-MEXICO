@@ -108,8 +108,20 @@ Same system prompt (byte-identical to `src/frame/engine.py`), same `max_pixels` 
 yes/no — strings the SDK's `Number.verify` (`strip().isdigit()`) and `Binary.verify` score as
 wrong regardless. Measured on A2 ep3's own answers: **110 strings carry a trailing period and
 all 110 are `open_ended`**, where the gold carries the period too — so the repair fixes 0 of
-the 44 wrong ones and touches 66 currently-correct ones. See
-`RESULTS_period_judge_ab.csv` for the paired judge A/B that measures what that costs.
+the 44 wrong ones and touches 66 currently-correct ones.
+
+🟢 **What that costs was measured, not argued.** A paired A/B under the same judge and seed,
+scoring each of the 110 as committed and again with the period stripped
+(`experiments/21-recipe-sweep/RESULTS_period_judge_ab.csv`):
+
+| | correct |
+|---|---|
+| with period (as scored) | 66 / 110 |
+| period stripped (as the container sends it) | 66 / 110 |
+| **verdicts flipped** | **0** |
+
+The judge is indifferent to the punctuation. The normalisation stays because it costs a
+measured zero here.
 
 Its value is insurance against the **hidden** test, not against ours: probe 16a measured 87% of
 `number` answers taking the `"1."` shape on off-template questions, and our scored eval only
