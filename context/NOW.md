@@ -48,8 +48,11 @@ turned up four things the records did not have.
    🎯 **Either outcome ranks the two branches we have failed to order for three sessions:** a tower
    that improves when decoupled is still teachable (perceptual — [[covt-reduced-sam-route]]); an
    indifferent one is saturated w.r.t. our 14,415 examples (mapping — [[counting-is-a-mapping-failure]]).
-   ⚠️ Note the tension with "the model cannot see": rung 21 lifted `fo_class` macro-F1 **+0.174**
-   and Spearman r **+0.059** *without touching perception*.
+   ⚠️ Note the tension with "the model cannot see": rung 21 lifted Spearman r **+0.059** and
+   exact-set `fo_class` ID **0.6478 → 0.688** *without touching perception*. 🔴 **Do NOT cite the
+   `+0.174` macro-F1 alongside these** — decomposed 2026-07-29, **82% of it is one `Needle`
+   question (`n_gold = 1`, 1/7 of an unweighted macro) flipping**, and `Gallstone` did **not** move
+   (recall still 0.036). See the correction in [[undertrained-was-real]].
    🔴 **Three blocking gates, because every failure mode here is silent.** `--vit_lr` switches the
    optimiser to `multimodal` (`trainers/arguments.py:249`), which partitions by prefix — **a
    trainable parameter matching none of the three groups is dropped with no error**. `G-COV`'s
