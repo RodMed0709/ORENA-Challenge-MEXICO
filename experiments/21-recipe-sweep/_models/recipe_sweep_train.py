@@ -118,10 +118,16 @@ def effective_batch(cfg: RecipeSweepConfig) -> int:
 # ARM A, and must be read and reported against arm A — never against rung 18, which would make
 # it a two-variable comparison wearing a one-variable label.
 BASELINES: dict[str, dict] = {
-    "control": {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
-    "A_lr":    {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
-    "A2_lr":   {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
-    "B_rank":  {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
+    # every baseline pins `num_train_epochs` too, so an arm whose variable IS the epoch count
+    # produces a visible diff instead of an empty one
+    "control":  {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "A_lr":     {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "A2_lr":    {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "B_rank":   {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    # 🔴 off ARM A2, which won the LR axis (3 of 30 cells, ALL and OOD both clearing zero).
+    # The LR axis was still rising with diminishing returns (+0.048 then +0.021), so the
+    # remaining question on optimisation distance is the OTHER knob: epochs.
+    "C_epochs": {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
 }
 
 # Where each baseline's own weights live, so a gate can read what it ACTUALLY trained with
@@ -131,6 +137,7 @@ BASELINE_RUN: dict[str, Path | None] = {
     "A_lr": None,
     "A2_lr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
     "B_rank": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
+    "C_epochs": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
 }
 
 
@@ -231,6 +238,12 @@ ARMS: dict[str, set[str]] = {
     "A2_lr": {"--learning_rate"},                   # vs arm A — is 1e-4 the optimum, or just
                                                     # better than 2e-5? Only one value was tested
     "B_rank": {"--lora_rank", "--lora_alpha"},      # vs arm A
+    # ⚠️ NOT a free extension of A2. Cosine anneals over the PLANNED steps, so epoch 3 of a
+    # 6-epoch run sits near half of peak LR while epoch 3 of a 3-epoch run sits at exactly 0.0
+    # -- the trajectories differ from step 1 and neither contains the other. Epochs 1-3 are
+    # still epoch-matched against A2 (that is what the flag does); epochs 4-6 are new ground
+    # with no control, and are read as a curve, not as a delta.
+    "C_epochs": {"--num_train_epochs"},             # vs arm A2
 }
 
 
