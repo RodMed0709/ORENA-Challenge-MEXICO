@@ -15,7 +15,7 @@
 | | Question | Verdict | Status | Where |
 |---|---|---|---|---|
 |  | Were we actually under-trained — and does more optimisation distance move the score, or only the loss? | REAL, AND IT IS THE LARGEST SINGLE MOVE OF THE CAMPAIGN. lr 2e-5 -> 1e-4, one flag, no data change: `bucket_mean` 0.5721 -> 0.6305 and the leaderboard proxy +0.0480 at epoch 3, epoch-matched against rung 18. 21 of 30 paired video-clustered cells exclude zero and ALL 21 favour the arm; not one cell favours the control. The plateau that held from rung 06 through rung 18 was a learning-rate ceiling, not a data ceiling | MEASURED | `context/decisions/undertrained-was-real.md` |
-|  | Does a newer-generation backbone close the gap by itself? | NO. Three generations of backbone buy +0.036 zero-shot; our own fine-tuning buys +0.317. Migration is NOT justified — but the gain concentrates 2.5x in the one cell that collapsed. | MEASURED | `context/decisions/backbone-generation-is-not-the-lever.md` |
+|  | Does a newer-generation backbone close the gap by itself? | NO. Three generations of backbone buy +0.036 zero-shot; our own fine-tuning buys +0.317. And the zero-shot 27B sits BELOW the template-aware floor in both halves (margin_ID -0.0666, margin_OOD -0.1367), so that +0.036 is movement beneath the floor, not skill. | MEASURED | `context/decisions/backbone-generation-is-not-the-lever.md` |
 |  | Is our LLM judge the one that scores us? *(derived)* | NO. `Qwen/Qwen3.5-4B` exists (HF, created 2026-02-27, 6.4M downloads) — the code comment claiming it does not is FALSE, and every judged number in this repo used a substitute | MEASURED | `context/decisions/wrong-judge-model.md` |
 |  | Is our LoRA recipe actually converged — or are we taking the low-learning-rate discount AND the low-epoch discount at the same time? | 🟢 CONFIRMED ON THE LR AXIS 2026-07-29 — see [[undertrained-was-real]]: lr 2e-5 -> 1e-4 alone moved bucket_mean 0.5721 -> 0.6305 with 21 of 30 paired cells excluding zero. The rank half is still running. The prior, as written: WE ARE THE ONLY CONFIGURATION IN THE PUBLISHED GRID THAT TAKES BOTH. Every strong surgical-VQA result pairs lr 1e-5–2e-5 with 15–20 epochs, or 3–5 epochs with lr 1e-4–3e-4. We run lr 2e-5 for 3 epochs, i.e. roughly 1/5 to 1/10 of anyone's total optimisation distance. And rank 8 has never been swept, while the one published ablation on our exact setting measures rank 32→128 = +0.028 against model 7B→72B = −0.020. 🔴 This is the most likely explanation on file for "a 4B beats our 8B on identical questions | MEASURED | `context/decisions/undertrained-on-both-axes.md` |
 |  | Does deriving the count as len(predicted_points) beat verbalising it, as Alghisi 2026 reports (+80.9 pts OOD)? | NOT PROMPT-ONLY — both pointing arms are WORSE than the bare integer in every cell, and the mechanism is visible: asked to point, the model emits exactly ONE point (a2 mean_pred = 1.0000 on all 681 questions). It does not enumerate. This bounds the PROMPT-ONLY path, which Alghisi themselves predicted would be weak; it does not bound the trained path | MEASURED | `context/decisions/prompt-only-pointing-collapses.md` |
@@ -116,17 +116,26 @@
 | What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments\18-count-aug\RESULTS_rank_ep2.csv` |
 | What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments\18-count-aug\RESULTS_rank_ep3.csv` |
 | What numbers does 18-count-aug report? | 6 row(s); columns: probe, dataset, per_device, grad_accum, probe_eff_batch, peak_mib… | `experiments\18-count-aug\RESULTS_vram.csv` |
-| What numbers does 20-judge-swap report? | 16 row(s); columns: metric, Qwen3-4B_substitute, Qwen3_5-4B_official, delta, n, note | `experiments\20-judge-swap\RESULTS.csv` |
+| What numbers does 20-judge-swap report? | 2 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\20-judge-swap\RESULTS.csv` |
+| What numbers does 20-judge-swap report? | 16 row(s); columns: metric, Qwen3-4B_substitute, Qwen3_5-4B_official, delta, n, note | `experiments\20-judge-swap\RESULTS_judge_agreement.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_A_lr.csv` |
-| What numbers does 21-recipe-sweep report? | 2 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_B_rank.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_B_rank.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep1.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep2.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep3.csv` |
 | What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci_B_vs_A.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep1.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep2.csv` |
 | What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep3.csv` |
-| What numbers does 23-backbone-screen report? | 14 row(s); columns: bucket, rung00_zeroshot_8B_gen3, rung23a_zeroshot_27B_gen36, delta_generation, rung06ep3_finetuned_8B, delta_finetuning | `experiments\23-backbone-screen\RESULTS.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep3.csv` |
+| What numbers does 23-backbone-screen report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\23-backbone-screen\RESULTS.csv` |
+| What numbers does 23-backbone-screen report? | 14 row(s); columns: bucket, rung00_zeroshot_8B_gen3, rung23a_zeroshot_27B_gen36, delta_generation, rung06ep3_finetuned_8B, delta_finetuning | `experiments\23-backbone-screen\RESULTS_generation_deltas.csv` |
 
 ## Cuts already computed (do not recompute these)
 
@@ -135,6 +144,7 @@
 | Which cuts are precomputed for 00_zeroshot_qwen3vl? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\00-baseline\runs\00_zeroshot_qwen3vl\stratified.json` |
 | Which cuts are precomputed for 02_lora_sft_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\02-lora-sft\runs\02_lora_sft_v1\stratified.json` |
 | Which cuts are precomputed for 06_vit_lora_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\06-vit-lora\runs\06_vit_lora_v1\stratified.json` |
+| Which cuts are precomputed for 23a_qwen36_27b_bf16? | `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\23-backbone-screen\runs\23a_qwen36_27b_bf16\stratified.json` |
 
 ## ⚠️ Not indexed
 
