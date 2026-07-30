@@ -2,7 +2,43 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-29**.
+> Last updated: **2026-07-30**.
+
+## 🟢 2026-07-30 — the recipe sweep is CLOSED, and we have a new best checkpoint
+
+**Read [[recipe-axis-is-the-learning-rate]].** Five arms, one flag each, zero data change in
+any of them. **Only the learning rate is real.**
+
+| arm | flag | baseline | Δ proxy @ep3 | paired cells (of 30) |
+|---|---|---|---|---|
+| `A_lr` | lr 2e-5 → **1e-4** | rung 18 | **+0.0480** | **21 sig, all pro-arm** |
+| `A2_lr` | lr 1e-4 → **2e-4** | `A_lr` | **+0.0203** | 3 sig, all pro-arm |
+| `B_rank` | r 8→32, α 32→128 | `A_lr` | +0.0193 | **0 sig** |
+| `D_clip` | `max_grad_norm` 1.0 → 10.0 | `A2_lr` | −0.0051 | 3 sig, **all at ep1/ep2** |
+| `A3_vitlr` | `vit_lr` 2e-4 → 2e-5 | `A2_lr` | **−0.0278** | **4 sig, all pro-CONTROL** |
+
+🟢 **BEST CHECKPOINT OF THE CAMPAIGN — `21_lr_2e4_v1/checkpoint-2703`** (arm A2, epoch 3):
+proxy **0.6104**, `bucket_mean` **0.6496**, `margin_OOD` **0.2343**. Rung 06 ep3's 0.5724 had
+stood since 13 July; nineteen rungs of data work did not move it and one flag did.
+
+🔴 **The vision tower wants the HIGH learning rate.** The pre-registered worry was that lr 2e-4
+would break the ViT and that Qwen3-VL's 5–10× lower `vit_lr` default would fix it. Measured:
+it **loses**, significantly, with the damage in `fo_class` OOD (−0.0487) — the cell the tower
+owns. Answers [[vit-lora-partial]]'s open question in the opposite direction to its own
+prescription. ⚠️ `--vit_lr` is a **silent no-op unless `--optimizer multimodal` is passed** —
+found before the arm ran, or the result would have been a fake null.
+
+⚠️ **Rank is OPEN, not dead.** B's +0.0193 is the same size as A2's +0.0203; only the interval
+separates them (B's `ALL` CI is [−0.0000, 0.0394]). B and A2 were **never compared to each
+other**. A2 ships for being significant and 4× cheaper, not for being better.
+
+⚠️ **The cost the headline hides:** A2 gives back most of arm A's class-balanced F1 gain on ID
+(0.6906 → **0.5474**) while exact-match rises — the `Clip` attractor, and exactly
+[[coa-sft-published-null]]'s published pattern in our own data. **A rung targeting the tail
+should baseline against arm A, not A2.**
+
+**Next:** submit A2 ep3 (9 of 10 slots left), and rebase rung 22 (loss-mass) onto A2 — it was
+designed against a 2e-5 recipe whose gradient behaviour it no longer describes.
 
 ## 🔴 2026-07-29 — rung 21 is the RECIPE now, and it is training
 

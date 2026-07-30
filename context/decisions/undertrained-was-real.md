@@ -10,7 +10,10 @@ measured_in: experiments/21-recipe-sweep/RESULTS_A_lr.csv + RESULTS_paired_ci.cs
 
 - **Status:** MEASURED · 2026-07-29 · ~11 GPU-hours on one RTX 5090.
 - **Applies when:** proposing ANY new lever. The recipe is no longer background; it is the
-  best-understood axis in the campaign and every future arm inherits lr 1e-4.
+  best-understood axis in the campaign.
+- ⬆️ **Superseded as the operative recipe by [[recipe-axis-is-the-learning-rate]]** (2026-07-30,
+  five arms): every future arm inherits **lr 2e-4**, not 1e-4. This note stays as the record of
+  *why the plateau broke* — the first and largest step of the ladder.
 
 ## What was run
 
@@ -65,10 +68,12 @@ over more epochs**, which is a different trajectory from step 1 and does NOT con
 
 ## ⚠️ What this does NOT say
 
-- **Not that 1e-4 is optimal.** Exactly ONE alternative value was tested. The published band is
-  1e-4–3e-4 and we sit at its floor. `21_lr_2e4_v1` is running.
-- **Not that rank is settled.** `21_rank32_v1` (r 8→32, α 32→128 so α/r stays 4) is running as
-  a single variable off THIS arm, not off rung 18.
+- **Not that 1e-4 is optimal.** Exactly ONE alternative value was tested here. ✅ **RESOLVED
+  2026-07-30:** `21_lr_2e4_v1` (2e-4) adds a further **+0.0203** and is the best checkpoint of
+  the campaign — see [[recipe-axis-is-the-learning-rate]] for the full five-arm sweep.
+- **Not that rank is settled.** ✅ **RESOLVED-ish 2026-07-30:** `21_rank32_v1` lands +0.0193
+  off THIS arm — the same size as the 2e-4 step — but **0 of 30** paired cells exclude zero
+  (its `ALL` CI is [−0.0000, 0.0394]). Rank stays **OPEN, not refuted**.
 - **Not a variance estimate.** A paired CI removes question-level variance and clusters on the
   38 videos. It says the difference between *these two models* on *these questions* is real. It
   does not say where a rerun lands, and nothing in this project does.
