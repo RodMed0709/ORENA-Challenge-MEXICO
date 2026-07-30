@@ -97,6 +97,14 @@ class RecipeSweepConfig(ViTLoRAConfig):
     # says the loss traces matched.
     gradient_checkpointing: bool = True
 
+    # 🔴 THE VARIABLE of arm D_clip, and it was never ours: 1.0 is transformers' DEFAULT and no
+    # rung ever set it. Measured on arm A2's own logging.jsonl (541 steps): grad_norm median
+    # 6.76, p75 11.37, p90 18.68, max 208.19 -- so the clip binds on 99.6% of steps and every
+    # ordinary step is being shrunk 5-10x. It does not shrink them equally: a step at norm 127 is
+    # divided by 127 while a step at norm 2 is divided by 2, so the HARDEST batches contribute
+    # proportionally least. That is the same shape as the loss-mass finding, one level down.
+    max_grad_norm: float = 1.0
+
     # The control's data, used as-is. NOT re-exported — see the module docstring.
     control_train_jsonl: Path = _CONTROL_RUN / "train.jsonl"
     control_sha256: str | None = None   # None = record it; a string = assert it
@@ -128,6 +136,10 @@ BASELINES: dict[str, dict] = {
     # The LR axis was still rising with diminishing returns (+0.048 then +0.021), so the
     # remaining question on optimisation distance is the OTHER knob: epochs.
     "C_epochs": {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    # off ARM A2 as well, and deliberately at 3 epochs: pairing the clip change with an epoch
+    # change would be two flags and neither could be attributed.
+    "D_clip":   {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3,
+                 "max_grad_norm": 1.0},
 }
 
 # Where each baseline's own weights live, so a gate can read what it ACTUALLY trained with
@@ -138,6 +150,7 @@ BASELINE_RUN: dict[str, Path | None] = {
     "A2_lr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
     "B_rank": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
     "C_epochs": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
+    "D_clip": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
 }
 
 
@@ -203,6 +216,10 @@ def swift_args_21(cfg: RecipeSweepConfig) -> list[str]:
     args = list(_swift_args(cfg))
     if not cfg.gradient_checkpointing:
         args[args.index("--gradient_checkpointing") + 1] = "false"
+    # rung 06 never emitted --max_grad_norm, so every rung so far rode transformers' default of
+    # 1.0. Stating it explicitly is behaviour-preserving at 1.0 and it is what lets the diff show
+    # the flag when an arm moves it.
+    args += ["--max_grad_norm", str(cfg.max_grad_norm)]
     return args
 
 
@@ -252,6 +269,7 @@ ARMS: dict[str, set[str]] = {
     # still epoch-matched against A2 (that is what the flag does); epochs 4-6 are new ground
     # with no control, and are read as a curve, not as a delta.
     "C_epochs": {"--num_train_epochs"},             # vs arm A2
+    "D_clip": {"--max_grad_norm"},                  # vs arm A2
 }
 
 
