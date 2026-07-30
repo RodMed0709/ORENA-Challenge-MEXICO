@@ -114,8 +114,59 @@ clinician and no blind human recount.**
 - It was itself built by a **model-in-the-loop data engine** that improves model and data through
   iteration. The bootstrap-and-retrain loop is the model's own construction procedure, not an
   improvisation on top of it.
-- It handles **video with streaming memory**. Our data *is* video: 92 videos, every row carrying
-  `timestamp_start`. CoVT is single-image because its domain is; **we are not bound by that.**
+- It handles **video with streaming memory**. Our data *is* video, and CoVT is single-image only
+  because its domain is; **we are not bound by that.** ⚠️ Sharpened 2026-07-29 — see below, because
+  the naive version of this sentence is wrong in one direction and stronger than stated in another.
+
+### 🔴 What "our data is video" does and does NOT mean (measured 2026-07-29)
+
+The original wording invited a wrong inference that was in fact drawn once and is corrected here.
+
+🔴 **It does NOT mean streaming memory helps at inference.** Verified directly on all four
+parquets: **`timestamp_start == timestamp_end` in 20,000 of 20,000 rows (100%)**. The FRAME clip
+has **zero duration** — every question is a single instant, and the SDK hands `predict()` one
+moment. At inference **there is no video to stream**, and SAM 2's memory bank buys nothing.
+(`00-baseline/CONTEXT.md:8` already recorded the fact; it had never been connected to this route.)
+
+🟢 **It DOES mean the label economics change, and the measurement is better than the claim.** The
+route's value was always **offline label generation on the source videos**, and those are real
+video. Measured from the parquets:
+
+| | |
+|---|---|
+| questions | 20,000 |
+| distinct frames | **15,213** |
+| **distinct videos** | **130** |
+| frames per video | median 69 · mean 117 · max 352 |
+
+*(Reconciling two counts that are both right: **130** is every video across all four parquets —
+the 20,000-question universe. The **92** quoted elsewhere, e.g. rung 12's subsample, is the
+**train** split's 13,748 rows. Neither figure is wrong; they have different denominators.)*
+
+🔑 **And the annotated frames are DENSE, which is what makes propagation viable** — 15,083
+consecutive within-video pairs:
+
+| gap to the previous annotated frame | share |
+|---|---|
+| ≤ 1 s | **31.1%** |
+| ≤ 5 s | **63.6%** |
+| ≤ 10 s | 76.1% |
+| ≤ 30 s | 89.2% |
+| median | **3 s** · p99 449 s |
+
+Nearly two thirds of annotated frames sit within **5 seconds** of the previous one — squarely
+inside SAM 2's tracking horizon, the regime its memory bank was designed for.
+
+⚠️ **The honest economics: ~9×, not 117×.** A track does not survive a multi-minute gap, so
+re-seeding is needed where the gap is large: **1,629 re-seed points at a 30 s threshold** (5,493 at
+5 s) against **15,213 frames**. Between impossible and tractable — and automatic mode means not
+every re-seed is a human click.
+
+🎯 **What the density additionally licenses, and this is the strongest part:** at ≤1 s apart
+(**31% of pairs**) a tracked object is **the same physical instance by construction**, while the
+gold count moves **±0.86** between annotated frames <1 s apart. ⇒ **Where the track is steady and
+the gold jumps, the gold is wrong.** That is not only the noise probe below — it is a **label
+correction mechanism**, and it is exactly the loop SAM 2's own model-in-the-loop data engine runs.
 
 ### 🎯 The probe that goes first — and what it decomposes
 

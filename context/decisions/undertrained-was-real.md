@@ -24,11 +24,46 @@ already-scored per-epoch series, compared **epoch to epoch** (RULES §6b).
 | `bucket_mean` | 0.5721 | **0.6305** | +0.0584 |
 | `margin_OOD` | 0.1455 | **0.2160** | **+0.0705** |
 | `number_margin_OOD` | −0.0098 | **+0.0264** | +0.036 |
-| class-balanced F1, `fo_class` ID | 0.5166 | **0.6906** | +0.174 |
+| class-balanced F1, `fo_class` ID | 0.5166 | **0.6906** | +0.174 ⚠️ **see the correction below** |
 | Spearman r, `Clips` | 0.6003 | **0.6589** | +0.059 |
 
 Pre-registered condition (proxy rises AND `margin_OOD` does not fall) is met at **all three
 epochs**, not just the best one.
+
+## 🔴 CORRECTION 2026-07-29 — the class-balanced F1 row is 82% ONE question
+
+**The `+0.174` above is real arithmetic and a misleading summary.** Decomposed class by class from
+the two runs' own `predictions.json` (arm A ep3 recomputed off the volume; the macro reproduces
+`RESULTS_class_f1_A_lr_ep3.csv`'s **0.6906** and exact-set **0.688** to the digit):
+
+| class | `n_gold` | F1 rung 18 | F1 arm A | contribution to +0.174 |
+|---|---|---|---|---|
+| **Needle** | **1** | 0.000 | 1.000 | **+0.1429** ← **82%** |
+| External drain | 24 | 0.303 | 0.410 | +0.0153 |
+| Sponge | 218 | 0.781 | 0.829 | +0.0069 |
+| Clip | 406 | 0.811 | 0.846 | +0.0050 |
+| Specimen bag | 278 | 0.845 | 0.872 | +0.0039 |
+| Specimen | 367 | 0.809 | 0.812 | +0.0004 |
+| **Gallstone** | 28 | 0.067 | **0.065** | **−0.0003** |
+
+Macro-F1 averages **seven** classes, so a class with `n_gold = 1` carries **1/7 of the metric**.
+That single `Needle` question flipping from wrong to right *is* most of the headline.
+
+🔴 **What this retires:** any reading of this rung as *"the recipe fixed the tail"*.
+**`Gallstone` did not move — recall stays 0.036.** The tail collapse
+([[class-imbalance-not-counting]]) is exactly as open as it was before rung 21.
+
+🟢 **What survives untouched:** everything else in this note. The rung's verdict rests on
+`bucket_mean` +0.0584, the leaderboard proxy +0.0480 and **21 of 30 paired video-clustered cells**,
+none of which involve macro-F1. Exact-set accuracy on the same cell rose **0.6478 → 0.688** on
+n=920, and that number is not `n=1`-sensitive. **The result stands; this one row of the table does
+not summarise it.**
+
+⚠️ **The general lesson, and it applies to every future rung:** `frame.metrics.class_f1_report`
+landed *because* the tail was invisible under a pooled headline — and unweighted macro over a
+long-tailed class list has the mirror defect, letting a single-example class dominate. **Quote
+macro-F1 with its per-class table, or do not quote it.** A `Needle` column with `n_gold = 1` is not
+a capability measurement.
 
 ## Why this is not a lucky slice
 
