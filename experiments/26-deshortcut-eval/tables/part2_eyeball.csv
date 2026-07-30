@@ -1,0 +1,91 @@
+qID,video,arm,question,answer
+heico__1973736,0029 - Heico - Sigma - 10.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__1973736,0029 - Heico - Sigma - 10.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__1973736,0029 - Heico - Sigma - 10.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2041593,0020 - Heico - Sigma - 1.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2041593,0020 - Heico - Sigma - 1.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2041593,0020 - Heico - Sigma - 1.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Sponge
+heico__2112763,0021 - Heico - Sigma - 2.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2112763,0021 - Heico - Sigma - 2.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2112763,0021 - Heico - Sigma - 2.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2148102,0022 - Heico - Sigma - 3.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2148102,0022 - Heico - Sigma - 3.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2148102,0022 - Heico - Sigma - 3.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2148470,0022 - Heico - Sigma - 3.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2148470,0022 - Heico - Sigma - 3.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2148470,0022 - Heico - Sigma - 3.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2219551,0023 - Heico - Sigma - 4.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2219551,0023 - Heico - Sigma - 4.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2219551,0023 - Heico - Sigma - 4.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Sponge
+heico__2294167,0024 - Heico - Sigma - 5.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+heico__2294167,0024 - Heico - Sigma - 5.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+heico__2294167,0024 - Heico - Sigma - 5.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Specimen bag
+heico__2405197,0025 - Heico - Sigma - 6.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+heico__2405197,0025 - Heico - Sigma - 6.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+heico__2405197,0025 - Heico - Sigma - 6.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+heico__2405353,0025 - Heico - Sigma - 6.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2405353,0025 - Heico - Sigma - 6.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2405353,0025 - Heico - Sigma - 6.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2405354,0025 - Heico - Sigma - 6.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2405354,0025 - Heico - Sigma - 6.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2405354,0025 - Heico - Sigma - 6.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2451131,0026 - Heico - Sigma - 7.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2451131,0026 - Heico - Sigma - 7.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2451131,0026 - Heico - Sigma - 7.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2451266,0026 - Heico - Sigma - 7.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2451266,0026 - Heico - Sigma - 7.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2451266,0026 - Heico - Sigma - 7.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2524799,0027 - Heico - Sigma - 8.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2524799,0027 - Heico - Sigma - 8.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2524799,0027 - Heico - Sigma - 8.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Sponge
+heico__2524827,0027 - Heico - Sigma - 8.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2524827,0027 - Heico - Sigma - 8.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2524827,0027 - Heico - Sigma - 8.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2524863,0027 - Heico - Sigma - 8.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2524863,0027 - Heico - Sigma - 8.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2524863,0027 - Heico - Sigma - 8.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+heico__2615550,0028 - Heico - Sigma - 9.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Needle
+heico__2615550,0028 - Heico - Sigma - 9.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Needle
+heico__2615550,0028 - Heico - Sigma - 9.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Needle
+heico__2615795,0028 - Heico - Sigma - 9.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Needle
+heico__2615795,0028 - Heico - Sigma - 9.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Needle
+heico__2615795,0028 - Heico - Sigma - 9.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Needle
+heico__2615906,0028 - Heico - Sigma - 9.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2615906,0028 - Heico - Sigma - 9.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+heico__2615906,0028 - Heico - Sigma - 9.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Sponge
+heico__2615917,0028 - Heico - Sigma - 9.avi,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2615917,0028 - Heico - Sigma - 9.avi,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,External drain
+heico__2615917,0028 - Heico - Sigma - 9.avi,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,External drain
+lapchole__1149480,0028 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__1149480,0028 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__1149480,0028 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+lapchole__134147,0004 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+lapchole__134147,0004 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Sponge
+lapchole__134147,0004 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Sponge
+lapchole__1347577,0033 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen
+lapchole__1347577,0033 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen
+lapchole__1347577,0033 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Specimen
+lapchole__1799551,0045 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__1799551,0045 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__1799551,0045 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+lapchole__2662432,0065 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__2662432,0065 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__2662432,0065 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+lapchole__2662618,0065 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen
+lapchole__2662618,0065 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen
+lapchole__2662618,0065 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Specimen
+lapchole__3154410,0078 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+lapchole__3154410,0078 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+lapchole__3154410,0078 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Specimen bag
+lapchole__3154434,0078 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+lapchole__3154434,0078 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Specimen bag
+lapchole__3154434,0078 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Specimen bag
+lapchole__3494460,0093 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__3494460,0093 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__3494460,0093 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+lapchole__3750439,0100 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__3750439,0100 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__3750439,0100 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
+lapchole__616937,0017 - Laparoscopic Cholecystectomy.mp4,original,There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__616937,0017 - Laparoscopic Cholecystectomy.mp4,premise_dropped,What surgical foreign object is visible in this video frame? Please provide a class name.,Clip
+lapchole__616937,0017 - Laparoscopic Cholecystectomy.mp4,set_framed,List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.,Clip
