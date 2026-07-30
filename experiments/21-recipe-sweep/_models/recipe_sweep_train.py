@@ -378,10 +378,24 @@ def assert_control_is_rung18(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict:
             )
         trained = json.loads(Path(found[-1]).read_text())
         source = f"{run.name}/ckpt/.../args.json"
+        # ⚠️ max_grad_norm and vit_lr belong here because they are what arms D_clip and
+        # A3_vitlr MOVE -- a gate that omits the arm's own variable cannot catch the one
+        # mistake that matters. Both happened to be right on their first run, by luck rather
+        # than by check. `vit_lr` is absent from a run that never passed --optimizer, and the
+        # tower then rides `learning_rate`, so `None` is compared against that fallback.
         checked = ("learning_rate", "lora_rank", "lora_alpha", "lora_dropout",
-                   "per_device_train_batch_size", "gradient_accumulation_steps", "seed")
-        drift = {f: (trained.get(f), getattr(ctrl, f))
-                 for f in checked if trained.get(f) != getattr(ctrl, f)}
+                   "per_device_train_batch_size", "gradient_accumulation_steps", "seed",
+                   "max_grad_norm", "vit_lr")
+        def _trained(field):
+            v = trained.get(field)
+            # swift records vit_lr as null when --optimizer was never passed; the effective
+            # rate in that case is the LLM's (multimodal.py:56), which is what to compare.
+            if field == "vit_lr" and v is None:
+                return trained.get("learning_rate")
+            return v
+
+        drift = {f: (_trained(f), getattr(ctrl, f))
+                 for f in checked if _trained(f) != getattr(ctrl, f)}
         fields = checked
 
     if drift:
