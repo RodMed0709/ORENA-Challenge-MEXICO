@@ -1,4 +1,4 @@
-# Technique Fichas — VLM-Techniques Sub-Corpus (33 fichas over 45 kept papers)
+# Technique Fichas — VLM-Techniques Sub-Corpus (42 fichas over 54 kept papers)
 
 > Structured, comparable technique cards for every **Tier-1 and Tier-2** paper in
 > `literature/vlm-techniques/INDEX.md`. Tier-3 entries are context and are described in the INDEX
@@ -15,14 +15,14 @@
 > **Known-dead (do not re-propose without new evidence):** self-consistency / majority voting
 > (k=16 harms OOD −0.043), post-hoc count calibration (dead three ways), enumerate-then-count
 > prompting, inference-only input transforms (negative, monotone in dose).
-> **Newly-legal:** latency is pooled (120 s + B×5 s) and our p99 is 0.196 s → ~25× headroom, so
+> **Newly-legal:** latency is pooled (120 s + B×5 s) and our p99 is 0.352 s → ~14× headroom, so
 > extra tokens and extra forward passes are back on the table.
 > **Hard constraint:** our DUA forbids sending challenge frames or annotations to any external API.
 > Any teacher/generator model must run **on-pod**.
 
 ---
 
-## MASTER SYNTHESIS — the five things this corpus actually says
+## MASTER SYNTHESIS — the six things this corpus actually says
 
 | # | Claim | Evidence | Consequence for us |
 |---|---|---|---|
@@ -31,6 +31,7 @@
 | 3 | **The counting collapse is a target/loss problem, not a "VLMs can't count" law.** | Gautam (v05): Qwen2.5-VL-7B + plain LoRA r=16, ViT frozen, 5 ep → **Count MAE 9.86 → 0.26** on the counting-ONLY task; multi-task (count+point) is measured **WORSE** for counting (**1.52**) — see the v05 ficha. Zausinger (v12): CE treats numbers as a *nominal* scale — no gradient toward being *close*. Qwen3-VL (v14) ships counting as a pretrained grounding capability. | Our `number` bucket is being diluted, not destroyed. Attack the **loss** (number-token loss) and the **task mix**, not the decoder. |
 | 4 | **Forgetting is fixable post-hoc, for free, on a checkpoint we already have.** | LiNeS (v13): layer-depth-scaled updates keep **99.8%** of fine-tuned task performance while restoring **97.9%** of pretrained performance on control tasks. WiSE-FT (v23): one interpolation coefficient. MoFO (v25): needs **no pretraining data and no extra loss term**. | Three zero-to-cheap experiments exist that we have not run, all on the epoch-3 checkpoint sitting on disk. |
 | 5 | **Our checkpoint-selection rule is a known, named bug.** | Xu (v37): validation-average criteria are "unstable under noisy evaluation signals" and hide per-capability collapse. CapTrack (v39) and EMT (v09) both show the erosion is monotone in epochs while the *average* stays flat or rises. | Stop selecting on `acc_OOD`. Select on **worst-cell margin** or on a per-format floor-relative vector. This is a one-line change with no GPU cost. |
+| 6 🆕 | **The corpus is not anti-CoT — it is anti-EMITTING. The negative and positive evidence split cleanly on an axis nobody was reporting.** | *Against emitting at inference, on perception:* v01 (62.0 vs 65.7, our exact backbone), v10 (the two SFT variants differ ~1 pt in opposite directions; the payoff is RFT), v06 (−3% over 13 spatial benchmarks; 7/8 distilled reasoners lose to their own backbone), v07 (names **visual grounding and object counting** as what CoT degrades), v40 (mechanism: attention dispersion), and our own rung 23 (**0/24** — the trace truncates before the answer at `max_new_tokens 64`). *For training on traces and not paying at inference:* v18 STaR (**+12.5% over direct-answer SFT at the same data scale**, via correctness-filtered rationalization) and v47 3TF (**93.0 vs NoThinking's 89.9 at the same 241 tokens**; its §4.6 ablation says reasoning-bearing targets beat answer-only targets). | **Train on the trace, suppress it at inference.** No paper trains once on a scaffold and evaluates the *same checkpoint* under both emit and suppress on a perception benchmark — that cell is genuinely empty and it is what rung 09 should test. ⚠️ Both positive results are **text-only, on reasoning tasks** — the category v07 says CoT helps. The transfer risk is real and can only be measured. And per v48, a derived-trace target is **target-side noise**: bring its measured error rate first. |
 
 ---
 
@@ -351,6 +352,77 @@
 
 ---
 
+### v46 — Chain-of-Visual-Thought (CoVT) ⭐ the perceptual-reasoning route
+
+- **Paper**: Chain-of-Visual-Thought: Teaching VLMs to See and Think Better with Continuous Visual Tokens — Yiming Qin, Bomin Wei, Jiaxin Ge, Konstantinos Kallidromitis, Stephanie Fu, Trevor Darrell, XuDong Wang (UC Berkeley / UCLA / Panasonic AI Research)
+- **Venue, year**: arXiv:2511.19418v2, 30 Nov 2025
+- **file**: `pdfs/v46_qin_2025_chain-of-visual-thought.pdf`
+- **Problem it attacks**: VLMs reason in *text* about images they perceive coarsely. CoVT makes the model emit **continuous visual tokens** inside its own thinking chain, so the reasoning is grounded in dense perceptual signal rather than in a verbal re-description of it.
+- **Backbone + adaptation**: Qwen2.5-VL-7B (also LLaVA-v1.5-13B). LoRA **r=16, α=32**, LoRA lr **5e-5**, projection-layer lr **1e-5**, batch 4, **1×A100 or 4×A6000**. Twenty visual tokens total, each aligned during training to a lightweight vision expert: **8 segmentation → SAM decoder** (prompt-level, Hungarian matching + dice/focal), **4 depth → DepthAnythingV2** (BMM + L1), **4 edge → PIDINet** (1×1 conv + L1), **4 DINO → DINOv2** (feature-level MSE). The projector is one multi-head attention layer plus two FC layers. Joint loss `L_ce + γ·Σ λ_i·L_visual_i`, γ = λ = 1. **Four training stages — comprehension, generation, reasoning, efficient reasoning — 4K+3K+3K+5K = 17K steps.**
+- **Data**: **774.6k rows** — LLaVA-OneVision subsets + 150k re-filtered TallyQA + 5k ADE20K-Depth. General domain. 🔑 **All dense GT is computed by the same vision experts that supervise the tokens (A.2) — zero human annotation anywhere in the pipeline.**
+- **Eval**: 10+ perception-centric benchmarks — CVBench, BLINK, RealWorldQA, MMStar-P, MMVP, V\*, HR-4K.
+- **Reported effect**: 🔴 **The advertised +26.6% BLINK-`count` is LLaVA-v1.5-13B against a reproduced Aurora baseline (Tab. 3), not a Qwen backbone.** On Qwen2.5-VL-7B against the paper's own fine-tuned control (Tab. 2), the per-expert ablation is what matters:
+
+  | arm | CVBench | **Count** | Depth | Dist |
+  |---|---|---|---|---|
+  | Qwen2.5-VL-7B base | 74.5 | **65.0** | 72.8 | 75.5 |
+  | Seg only | 77.9 | **66.0** | 80.8 | 80.5 |
+  | Depth only | 78.7 | 65.4 | 83.2 | 78.2 |
+  | DINO only | 71.3 | **64.7** ↓ | 72.3 | 66.7 |
+  | Seg+Depth+DINO (full) | **80.0** | 66.2 | 86.8 | 82.5 |
+  | +Edge (4 types) | 79.8 | 66.1 | **89.2** | 80.5 |
+  | **Δ full vs base** | +5.5 | **+1.2** | **+14.0** | **+7.0** |
+
+  Token-count ablation (Tab. 4): **0 < 1 < 8 > 32**, an interior optimum at 8 segmentation tokens; 32 tokens goes **negative** (−1.03% avg). A "16 empty" latent-filler control **ties the full model on BLINK (56.0)**, so the gain is in the *alignment*, not in the extra capacity. Fig. 12: **+4.18% average at +136% wall-clock**. Tab. 7: training **only stages 3&4 scores BLINK 53.8 — below the 55.7 base.**
+- **The key trick**: keep the plain next-token-prediction paradigm and let some emitted tokens be *visual*; supervise them by making task decoders reconstruct dense outputs from them. At inference **the tokens are never decoded** — reasoning happens entirely in latent visual space, so **no vision expert ships in the serving container**.
+- **Transfer to us**: **The method as published is a NO-GO** — see `context/decisions/covt-reduced-sam-route.md`. Corpus (774.6k rows), non-optional stages, 17K steps, and it is **not expressible in ms-swift, nor in LLaMA-Factory or Unsloth** (Hungarian matching + dice/focal + per-type trainable projectors); those are recipe wrappers, so switching framework buys nothing. **But three blockers assumed in earlier readings do not survive the supplementary:** (a) **offline deployment is a non-issue** — experts are training-only; (b) **annotation cost is zero** — GT is expert-generated; (c) **licensing is resolvable by dropping exactly the expert that does not help us** — SAM 1/2, DepthAnythingV2 and DINOv2 are Apache-2.0, only **PIDINet is research-only**, and edge tokens move counting by −0.1. Furthermore its own Tab. 2 says that **for counting, segmentation is the only expert that helps and DINO actively hurts** ⇒ a **one-expert, 8-segmentation-token CoVT-lite is better aimed at our target than the full method, cheaper, and licence-clean.** 🔑 **And under our own `target-noise-is-the-harmful-kind` rule, CoVT's risk profile is strictly better than CoA's: the visual loss is auxiliary, on *extra* tokens, and the answer's CE is untouched — noisy masks degrade the auxiliary term, they do not poison the answer gradient.** The residual blockers are real and are the whole cost: the early stages are load-bearing, and it needs a bespoke trainer.
+- **Weights/license**: no weights released. Experts: SAM 1/2, DepthAnythingV2, DINOv2 **Apache-2.0**; **PIDINet research-only (commercial use requires contacting the authors) — excluded from any design we ship.**
+- **Verdict**: **REFUTES-US** as published (the count headline is a different backbone; +1.2 on Qwen) / **STEAL** the reduced form — seg-only, 8 tokens, expert-generated GT, auxiliary loss on extra tokens.
+
+---
+
+### v47 — 3TF: Thought-Training and Thought-Free Inference ⭐ the suppress arm's evidence
+
+- **Paper**: Efficient Reasoning via Thought-Training and Thought-Free Inference — Canhui Wu, Qiong Cao, Chao Xue, Wei Xi, Xiaodong He (Xi'an Jiaotong University / JD Future Academy)
+- **Venue, year**: arXiv:2511.03408v3, 28 Nov 2025
+- **file**: `pdfs/v47_wu_2025_thought-training-thought-free.pdf`
+- **Problem it attacks**: CoT buys accuracy at a token cost that no latency-bound deployment can pay. 3TF breaks the symmetry: **learn from CoT-annotated data during training, then operate in a thought-free mode at inference**, emitting only the concise final answer.
+- **Backbone + adaptation**: **Qwen3 at 4B, 8B and 14B** (hybrid reasoning models), plus Qwen2.5-7B-Instruct and Qwen2.5-7B-R1-Distill. SFT on CoT data; at deployment, decoding is initialised with an **empty reasoning field** so the model is conditioned on `t = ∅` from the first token — implemented as the literal prompt `<think>\n\n</think><answer>`. ⚠️ Text-only; **`NOT FOUND IN PAPER` that any model is multimodal.**
+- **Data**: AIME24, MATH500, GSM8K, Olympiad.
+- **Eval**: accuracy and mean output tokens per benchmark, comparing Thinking / NoThinking / 3TF, plus CoT-Valve and LS-mixture fine-tuned on their official datasets.
+- **Reported effect** (Qwen3-8B, Tab. 1):
+
+  | Method | GSM8K Acc / Tok | MATH-500 Acc / Tok | OLYMPIC Acc / Tok | AIME24 Acc / Tok |
+  |---|---|---|---|---|
+  | Thinking | 94.2 / 2020 | 98.0 / 4894 | 81.4 / 10454 | 80.0 / 13173 |
+  | NoThinking | 89.9 / 245 | 93.2 / 1096 | 65.5 / 2081 | 50.0 / 3581 |
+  | **3TF** | **93.0 / 241** | **96.6 / 1358** | **76.0 / 3134** | **76.6 / 7961** |
+
+  ">90% of full-CoT accuracy at roughly one third of the tokens." **The ablation is the load-bearing result** (§4.6): training on data that *contains* reasoning improves the No-Think mode **relative to training on answer content alone** ("NoThink-T2") — "Data containing reasoning improves the performance of No-Think modes, rather than the answer content alone." Fig. 4: raising the No-Think ratio shortens outputs monotonically but **monotonically reduces accuracy**. Scaling: "as the parameter count increases, the performance gap between 3TF and Base_Think consistently narrows."
+- **The key trick**: put the trace in the *training target* and **charge nothing for it at inference** by conditioning generation on an empty thought field.
+- **Transfer to us**: **High, and it is the first published support for the arm rung 09 has left open.** Our rung 23 measured that with `max_new_tokens 64` **emitting a trace scores 0/24** — the trace truncates before the answer — so emit-mode is dead for us on latency grounds alone, independent of whether it helps. 3TF is the only shape of the CoT axis that survives that. It also supplies the exact inference-side implementation (`<think>\n\n</think>`) for the suppress arm of our paired emit-vs-suppress eval. **Three caveats, all material:** (a) text-only, on mathematical reasoning — precisely the category v07 says CoT *helps*, not the perception category where it hurts; (b) at 8B the 3TF-vs-Think gap should still be visible, but it closes with scale; (c) 🔴 **3TF derives targets**, which puts it in the harmful category of v48 — the trace error rate must be measured before training, not after.
+- **Weights/license**: no release stated.
+- **Verdict**: **STEAL** — the thought-free inference conditioning, as the suppress arm; **CONTEXT** for the claim that reasoning-bearing targets beat answer-only targets at equal inference cost.
+
+---
+
+### v48 — Analyzing the Effect of Noise in LLM Fine-tuning ⭐ the rule that re-ranks every lever
+
+- **Paper**: Analyzing the Effect of Noise in LLM Fine-tuning — **anonymous preprint** (no author list; code at an anonymous 4open.science repo)
+- **Venue, year**: arXiv:2604.12469v1, 14 Apr 2026
+- **file**: `pdfs/v48_anon_2026_noise-in-llm-finetuning.pdf`
+- **Problem it attacks**: Everyone studies *robust algorithms* for noisy fine-tuning data; almost nobody studies **how different noise types change the learning dynamics**. It introduces controlled perturbations of three kinds — **label noise, grammatical noise, typographical noise** — and traces them through task performance, layer-wise representations and attention.
+- **Backbone + adaptation**: three pretrained families — **GPT-2, Qwen2, Llama-2** — across three NLP tasks. Text-only; no vision.
+- **Data**: three diverse NLP tasks with synthetic, dose-controlled corruption applied separately to inputs and to labels.
+- **Eval**: task performance by noise type and dose; CKA between representations; attention-structure stability; **and a seed sweep under clean vs corrupted conditions**.
+- **Reported effect**: 🔴 **Corrupting labels causes by far the largest degradation (~21%); grammatical and typographical noise are harmless and occasionally act as mild regularisation.** Noise effects localise to task-specific layers while attention structure stays comparatively stable. Its Tab. 10 is the one we used: **three seeds on clean data span 0.5 pp (94.0–94.5); the same three seeds under 40% label-flip span 68.5 pp.** Clean-vs-clean cross-seed CKA = **0.890**.
+- **The key trick**: separating **target-side** from **input-side** corruption as the primary axis, rather than treating "noise" as one quantity.
+- **Transfer to us**: **Maximum, and it retro-predicts our own results.** Two decisions came out of it. (1) **Seed variance is a property of training near a noise threshold, not of fine-tuning** ⇒ on clean data the band is ~0.5 pp, so rung 21's **+5.84 pp** clears it by ~11× and rungs 14/15 (±2 pp) were already dead in the paired CI — two independent instruments agreeing ⇒ **we run zero seed repeats** (`seed-variance-is-small-when-clean`). (2) 🔑 **The rule: a lever that derives TARGETS (minted zeros, SAM masks, centroids, CoA traces) sits in the harmful category and must bring its measured error rate before training; a lever that perturbs the INPUT is cheap and unlikely to hurt** (`target-noise-is-the-harmful-kind`). We had been pricing these backwards, and it retro-predicts the nulls of rungs 14 and 18. ⚠️ Limits to state honestly: the clean 0.5 pp band comes from a **saturated binary task** (so it is a *lower* bound), n=3, **zero vision**, and it does **not** convert our paired bootstrap CI into a variance estimate.
+- **Weights/license**: anonymous code repo; no weights.
+- **Verdict**: **STEAL** — both the seed decision and the target-vs-input taxonomy. This is the most consequential methodological paper in the corpus.
+
+---
+
 ## Tier 2 fichas
 
 ### v17 — S-Chain: Structured Visual Chain-of-Thought for Medicine
@@ -511,7 +583,7 @@
 - **Data / Eval**: multiple counting and general vision datasets/benchmarks.
 - **Reported effect**: consistent improvement in LVLM counting on large-count images across datasets; the authors position it as a reference baseline rather than a final answer.
 - **The key trick**: the anti-split guard on the decomposition — the difference between a working divide-and-conquer and a broken one.
-- **Transfer to us**: Medium. Newly viable now that latency is pooled (p99 0.196 s vs a 5 s per-question equivalent — we can afford 3–5 forward passes). But two things temper it: (a) our counts are **small** (golds concentrated 1–8), and this method's gains are concentrated at *large* counts; (b) it is an **inference-only** intervention, and our own inference-only input transforms measured negative and monotone in dose. That said, it is not the same *kind* of intervention (region decomposition with re-prompting, not an image transform), so it is not strictly covered by our dead-end. Worth exactly one probe on the `number` OOD subset, capped.
+- **Transfer to us**: Medium. Newly viable now that latency is pooled (p99 0.352 s vs a 5 s per-question equivalent — we can afford 3–5 forward passes). But two things temper it: (a) our counts are **small** (golds concentrated 1–8), and this method's gains are concentrated at *large* counts; (b) it is an **inference-only** intervention, and our own inference-only input transforms measured negative and monotone in dose. That said, it is not the same *kind* of intervention (region decomposition with re-prompting, not an image transform), so it is not strictly covered by our dead-end. Worth exactly one probe on the `number` OOD subset, capped.
 - **Weights/license**: method; code availability to verify.
 - **Verdict**: **TEST** — low priority, one capped probe.
 
@@ -629,6 +701,148 @@
 
 ---
 
+### v49 — MoE-Sieve: Routing-Guided LoRA for Efficient MoE Fine-Tuning ⭐ the equivalence test
+
+- **Paper**: MoE-Sieve: Routing-Guided LoRA for Efficient MoE Fine-Tuning — Andrea Manzoni (independent)
+- **Venue, year**: arXiv:2603.24044v1, 25 Mar 2026
+- **file**: `pdfs/v49_manzoni_2026_moe-sieve.pdf`
+- **Problem it attacks**: Standard LoRA on a Mixture-of-Experts model adapts *every* expert, but per-layer routing is highly skewed — a small subset handles most tokens while many stay "cold". Profile the routing, adapt only the hot experts.
+- **Backbone + adaptation**: **OLMoE-1B-7B** and **Qwen1.5-MoE-A2.7B** for fine-tuning, **DeepSeek-MoE-16B** for profiling. Recipe: profile routing counts on a small calibration set → select top-k most-routed experts per layer → apply LoRA only to those. Attention, router and shared-expert adapters stay always-on. ⚠️ **Text-only MoE language models; not multimodal.**
+- **Data**: fine-tuning on **Spider, GSM8K, HellaSwag**; calibration profiling over ten corpora (those three plus ARC-Challenge, BoolQ, PIQA, MMLU, CodeAlpaca, Wikitext, MBPP).
+- **Eval**: mean accuracy **± std over 8 seeds**, paired delta, paired 95% CI, and **TOST equivalence at a pre-declared ±2 pp margin**.
+- **Reported effect** (Tab. 3, complete):
+
+  | Model | Task | Full LoRA | Hot (25%) | ∆ (pp) | 95% CI (pp) | Eqv@2pp |
+  |---|---|---|---|---|---|---|
+  | OLMoE | Spider | .396 ± .026 | .399 ± .015 | +0.30 | [−2.04, +2.64] | **×** |
+  | OLMoE | GSM8K | .304 ± .011 | .304 ± .006 | −0.08 | [−1.45, +1.30] | ✓ |
+  | OLMoE | HellaSwag | .805 ± .005 | .807 ± .008 | +0.17 | [−0.71, +1.05] | ✓ |
+  | Qwen | Spider | .520 ± .014 | .511 ± .005 | −0.93 | [−1.88, +0.03] | ✓ |
+  | Qwen | GSM8K | .590 ± .011 | .592 ± .007 | +0.20 | [−0.77, +1.17] | ✓ |
+  | Qwen | HellaSwag | .885 ± .002 | .893 ± .001 | +0.73 | [+0.53, +0.93] | ✓ |
+
+  Plus **70–73% fewer LoRA trainable parameters**, 71–73% smaller adapter checkpoints and up to **50% less wall-clock training time**. Ablations: **random-k at matched budget is ~2.5 pp worse** (the routing signal is doing real work), and greedy per-layer budget allocation does **not** beat uniform top-k.
+- **The key trick**: two separable things. The method (profile → top-k → adapt) and, for us more valuable, **the statistical protocol** — TOST, `H0: |µ_hot − µ_full| ≥ ε` against `H1: |…| < ε`, paired differences across 8 seeds, α = 0.05, **margin declared in advance** (appendix reports ε ∈ {1, 2, 3} pp).
+- **Transfer to us**: Two independent channels. **(a) The instrument, and this is the urgent one.** TOST is what turns "we saw nothing" into "**it is a tie**". Our decision rule for rung 24 currently reads *"a tower that is indifferent ⇒ the branch is mapping"* — and **"indifferent" has no numeric definition**, which is exactly how rungs 14 and 15 were lost. Their protocol needs 8 seeds and we run zero (v48), but the adaptation is trivial and **zero-GPU**: our `paired_delta_ci` (`src/frame/metrics.py:652`) already returns a video-clustered bootstrap CI, and equivalence at ε is simply the CI lying wholly inside [−ε, +ε]. What must be inherited is the **discipline**: ε is declared before looking. ⚠️ Their own failing row is the warning — OLMoE/Spider is inconclusive *with* 8 seeds — so establishing equivalence needs power, and our ε has to come from the width of a CI we have already measured, not from a wish. **(b) The method**, which bears on `qwen-size-ladder` (next size up = 30B-A3B MoE FP8): hot-25% LoRA is the thing that could make a 30B MoE trainable on one dev GPU. Caveats: text-only MoE, and it needs a calibration/profiling pass first. It updates the ladder's cost model; it does not unblock it.
+- **Weights/license**: no weights; single-author preprint, licence unstated.
+- **Verdict**: **STEAL** — the pre-declared TOST equivalence test as a first-class output of `frame.metrics`. **CONTEXT** for the MoE ladder.
+
+---
+
+### v50 — Idis: Understanding the Effects of Distractors on Reasoning VLMs
+
+- **Paper**: Understanding the Effects of Distractors on Reasoning Vision-Language Models — Jiyun Bae, Hyunjong Ok, Sangwoo Mo, Jaeho Lee (POSTECH)
+- **Venue, year**: arXiv:2511.21397v2, 2025
+- **file**: `pdfs/v50_bae_2025_idis-distractors.pdf`
+- **Problem it attacks**: How irrelevant information — visual and linguistic — interacts with inference-time scaling in reasoning VLMs. Do distractors make models think longer, think worse, or both?
+- **Backbone + adaptation**: **Qwen3-VL-8B-Thinking** (our exact family), GLM-4.1V-9B-Thinking, Intern-S1-mini, R1-OneVision-7B-RL. Evaluation only, no training.
+- **Data**: **Idis** — Idis-perception (built on ImageNet-9) and Idis-math (MathVerse + LogicVista), with visual and **typographic** distractors generated per semantic category and distractor count; plus **Waterbirds**.
+- **Eval**: accuracy and mean reasoning length across aligned / conflicting / irrelevant distractor conditions, distractor counts 1–4, under controlled reasoning budgets.
+- **Reported effect** (Tab. 10, Waterbirds — the only tabulated performance results; the main findings are in Figs. 3–6):
+
+  | Model | Aligned Acc / Len | Conflicting Acc / Len | Overall Acc / Len |
+  |---|---|---|---|
+  | Qwen3-VL-Thinking | 93.6 / 635.9 | 76.4 / 829.9 | 88.3 / 695.8 |
+  | **+ Prompt Strategy** | 94.1 / 474.7 | **78.2** / 652.1 | **89.2** / 529.5 |
+  | GLM-4.1V | 94.4 / 340.9 | 80.7 / 498.2 | 90.1 / 389.5 |
+  | + Prompt Strategy | 92.9 / 253.9 | **84.7** / 358.7 | 90.4 / 286.3 |
+
+  Two findings beyond the table. **(1) Visual and typographic distractors reduce accuracy *without* substantially increasing reasoning length, whereas textual distractors intensify test-time inverse scaling** — the two channels fail differently. **(2) Reasoning budget is flat**: imposing 1024 / 2048 / 4096-token caps "barely changes either accuracy or reasoning length across all distractor counts and semantic types". On Idis-perception the damage comes from **semantically conflicting** distractors while aligned ones cause little to no degradation; on Idis-math, *irrelevant* samples give the largest drop.
+- **The key trick**: the mitigation (§6.2) is **a prompt change only** — instruct the model to attend to the target object alone — and it lifts the conflicting condition while *shortening* the output.
+- **Transfer to us**: **High, and it names an input-side lever.** Three consequences. **(a) The "give it more thinking tokens" axis is closed**, now by three independent sources — this paper's flat budget curve, v52's negative marginal utility past 12K, and v46's interior optimum at 8 tokens. It does not get re-proposed. **(b)** Our prompt carries a **class list**, and per `open-class-vocabulary` that list contains `silicone loop` — **435 training examples, zero in val** — plus non-target class names on every question. That is the textbook definition of a conflicting textual/typographic distractor, injected by us, by hand, into the input. **(c)** The mitigation is inference-only, single-variable, and **input-side** — the cheap-and-unlikely-to-hurt category under v48. Best cost/risk ratio in this intake. Caveat: their tasks are ImageNet-9 and math, not surgical perception, and the effect sizes are small (+1.8 for Qwen3-VL).
+- **Weights/license**: benchmark construction described; release terms unstated.
+- **Verdict**: **TEST** — a prompt-level distractor audit (free) followed by one inference-only A/B.
+
+---
+
+### v51 — GPRO: Gated Perception-Reasoning Optimization
+
+- **Paper**: Addressing Overthinking in Large Vision-Language Models via Gated Perception-Reasoning Optimization — Xingjian Diao, Zheyuan Liu, Chunhui Zhang, Weiyi Wu, Keyi Kong, Lin Shi, Kaize Ding, Soroush Vosoughi, Jiang Gui (Dartmouth / Notre Dame / Cornell / Northwestern)
+- **Venue, year**: arXiv:2601.04442v2, 15 Apr 2026
+- **file**: `pdfs/v51_diao_2026_gpro-gated-perception-reasoning.pdf`
+- **Problem it attacks**: Slow-thinking LVLMs overthink simple queries. The authors argue the real bottleneck is **visual perception failure**, not insufficient deliberation — reasoning errors originate in imperfect grounding.
+- **Backbone + adaptation**: **Qwen2-VL-7B** and **Qwen2.5-VL at 3B and 7B**. GPRO is a meta-reasoning controller routing computation token-by-token among three paths — a lightweight **fast path**, a **slow perception path** that re-examines the visual input, and a **slow reasoning path** for internal reflection. The GPR module **replaces standard FFN layers** at alternating positions in the decoder and is trained with **PPO**, multi-objective reward, batch 512, 8 rollouts/question, 10 epochs, **8×H100**.
+- **Data / Eval**: MathVision, MathVerse, MathVista, DynaMath, MM-Vet — accuracy and mean response length.
+- **Reported effect** (Tab. 1, 7B scale):
+
+  | Method | MathVision | MathVerse | MathVista | DynaMath | MM-Vet |
+  |---|---|---|---|---|---|
+  | Qwen2.5-VL-7B | 25.6 (443 tok) | 46.9 (389) | 68.2 (189) | 58.0 (273) | 67.1 (133) |
+  | **GPRO-7B** | **31.2 (196 tok)** | **48.7 (188)** | **74.2 (115)** | **59.2 (159)** | **70.9 (119)** |
+
+  🔑 **The ablation is what transfers:** "The most significant performance degradation occurs upon removing the **Slow Perception Path**, resulting in a sharp decline of 3.4% on MathVision and 4.4% on MathVerse" — **a larger loss than removing the reasoning path.**
+- **The key trick**: make "look again" a first-class, learned action rather than an implicit consequence of longer text.
+- **Transfer to us**: **The method is a NO-GO** — PPO plus architecture surgery on the decoder, 8×H100 for 10 epochs, entirely outside ms-swift and outside a $60–120 compute budget. **Two facts survive.** (1) On a Qwen-VL backbone, **re-examining the image beats reflecting internally** — independent, literature-grade support for the perceptual branch of our open decision (`covt-reduced-sam-route` over CoT/CoA), though it is their data and not ours, so it does not preempt rung 24. (2) GPRO gains **+5.6 on MathVision while more than halving output tokens** — accuracy and brevity are not in tension, so our `max_new_tokens ≤ 32` cap is not what is costing us points.
+- **Weights/license**: no release stated.
+- **Verdict**: **REFUTES-US** as a method (cost) / **CONTEXT** with teeth — the perception-path ablation is a vote for the perceptual branch.
+
+---
+
+## Tier 3 fichas
+
+> Normally Tier-3 papers are described in the INDEX only. These three carry fichas because they were
+> extracted before triage; they are kept because each contains one durable fact, and demoted because
+> none is actionable on its own.
+
+### v52 — When More Thinking Hurts: Overthinking in LLM Test-Time Compute Scaling
+
+- **Paper**: When More Thinking Hurts: Overthinking in LLM Test-Time Compute Scaling — **anonymous preprint** (no author list)
+- **Venue, year**: arXiv:2604.10739v1, 12 Apr 2026
+- **file**: `pdfs/v52_anon_2026_when-more-thinking-hurts.pdf`
+- **Problem it attacks**: Test-time scaling assumes longer thinking is always better. The paper measures the **marginal utility** of additional reasoning tokens as the budget grows.
+- **Backbone + adaptation**: **DeepSeek-R1-32B** and **s1-32B**, temperature 0. ⚠️ **Text-only LLMs, mathematical reasoning; no vision, no perception benchmark.**
+- **Data / Eval**: AIME 2024/2025, MATH-500, GPQA Diamond. Marginal utility per budget range, accuracy per budget, and a cost-aware evaluation.
+- **Reported effect** (Tab. 1, AIME; baseline at 500 tokens = 28.2% R1 / 24.8% s1):
+
+  | Range | MU R1 | MU s1 | Budget | Acc R1 | Acc s1 | ∆R1 |
+  |---|---|---|---|---|---|---|
+  | 0.5–2K | +3.2 | +2.8 | 2K | 37.8 | 33.2 | – |
+  | 4–6K | +0.9 | +0.7 | 6K | 50.2 | 44.5 | +3.7 |
+  | 8–12K | +0.1 | −0.2 | 12K | **55.8** | 47.6 | +2.0 |
+  | 12–16K | **−0.3** | **−0.6** | 16K | 54.9 | 45.8 | **−0.9** |
+
+  **Marginal utility turns negative past 12K.** 71% (221/312) of long samples contain an explicit reconsideration, and samples with reconsideration have **12% lower accuracy** than those without. Validated against naturally-long (not budget-forced) generations.
+- **The key trick**: the **flip ratio** — `negative flips / positive flips`, where a negative flip is correct→incorrect as the budget grows and a positive flip is incorrect→correct.
+- **Transfer to us**: The paper itself is the weakest in the intake (pure math, no vision, and its budgets are 400× ours). **One thing transfers and it is worth having: the flip ratio is a zero-GPU diagnostic computable over any pair of checkpoints we have already scored.** It decomposes a delta into *what it fixed* and *what it broke*, which a `bucket_mean` delta cannot show — and it is precisely the lens that would have caught the rung-21 `+0.174` macro-F1 artefact (82% of it was one `Needle` question flipping) before it was written up. Also relevant to `checkpoint-selection-vs-number`: which epoch flips `number` OOD the wrong way. Second use: it corroborates v50's flat budget curve from an independent direction.
+- **Weights/license**: none.
+- **Verdict**: **STEAL** the flip-ratio instrument / **CONTEXT** for everything else.
+
+---
+
+### v53 — Evaluating Reasoning Faithfulness in Medical VLMs using Multimodal Perturbations
+
+- **Paper**: Johannes Moll, Markus Graf, Tristan Lemke, Nicolas Lenhart, Daniel Truhn, Jean-Benoit Delbrouck, Jiazhen Pan, Daniel Rueckert, Lisa C. Adams, Keno K. Bressem (TUM / RWTH Aachen / Stanford)
+- **Venue, year**: **ML4H 2025** (PMLR 297), arXiv:2510.11196v2
+- **file**: `pdfs/v53_moll_2025_reasoning-faithfulness-medical-vlm.pdf`
+- **Problem it attacks**: Whether a medical VLM's CoT explanation reflects its actual decision process, probed by **controlled text and image perturbations** on chest-X-ray VQA.
+- **Backbone + adaptation**: six VLMs — Gemini 2.5 Pro / Flash / Flash-Lite, MedGemma-4b-it, LlamaV-o1, HealthGPT-M3. Evaluation only. (Qwen3-30B-A3B-Instruct appears in App. F only, as an automatic-judge candidate.)
+- **Data**: TAIX-Ray, and **TAIX-VQA** derived from it.
+- **Eval**: mean final-answer accuracy, **flip rate**, and three explanation-quality metrics — clinical fidelity (CF), causal attribution (CA), confidence calibration (CC, exploratory). Validated against a **reader study with 4 board-certified radiologists** via Kendall's τ_b against a z-scored consensus, with randomisation and model blinding enforced by the interface.
+- **Reported effect** (Tab. 1, aggregate over all modifications): accuracy spans **10.1 – 39.3** and flip rate **30.8 – 51.1** across the six models. Gemini 2.5 Pro leads at 39.3 accuracy / 40.4 flip rate; HealthGPT-M3 collapses to 10.1 / 51.1. App. D saliency sweep: bounding-box **stroke thickness is non-monotonic**, heatmap **opacity is proportional**.
+- **The key trick**: 🔑 **the visual perturbations need no extra per-image annotation.** Boxes and heatmaps are inserted deterministically from **view-specific normalised coordinates** driven by question type and laterality — "Placement is deterministic given the question type and laterality."
+- **Transfer to us**: Demoted because its subject — auditing a CoT teacher — lost its object: CoA has a published null on our exact backbone (v01), so there is no teacher to audit. **Two things survive.** (a) The annotation-free deterministic perturbation battery is directly portable to our frames as an **input-side** robustness probe — no clinician, no masks, and input-side is the cheap category under v48. (b) A calibration datum worth remembering: six frontier VLMs manage **34–39% accuracy and flip 30–51% of answers** on medical VQA under perturbation. Medical VQA is hard everywhere. Their judge-validation protocol also tells us what validating a judge actually costs (four radiologists) — which we cannot pay, and do not need to, since our headline is exact-match.
+- **Weights/license**: PMLR/arXiv; datasets derived from TAIX-Ray — verify terms before any reuse.
+- **Verdict**: **CONTEXT** / **TEST** the deterministic perturbation battery if an input-side robustness probe is ever scheduled.
+
+---
+
+### v54 — PitVQA (the original; predecessor of v19)
+
+- **Paper**: PitVQA: Image-grounded Text Embedding LLM for Visual Question Answering in Pituitary Surgery — Runlong He, Mengya Xu, Adrito Das, Danyal Z. Khan, Sophia Bano, Hani J. Marcus, Danail Stoyanov, Matthew J. Clarkson, Mobarakol Islam (UCL WEISS / CUHK)
+- **Venue, year**: arXiv:2405.13949v1, 22 May 2024
+- **file**: `pdfs/v54_he_2024_pitvqa.pdf`
+- **Problem it attacks**: Surgical VQA datasets are scarce, and image–text contextual fusion is unsolved. Contributes the **PitVQA** dataset and **PitVQA-Net** (image-grounded text embedding + GPT-2 backbone + Excitation Block classification head).
+- **Backbone + adaptation**: 🔴 **TOPIC DISCREPANCY — this is closed-set classification, not free-text generation.** The paper states it uses "naive classification heads to convert the language generation model into VQA classification"; **59 classes** on PitVQA, 18 on EndoVis18-VQA, final softmax over an EB classification head.
+- **Data**: PitVQA (endonasal pituitary surgery) and EndoVis18-VQA.
+- **Eval**: FScore, **balanced accuracy**, accuracy, recall. Balanced accuracy is defined conceptually only — "a prevalence-independent measure that computes the prediction accuracy by equally weighting the contribution of each class" — no formula given.
+- **Reported effect** (Tab. 2): PitVQA-Net 0.5952 F / **0.5882 B.Acc** / 0.7601 Acc vs SurgicalGPT 0.5261 / 0.5090 / 0.7232 and VisualBert 0.4286 / 0.4358 / 0.6338. Ablations (§3.5) swap the vision-language embedding (CLIP-GPT, CLIP-BioGPT, BLIP-BERT) and remove pretraining and the Excitation Block; the full configuration wins.
+- **The key trick**: image-grounded text embedding fused before a GPT-2 backbone, with an excitation-block head that handles class imbalance.
+- **Transfer to us**: **Low, and the discrepancy *is* the finding.** This paper was catalogued to answer "how do you compute balanced metrics over **free text**" — **it does not answer that question**, because its answers are classes, not text. Consequences: (a) its B.Acc 0.5882 is **not comparable** to our exact-match generative headline, and any comparison drawn against it is invalid (the pre-existing note in `Bloque-A-Modelo.md:429` had this right and needs no correction); (b) it produces a clean, argued **NO-GO**: a classification head would eliminate our `fo_class` format-token failure mode entirely, but `open-class-vocabulary` establishes that our class set is **OPEN** ("such as … and similar objects", with `mesh` and `foreign object` carrying zero examples), so a closed head is structurally incompatible — this moves from "untried idea" to "discarded with a reason". Our own balanced-metric question was settled in code instead (`frame.metrics.class_f1_report`, commit `0674f02`).
+- **Weights/license**: dataset and code at the authors' UCL repos — verify terms.
+- **Verdict**: **REFUTES-US** as a design (closed-set head vs our open class set) / **CONTEXT**. The successor **v19 (PitVQA++/Vector-MoLoRA)** remains the more useful entry of the two.
+
+---
+
 ## What to steal — ranked
 
 Ranked by (expected movement on `bucket_mean`) × (probability it survives our setting) ÷ (cost).
@@ -702,7 +916,7 @@ in the existing generation driver; regeneration of the rejected fraction.**
 Train on the full scaffold; at inference, prefill `<answer>` (or constrain generation to the answer
 span) and measure both modes. Three papers agree CoT degrades *perception* tasks specifically —
 grounding and object counting — and v08 shows counting accuracy peaks around ~40% with thinking
-tokens and then **declines with overthinking**. Since we now have ~25× latency headroom the cost of
+tokens and then **declines with overthinking**. Since we now have ~14× latency headroom the cost of
 testing both is negligible, and the dose-curve says scaffold *length* should be a swept axis, not a
 binary. **Not killed** — this is decoding-mode selection, not majority voting. Cost: **two eval
 passes per checkpoint.**
@@ -799,7 +1013,7 @@ inference-time computation the trace provides. v06/v07/v08/v40 argue that genera
 answer quality depends heavily on how the trace was *weighted in training*, implying the emit/suppress
 question may be downstream of a loss-design question and not independent of it. **This cell is
 genuinely empty, and it is the highest-value thing we can contribute.** Because our latency turned
-out to be pooled (p99 0.196 s against 120 s + B×5 s), we can run both inference modes on the same
+out to be pooled (p99 0.352 s against 120 s + B×5 s), we can run both inference modes on the same
 checkpoint at negligible cost — which makes us unusually well-placed to fill it. Do so as a
 pre-registered two-arm eval, and sweep scaffold *length* as a third axis, because v08's dose curve
 says the answer is probably not binary.
