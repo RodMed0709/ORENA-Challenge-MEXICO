@@ -3,14 +3,16 @@ question: Does Chain-of-Visual-Thought (CoVT) transfer to FRAME, and if not, wha
 verdict: CoVT AS PUBLISHED = NO-GO (774.6k-row corpus, 17K steps, outside any recipe framework). But its gains land in `object_recognition`, which is 50% of the leaderboard headline — so the perceptual branch is REOPENED via a bespoke SAM 2 route.
 status: SETTLED (paper read end-to-end incl. supplementary) · route OPEN
 date: 2026-07-26
-measured_in: local/fuentes/papers/2511.19418v2-1.pdf · local/fuentes/analisis-articulos-legokna.md
+measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought.pdf (ficha §v46) · local/fuentes/analisis-articulos-legokna.md
 ---
 # Decision: CoVT as published is NO-GO — but it re-aims the perceptual branch
 
 - **Status:** SETTLED for the method · **OPEN** for the route it unlocks · 2026-07-26 · zero GPU
 - **Source:** arXiv 2511.19418v2, read end-to-end including the supplementary (pp. 13–16).
   Human reading pass + notes: `local/fuentes/analisis-articulos-legokna.md` §3.
-- **Not in `literature/`** before this — CoVT is new material for the corpus.
+- 🆕 **Catalogued 2026-07-29** as **`literature/vlm-techniques/` #46** (ficha §v46, PDF at
+  `pdfs/v46_qin_2025_chain-of-visual-thought.pdf`). It was new material for the corpus when this
+  note was written; the ficha now carries the per-expert ablation and the reduced-design reading.
 
 ## What CoVT is
 
