@@ -488,6 +488,64 @@ def assert_all_rows_grouped(results_df: pd.DataFrame) -> None:
         )
 
 
+def assert_class_f1_reported(row, *, results_df: pd.DataFrame | None = None) -> None:
+    """A published result that scored ``fo_class`` MUST carry a class-balanced macro-F1.
+
+    🔴 **Why this is a gate and not advice.** ``fo_class`` accuracy is exact set equality,
+    so it is dominated by the head of a long-tailed class distribution — and the failure it
+    hides is not hypothetical, it is published on our exact backbone: CoA (FICHAS §v01)
+    raises overall F1 on CholecT50 while **crushing class-balanced F1cls 20.7 → 15.3**.
+    That is our own ``clip`` attractor, in print. Our own numbers say the same: rung 18 ep3
+    scores 0.6478 on ``fo_class`` × ID while ``Gallstone`` recalls **0.036**. And rung 21's
+    ``+0.174`` macro-F1 headline turned out to be **82% one `Needle` question** — the metric
+    is only safe when its ``per_class`` table is read beside it.
+
+    ``bucket_mean`` cannot see any of this, so a rung that reports only ``bucket_mean``
+    cannot distinguish "the model got better" from "the model got better at `clip`". Every
+    phase of the CoA/CoT roadmap changes the target, which is exactly the intervention that
+    produces this failure — see ``context/decisions/class-balanced-f1-is-mandatory.md``
+    (RULES §9b).
+
+    ``row`` is the ledger-shaped result mapping (dict or Series). Pass ``results_df`` to
+    scope the requirement to the distributions that actually carry ``fo_class`` rows: a run
+    with no ``fo_class`` questions owes nothing. Compute the values with
+    ``class_f1_report`` — never by hand (RULES §1).
+    """
+    keys = dict(row)
+    have = {
+        k: v for k, v in keys.items()
+        if str(k).startswith("macro_f1") and v is not None and not pd.isna(v)
+    }
+
+    needed: list[str] = []
+    if results_df is not None and len(results_df):
+        if "answer_format" not in results_df.columns:
+            raise KeyError("results_df has no `answer_format` column to scope fo_class rows")
+        fo = results_df[results_df["answer_format"] == "fo_class"]
+        if fo.empty:
+            return  # no fo_class questions scored — nothing is owed
+        for dist in sorted(fo["qID"].map(_dist_from_qid).dropna().unique()):
+            needed.append(f"macro_f1_{dist}")
+    elif have:
+        return
+    else:
+        raise ValueError(
+            "no `macro_f1*` value in this result row. A run that scored `fo_class` must "
+            "publish a class-balanced F1 beside its accuracy — exact-set accuracy hides a "
+            "long-tail collapse (RULES §9b; FICHAS §v01 measures SFT raising F1 while "
+            "crushing F1cls 20.7 -> 15.3 on our exact backbone). Use "
+            "`frame.metrics.class_f1_report`."
+        )
+
+    if missing := [k for k in needed if k not in have]:
+        raise ValueError(
+            f"missing {missing} — this run scored `fo_class` questions in "
+            f"{[k.replace('macro_f1_', '') for k in needed]}, so each needs a "
+            f"class-balanced F1 (RULES §9b). Present: {sorted(have)}. Use "
+            "`frame.metrics.class_f1_report`; do not hand-roll it (RULES §1)."
+        )
+
+
 def assert_bucket_counts(
     results_df: pd.DataFrame, expected: dict[tuple[str, str], int]
 ) -> None:

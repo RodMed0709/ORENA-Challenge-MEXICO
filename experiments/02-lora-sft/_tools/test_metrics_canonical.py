@@ -455,6 +455,63 @@ def part_a_flip_report():
     print("  [A]  flip_report: same delta / different composition, NaN ratio, strata, refusals  PASS")
 
 
+def part_a_class_f1_gate():
+    """A run that scored `fo_class` cannot publish without a class-balanced F1."""
+    g = m.assert_class_f1_reported
+
+    rdf = pd.DataFrame({
+        "qID": ["lapchole__1", "lapchole__2", "heico__1", "heico__2"],
+        "answer_format": ["fo_class", "number", "fo_class", "binary"],
+    })
+
+    # Scoped to the distributions that actually carry fo_class rows: both here.
+    g({"bucket_mean": 0.63, "macro_f1_ID": 0.51, "macro_f1_OOD": 0.44}, results_df=rdf)
+
+    # Half-reported is a failure — the OOD collapse is the one bucket_mean hides worst.
+    for row in ({"macro_f1_ID": 0.51}, {"macro_f1_OOD": 0.44}, {"bucket_mean": 0.63}):
+        try:
+            g(row, results_df=rdf)
+        except ValueError as exc:
+            assert "macro_f1" in str(exc), exc
+        else:
+            raise AssertionError(f"{row} must raise — fo_class was scored in ID and OOD")
+
+    # NaN is not a value. A column present but empty is the exact way this would rot.
+    try:
+        g({"macro_f1_ID": 0.51, "macro_f1_OOD": float("nan")}, results_df=rdf)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("a NaN macro_f1 must not satisfy the gate")
+
+    # A run with no fo_class questions owes nothing.
+    g({"bucket_mean": 0.63},
+      results_df=rdf[rdf.answer_format != "fo_class"])
+
+    # ID-only run: only the ID value is owed.
+    g({"macro_f1_ID": 0.51}, results_df=rdf[rdf.qID.str.startswith("lapchole")])
+
+    # Without a results_df the gate cannot scope, so it only insists that SOMETHING is there.
+    g({"macro_f1_pooled": 0.48})
+    try:
+        g({"bucket_mean": 0.63})
+    except ValueError as exc:
+        assert "class-balanced" in str(exc), exc
+    else:
+        raise AssertionError("an unscoped row with no macro_f1 at all must raise")
+
+    # A results_df without answer_format cannot be scoped: that is a bug, not a pass.
+    try:
+        g({"macro_f1_ID": 0.5}, results_df=rdf.drop(columns=["answer_format"]))
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("results_df lacking answer_format must raise")
+
+    print("  [A]  assert_class_f1_reported: scoped per distribution, NaN rejected, "
+          "no-fo_class exempt  PASS")
+
+
 def main() -> int:
     print("PART A - OFFLINE (synthetic + committed CSVs):")
     part_a_synthetic_bucket_mean()
@@ -464,6 +521,7 @@ def main() -> int:
     part_a_template_floor_margin()
     part_a_equivalence_tost()
     part_a_flip_report()
+    part_a_class_f1_gate()
     part_a_rung05_self_consistency()
     print("PART B - POD-GATED (rung-02 saved predictions):")
     part_b_rung02_repro()
