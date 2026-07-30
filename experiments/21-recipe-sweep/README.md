@@ -12,9 +12,9 @@
 | 14 appearance-aug | colour/WB augmentation during LoRA | NULL |
 | 15 count-target | structured `number` target | NULL under the ID-AND-OOD conjunction |
 | 16 count-probes | *nothing trained* — four probes that licensed rung 18 | — |
-| **18 count-aug** ⬅ **the control** | minted zeros + question-surface variation | **0.5721** (ep3) |
-| **21 (this)** | **the RECIPE — `lr`, then `rank`. Zero data change.** | *pending* |
-| 22 loss-mass | per-sample loss normalisation (was 21; swapped) | *planned* |
+| 18 count-aug ⬅ **the control** | minted zeros + question-surface variation | 0.5721 (ep3) |
+| **21 (this)** | **the RECIPE — five arms, one flag each. Zero data change.** | **0.6496** (A2 ep3) |
+| 22 loss-mass | per-sample loss normalisation (was 21; swapped) | *planned, rebases on A2* |
 
 Rung **17** is Leo's (`17-generator-probe`), and rungs 19/20 are other fronts. This rung
 **swapped places with the loss-mass rung** on 2026-07-28 — the reason is in `PLAN.md`
@@ -22,54 +22,159 @@ Rung **17** is Leo's (`17-generator-probe`), and rungs 19/20 are other fronts. T
 
 ## What this rung is
 
-**One flag moves. No data changes at all.** The dataset is rung 18's own `train.jsonl`, used
-in place with its sha256 asserted, so the control is rung 18's already-scored per-epoch series
-and the only difference between the two runs is a single line of the `swift sft` command.
+**One flag moves per arm. No data changes at all, in any arm.** The dataset is rung 18's own
+`train.jsonl`, used in place with its sha256 asserted, so the comparison is always a single
+line of the `swift sft` command against a named, already-scored baseline.
 
-| arm | flag | control → arm | why that value |
+## 🟢 Result — the axis moves, and it is one variable
+
+**`lr` is the whole story. Everything else on the recipe axis is null or worse.**
+
+Five arms ran; all five scored all three epochs on the full 6,252. Every arm is read
+**epoch-matched** against its own declared baseline (RULES §6b) on the **leaderboard proxy**,
+`mean(aggregation_ID, object_recognition_ID)` (RULES §4b).
+
+| arm | the one flag | baseline | Δ proxy @ep3 | paired cells | verdict |
+|---|---|---|---|---|---|
+| `A_lr` | `--learning_rate 2e-5 → 1e-4` | rung 18 | **+0.0480** | **21/30**, all pro-arm | 🟢 **WIN** — [[undertrained-was-real]] |
+| `A2_lr` | `--learning_rate 1e-4 → 2e-4` | `A_lr` | **+0.0203** | 3/30, all pro-arm | 🟢 **WIN, smaller** — best checkpoint |
+| `B_rank` | `--lora_rank 8→32`, `--lora_alpha 32→128` | `A_lr` | +0.0193 | **0/30** | ⚠️ NULL by the CI, see below |
+| `D_clip` | `--max_grad_norm 1.0 → 10.0` | `A2_lr` | −0.0051 | 3/30 — **all at ep1/ep2** | 🔴 NULL at ep3 |
+| `A3_vitlr` | `--vit_lr 2e-4 → 2e-5` (+ `--optimizer multimodal`) | `A2_lr` | **−0.0278** | **4/30, all pro-CONTROL** | 🔴 **LOSES, significantly** |
+
+**Best checkpoint of the campaign: `21_lr_2e4_v1/checkpoint-2703`** (arm A2, epoch 3) —
+proxy **0.6104**, `bucket_mean` **0.6496**, `margin_OOD` **0.2343**. Against rung 06 ep3's
+0.5724, which had stood since 13 July.
+
+### ⚠️ Rank is not "dead" — it is unresolved, and it is honest to say so
+
+Arm B's point estimate at epoch 3 is **+0.0193** over arm A, which is the same size as arm A2's
+**+0.0203**. What separates them is only the interval: A2's `ALL` cell is
+**[0.0037, 0.0391]** and B's is **[−0.0000, 0.0394]** — B misses excluding zero by its fourth
+decimal. Their epoch-3 headlines are a coin-flip apart (`bucket_mean` 0.6478 vs 0.6496,
+proxy 0.6095 vs 0.6104), and **B and A2 were never compared against each other** — both were
+run against A, in parallel, so there is no paired test between them.
+
+The defensible reading: **two different flags each buy about +0.02 over arm A, and we cannot
+order them.** A2 is preferred because it is significant, cheaper (r=8 keeps trainable
+parameters 4× lower), and is the arm the later arms were built on. Rank stays **open**, not
+refuted — Biderman's "learns more, forgets more" is consistent with a real-but-noisy gain.
+
+### The arms in full, epoch by epoch
+
+Leaderboard proxy, per epoch. Rung 18's own proxy is recovered from arm A's committed deltas.
+
+| arm | ep1 | ep2 | ep3 |
 |---|---|---|---|
-| `A_lr` | `--learning_rate` | 2e-5 → **1e-4** | the Qwen3-VL community default, and the bottom of the 1e-4–3e-4 band every 3-to-6-epoch result in the published grid uses |
-| `B_rank` | `--lora_rank` + `--lora_alpha` | 8/32 → **32/128** | IOVQA (our data scale) measures rank 32→128 = **+0.028** against model 7B→72B = **−0.020**. α moves with r so that **α/r stays 4** and rank is the only thing that changes |
+| rung 18 (origin) | 0.4877 | 0.5073 | 0.5421 |
+| `A_lr` (1e-4) | 0.5028 | 0.5679 | 0.5901 |
+| `A2_lr` (2e-4) | 0.4986 | 0.5751 | **0.6104** |
+| `B_rank` (r32 @1e-4) | 0.4866 | 0.5766 | 0.6095 |
+| `D_clip` (clip 10) | 0.5231 | 0.5746 | 0.6053 |
+| `A3_vitlr` | 0.5063 | 0.5599 | 0.5825 |
 
-**Arm B is not launched until arm A is read.**
+**The score has not stopped rising at epoch 3 in any arm.** The cosine anneals to lr 0.0 by
+the last planned step, so this is the schedule running out, not the optimiser converging — see
+[[undertrained-was-real]] for why a "resume from epoch 3" learns nothing.
+
+### `D_clip` — a real early effect that does not survive to epoch 3
+
+Raising `--max_grad_norm` from 1.0 to 10.0 (i.e. **removing** the clip on all but the largest
+steps) is the only arm with a significant **epoch-1** effect: `ALL` **+0.0232** [0.0046, 0.0416]
+and `ID` +0.0249, plus `fo_class` OOD **+0.0474** at epoch 2. By epoch 3 it is gone —
+`ALL` −0.0045 [−0.0217, 0.0126].
+
+The reading is that the clip binds early, when gradient norms are largest, and lifting it lets
+the same trajectory arrive sooner. It does not change where the trajectory ends. **Not a win,
+but the one arm whose null is "converged to the same place", not "did nothing".**
+
+## 🔴 What the tail metric says, and it disagrees with the headline
+
+Class-balanced macro-F1 on `fo_class` (landed for this rung, `frame.metrics.class_f1_report`)
+at epoch 3, **ID cell**, each arm against the arm before it:
+
+| arm | macro-F1 ID | vs previous |
+|---|---|---|
+| rung 18 | 0.5166 | — |
+| `A_lr` | **0.6906** | +0.174 |
+| `A2_lr` | 0.5474 | **−0.143** |
+| `B_rank` | 0.5928 | −0.098 |
+| `D_clip` | 0.5427 | −0.005 |
+| `A3_vitlr` | 0.6330 | +0.086 |
+
+**A2 buys its +0.0203 of proxy while giving back most of A's macro-F1 gain on ID.** Exact-match
+on the same rows still rises (0.6880 → 0.7228), so the arm is getting more answers right and
+distributing them across fewer classes — the `Clip` attractor, visible in a metric the headline
+cannot see. This is the cost side of 2e-4 and it is on the record, not hidden.
+
+⚠️ `A3_vitlr` is also the **only** arm in the whole rung to emit an **illegal `fo_class` token**
+(1 of 1,755 OOD) — a token `verify()` RAISES on rather than scoring 0 (RULES §8b).
+
+## 🔴 The ViT learning rate: measured, and it is the wrong direction
+
+The pre-registered risk (below) was that lr 2e-4 reaching the vision tower at full strength
+might be a *collapse*, and that the Qwen3-VL default of a **5–10× lower `vit_lr`** would fix it.
+It was run as arm A3 and it **loses on every headline**: proxy −0.0278, `margin_OOD` −0.0353,
+Spearman r on `Clips` −0.064, and its `eval_loss` is worse than A2's at every epoch
+(0.2779/0.1754 vs 0.2241/0.1313).
+
+**And it is the only arm in the rung that loses *significantly*.** Four of thirty paired cells
+exclude zero at epoch 3 and **all four favour the control**:
+
+| cell | Δ (A3 − A2) | 95% CI |
+|---|---|---|
+| ALL | **−0.0293** | [−0.0479, −0.0096] |
+| ID | −0.0271 | [−0.0524, −0.0016] |
+| OOD | −0.0352 | [−0.0525, −0.0175] |
+| `fo_class` OOD | **−0.0487** | [−0.0736, −0.0241] |
+
+⇒ **the vision tower wants the high learning rate.** Discounting it is not a safety measure on
+our data; it is a cost, concentrated in `fo_class` OOD — the cell where the tower does its work.
+This is the missing measurement [[vit-lora-partial]] left open ("the ceiling question stays
+OPEN until a lower `vit_lr` runs"), answered in the direction nobody expected.
+
+⚠️ Found *before* the arm ran and worth keeping: **`--vit_lr` is a silent no-op unless
+`--optimizer multimodal` is also passed.** Every earlier discussion of "our ViT trains at the
+LLM's LR" was correct by accident — the flag would not have changed anything on its own.
 
 ## Why the recipe, after nineteen data rungs
 
 [[undertrained-on-both-axes]]: every strong surgical-VQA result pairs lr 1e-5–2e-5 with
-**15–20 epochs**, or **3–6 epochs** with lr 1e-4–3e-4. We run **lr 2e-5 for 3 epochs** — the
+**15–20 epochs**, or **3–6 epochs** with lr 1e-4–3e-4. We ran **lr 2e-5 for 3 epochs** — the
 only configuration in the published grid that takes *both* discounts, at roughly **1/5 to
-1/10** of anyone's total optimisation distance. Rank 8 has never been swept.
+1/10** of anyone's total optimisation distance. Rank 8 had never been swept.
 
 The recipe was inherited from rung 02 and treated as settled background for nineteen rungs.
-A control that is never challenged stops being a control and becomes an assumption.
+**A control that is never challenged stops being a control and becomes an assumption.**
 
-## 🔴 The risk, named before the run
+## The risks, named before the runs
 
-Our LoRA reaches the **ViT at the LLM's own learning rate** (rung 06's design), while the
-Qwen3-VL default puts the tower **5–10× lower**. At lr 1e-4 the tower gets 1e-4 too, so a
-collapse in arm A may be the *vision tower* rather than the recipe — and arm A cannot tell
-them apart. Accepted rather than fixed, because `--vit_lr` would be a second flag. The
-diagnostic is **pre-registered**: arm **A2** = lr 1e-4 with `vit_lr` held at 2e-5.
-
-⚠️ Counter-citation on file for arm B: Biderman (TMLR, arXiv:2405.09673) measures that higher
-rank **learns more and forgets more**, and our failure mode is prior collapse, not a capacity
-ceiling. Both citations get read together.
+- **The ViT rides the LLM's LR** (rung 06's design) while Qwen3-VL's default puts the tower
+  5–10× lower. Pre-registered diagnostic: arm A3. 🟢 **Run. The tower is fine at 2e-4;
+  lowering it costs score.**
+- **Biderman (TMLR, arXiv:2405.09673):** higher rank *learns more and forgets more*, and our
+  failure mode is prior collapse, not a capacity ceiling. 🟢 **Consistent with arm B's null:**
+  4× the trainable parameters bought **0 of 30** significant cells.
 
 ## Files
 
 | file | what it is |
 |---|---|
-| `PLAN.md` | the design, the gates, the pre-registration |
+| `PLAN.md` | the design, the gates, the pre-registration (written before any arm ran) |
 | `21_recipe_sweep.ipynb` | build → smoke → full. Generates checkpoints; scores nothing |
-| `21b_epoch_eval.ipynb` | scores ONE epoch against rung 18's SAME epoch (`-p EPOCH n -p ARM x`) |
+| `21b_epoch_eval.ipynb` | scores ONE epoch against the arm's baseline SAME epoch (`-p EPOCH n -p ARM x`) |
 | `_models/recipe_sweep_train.py` | the engine — imports rung 06's recipe, never copies it |
-| `RESULTS.csv` | one row per arm × epoch (written by `21b`) |
+| `RESULTS_<arm>.csv` | one row per epoch, per arm (written by `21b`; per-arm to avoid a shared-volume race) |
+| `RESULTS_paired_ci_*.csv` | 30 paired video-clustered cells per arm — the only variance instrument |
+| `RESULTS_class_f1_<arm>_ep<n>.csv` | the tail metric |
+| `RESULTS_rank_<arm>_ep<n>.csv` | Spearman r on the `Clips` template |
+| `RESULTS_vram_<arm>.json` | measured peak VRAM per arm |
 
 ## How it is read
 
 The headline is the **leaderboard proxy** — `mean(aggregation_ID, object_recognition_ID)` —
 not `bucket_mean`; they are different quantities (RULES §4b). `bucket_mean`, `margin_OOD`,
-Spearman r on `Clips` and 🆕 **class-balanced F1 on `fo_class`** are reported beside it.
+Spearman r on `Clips` and **class-balanced F1 on `fo_class`** are reported beside it.
 
 **Pre-registered:** a win requires the proxy to **rise** AND `margin_OOD` **not to fall**,
 epoch-matched. ⚠️ No seed-variance estimate exists in this project — quote the paired
