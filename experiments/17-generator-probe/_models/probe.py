@@ -42,9 +42,18 @@ class ProbeConfig:
     max_new_tokens: int = 32                   # a direct answer, not a scaffold
     max_pixels: int = 1280 * 720               # == BaselineConfig: probe pixels == serve pixels
 
-    data_root: Path = Path("/workspace/repo/external_data/orena-data")
+    # 🔴 The pod keeps the corpus at /workspace/orena-data, NOT inside a checkout. This field
+    # used to read `/workspace/repo/external_data/orena-data` — the repo's LOCAL convention
+    # (`external_data/` is gitignored, so every checkout populates it by hand and the pod's
+    # never was). Three of the four paths here were pod-correct and this one was not, which is
+    # the signature of a config written for a rung that has never run. Same layout either way:
+    # <dataset>/data/frame/{train,test}.parquet.
+    data_root: Path = Path("/workspace/orena-data")
     frames_cache: Path = Path("/workspace/frames_cache")
-    exp_dir: Path = Path("/workspace/repo/experiments/17-generator-probe")
+    # Self-locating rather than hard-coded: the checkout that OWNS this file is the one whose
+    # runs/ the results belong in. A literal `/workspace/repo/...` writes another person's
+    # checkout when the pod carries more than one — which it does.
+    exp_dir: Path = field(default_factory=lambda: Path(__file__).resolve().parents[1])
     run_name: str = "17_generator_probe_v1"
     datasets: tuple[str, ...] = ("heico", "lapchole")
     base_fps: dict = field(default_factory=lambda: {"heico": 25, "lapchole": 30})
