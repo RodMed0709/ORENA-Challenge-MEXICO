@@ -227,8 +227,16 @@ def diff_vs_control(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict[str, tupl
     # The baseline's argv carries THIS run's checkpointing setting on purpose: the flag is
     # allowed to move only because it has been measured not to change the result, so showing it
     # as a difference would be noise in the one place that must stay signal.
-    a = _as_map(swift_args_21(control_cfg(cfg, arm)))
-    b = _as_map(swift_args_21(cfg))
+    #
+    # 🔴 Both sides are built with `smoke=False` even during a SMOKE pass. The single-variable
+    # claim is about the recipe of the FULL run, and smoke plumbing overrides parts of it:
+    # `_swift_args` emits `--num_train_epochs 1` in smoke regardless of the config, so an arm
+    # whose variable IS the epoch count would show an empty diff and the gate would report that
+    # the arm never changed anything. That fired on arm C_epochs' first smoke. Comparing the
+    # real recipe keeps the gate meaningful in both modes.
+    real = replace(cfg, smoke=False)
+    a = _as_map(swift_args_21(control_cfg(real, arm)))
+    b = _as_map(swift_args_21(real))
     return {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
 
 
