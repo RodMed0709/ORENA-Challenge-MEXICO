@@ -105,6 +105,18 @@ class RecipeSweepConfig(ViTLoRAConfig):
     # proportionally least. That is the same shape as the loss-mass finding, one level down.
     max_grad_norm: float = 1.0
 
+    # 🔴 THE VARIABLE of arm A3, and the reason it was never touched: rung 06 put LoRA on the
+    # vision tower and never gave it its own LR, so `swift/optimizers/multimodal.py:56` falls
+    # back to `args.learning_rate` and the tower has ridden the LLM's rate for the whole
+    # campaign. At lr 2e-4 that runs the tower at 5-10x the Qwen3-VL default.
+    # ⚠️ `--vit_lr` ALONE IS A SILENT NO-OP. `swift/arguments/sft_args.py:213-217` only
+    # auto-selects an optimizer for `lorap_lr_ratio` or `use_galore`, so without
+    # `--optimizer multimodal` the MultimodalOptimizerCallback never runs and the flag is
+    # ignored with no error. Both flags are emitted together, and the BASELINE carries them too
+    # (with vit_lr == learning_rate, which is what the fallback already computes), so the diff
+    # is exactly one value rather than the optimizer machinery appearing as a change.
+    vit_lr: float | None = None          # None = same as learning_rate (the campaign's default)
+
     # The control's data, used as-is. NOT re-exported — see the module docstring.
     control_train_jsonl: Path = _CONTROL_RUN / "train.jsonl"
     control_sha256: str | None = None   # None = record it; a string = assert it
@@ -140,6 +152,10 @@ BASELINES: dict[str, dict] = {
     # change would be two flags and neither could be attributed.
     "D_clip":   {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3,
                  "max_grad_norm": 1.0},
+    # off ARM A2. The baseline pins vit_lr TO the LLM's rate rather than to None, so the
+    # optimizer machinery is present on both sides and only the value differs.
+    "A3_vitlr": {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3,
+                 "max_grad_norm": 1.0, "vit_lr": 2e-4},
 }
 
 # Where each baseline's own weights live, so a gate can read what it ACTUALLY trained with
@@ -151,6 +167,7 @@ BASELINE_RUN: dict[str, Path | None] = {
     "B_rank": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
     "C_epochs": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
     "D_clip": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
+    "A3_vitlr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
 }
 
 
@@ -220,6 +237,8 @@ def swift_args_21(cfg: RecipeSweepConfig) -> list[str]:
     # 1.0. Stating it explicitly is behaviour-preserving at 1.0 and it is what lets the diff show
     # the flag when an arm moves it.
     args += ["--max_grad_norm", str(cfg.max_grad_norm)]
+    if cfg.vit_lr is not None:
+        args += ["--optimizer", "multimodal", "--vit_lr", str(cfg.vit_lr)]
     return args
 
 
@@ -270,6 +289,7 @@ ARMS: dict[str, set[str]] = {
     # with no control, and are read as a curve, not as a delta.
     "C_epochs": {"--num_train_epochs"},             # vs arm A2
     "D_clip": {"--max_grad_norm"},                  # vs arm A2
+    "A3_vitlr": {"--vit_lr"},                       # vs arm A2
 }
 
 
