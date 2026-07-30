@@ -103,6 +103,20 @@
 9. **Every result → the ledger.** Regenerate root `RESULTS.md` via `frame.ledger`; every
    number must be reproducible from a commit.
 
+9b. 🔴 **A run that scored `fo_class` may NOT publish without a class-balanced macro-F1.**
+   `fo_class` accuracy is exact SET equality, so it is dominated by the head of a long-tailed
+   class distribution and **cannot see a tail collapse**. Measured three ways: on our exact
+   backbone SFT lifts F1 58.7 → 62.4 while crushing **F1cls 20.7 → 15.3**
+   (`literature/vlm-techniques/FICHAS.md` §v01); our own rung 18 ep3 scores **0.6478** while
+   `Gallstone` recalls **0.036**; and the failure inside `object_recognition` is per-CLASS, not
+   per-count ([[class-imbalance-not-counting]]). Compute it with `frame.metrics.class_f1_report`
+   — never by hand (§1) — and gate the publication with
+   `frame.metrics.assert_class_f1_reported`, which RAISES on a missing or NaN value. Binding for
+   every rung, and *especially* for anything that changes the training target, which is the
+   intervention that produces the collapse. ⚠️ **Read the `per_class` table beside the scalar:**
+   rung 21's `+0.174` macro-F1 was **82% one `Needle` question** flipping.
+   See [[class-balanced-f1-is-mandatory]].
+
 ## READING results (from the data card, rung 08 — read `experiments/08-data-card/`)
 A raw accuracy is meaningless without its trivial floor. Read numbers this way:
 
