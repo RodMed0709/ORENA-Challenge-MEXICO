@@ -18,9 +18,10 @@ an instrument we knew was not the organizers'.
 ## What was run
 
 Rung 06 ep3's **committed predictions**, re-scored under **both judges in one process on one
-GPU**. That last detail is the design: the repo already records that ~0.5 % of stored answers
-change on a GPU swap ([[archived-results-not-bit-reproducible]] — user memory), so comparing
-against the archived `results.csv` would have mixed judge disagreement with machine drift. Both
+GPU**. That last detail is the design: roughly 0.5 % of stored answers change on a GPU swap — a fact
+that currently lives **only in the maintainer's private notes and nowhere in this repo**, so
+treat it as unverified here — and comparing against the archived `results.csv` would have mixed
+judge disagreement with machine drift. Both
 arms therefore re-run; the substitute arm is a CONTROL that must reproduce 0.5724246 exactly,
 and it does.
 
