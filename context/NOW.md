@@ -62,6 +62,33 @@ turned up four things the records did not have.
    **Status: built, not launched** (`3c1fcdc`, `18233d9`) — the notebook and G-COV runtime are owed,
    and the idle pod was stopped to stop paying for it.
 
+6. 🆕 **Rung 25 is built and pre-registered — `25-individuation-probe`, and it re-frames the
+   external datasets rather than re-opening rung 19.** Rung 19 closed *"can external counting data
+   be **training supervision** for `number`?"* — no, no public instance-annotated corpus reaches our
+   **5–12** range. That verdict stands. This rung asks a different question of the same files:
+   **not labels for the answer, labels for the intermediate representation.**
+   🔑 **We have never been able to measure whether the model HAS the objects**, because our gold is
+   a bare integer — *"saw 3, said 2"* and *"saw 2, said 2"* are the same observation to us.
+   CholecInstanceSeg's instance masks are the localization gold we lack, so the probe asks the model
+   to **point**, checks each point against the masks, and reads **coverage against verbalized count
+   accuracy on the same frames**. The discriminating cell — high coverage, low count accuracy — is
+   [[counting-is-a-mapping-failure]] measured on **our** checkpoint instead of borrowed from
+   Alghisi (whose Qwen2.5-VL-7B answers 32% while individuating **95%**).
+   🔴 **Registered kill-only, and the ceiling is declared:** CholecInstanceSeg tops out at **3**, so
+   a failure at 1–3 kills the trained-pointing lever for ~2 GPU-h, and a success says **nothing**
+   about 5–12. Neither outcome may be written as "pointing works".
+   🔴 **G-NO-OVERLAP is blocking:** our `lapchole` split is Laparoscopic Cholecystectomy and
+   CholecInstanceSeg is Cholec80-lineage lap-chole. The organizers' video IDs are **anonymised**, so
+   a name match cannot settle it — the gate compares *content* (dHash, ≤6 bits, declared before it
+   runs). A val-side near-duplicate **aborts the rung**; train-side hits are excluded, not kept.
+   **Status: built, not launched** — and deliberately behind rung 24, because measuring on a
+   checkpoint we are about to replace is rung 18's mistake again.
+   🟢 **One thing IS runnable today with no GPU:** `19-external-count/_tools/medmultipoints_probe.py`.
+   MedMultiPoints is the only swept candidate never measured, the only one with a native integer
+   count, and the only one with a published counting win on our own model family (MAE 9.86 → 0.26).
+   If its counts reach 5–12 it is the first public dataset that does and rung 19's headline needs an
+   amendment; if not, that finding is confirmed by a fourth corpus and closes on merit.
+
 ⚠️ **The shared volume has a cost, and it is now MEASURED both ways.** The two live arms slowed
 **10.9 → ~24 s/it** across this session, monotonically, tracking heavy read traffic from the third
 pod (a `find` over 253 GB, the ledger rebuild, ms-swift imports over a network FS) — and recovered
