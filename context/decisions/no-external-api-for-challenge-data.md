@@ -1,3 +1,11 @@
+---
+question: Can we send challenge frames or annotations to an external LLM/VLM API if we use it "only to generate data, not to train"?
+verdict: NO. BINDING under the ORENA FOCUS DUA. Every data-touching model must have downloadable weights and run ON-POD — data-gen, scaffold generation, judging, augmentation and analysis alike.
+status: SETTLED
+date: 2026-07-18
+measured_in: the ORENA FOCUS DUA, read directly
+question_derived: false
+---
 # Decision: NO challenge data (frames OR annotations) to any external API — data-touching models run ON-POD only
 
 - **Status:** SETTLED · BINDING · 2026-07-18 · derived from the ORENA FOCUS DUA

@@ -1,17 +1,3 @@
-metric,Qwen3-4B_substitute,Qwen3_5-4B_official,delta,n,note
-bucket_mean,0.5724246,0.5710362,-0.0013884,6252,headline; canonical frame.metrics.stratified_report
-acc_ID,0.5595027,0.5617229,0.0022202,2252,flat per-question mean over the ID half
-acc_OOD,0.6045000,0.5995000,-0.0050000,4000,flat per-question mean over the OOD half
-bucket_aggregation_ID,0.4345550,0.4345550,0.0000000,955,no judged rows in this bucket
-bucket_aggregation_OOD,0.5546667,0.5546667,0.0000000,1875,no judged rows in this bucket
-bucket_object_recognition_ID,0.6520062,0.6558642,0.0038580,1296,the bucket that collapsed -0.150 on the platform
-bucket_object_recognition_OOD,0.6484706,0.6390588,-0.0094118,2125,
-agreement_all,0.9921625,,,6252,verdict-by-verdict over every question
-agreement_judged,0.9354414,,,759,open_ended + multiple_choice (no matching rows exist)
-agreement_multiple_choice,1.0000000,,,202,zero disagreements
-agreement_open_ended,0.9120287,,,557,49 disagreements; 40 of them OOD
-acc_judged_substitute,0.6930171,,,759,
-acc_judged_official,0.6732543,,,759,
-disagree_substitute_correct_official_wrong,32,,,759,substitute was the more lenient judge
-disagree_official_correct_substitute_wrong,17,,,759,
-judge_minutes,3.8,3.45,,,arm 1 on transformers 4.57.6; arm 2 on transformers 5.14.1
+run,model,bucket_mean,acc_ID,acc_OOD,floor_ID,floor_OOD,margin_ID,margin_OOD,acc_fo_class,acc_number,acc_binary,acc_open_ended,acc_multiple_choice,n_questions,date,notes
+20_judge_swap_v1__06ep3_judge_Qwen3-4B,"rung 06 ep3 predictions re-scored under the SUBSTITUTE judge Qwen/Qwen3-4B (baseline_run 06_vit_lora_v1, epoch 3)",0.5724246003908642,0.5595026642984015,0.6045,0.3370337477797513,0.45975,0.22246891651865014,0.14475000000000005,0.6351401869158878,0.4245463228271251,0.7790055248618785,0.6499102333931778,0.8118811881188119,6252,2026-07-28,"CONTROL arm. Same predictions as 06-vit-lora ep3, only the judge differs; this row therefore reproduces rung 06 ep3's headline exactly (0.5724246) and is a provenance check on the whole comparison, not a new model."
+20_judge_swap_v1__06ep3_judge_Qwen3.5-4B,"rung 06 ep3 predictions re-scored under the OFFICIAL SDK judge Qwen/Qwen3.5-4B (baseline_run 06_vit_lora_v1, epoch 3)",0.571036165387233,0.5617229129662522,0.5995,0.3370337477797513,0.45975,0.2246891651865009,0.13975000000000004,0.6351401869158878,0.4245463228271251,0.7790055248618785,0.6229802513464991,0.8118811881188119,6252,2026-07-28,"CHALLENGER arm, single variable = the judge model. bucket_mean moves -0.0013884 and object_recognition ID moves UP +0.0039; aggregation is byte-identical because none of its questions are judged. fo_class/number/binary/multiple_choice are IDENTICAL across arms -- ONLY open_ended moves (0.6499 -> 0.6230), 49 of 557 rows, 40 of them OOD. Verdict: the wrong judge was real and cost nothing; see context/decisions/judge-swap-is-not-the-gap.md. Agreement detail in RESULTS_judge_agreement.csv, the 49 disagreeing rows in DISAGREEMENTS.csv."

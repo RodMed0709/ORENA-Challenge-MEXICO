@@ -1,15 +1,2 @@
-bucket,rung00_zeroshot_8B_gen3,rung23a_zeroshot_27B_gen36,delta_generation,rung06ep3_finetuned_8B,delta_finetuning
-bucket_mean,0.2557,0.2913,0.0356,0.5724,0.3167
-acc_ID,,0.2704,,0.5595,
-acc_OOD,,0.3230,,0.6045,
-aggregation_ID,0.1885,0.1937,0.0052,0.4346,0.2461
-aggregation_OOD,0.3003,0.3136,0.0133,0.5547,0.2544
-object_recognition_ID,0.2932,0.3264,0.0332,0.6520,0.3588
-object_recognition_OOD,0.2409,0.3313,0.0904,0.6485,0.4076
-n_questions,6252,6252,,6252,
-latency_mean_s,,0.5853,,0.79,
-latency_p99_s,,0.8512,,,
-latency_max_s,,1.2947,,,
-weights_gb_bf16,17.5,55.6,,17.5,
-weights_gb_fp8,,30.9,,,
-fits_48gb_eval_gpu,yes,fp8_only,,yes,
+run,model,bucket_mean,acc_ID,acc_OOD,floor_ID,floor_OOD,margin_ID,margin_OOD,acc_fo_class,acc_number,acc_binary,acc_open_ended,acc_multiple_choice,n_questions,date,notes
+23a_qwen36_27b_bf16,"Qwen/Qwen3.6-27B bf16, ZERO-SHOT (no fine-tuning), enable_thinking=False",0.29125007100571465,0.27042628774422733,0.323,0.3370337477797513,0.45975,-0.06660746003552398,-0.13674999999999998,0.25345794392523363,0.1384909264565425,0.6657458563535912,0.5673249551166966,0.6683168316831684,6252,2026-07-29,"Zero-shot screen of a newer-generation backbone. baseline_run for the generation delta = 00_zeroshot_qwen3vl (also zero-shot, bucket_mean 0.2557248); the fine-tuned reference is 06_vit_lora_v1 epoch 3 (0.5724246). Generation buys +0.0356, our own fine-tuning buys +0.3167. 🔴 BOTH MARGINS ARE NEGATIVE (-0.0666 ID, -0.1367 OOD): this model scores BELOW the template-aware trivial floor, so per RULES 10 the +0.0356 is movement beneath the floor and not skill. NO-GO on the transformers 5.x migration; 23b never ran. Prompt, message shape, greedy decode, max_new_tokens, max_pixels, judge and eval set all held at rung 06. Ran bf16 because the hub finegrained-fp8 kernels have no sm_120 build; bf16 is the upper bound of the FP8 build's score. Per-bucket generation deltas in RESULTS_generation_deltas.csv; verdict in context/decisions/backbone-generation-is-not-the-lever.md."

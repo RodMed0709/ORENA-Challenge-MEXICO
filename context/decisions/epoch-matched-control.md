@@ -1,3 +1,13 @@
+---
+question: Rung 06 never evaluated its own last epoch — do rungs 14 and 15 actually beat the control?
+verdict: NO. Rung 06 ep3 = 0.5724 and both challengers compared against its ep2. Rung 14 = faithful NULL, rung 15 = ID-driven with margin_OOD below floor. The missing control is merge+eval, ~1 h, zero training.
+status: MEASURED
+date: 2026-07-27
+withdrawn: Its closing line "rung 06 remains the best checkpoint and is what we submit" is SUPERSEDED as of 2026-07-29 — rung 21 arm A (lr 1e-4) ep3 scores 0.6305, +0.058 over rung 06 ep3, with 21 of 30 paired cells excluding zero. The epoch-matching finding itself stands; only the "best checkpoint" claim is dead.
+amended_by: [undertrained-was-real]
+measured_in: pod artifacts for rung 06 ep3 / 14 / 15, read directly rather than from a README
+question_derived: false
+---
 # Epoch-matched control — rung 06 never evaluated its own last epoch
 
 **Question.** The team reported rungs 14 (appearance-aug) and 15 (count-target) as

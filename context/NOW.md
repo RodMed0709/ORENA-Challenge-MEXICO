@@ -91,6 +91,57 @@ same schema, carrying capability leaves that are **zero** in `frame`. ⚠️ The
 aggregates (*"maximum number of Clips at once in a single frame"*), so they are **not** drop-in
 frame-level supervision. A rung of its own, not a quick win.
 
+## 🟢 2026-07-30 — the recipe sweep is CLOSED, and we have a new best checkpoint
+
+⚠️ **Adversarially audited the same day; three headlines were corrected.** The corrections are
+in place below and collected in the decision note's "What the audit changed" table.
+
+**Read [[recipe-axis-is-the-learning-rate]].** Five arms, one flag each, zero data change in
+any of them. **Only the learning rate is real.**
+
+| arm | flag | baseline | Δ proxy @ep3 | paired cells (of 30) |
+|---|---|---|---|---|
+| `A_lr` | lr 2e-5 → **1e-4** | rung 18 | **+0.0480** | **21 sig, all pro-arm** |
+| `A2_lr` | lr 1e-4 → **2e-4** | `A_lr` | **+0.0203** | 3 sig, all pro-arm |
+| `B_rank` | r 8→32, α 32→128 | `A_lr` | +0.0193 | **0 sig** |
+| `D_clip` | `max_grad_norm` 1.0 → 10.0 | `A2_lr` | −0.0051 | 3 sig, **all at ep1/ep2** |
+| `A3_vitlr` | `vit_lr` 2e-4 → 2e-5 | `A2_lr` | **−0.0278** | **4 sig, all pro-CONTROL** |
+
+🟢 **BEST CHECKPOINT OF THE CAMPAIGN — `21_lr_2e4_v1/checkpoint-2703`** (arm A2, epoch 3):
+proxy **0.6104**, `bucket_mean` **0.6496**, `margin_OOD` **0.2343**. Rung 06 ep3's 0.5724 had
+stood since 13 July; nineteen rungs of data work did not move it and one flag did.
+
+🔻 **Lowering the ViT learning rate costs 0.028 — but the ViT reading is DOWNGRADED.** A3 loses
+significantly (4 of 30 cells, all pro-control). ⚠️ **It is a TWO-flag arm**: `--optimizer
+multimodal` is emitted if and only if `vit_lr` is set, and **A2 never passed it**, so the two
+checkpoints differ in two things. The single-variable gate diffs against a *synthetic* baseline
+config and omits `optimizer` from its artifact check. Defensible claim: *lowering `vit_lr`
+under the multimodal optimizer costs 0.028.* **NOT** "the tower wants the high LR", and
+[[vit-lora-partial]] stays **OPEN**. 🔴 **Open action: a 20-step probe of A2's config with and
+without `--optimizer multimodal` at `vit_lr == learning_rate`.**
+
+⚠️ `--vit_lr` is a **silent no-op unless `--optimizer multimodal` is passed** — the trap is real
+and still worth more than the arm it guarded.
+
+🔻 **Rank is OPEN — and by the pre-registration it is a WIN.** `PLAN.md:114-116` says a win =
+proxy rises AND `margin_OOD` does not fall. B at ep3: **+0.0193 / +0.0155** — it passes, at ep2
+and ep3. The CI gate that demoted it was the *noise instrument*, never a decision rule. B and A2
+were **never compared to each other**.
+
+🔻 **And A2's edge is not where the leaderboard looks.** The proxy is ID-only; on the ID cell
+A2 is +0.0221 **[−0.0017, 0.0449]** and B is +0.0212 **[−0.0039, 0.0468]** — *neither excludes
+zero*. A2 ships for being top-scoring and 4× cheaper, not for a significant edge over B.
+
+⚠️ **The cost the headline hides:** A2 appears to give back most of arm A's class-balanced F1 on
+ID (0.6906 → **0.5474**) while exact-match rises — the `Clip` attractor. 🔻 **No paired CI on
+macro-F1 exists**, so this is a point estimate quoted against the rung's own rule.
+
+⚠️ **No multiplicity correction** anywhere: 150 paired cells at 95% ⇒ ~7.5 false positives
+expected. Bears on A2's 3 cells and D_clip's 3, not on arm A's 21 of 30.
+
+**Next:** submit A2 ep3 (9 of 10 slots left), and rebase rung 22 (loss-mass) onto A2 — it was
+designed against a 2e-5 recipe whose gradient behaviour it no longer describes.
+
 ## 🟢 2026-07-29 (pm) — the brain is reconciled, the ledger dedups, and the SAM 2 probe is unblocked
 
 **Zero GPU of our own; the two rung-21 arms kept running untouched.** A housekeeping session that

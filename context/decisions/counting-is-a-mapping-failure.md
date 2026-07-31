@@ -1,7 +1,7 @@
 ---
 question: Can external low-count data fix our counting deficit, and in what form?
 verdict: NOT as `number` targets (refuted on our backbone family) — but YES as POINT supervision, counting the emitted coordinates outside the model
-status: MEASURED (ours) + LITERATURE (external)
+status: MEASURED
 date: 2026-07-28
 measured_in: ep3_full/predictions.json + arXiv:2603.21746, 2605.30170, 2604.10039
 question_derived: true
