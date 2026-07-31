@@ -128,6 +128,37 @@ Its value is insurance against the **hidden** test, not against ours: probe 16a 
 ever asks the corpus's own templates — so a formatting fragility outside them is invisible to
 every number we report, by construction.
 
+## 🟢 The check nobody had ever run: does the shipped code reproduce the scored model?
+
+Every earlier verification tested *wiring* — the container starts, finds frames, writes valid
+JSON. None tested whether the model inside is the model that scored 0.6496.
+
+Method: build a real `/input` in the container's own shape (`request.json` + `batch.json` +
+`FO_definitions.json` + `frames/<qID>.png`) from A2 epoch 3's committed run, run **this exact
+`inference.py`, unmodified**, on the merged weights on a GPU, and diff against `inspect.csv`.
+60 questions, stratified by `answer_format`, sampled at random (`RESULTS_container_vs_eval.csv`).
+
+| | |
+|---|---|
+| answers byte-identical | **56 / 60 (93.3%)** |
+| eval correct | 36 / 60 (60.0%) |
+| **container correct** | **36 / 60 (60.0%)** |
+| **delta** | **+0** |
+
+Of the 4 that differ: 1 favours the eval, 1 favours the container, 1 both wrong, 1 both right
+in different words. **An exact split.**
+
+⚠️ It is not byte-identical and cannot be: the eval decodes frames with decord straight from
+the video, the container reads PNGs — which is what the platform actually hands it. That
+difference predates us; it is already inside submission 01's 0.4767.
+
+⚠️ Two sampling traps this ran into, both worth remembering. **Taking the first N rows of a
+file is not a sample** — the first 50 rows of `inspect.csv` are 0% correct against a corpus
+that is 67% correct, so the run compared the two systems only on the questions the model is
+least sure about, where any input difference flips the answer. It read 82% and looked alarming.
+And the SDK ships FO definitions as **`assets/FO_definitions.txt`**, not `data/*.json`; missing
+them changes the system prompt silently, because the text is pasted into it verbatim.
+
 ## What is NOT verified
 
 - **The GPU path inside the image.** Never exercised live, for submission 01 either. There is
