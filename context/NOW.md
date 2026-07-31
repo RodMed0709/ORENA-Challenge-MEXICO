@@ -2,7 +2,38 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-29**.
+> Last updated: **2026-07-31**.
+
+## 🟢 2026-07-31 — rung 24 (geometric-aug) CLOSED: not a win, but a real shortcut mechanism confirmed
+
+`24_flip_p25_v1` (label-aware horizontal flip, `p=0.25`, vs rung 21 arm A) is **NOT A WIN** on
+the pre-registered headline at any epoch — `margin_OOD` falls every epoch, and the targeted
+871-row check (the actual hypothesis) is non-significant throughout. A separate, unexplained
+`fo_class × ID` class-balanced-F1 regression also surfaced.
+
+🔴 **A real bug was found and fixed**: `transform_qa` couldn't supply the row's real
+`primary_capability` (not carried by the training JSONL), so the `1e`/situs exclusion never
+fired at export time. Quantified: 32/14,415 rows (≈0.22%) plausibly mislabeled — real, but too
+small to explain the headline result. Fixed at the source (text-only detection in
+`flip_audit.py`, conservative `manual_review` routing).
+
+🟢 **The actual finding**: motivated by ["Your other Left!"](https://arxiv.org/abs/2508.00549)
+(MICCAI 2025), built a position-prior probe (`experiments/24-geometric-aug/
+24_position_prior_probe.ipynb`) — does FRAME's model answer position questions from a
+memorised class→quadrant prior instead of reading the frame, the same shortcut that paper found
+in medical VLMs generally? **Yes, significantly, on rung 21 arm A** (atypical accuracy 8.5 pts
+below typical, CI excludes zero) — the first on-model confirmation this failure mode transfers
+here. **And the flip augmentation significantly narrows it**: a paired interaction test (both
+arms score the same 661 questions) gives +0.0608, CI **[+0.0023, +0.1225]**. The augmentation
+measurably does what it was designed to do, even though that didn't convert into a net accuracy
+win at this dose — reducing reliance on a usually-correct prior doesn't have to raise raw
+accuracy to be real progress.
+
+**Verdict: closed, `p=0.50` not pursued as a direct scale-up** (would scale the validated
+benefit and the unexplained regression together with no new information). If revisited, the
+better-motivated next step is a differently-scoped rung (flip only spatial rows, not the whole
+dataset) — a new decision against the campaign's other levers. Full writeup:
+[[flip-narrows-shortcut-not-a-win]].
 
 ## 🔴 2026-07-29 — rung 21 is the RECIPE now, and it is training
 

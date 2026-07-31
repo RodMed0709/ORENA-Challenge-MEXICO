@@ -5,7 +5,7 @@
 | `24_flip_audit.ipynb` | 24a | transformable QA rows | done — 871/6,252 test rows transformable |
 | `24_horizontal_flip.ipynb` | 24b (train) | — | trained (`24_flip_p25_v1`, 3 epochs) |
 | `24b_epoch_eval.ipynb` | 24b (eval) | 0.6333 @ ep3 (armA 0.6305) | **NOT A WIN, any epoch** — `margin_OOD` falls all 3 epochs; targeted 871-row check non-significant every epoch |
-| `24_position_prior_probe.ipynb` | 24 (probe) | atypical−typical acc gap | *(probe)* — mechanistic follow-up, not yet run |
+| `24_position_prior_probe.ipynb` | 24 (probe) | interaction +0.0608 [+0.002,+0.123] | *(probe)* — flip significantly narrows a real, measured shortcut |
 
 ## Objective
 
@@ -73,37 +73,50 @@ A separate, unrelated regression also surfaced: `fo_class × ID` class-balanced 
 substantially at ep1 (−0.093) and ep3 (−0.129) vs arm A, while exact-set accuracy on the same
 cell stays flat — a tail-class collapse hidden by the headline.
 
-## Known defect (found, not yet fixed) — the `1e`/situs exclusion doesn't fire at export time
+## Known defect — FIXED — the `1e`/situs exclusion didn't fire at export time
 
-`transform_qa` (`_models/horizontal_flip.py:82-89`) hardcodes `primary_capability="3a"` when
-calling `flip_audit.classify_row`, so the `capability == "1e"` branch that defines
-`excluded_situs` can never trigger during the actual training export — only in the standalone
-audit (`24_flip_audit.ipynb`), which uses the real capability. Quantified against the real
-`train.jsonl` (question-text join, sha256-verified): of 305 real `1e` rows, **136 are
-"abdominal quadrant location" questions** (plausibly pixel-grounded, i.e. should have been
-transformed like a spatial row) and **30 of those got flipped with their pre-flip quadrant
-label left unchanged**. The other 169 `1e` rows (organ contact/identity/presence) are almost
-certainly genuinely flip-invariant despite going through the same buggy path. Net: **~30/14,415
-rows (≈0.2%) plausibly mislabeled** — real, but too small to be the primary explanation for the
-eval result above. Must be fixed (text-pattern situs detection, not a capability field the
-JSONL doesn't carry) before `p=0.50` scales the same bug proportionally.
+`transform_qa` (`_models/horizontal_flip.py`) hardcoded `primary_capability="3a"` when calling
+`flip_audit.classify_row`, so the `capability == "1e"` branch that defines `excluded_situs`
+could never trigger during the actual training export — only in the standalone audit
+(`24_flip_audit.ipynb`), which uses the real capability. Quantified against the real
+`train.jsonl` (question-text join, sha256-verified): **32 of 14,415 train rows (≈0.22%)**
+plausibly got a flipped image paired with an unchanged, now-likely-wrong "abdominal quadrant"
+location answer — real, but too small to be the primary explanation for the eval result below.
+**Fixed** in `flip_audit.py`: `classify_row` now detects these by TEXT (`\bquadrant\b`), which
+works regardless of what capability value the caller supplies — and as a bonus catches one row
+mistagged `1a` instead of `1e` in the raw parquet that a capability-based check would have
+missed too. Routes conservatively to `manual_review` (raises if ever selected), not a guessed
+transform.
 
-## Position-prior probe (24, mechanistic follow-up)
+## Position-prior probe — the actual finding
 
 Motivated by ["Your other Left!"](https://arxiv.org/abs/2508.00549) (MICCAI 2025): VLMs answer
 medical position questions from a memorised class/anatomy prior rather than reading the image.
-`24_position_prior_probe.ipynb` tests whether FRAME's model does the same — is quadrant accuracy
-worse specifically when an object sits in an ATYPICAL quadrant for its class (e.g. a Needle in
-bottom/right, which happens in only ~6% of train examples) — on both rung 21 arm A and the flip
-arm, at the same epoch. Zero GPU; reads existing `results.csv` only. Not yet run.
+`24_position_prior_probe.ipynb` tests the same on FRAME: is quadrant accuracy worse specifically
+when an object sits in an ATYPICAL quadrant for its class (e.g. a Needle in bottom/right, ~6% of
+train examples)?
 
-## Registered probability sequence
+**Yes, significantly, on rung 21 arm A** (unaffected by any flip augmentation): atypical
+accuracy 8.5 points below typical, CI excludes zero. **FRAME's model has the same shortcut the
+paper describes.** **And the flip augmentation significantly narrows it**: a paired
+interaction test (both arms score the same 661 questions) gives **+0.0608, CI [+0.0023,
++0.1225]**. Full writeup: [[flip-narrows-shortcut-not-a-win]].
 
-`24b` starts with **`p=0.25`** against rung 21 arm A (`lr=1e-4`). `24c` may test
-**`p=0.50`** only after 24b is evaluated; it is a second, separately reported
-single-variable rung, not a hyperparameter sweep folded into one result.
+## Verdict and status: CLOSED
 
-The policy's draw is deterministic from the SHA-256 of rung 21's frozen control
-JSONL plus its line number. This is intentional: that JSONL includes rung 18's
-minted and paraphrased supervision, which must remain in the geometry A/B
-rather than being re-exported from raw Parquets.
+**NOT A WIN** on the pre-registered headline (`margin_OOD` falls every epoch; targeted-subset
+check non-significant every epoch) — **but the augmentation measurably fixes the mechanism it
+was designed to fix**, which the headline accuracy doesn't reward at this dose. See
+[[flip-narrows-shortcut-not-a-win]] for the full picture and why these don't contradict.
+
+**`p=0.50` (24c) is NOT pursued as a direct scale-up.** Blindly doubling `p` would scale the
+validated shortcut-narrowing and the unexplained `fo_class` regression together, with no new
+information about the net trade-off. If this lever is revisited, the better-motivated next step
+is a differently-scoped rung — flip only genuinely spatial-question rows, not the whole
+dataset — a new decision competing with the campaign's other levers, not one this rung's
+evidence forces on its own.
+
+The policy's draw was deterministic from the SHA-256 of rung 21's frozen control JSONL plus its
+line number — intentional, since that JSONL includes rung 18's minted and paraphrased
+supervision, which had to remain in the geometry A/B rather than being re-exported from raw
+Parquets.

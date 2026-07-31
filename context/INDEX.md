@@ -25,6 +25,12 @@
 - **`context/RULES.md`** — the DO/DON'T checklist that stops recurring mistakes (human or Claude). EVAL rules: score only via `frame.metrics`, leaf→group via `Capability.group`, ID/OOD from qID, headline `bucket_mean`, gates RAISE (never disable). Complements `CONSTITUTION.md`.
 
 ## DECISIONS — settled verdicts (do NOT re-litigate)
+- [[flip-narrows-shortcut-not-a-win]] — rung 24 (label-aware horizontal flip, `p=0.25`) is
+  **CLOSED, NOT A WIN** on the pre-registered headline (`margin_OOD` falls every epoch) — but a
+  position-prior probe confirms FRAME's model has a **real, significant class→position
+  shortcut** (matching ["Your other Left!"](https://arxiv.org/abs/2508.00549), MICCAI 2025) and
+  the augmentation **significantly narrows it** (paired interaction CI excludes zero), just not
+  enough to win on raw accuracy at this dose. `p=0.50` NOT pursued as a blind scale-up.
 - [[viT-swap-nogo]] — swapping Qwen3-VL's ViT = **NO-GO** (license + full realignment).
 - [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step). 🔒 Gated by [[vit-lora-partial]].
 - [[unused-metadata]] — 🔴 **90% of questions carry `secondary_capabilities` we never read**: aggregation supervision is **+77% larger** than we thought (9,762 train questions, not 5,524) at zero annotation cost. Also `generation` (automatic/anchor/manual) unused, and **`clinical_relevance` is all-False** — a second landmine beside `ood`.
