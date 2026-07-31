@@ -132,10 +132,40 @@ def score_canonically(cfg: ProbeConfig, results_csv: Path, gold) -> dict:
     Raw accuracy for a zero-shot generator is unreadable — the template-aware floor is 0.34
     ID / 0.46 OOD, so a model can look respectable and be at the trivial constant.
     """
+    import glob  # noqa: PLC0415
+
     import pandas as pd
+    from focus.taxonomy import Capability  # noqa: PLC0415
     from frame import metrics
 
     df = pd.read_csv(results_csv)
+
+    # 🔴 `blind_probe.csv` is rung 09's shape, not the Evaluator's. It carries
+    # qID/answer_format/gold/correct — `correct` is already an accepted alias for
+    # `correctness` (metrics.py:148) — but NOT `video` (the clustered bootstrap keys on it,
+    # RULES §13: effective n is videos) nor `primary` (leaf→group, RULES §1). Without them
+    # stratified_report dies on KeyError, which is what a rung that had never been RUN could
+    # not have known. Both come back from the very parquets the probe sampled, on the same
+    # qID namespacing, so nothing is invented here.
+    meta = []
+    for f in sorted(glob.glob(str(Path(cfg.data_root) / "*" / "data" / "frame" / "train.parquet"))):
+        ds = Path(f).parents[2].name
+        p = pd.read_parquet(f, columns=["id", "video", "primary_capability"])
+        meta.append(p.assign(qID=ds + "__" + p["id"].astype(str)))
+    meta = pd.concat(meta, ignore_index=True)
+    # Store the LEAF VALUE, as data.py:69 does, so this run's leaf rows are named like every
+    # other run's rather than carrying the raw "1a" codes.
+    meta["primary"] = meta["primary_capability"].map(
+        lambda raw: (c.value if (c := Capability.from_any(raw)) is not None else None)
+    )
+
+    df = df.merge(meta[["qID", "video", "primary"]], on="qID", how="left")
+    if (n_bad := int(df["primary"].isna().sum() + df["video"].isna().sum())):
+        raise KeyError(
+            f"{n_bad} of {len(df)} probe rows failed to join their parquet metadata — the "
+            "probe and the gold disagree on qID namespacing, and scoring would silently drop rows."
+        )
+
     metrics.assert_no_dup_qid(df)
     metrics.assert_ood_from_qid(df)
     rep = metrics.stratified_report(df, gold=gold)
