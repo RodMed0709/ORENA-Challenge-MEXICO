@@ -2,7 +2,9 @@
 
 | Notebook | Rung | Metric (`bucket_mean`) | Verdict |
 |---|---:|---:|---|
-| `24_flip_audit.ipynb` | 24a | transformable QA rows | audit pending |
+| `24_flip_audit.ipynb` | 24a | transformable QA rows | done — 871/6,252 test rows transformable |
+| `24_horizontal_flip.ipynb` | 24b (train) | — | trained (`24_flip_p25_v1`), not yet scored |
+| `24b_epoch_eval.ipynb` | 24b (eval) | vs rung 21 arm A, per epoch | built, awaiting a GPU pod to run |
 
 ## Objective
 
@@ -49,6 +51,20 @@ only variable will be a deterministic, label-aware horizontal-flip policy.
 With that policy disabled, the training export must be byte-identical to the
 rung-21 control. This repository currently contains no horizontal-flip or
 other geometric image augmentation result.
+
+## Evaluation (24b)
+
+`24_flip_p25_v1` (`p=0.25`, three epochs) has been trained. `24b_epoch_eval.ipynb` scores each
+epoch's checkpoint canonically against **rung 21 arm A's same epoch** (never rung 18 — this
+experiment's baseline is arm A's recipe and data, per the A/B contract below), following the
+epoch-matched-control standard `21b_epoch_eval.ipynb` set. Beyond the generic leaderboard
+proxy and `margin_OOD`, it adds a **targeted check**: paired accuracy on the 871 test rows the
+24a audit marked `transformable`, split by rule, against arm A on the same qIDs — the
+population this augmentation actually targets, which a flat bucket average can hide inside
+either direction.
+
+Status: notebook built and syntax-checked; not yet run (needs a live GPU pod to merge +
+infer). No `RESULTS_flip_p25.csv` exists yet.
 
 ## Registered probability sequence
 

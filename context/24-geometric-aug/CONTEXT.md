@@ -32,10 +32,17 @@ situs rows remain explicitly excluded.
 
 ## Next
 
-The audit has no `manual_review` rows. Next: specify a flip-export engine with
-a deterministic flip rate, image materialisation, and flag-off byte-identity
-against the rung-21 control.
+The audit has no `manual_review` rows. The flip-export engine
+(`_models/horizontal_flip.py`) landed with a deterministic flip rate, image
+materialisation, and a flag-off byte-identity gate against the rung-21
+control, keyed on the frozen rung-21 control JSONL's SHA-256 and row number
+(preserving rung 18's minted/paraphrased rows exactly).
 
-The implementation registers `p=0.25` first; `p=0.50` is a follow-up rung only.
-It keys each deterministic Bernoulli draw on the frozen rung-21 control JSONL's
-SHA-256 and row number, preserving rung 18's minted/paraphrased rows exactly.
+`24_flip_p25_v1` (`p=0.25`, three epochs) has been trained. `24b_epoch_eval.ipynb`
+is built (not yet run): scores each epoch against **rung 21 arm A's same
+epoch** (this experiment's baseline, not rung 18), plus a targeted paired
+check on the 871 `transformable` test rows against arm A — the direct read on
+whether the flip policy moved the population it targets, separate from the
+generic leaderboard proxy. Needs a live GPU pod to execute (merge + infer);
+`p=0.50` (24c) stays gated on this evaluation per the README's registered
+sequence.
