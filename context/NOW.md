@@ -2,7 +2,72 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-29 (pm)**.
+> Last updated: **2026-07-31**.
+
+## 🔴 2026-07-31 — the teacher cannot see: phase 3 is closed, and the perceptual branch is the only one left
+
+**Three measurements, one direction.** A long session on a shared volume with three checkouts.
+
+1. 🔴 **Rung 17 ran and fired its pre-registered STOP** — [[generator-32b-is-not-a-teacher]].
+   Asked the FRAME questions with no gold, Qwen3-VL-32B scores **0.08** where the trivial constant
+   scores **0.295** (**margin OOD −0.2150**) — **worse than our own untrained 8B** (−0.191).
+   Outputs are well-formed (`Specimen`, `Clip`, `0`), so it is incapacity, not the rung-23a silent
+   engine failure. 🔑 **Read it narrowly, as legokna framed it: this does NOT invalidate CoT/CoA.**
+   A bigger *general* model is not better than the base we would be teaching, so **there is nothing
+   to transfer**. It would change if we fine-tuned the **32B** instead of the 8B — a real escape
+   hatch — but that is double the work with no guarantee of better cost/efficiency than the 8B line
+   that is actually moving the score. ⚠️ Sampling defect recorded: **200/200 `heico`**, so
+   `margin_ID` is NaN and the ID half was never measured; the verdict survives because the rule is a
+   conjunction and OOD fails by 21.5 pts. Two bugs left open, neither touching the number:
+   `select_blind_probe` does not stratify by dataset, and `register_run()` gets a duplicate
+   `run_dir`. 🔴 **The rung had been PRE-REGISTERED AND UNRUN since 2026-07-23 and carried three
+   defects that only appear on execution** — `data_root` pointing at a gitignored dir the pod never
+   populated, a hard-coded `exp_dir` that would write another checkout, and a scorer expecting the
+   Evaluator's schema while the probe emits rung 09's. All three fixed (`b63f1fc`, `644c01f`).
+
+2. 🟢 **Roadmap phase 0.4 CLOSED — the margin is vision, not phrasing** ([[margin-is-vision-not-phrasing]]).
+   673 `fo_class` questions, same frame and gold, three phrasings in ONE process. Dropping the
+   cardinality premise is **EQUIVALENT** at the pre-declared ε=0.05 (ID +0.0021). ⇒ rung 26 part 1's
+   2× margin gap was **difficulty, not exploitation**, and every ladder comparison leaning on
+   `object_recognition` — 50% of the headline — **stands**. ⚠️ `epsilon_min` on ID is 0.0417: with
+   28 videos no finer margin was reachable. 🔑 **The secondary arm found what we were not looking
+   for:** re-asked with the corpus's own *"list all"* template the model must decide the cardinality
+   itself and drops **−0.0647** (50 questions flip right→wrong against 11 in OOD). Follow-up
+   analysis: **100% of the flips over-enumerate**, keeping the correct class and adding false ones
+   (`Clip` the usual intruder). And the gold survives the check — on the **142** stratum frames that
+   also carry an independent *"List all"* question, the two golds agree **142/142** and none lists
+   more than one class. So it is a **precision** failure, not the gold being incomplete.
+
+3. 🟢 **Rung 21 is closed, and only the learning rate moved anything.** `A2_lr` (2e-4) ep3 is the
+   ladder's best and the campaign's first significant win — paired vs arm A: ALL **+0.0211**
+   [0.0037, 0.0391], OOD and `fo_class` ID also excluding zero. `B_rank` (32) nearly matches the
+   point estimate but its CI touches zero. **`D_clip`** (`max_grad_norm` 1.0 → 10) is a faithful
+   **NULL** — no cell excludes zero. **`A3_vitlr`** (`vit_lr` 2e-5 at lr 2e-4) is a **significant
+   NEGATIVE** vs A2 (ALL −0.0293, ID −0.0271, OOD −0.0353, all excluding zero) ⇒ slowing the tower
+   HURTS ⇒ it is **not saturated** ⇒ [[roadmap-fork-points-at-phase4]]. Arm C (6 epochs) died at 9%.
+   ⚠️ Rung 24's `A_low` was effectively answered by `A3_vitlr` rebased on 2e-4; **`B_high` never ran
+   and is parked** (`local/tasks/vit-lr-decouple.md`). If resumed it goes as **rung 27** — Yingyu
+   took 24 for `24-geometric-aug` in `repo_yyy`.
+
+🔴 **Operational lesson, paid for twice today.** `/workspace` carries **three checkouts** and
+`repo/` was on Rodrigo's branch. Switching its branch without checking cost a run and left a
+colleague mid-rebase; his commit was rescued to `rescue/container-norm` and `repo/` restored to
+`task/r3-rung16`. **We now have our own checkout, `/workspace/repo_leo`** — cloned with the token
+stripped from its remote. Rung 17's `exp_dir` is self-locating for the same reason.
+⚠️ **Chains die with their parent.** Arms C and D lost work that way; only `setsid`/`nohup` from
+init survived. ⚠️ **Cold Python imports stall on the FUSE volume** (`WCHAN request_wait_answer`)
+under load — papermill works, bare `python -c` hangs.
+🔒 **The GitHub PAT is still in plaintext in every checkout's remote URL and is NOT yet rotated.**
+
+🟢 **~51 GB freed** (rungs 06 and 18 `merged/`, both regenerable, adapters verified intact) with
+rungs 20/21 untouched. ⚠️ `df -h /workspace` reports the whole MooseFS cluster, not our quota — it
+cannot answer "how much room is left".
+
+🆕 **Unregistered finding: 30,000 unused questions.** The challenge corpus has **three** tracks and
+we use one — `frame` 20,000 (ours), **`segment` 20,000** and **`procedure` 10,000**, same videos,
+same schema, carrying capability leaves that are **zero** in `frame`. ⚠️ They are segment/video-level
+aggregates (*"maximum number of Clips at once in a single frame"*), so they are **not** drop-in
+frame-level supervision. A rung of its own, not a quick win.
 
 ## 🟢 2026-07-29 (pm) — the brain is reconciled, the ledger dedups, and the SAM 2 probe is unblocked
 
