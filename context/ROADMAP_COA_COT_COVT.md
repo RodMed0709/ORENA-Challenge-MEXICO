@@ -140,8 +140,10 @@ no weights repo or licence; Gemma/MedGemma are excluded by the *Model Derivative
 would propagate onto our released Apache-2.0 8B. The DUA needs **downloadable weights, on-pod** —
 open-vs-closed is not the filter, data location is ([[no-external-api-for-challenge-data]]).
 
-⇒ The two real reopening conditions: **SurgVLM or EndoChat publish weights**, or **we fine-tune the
-32B ourselves** — double the training cost with no guarantee of better cost/efficiency than the 8B
+⇒ The two real reopening conditions: **SurgVLM publishes its weights** (checked at source
+2026-07-31 — the variants are named, the 🤗 icons are placeholders, only the dataset is out; but
+the repo is **MIT** and the model is **9B**, so it would clear both the licence and the hardware
+bar), or **we fine-tune the 32B ourselves** — double the training cost with no guarantee of better cost/efficiency than the 8B
 line that is actually moving the score. Not a different scaffold.
 
 <details><summary>the design, as pre-registered</summary>
