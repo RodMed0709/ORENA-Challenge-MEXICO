@@ -4,7 +4,7 @@
 > number looks wrong, a gate looks weak, or a phase looks mis-ordered, **edit this file** rather
 > than settling it in chat. Every claim below carries its source so it can be checked.
 >
-> Status: **phase 0 COMPLETE (0.4 closed 2026-07-30), phase 2 started**. Everything remaining needs a pod.
+> Status: **phase 0 COMPLETE · phase 1 RUN → STOP · phase 3 CLOSED unrun · the perceptual branch (phase 4) is the only live one.** Updated 2026-07-31.
 > Last updated 2026-07-29. Personal working copy: `local/tasks/roadmap-coa-cot-covt.md` (Spanish).
 
 ## Why one document for three routes
@@ -87,12 +87,32 @@ Why 0.1 mattered: rung 24's pre-registered rule says *"a tower that is **indiffe
 is mapping"* and **"indifferent" had no numeric definition** — the same hole that lost rungs 14 and
 15. It now has four states, and INCONCLUSIVE is no longer readable as a tie.
 
-### Phase 1 — the gate we never ran (needs pod)
+### Phase 1 — ✅ RUN 2026-07-31, and it fired STOP — [[generator-32b-is-not-a-teacher]]
+
+**margin OOD −0.2150** (acc 0.08 vs a 0.295 floor), **worse than our own untrained 8B** (−0.191).
+Outputs well-formed, so incapacity and not an engine failure.
+
+🔑 **Read the claim narrowly.** This does **not** invalidate CoT/CoA. It says a bigger *general*
+model is not better than the base we would be teaching, so **there is nothing to transfer**. It
+would change if we fine-tuned the **32B** instead of the 8B — a real escape hatch — but that is
+double the work with no guarantee of better cost/efficiency than the 8B line that is actually
+moving our score.
+
+⚠️ The mechanism generalises past this teacher: **any gold-anchored trace** hides a perception
+failure inside a correct-looking answer, including a STaR self-generated one filtered on
+correctness — correctness is precisely what is guaranteed.
+
+⚠️ Sampling defect recorded, verdict unaffected: 200/200 `heico`, so `margin_ID` is NaN and the ID
+half was never measured. The rule is a conjunction and OOD fails by 21.5 points.
+
+<details><summary>the original pre-registration</summary>
+
 **Rung 17.** The rung-09 generator receives the gold and writes reasoning that *derives* it, so a
 perception failure **cannot appear as a wrong answer** — it appears as `<evidence>` describing a
 scene that is not there, with a correct `<answer>` by construction, and the judge-mirror is a text
 model that cannot see the frame either. Pre-registered: margin ID **and** OOD > 0 ⇒ GO; either
 < 0 ⇒ **STOP**.
+</details>
 
 ### Phase 2 — the loss hook (zero GPU) 🟡 STARTED
 `compute_loss_func` existed nowhere in the repo. One hook, four uses:
@@ -108,13 +128,24 @@ Two invariants, both from rung 22's measurements: **OFF is byte-identical** (the
 `None`, so the trainer takes its ordinary branch), and **reweighting is mean-preserving** because
 `max_grad_norm` is 1.0 and clipping is the one channel a loss rescale is not invariant to.
 
-### Phase 3 — CoA/CoT done properly = the **suppress arm** (rung 09 stage 2)
+### Phase 3 — 🔴 CLOSED 2026-07-31 by phase 1's STOP, unrun
+
+The design below was sound and is kept as the record. It died on its input, not its shape: it
+needed a teacher that perceives, and [[generator-32b-is-not-a-teacher]] measured that this one
+does not. Reopening it requires **a different teacher** — a fine-tuned 32B is the named candidate,
+at double the training cost — not a different scaffold.
+
+<details><summary>the design, as pre-registered</summary>
+
+#### CoA/CoT done properly = the **suppress arm** (rung 09 stage 2)
 One experiment. All conditions mandatory: short gold-anchored scaffold generated on-pod (DUA) ·
 **STaR correctness filter** (free — we hold the gold) · **SCALe loss** (without it we reproduce the
 published null at our own expense) · **matched 2k bare-gold control** · 🎯 **the same checkpoint
 scored under emit AND suppress, paired** · p99 in suppress mode before the full run · F1cls
 reported · 1–2 epochs, number-aware selection · booked as a **cold start for a later RLVR rung**,
 not a standalone win. Honest prior: `bucket_mean` ≈ 0 (−0.02 to +0.02).
+
+</details>
 
 ### Phase 4 — CoVT-lite
 One expert (**SAM 2, 8 segmentation tokens**), expert-generated GT, auxiliary loss with the
