@@ -55,6 +55,12 @@ wandb/
 literature/preprocessing/pdfs/
 literature/vlm-techniques/pdfs/
 
+# UNAM HPC cluster access — SSH public keys sent to the sysadmin for the ENES
+# Juriquilla server. Personal access material, not project code: the keys are
+# per-person, they grant nothing on their own, and a teammate has their own pair.
+# Nothing here is reproducible from the repo, so nothing here belongs in it.
+UNAM/
+
 # Junk
 __pycache__/
 *.pyc
@@ -65,3 +71,10 @@ __pycache__/
 # called from there, never duplicated into the repo. The instrument itself is versioned at
 # experiments/16-count-probes/_tools/contar.html; only this scratch copy is ignored.
 local/adjudicate/
+
+# Submission packages: the recipe is versioned, the 17 GB of merged weights and the
+# built tarball are not. `submissions/<id>/README.md` documents how to regenerate both.
+submissions/*/resources/
+submissions/*/test/
+submissions/*/*.tar.gz
+submissions/*/__pycache__/

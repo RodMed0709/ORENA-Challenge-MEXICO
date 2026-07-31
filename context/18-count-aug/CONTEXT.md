@@ -7,8 +7,32 @@
 
 ## Status
 
-**BUILT and GATED; training pending.** Every gold-only gate passed on the smoke pass
-(2026-07-28). The results section below is deliberately empty until the full run is scored.
+**RUN and SCORED.** `bucket_mean` 0.5255 / 0.5488 / **0.5721** across three epochs; proxy
+0.4877 / 0.5073 / **0.5421**. Read against rung 06 ep3's 0.5724 that is a **null** — but see
+the update below, because this rung's real value turned out to be something else entirely.
+
+## 🟢 Update 2026-07-30 — this rung became the control that broke the plateau
+
+Rung 21 used **this rung's `train.jsonl`, byte-identical and in place** (sha256 asserted), and
+changed nothing but the learning rate. On that unchanged data the proxy went **0.5421 →
+0.6104** and `bucket_mean` **0.5721 → 0.6496** ([[recipe-axis-is-the-learning-rate]]).
+
+⇒ 🔴 **Two readings here have to change.**
+
+1. **This rung's null was a recipe null, not a data null.** The augmentation was evaluated at
+   lr 2e-5 for 3 epochs — the configuration rung 21 measured as roughly 1/5 to 1/10 of anyone
+   else's optimisation distance. **Whether L1 and L2 help at 2e-4 has never been measured.**
+   The data is not refuted; it was read through an under-trained model.
+2. **"Training erases OOD counting" is RETIRED.** This rung's ep3 `number_margin_OOD` of
+   −0.0098, and rung 06 ep3's of exactly 0.000000, read as evidence that more training destroys
+   the counter, and that reading shaped several rungs. At lr 1e-4 the *same three-epoch
+   schedule on this exact dataset* gives **+0.042 (ep2) / +0.026 (ep3)**. The counter was never
+   being erased; it was never being trained ([[undertrained-was-real]]).
+
+⚠️ **What survives untouched:** every gold-only measurement in the build section below. Those
+are properties of the data, not of the run — the minted-zero dosing, the 330 co-occurrence
+repairs, the byte-identity of the flags-off export. They are why the rung was a usable control
+in the first place.
 
 ## Why this rung exists
 
@@ -112,7 +136,7 @@ closure assumption and the residual noise is real. Both numbers are carried in
 objects are the same class" = yes while its `fo_class` gold names two. The closure inventory
 and the binaries disagree only by omission, never by conflict.
 
-## What to read when it lands, in this order
+## What to read when it lands, in this order *(written before the run; kept as the record of what was pre-registered)*
 
 1. **Spearman r** on the `Clips` template vs **0.5866** — `frame.metrics.count_rank_report`,
    quoting the template and n every time (RULES §13b).
@@ -133,4 +157,5 @@ it buys is that a null is diagnosable rather than mute.
 [[zero-is-format-localized]] · [[model-out-ranks-the-blind-human]] ·
 [[gold-is-signal-model-underuses-it]] · [[epoch-matched-control]] ·
 [[the-gap-is-the-number-format]] · [[prompt-only-pointing-collapses]] ·
-[[count-calibration-dead]] · [[open-class-vocabulary]] · [[the-negatives-dosing]]
+[[count-calibration-dead]] · [[open-class-vocabulary]] · [[the-negatives-dosing]] ·
+[[recipe-axis-is-the-learning-rate]] · [[undertrained-was-real]]

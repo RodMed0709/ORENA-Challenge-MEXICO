@@ -44,12 +44,28 @@
    unweighted bucket mean that a single n=1 question inflates (it lifted rung-02 from an
    honest **0.550** to a reported **0.708**).
 
-4b. 🔴 **`bucket_mean` and the leaderboard's `pre_evaluation_score` are DIFFERENT QUANTITIES.
-   Never quote one against the other.** `bucket_mean` averages **4** buckets (ID+OOD). The
-   leaderboard averages **populated** buckets, and on the pre-eval set only **2** populate,
-   both ID. Comparing them made a −0.057 gap look like −0.096. **The right local comparator
-   for any leaderboard number is mean-ID** (`aggregation_ID` + `object_recognition_ID`, /2).
-   ⚠️ A `null` bucket means EMPTY, not broken. See [[leaderboard-metric-vs-our-headline]].
+4b. 🟢 **RETRACTED AND REPLACED 2026-07-30 — the headline IS `bucket_mean`.** The platform's
+   own `_docs` defines `pre_evaluation_score` as the *"unweighted mean accuracy over the 10
+   buckets (5 capability groups **× in-/out-of-distribution**)"*, and its four populated
+   buckets reproduce the reported score **exactly to 1e-15**. **Score `bucket_mean`. It was
+   always the right comparator.**
+   ⚠️ The retracted version of this rule said the headline was an ID-only mean over 2
+   populated buckets, and prescribed `mean(aggregation_ID, object_recognition_ID)` as the
+   comparator. That came from a **partial** payload that reported everything under two ID keys.
+   Rung 21 was designed and reported against that proxy; **no verdict flipped** (the arms rank
+   identically under both), but the offset, the `object_recognition` collapse size and every
+   "mean-ID" figure are withdrawn. See [[leaderboard-metric-is-bucket-mean]].
+   ⚠️ Still true and still load-bearing: a `null` bucket means **EMPTY, not broken**, and empty
+   buckets are **excluded from the mean**, not counted as zero. FRAME populates only
+   `aggregation` and `object_recognition`; the other three groups belong to the video tracks.
+
+4b-i. **Latency is pooled PER BATCH and we are 12.5× under it.** `120 s setup + B × 5 s` per
+   batch of B=20; submission 01 used **17.56 s** of 220 and reported
+   `mean_latency_per_question_s: 0.0` (the whole job fit inside the setup allowance).
+   🔴 **Overrunning by 20% forfeits the ENTIRE batch**; smaller overruns forfeit questions
+   *proportionally*, chosen deterministically and stratified across buckets — **not** the
+   individually slow ones. One slow question does not cost itself, it costs a share of the
+   batch.
 
 4c. **The FINAL ranking is not a mean at all.** It is **Copeland over buckets with pairwise
    significance tests** — non-significant deltas collapse to the SAME rank

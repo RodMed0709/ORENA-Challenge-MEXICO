@@ -97,6 +97,26 @@ class RecipeSweepConfig(ViTLoRAConfig):
     # says the loss traces matched.
     gradient_checkpointing: bool = True
 
+    # 🔴 THE VARIABLE of arm D_clip, and it was never ours: 1.0 is transformers' DEFAULT and no
+    # rung ever set it. Measured on arm A2's own logging.jsonl (541 steps): grad_norm median
+    # 6.76, p75 11.37, p90 18.68, max 208.19 -- so the clip binds on 99.6% of steps and every
+    # ordinary step is being shrunk 5-10x. It does not shrink them equally: a step at norm 127 is
+    # divided by 127 while a step at norm 2 is divided by 2, so the HARDEST batches contribute
+    # proportionally least. That is the same shape as the loss-mass finding, one level down.
+    max_grad_norm: float = 1.0
+
+    # 🔴 THE VARIABLE of arm A3, and the reason it was never touched: rung 06 put LoRA on the
+    # vision tower and never gave it its own LR, so `swift/optimizers/multimodal.py:56` falls
+    # back to `args.learning_rate` and the tower has ridden the LLM's rate for the whole
+    # campaign. At lr 2e-4 that runs the tower at 5-10x the Qwen3-VL default.
+    # ⚠️ `--vit_lr` ALONE IS A SILENT NO-OP. `swift/arguments/sft_args.py:213-217` only
+    # auto-selects an optimizer for `lorap_lr_ratio` or `use_galore`, so without
+    # `--optimizer multimodal` the MultimodalOptimizerCallback never runs and the flag is
+    # ignored with no error. Both flags are emitted together, and the BASELINE carries them too
+    # (with vit_lr == learning_rate, which is what the fallback already computes), so the diff
+    # is exactly one value rather than the optimizer machinery appearing as a change.
+    vit_lr: float | None = None          # None = same as learning_rate (the campaign's default)
+
     # The control's data, used as-is. NOT re-exported — see the module docstring.
     control_train_jsonl: Path = _CONTROL_RUN / "train.jsonl"
     control_sha256: str | None = None   # None = record it; a string = assert it
@@ -118,10 +138,24 @@ def effective_batch(cfg: RecipeSweepConfig) -> int:
 # ARM A, and must be read and reported against arm A — never against rung 18, which would make
 # it a two-variable comparison wearing a one-variable label.
 BASELINES: dict[str, dict] = {
-    "control": {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
-    "A_lr":    {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32},   # rung 18
-    "A2_lr":   {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
-    "B_rank":  {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32},   # arm A
+    # every baseline pins `num_train_epochs` too, so an arm whose variable IS the epoch count
+    # produces a visible diff instead of an empty one
+    "control":  {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "A_lr":     {"learning_rate": 2e-5, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "A2_lr":    {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    "B_rank":   {"learning_rate": 1e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    # 🔴 off ARM A2, which won the LR axis (3 of 30 cells, ALL and OOD both clearing zero).
+    # The LR axis was still rising with diminishing returns (+0.048 then +0.021), so the
+    # remaining question on optimisation distance is the OTHER knob: epochs.
+    "C_epochs": {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3},
+    # off ARM A2 as well, and deliberately at 3 epochs: pairing the clip change with an epoch
+    # change would be two flags and neither could be attributed.
+    "D_clip":   {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3,
+                 "max_grad_norm": 1.0},
+    # off ARM A2. The baseline pins vit_lr TO the LLM's rate rather than to None, so the
+    # optimizer machinery is present on both sides and only the value differs.
+    "A3_vitlr": {"learning_rate": 2e-4, "lora_rank": 8, "lora_alpha": 32, "num_train_epochs": 3,
+                 "max_grad_norm": 1.0, "vit_lr": 2e-4},
 }
 
 # Where each baseline's own weights live, so a gate can read what it ACTUALLY trained with
@@ -131,6 +165,9 @@ BASELINE_RUN: dict[str, Path | None] = {
     "A_lr": None,
     "A2_lr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
     "B_rank": Path(__file__).resolve().parents[1] / "runs" / "21_lr_1e4_v1",
+    "C_epochs": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
+    "D_clip": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
+    "A3_vitlr": Path(__file__).resolve().parents[1] / "runs" / "21_lr_2e4_v1",
 }
 
 
@@ -196,6 +233,12 @@ def swift_args_21(cfg: RecipeSweepConfig) -> list[str]:
     args = list(_swift_args(cfg))
     if not cfg.gradient_checkpointing:
         args[args.index("--gradient_checkpointing") + 1] = "false"
+    # rung 06 never emitted --max_grad_norm, so every rung so far rode transformers' default of
+    # 1.0. Stating it explicitly is behaviour-preserving at 1.0 and it is what lets the diff show
+    # the flag when an arm moves it.
+    args += ["--max_grad_norm", str(cfg.max_grad_norm)]
+    if cfg.vit_lr is not None:
+        args += ["--optimizer", "multimodal", "--vit_lr", str(cfg.vit_lr)]
     return args
 
 
@@ -220,8 +263,16 @@ def diff_vs_control(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict[str, tupl
     # The baseline's argv carries THIS run's checkpointing setting on purpose: the flag is
     # allowed to move only because it has been measured not to change the result, so showing it
     # as a difference would be noise in the one place that must stay signal.
-    a = _as_map(swift_args_21(control_cfg(cfg, arm)))
-    b = _as_map(swift_args_21(cfg))
+    #
+    # 🔴 Both sides are built with `smoke=False` even during a SMOKE pass. The single-variable
+    # claim is about the recipe of the FULL run, and smoke plumbing overrides parts of it:
+    # `_swift_args` emits `--num_train_epochs 1` in smoke regardless of the config, so an arm
+    # whose variable IS the epoch count would show an empty diff and the gate would report that
+    # the arm never changed anything. That fired on arm C_epochs' first smoke. Comparing the
+    # real recipe keeps the gate meaningful in both modes.
+    real = replace(cfg, smoke=False)
+    a = _as_map(swift_args_21(control_cfg(real, arm)))
+    b = _as_map(swift_args_21(real))
     return {k: (a.get(k), b.get(k)) for k in set(a) | set(b) if a.get(k) != b.get(k)}
 
 
@@ -231,6 +282,14 @@ ARMS: dict[str, set[str]] = {
     "A2_lr": {"--learning_rate"},                   # vs arm A — is 1e-4 the optimum, or just
                                                     # better than 2e-5? Only one value was tested
     "B_rank": {"--lora_rank", "--lora_alpha"},      # vs arm A
+    # ⚠️ NOT a free extension of A2. Cosine anneals over the PLANNED steps, so epoch 3 of a
+    # 6-epoch run sits near half of peak LR while epoch 3 of a 3-epoch run sits at exactly 0.0
+    # -- the trajectories differ from step 1 and neither contains the other. Epochs 1-3 are
+    # still epoch-matched against A2 (that is what the flag does); epochs 4-6 are new ground
+    # with no control, and are read as a curve, not as a delta.
+    "C_epochs": {"--num_train_epochs"},             # vs arm A2
+    "D_clip": {"--max_grad_norm"},                  # vs arm A2
+    "A3_vitlr": {"--vit_lr"},                       # vs arm A2
 }
 
 
@@ -319,10 +378,24 @@ def assert_control_is_rung18(cfg: RecipeSweepConfig, arm: str = "A_lr") -> dict:
             )
         trained = json.loads(Path(found[-1]).read_text())
         source = f"{run.name}/ckpt/.../args.json"
+        # ⚠️ max_grad_norm and vit_lr belong here because they are what arms D_clip and
+        # A3_vitlr MOVE -- a gate that omits the arm's own variable cannot catch the one
+        # mistake that matters. Both happened to be right on their first run, by luck rather
+        # than by check. `vit_lr` is absent from a run that never passed --optimizer, and the
+        # tower then rides `learning_rate`, so `None` is compared against that fallback.
         checked = ("learning_rate", "lora_rank", "lora_alpha", "lora_dropout",
-                   "per_device_train_batch_size", "gradient_accumulation_steps", "seed")
-        drift = {f: (trained.get(f), getattr(ctrl, f))
-                 for f in checked if trained.get(f) != getattr(ctrl, f)}
+                   "per_device_train_batch_size", "gradient_accumulation_steps", "seed",
+                   "max_grad_norm", "vit_lr")
+        def _trained(field):
+            v = trained.get(field)
+            # swift records vit_lr as null when --optimizer was never passed; the effective
+            # rate in that case is the LLM's (multimodal.py:56), which is what to compare.
+            if field == "vit_lr" and v is None:
+                return trained.get("learning_rate")
+            return v
+
+        drift = {f: (_trained(f), getattr(ctrl, f))
+                 for f in checked if _trained(f) != getattr(ctrl, f)}
         fields = checked
 
     if drift:

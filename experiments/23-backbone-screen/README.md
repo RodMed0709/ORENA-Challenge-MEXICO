@@ -12,7 +12,13 @@
 ## 🔴 RESULT (2026-07-29): the migration is dead, and it cost $4.40
 
 Three generations and 3.4× the parameters buy **+0.036** zero-shot; our own fine-tuning buys
-**+0.317**. Full table in `RESULTS.csv`, verdict in
+**+0.317**.
+
+🔴 **AMENDED 2026-07-29 — the margins are negative.** With the canonical `stratified.json` (which
+did not exist when this section was first written) the floors come out: **margin_ID −0.0666,
+margin_OOD −0.1367**. The zero-shot 27B scores **below the template-aware trivial floor in both
+halves**, so the +0.036 is movement beneath the floor and not skill, and the +0.090 below is one
+sub-floor model beating another. RULES §10 makes the margin the binding reading. Full table in `RESULTS.csv`, verdict in
 `context/decisions/backbone-generation-is-not-the-lever.md`.
 
 One result argues the other way and is kept: the lift is **not uniform** — `object_recognition`
