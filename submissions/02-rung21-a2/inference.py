@@ -94,11 +94,13 @@ IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".bmp", ".webp"}
 
 # A run that fails this fraction of its questions is broken, not unlucky.
 #
-# 🔴 Tightened from 0.5 for submission 02. At the platform's B=2000, a 0.5 threshold
-# permitted **1000 empty answers and exit 0** — a schema-valid half-zero that looks like a
-# model which knows nothing, and burns a submission slot without saying why. A real run has
-# ~0 failures; anything above a few percent is a broken container, not a hard batch.
-MAX_FAILED_FRACTION = 0.05
+# 🔻 REVERTED to submission 01's value on 2026-07-30, and the reason is worth recording.
+# It was tightened to 0.05 on the reasoning that at B=2000 a 0.5 threshold permits 1000 empty
+# answers and exit 0. But the platform's own payload says the batches are **100 x 20**, not
+# one of 2000 — and at B=20, 0.05 rounds to ONE question. Two unlucky failures out of twenty
+# would have thrown away eighteen good answers, trading a rare failure mode for a likelier
+# and worse one. The submission that scored used 0.5; this keeps it.
+MAX_FAILED_FRACTION = 0.5
 
 # ── generation config — MUST match src/frame/config.py (the A2 eval) ──────────
 MAX_NEW_TOKENS = 64
