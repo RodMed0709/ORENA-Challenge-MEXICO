@@ -1,6 +1,6 @@
 ---
 question: Is the Qwen3-VL-32B a usable teacher for the CoA/CoT knowledge-transfer line?
-verdict: NO — and the reason is narrower than "CoT does not work". Asked the FRAME questions with no gold, the 32B scores 0.08 where the trivial constant scores 0.295 (margin −0.215 OOD) — worse than our own UNTRAINED 8B (−0.191). A bigger general model is not better than the base model we would be teaching, so there is nothing to transfer. This does NOT invalidate CoT/CoA as a technique; it invalidates this teacher
+verdict: NO — and the reason is narrower than "CoT does not work". Asked the FRAME questions with no gold, the 32B scores 0.08 where the trivial constant scores 0.295 (margin −0.215 OOD) — worse than our own UNTRAINED 8B (−0.191), and it was given the full 10-class definitions, so this is not missing vocabulary. A bigger general model is not better than the base model we would be teaching, so there is nothing to transfer. This does NOT invalidate CoT/CoA as a technique; it invalidates this teacher — and re-verified 2026-07-31, there is no eligible teacher to switch to
 status: MEASURED
 date: 2026-07-31
 measured_in: experiments/17-generator-probe/runs/17_generator_probe_v1/blind_probe.csv
@@ -64,6 +64,45 @@ matches by construction and the judge-mirror is a text model that cannot see the
 failure inside a correct-looking answer, including a STaR-style self-generated one filtered on
 correctness — correctness is exactly what is guaranteed. Worth knowing before the next variant is
 proposed.
+
+## 🔑 It is not missing vocabulary either — checked, because that would change everything
+
+The natural objection: a general model that has never seen the FOCUS taxonomy would fail on
+*naming*, not on *seeing*, and 0.08 would measure ignorance of a class list.
+
+**It does not.** The blind probe calls `gen_onpod` with `g._system_prompt()`, which resolves to
+`frame.engine.SYSTEM_PROMPT` — the same prompt our scored engine uses, and it embeds
+`FO_DEFINITIONS_FILE.read_text()`. The 32B was handed **the role** (expert surgical assistant,
+single laparoscopic frame), **the required output format**, and **the full definitions of all ten
+classes**, and still scored 0.08. Everything a teacher would have been given, it already had.
+
+## And it is not a lack of teachers to choose from — re-verified 2026-07-31
+
+The 18-July availability search is **still accurate 13 days later** (web re-check):
+
+| candidate | state |
+|---|---|
+| **SurgVLM** (arXiv 2506.02555) | arXiv only — no weights repository confirmed |
+| **LLaVA-Surg · Surgical-LVLM · GP-VLS** | no released weights |
+| **EndoChat** (arXiv 2501.11347, *Med. Image Analysis* 2025) | published, but no weights repo/licence; the 18-Jul blocker was a Llama-2 output-usage clause conflicting with training our Qwen |
+| **Gemma / MedGemma** | excluded by Gemma Terms — a model trained on Gemma outputs is a *Model Derivative*, which would propagate onto our released Apache-2.0 8B |
+
+⇒ **The line does not close because this teacher failed. It closes because there is no eligible
+teacher to switch to.** Revisit only if SurgVLM or EndoChat publish weights.
+
+## The literature does not contradict this — it predicts it
+
+*Challenging Vision-Language Models with Surgical Data* (arXiv 2506.06232) benchmarks GPT-4o,
+Claude 3.5, Gemini 1.5, Qwen2-VL-72B and Llama-3.2-90B and reports that general VLMs handle
+**basic counting and localization** at levels comparable to natural images — but collapse to
+near-chance on tasks **requiring medical knowledge**, concluding that *"the key focus should be on
+how to inject surgical knowledge effectively"*.
+
+🔑 That is our result, not a contradiction of it. FOCUS is **domain knowledge dressed as counting**:
+deciding whether a clip is a retained foreign object, or telling a `Specimen` from a `Specimen bag`,
+is not a counting skill. And "inject surgical knowledge effectively" is precisely the fine-tuning
+line that is already working for us — **+0.317 from our fine-tuning against +0.036 from three
+backbone generations**.
 
 ## The result is not an engine failure — checked, because it looks like one
 

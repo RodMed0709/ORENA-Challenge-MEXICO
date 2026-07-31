@@ -1,6 +1,26 @@
 # Decision: R1's scaffold generator = Qwen3-VL-32B (vision, ZERO-SHOT, ON-POD) — supersedes the text-only "no pixels" line
 
-- **Status:** SETTLED · 2026-07-18 · owner: Rodrigo · supersedes the text-only generator described
+> ## 🔴 SUPERSEDED 2026-07-31 — §3's premise was measured and is false
+>
+> This note picked the 32B on the reasoning in **§3**: *"the generator's job is not perception, it
+> is anchored writing … a strong general VLM does it zero-shot."* **Rung 17 measured it and it does
+> not.** Asked the FRAME questions with no gold, the 32B scores **0.08** against a **0.295** floor —
+> **margin OOD −0.2150**, worse than our own *untrained* 8B (−0.191).
+>
+> ⚠️ **The obvious confound is ruled out:** the probe uses `frame.engine.SYSTEM_PROMPT`, which
+> embeds `FO_DEFINITIONS_FILE` — the model was given the role, the required output format **and the
+> full 10-class definitions**, and still failed. This is not missing vocabulary.
+>
+> The rest of this note **stands**: the DUA reasoning (on-pod only), the model-availability search,
+> and the licence analysis are all unaffected and still binding. Only §3 is retracted. Verdict and
+> consequences: [[generator-32b-is-not-a-teacher]].
+>
+> 🔒 And the availability search in §2 was **re-verified on 2026-07-31**: nothing has changed —
+> still no downloadable weights for SurgVLM / LLaVA-Surg / Surgical-LVLM, EndoChat still publishes
+> no weights repository or licence, Gemma/MedGemma still excluded by the *Model Derivative* clause.
+> **There is no eligible teacher to buy**, which is why the line closes rather than switching model.
+
+- **Status:** 🔴 SUPERSEDED IN PART (§3) · SETTLED · 2026-07-18 · owner: Rodrigo · supersedes the text-only generator described
   in `experiments/09-coa-sft/README.md` (Stage-1 as first written) and `context/09-coa-sft/CONTEXT.md`.
 - **Gated by:** the compliance rule [[no-external-api-for-challenge-data]] (on-pod only) and the
   adversarial GO-WITH-CHANGES gate (2026-07-18, below).

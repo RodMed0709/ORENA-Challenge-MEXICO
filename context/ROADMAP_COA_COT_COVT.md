@@ -132,8 +132,17 @@ Two invariants, both from rung 22's measurements: **OFF is byte-identical** (the
 
 The design below was sound and is kept as the record. It died on its input, not its shape: it
 needed a teacher that perceives, and [[generator-32b-is-not-a-teacher]] measured that this one
-does not. Reopening it requires **a different teacher** — a fine-tuned 32B is the named candidate,
-at double the training cost — not a different scaffold.
+does not — with the full 10-class definitions in its prompt, so not for lack of vocabulary.
+
+🔒 **Reopening it needs a teacher that both perceives AND is eligible, and as of 2026-07-31 no such
+model exists to switch to.** SurgVLM / LLaVA-Surg / Surgical-LVLM publish no weights; EndoChat has
+no weights repo or licence; Gemma/MedGemma are excluded by the *Model Derivative* clause, which
+would propagate onto our released Apache-2.0 8B. The DUA needs **downloadable weights, on-pod** —
+open-vs-closed is not the filter, data location is ([[no-external-api-for-challenge-data]]).
+
+⇒ The two real reopening conditions: **SurgVLM or EndoChat publish weights**, or **we fine-tune the
+32B ourselves** — double the training cost with no guarantee of better cost/efficiency than the 8B
+line that is actually moving the score. Not a different scaffold.
 
 <details><summary>the design, as pre-registered</summary>
 
