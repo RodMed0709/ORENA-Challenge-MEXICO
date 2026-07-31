@@ -140,7 +140,7 @@ Roadmap **phase 1 is answered and phase 3 is closed**: the 2,000 cold-start scaf
 suppress arm, and the SCALe loss that only existed to serve them. Bought for ~30 minutes of
 inference on one pod.
 
-**The perceptual route is the only live branch** — consistent with [[roadmap-fork-points-at-phase4]]
+**The perceptual route is the only live branch** — consistent with rung 21's `A3_vitlr`
 (the vision tower is not saturated) and [[margin-is-vision-not-phrasing]] (the model invents
 classes when allowed to enumerate). ⚠️ Being the only branch left does not make it good: phase 4
 still owes an answer to v05's 5.8× negative before it is worth building.

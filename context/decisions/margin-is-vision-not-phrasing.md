@@ -19,8 +19,8 @@ shortcut-free ones. It could not say whether the model *exploits* the shortcut, 
 cells are **different questions** — an equally good explanation is that they are simply easier in a
 way the template-aware floor does not price.
 
-The stakes were not small. `object_recognition × ID` is **50 % of the headline**
-([[headline-is-two-id-buckets]]) and `fo_class` is 71 % of that bucket. Had the margin been
+The stakes were not small. `object_recognition × ID` is **50 % of the headline** — the mean of the two ID buckets
+([[covt-reduced-sam-route]] §2) — and `fo_class` is 71 % of that bucket. Had the margin been
 phrasing, every ladder comparison leaning on it — 02 vs 06, 18, 21, A2 vs A — would have needed
 re-reading, and the unexplained **−0.057** local↔leaderboard gap
 ([[leaderboard-metric-vs-our-headline]]) would have had a candidate cause.
@@ -91,8 +91,8 @@ between the two arms is enumeration.
 
 ## Where it points
 
-With [[roadmap-fork-points-at-phase4]] — measured the same day from rung 21's `A3_vitlr` arm, that
-the vision tower is **not saturated** — two independent instruments now point the same way: the
+Rung 21's `A3_vitlr`, measured the same day, says the vision tower is **not saturated**
+(slowing it is a significant negative). Two independent instruments now point the same way: the
 remaining headroom is **perceptual**, and the counting deficit is **wider than the bucket we were
 attributing it to**.
 

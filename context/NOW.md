@@ -44,7 +44,7 @@
    point estimate but its CI touches zero. **`D_clip`** (`max_grad_norm` 1.0 → 10) is a faithful
    **NULL** — no cell excludes zero. **`A3_vitlr`** (`vit_lr` 2e-5 at lr 2e-4) is a **significant
    NEGATIVE** vs A2 (ALL −0.0293, ID −0.0271, OOD −0.0353, all excluding zero) ⇒ slowing the tower
-   HURTS ⇒ it is **not saturated** ⇒ [[roadmap-fork-points-at-phase4]]. Arm C (6 epochs) died at 9%.
+   HURTS ⇒ it is **not saturated** ⇒ the roadmap fork resolves toward the perceptual branch (on ONE arm — do not write it as settled). Arm C (6 epochs) died at 9%.
    ⚠️ Rung 24's `A_low` was effectively answered by `A3_vitlr` rebased on 2e-4; **`B_high` never ran
    and is parked** (`local/tasks/vit-lr-decouple.md`). If resumed it goes as **rung 27** — Yingyu
    took 24 for `24-geometric-aug` in `repo_yyy`.
@@ -58,6 +58,28 @@ stripped from its remote. Rung 17's `exp_dir` is self-locating for the same reas
 init survived. ⚠️ **Cold Python imports stall on the FUSE volume** (`WCHAN request_wait_answer`)
 under load — papermill works, bare `python -c` hangs.
 🔒 **The GitHub PAT is still in plaintext in every checkout's remote URL and is NOT yet rotated.**
+
+4. 🔒 **The teacher line is closed, and for a stronger reason than a bad result.** legokna's
+   framing, which is the one written down: rung 17 does **not** invalidate CoT/CoA — it says a
+   bigger *general* model is not better than the base we would be teaching, so **there is nothing to
+   transfer**. Verified at source the same day: **there is no eligible teacher to switch to.**
+   SurgVLM publishes **no weights** (repo + project page checked — the 🤗 icons are placeholders),
+   EndoChat no weights repo or licence, Gemma/MedGemma excluded because a model trained on their
+   outputs is a *Model Derivative* that would propagate onto our released Apache-2.0 8B. 👀 **SurgVLM
+   is the one to watch**: MIT and 9B, so if those weights land, neither licence nor hardware blocks.
+   ⇒ [[coa-generator-qwen32b-onpod]] is now **SUPERSEDED IN PART** — its §3 (*"the generator's job is
+   not perception, it is anchored writing"*) is the sentence rung 17 falsified.
+
+5. 🆕 **And one new avenue with NO blocker — roadmap phase 4b.** `SurgVLM-DB` **is** partially
+   released: 1.81M frames / 7.79M conversations over **23 public datasets**, lap-chole included,
+   annotated **`QA Pairs; Bbox`** — boxes, not masks. SurgVLM itself is built on **Qwen2.5-VL**, our
+   own family one generation back. 🔴 It annotates **instruments**, which FOCUS excludes — useless as
+   task supervision. 🔑 But our measured failure is **over-enumeration** (`Clip` the magnet), and a
+   clip resembles a stapler jaw or a grasper tip: **learning instruments is learning not to confuse
+   them**. 🔑 And it inverts the SAM 2 relation favourably — SAM 2 is **box-promptable**, so public
+   boxes + frozen SAM 2 = **surgical masks at scale**, no annotation, no expert training. Screen
+   before building: *what fraction is lap-chole, and how many boxes cover the classes we confuse?*
+   Zero GPU. Card: `local/tasks/surgvlm-db-domain-adapt.md`.
 
 🟢 **~51 GB freed** (rungs 06 and 18 `merged/`, both regenerable, adapters verified intact) with
 rungs 20/21 untouched. ⚠️ `df -h /workspace` reports the whole MooseFS cluster, not our quota — it
