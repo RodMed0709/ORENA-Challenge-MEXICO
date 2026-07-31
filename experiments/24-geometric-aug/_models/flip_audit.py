@@ -60,6 +60,9 @@ class FlipRule:
     transform_answer: bool = False
 
 
+_ANATOMICAL_QUADRANT_RE = re.compile(r"\bquadrant\b", re.IGNORECASE)
+
+
 def classify_row(row: pd.Series) -> FlipRule:
     """Classify a QA row without inferring anatomical laterality.
 
@@ -85,6 +88,22 @@ def classify_row(row: pd.Series) -> FlipRule:
         return FlipRule("transformable", "all_object_positions", transform_answer=True)
     if _CLOSEST_CENTER_RE.match(question):
         return FlipRule("invariant", "closest_to_image_center")
+    # 🔴 BUG FIX (measured 2026-07-31, see context/decisions/[[flip-narrows-shortcut-not-a-win]]):
+    # `transform_qa` (horizontal_flip.py) cannot supply the real `primary_capability` --
+    # the training JSONL never carries it -- so it always calls this function with a
+    # non-1e/1d placeholder. That means the `capability == "1e"` branch above NEVER fires
+    # from the export path, only from a direct audit call with real data. An "abdominal
+    # quadrant" question (e.g. "In which abdominal quadrant is the sponge located...?")
+    # would otherwise fall through to the generic "invariant" default below and pair a
+    # flipped image with its pre-flip, now-plausibly-wrong quadrant answer. This check is
+    # TEXT-ONLY on purpose -- it must work correctly regardless of what capability value
+    # (real or placeholder) the caller supplies. Measured: 32/141 such rows in rung 18's
+    # actual train.jsonl were flipped this way before this check existed. Conservative by
+    # design: routes to manual_review (RAISES if ever selected), not a guessed transform --
+    # whether these are safely transformable like the other 3 rules is a team call, not
+    # inferred here.
+    if _ANATOMICAL_QUADRANT_RE.search(question):
+        return FlipRule("manual_review", "abdominal_quadrant_location")
     if capability != "1d":
         return FlipRule("invariant", "non_spatial")
     if not _QUADRANT_RE.search(question) and not _QUADRANT_RE.search(str(row["answer"])):
