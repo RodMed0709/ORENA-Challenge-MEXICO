@@ -3,8 +3,9 @@
 | Notebook | Rung | Metric (`bucket_mean`) | Verdict |
 |---|---:|---:|---|
 | `24_flip_audit.ipynb` | 24a | transformable QA rows | done — 871/6,252 test rows transformable |
-| `24_horizontal_flip.ipynb` | 24b (train) | — | trained (`24_flip_p25_v1`), not yet scored |
-| `24b_epoch_eval.ipynb` | 24b (eval) | vs rung 21 arm A, per epoch | built, awaiting a GPU pod to run |
+| `24_horizontal_flip.ipynb` | 24b (train) | — | trained (`24_flip_p25_v1`, 3 epochs) |
+| `24b_epoch_eval.ipynb` | 24b (eval) | 0.6333 @ ep3 (armA 0.6305) | **NOT A WIN, any epoch** — `margin_OOD` falls all 3 epochs; targeted 871-row check non-significant every epoch |
+| `24_position_prior_probe.ipynb` | 24 (probe) | atypical−typical acc gap | *(probe)* — mechanistic follow-up, not yet run |
 
 ## Objective
 
@@ -52,19 +53,49 @@ With that policy disabled, the training export must be byte-identical to the
 rung-21 control. This repository currently contains no horizontal-flip or
 other geometric image augmentation result.
 
-## Evaluation (24b)
+## Evaluation (24b) — result: NOT A WIN
 
-`24_flip_p25_v1` (`p=0.25`, three epochs) has been trained. `24b_epoch_eval.ipynb` scores each
-epoch's checkpoint canonically against **rung 21 arm A's same epoch** (never rung 18 — this
-experiment's baseline is arm A's recipe and data, per the A/B contract below), following the
-epoch-matched-control standard `21b_epoch_eval.ipynb` set. Beyond the generic leaderboard
-proxy and `margin_OOD`, it adds a **targeted check**: paired accuracy on the 871 test rows the
-24a audit marked `transformable`, split by rule, against arm A on the same qIDs — the
-population this augmentation actually targets, which a flat bucket average can hide inside
-either direction.
+`24_flip_p25_v1` (`p=0.25`, three epochs) trained and was scored canonically against **rung 21
+arm A's same epoch** (never rung 18 — this experiment's baseline is arm A's recipe and data),
+following the epoch-matched-control standard `21b_epoch_eval.ipynb` set. Full results:
+`RESULTS_flip_p25.csv` + `RESULTS_transformable_flip_p25_ep*.csv`.
 
-Status: notebook built and syntax-checked; not yet run (needs a live GPU pod to merge +
-infer). No `RESULTS_flip_p25.csv` exists yet.
+| epoch | Δ proxy vs armA | Δ margin_OOD vs armA | targeted 871-row delta (CI) |
+|---|---:|---:|---|
+| 1 | −0.0171 | −0.0170 | −0.0383 [−0.094, 0.017] |
+| 2 | +0.0153 | −0.0100 | +0.0116 [−0.037, 0.057] |
+| 3 | +0.0107 | −0.0052 | +0.0302 [−0.008, 0.071] |
+
+**Pre-registered verdict (proxy rises AND margin_OOD does not fall): NOT A WIN at any epoch** —
+`margin_OOD` falls every epoch. The **targeted check** (the actual hypothesis — paired accuracy
+on the 871 `transformable` rows against arm A) is **non-significant at every epoch**, every rule.
+A separate, unrelated regression also surfaced: `fo_class × ID` class-balanced macro-F1 drops
+substantially at ep1 (−0.093) and ep3 (−0.129) vs arm A, while exact-set accuracy on the same
+cell stays flat — a tail-class collapse hidden by the headline.
+
+## Known defect (found, not yet fixed) — the `1e`/situs exclusion doesn't fire at export time
+
+`transform_qa` (`_models/horizontal_flip.py:82-89`) hardcodes `primary_capability="3a"` when
+calling `flip_audit.classify_row`, so the `capability == "1e"` branch that defines
+`excluded_situs` can never trigger during the actual training export — only in the standalone
+audit (`24_flip_audit.ipynb`), which uses the real capability. Quantified against the real
+`train.jsonl` (question-text join, sha256-verified): of 305 real `1e` rows, **136 are
+"abdominal quadrant location" questions** (plausibly pixel-grounded, i.e. should have been
+transformed like a spatial row) and **30 of those got flipped with their pre-flip quadrant
+label left unchanged**. The other 169 `1e` rows (organ contact/identity/presence) are almost
+certainly genuinely flip-invariant despite going through the same buggy path. Net: **~30/14,415
+rows (≈0.2%) plausibly mislabeled** — real, but too small to be the primary explanation for the
+eval result above. Must be fixed (text-pattern situs detection, not a capability field the
+JSONL doesn't carry) before `p=0.50` scales the same bug proportionally.
+
+## Position-prior probe (24, mechanistic follow-up)
+
+Motivated by ["Your other Left!"](https://arxiv.org/abs/2508.00549) (MICCAI 2025): VLMs answer
+medical position questions from a memorised class/anatomy prior rather than reading the image.
+`24_position_prior_probe.ipynb` tests whether FRAME's model does the same — is quadrant accuracy
+worse specifically when an object sits in an ATYPICAL quadrant for its class (e.g. a Needle in
+bottom/right, which happens in only ~6% of train examples) — on both rung 21 arm A and the flip
+arm, at the same epoch. Zero GPU; reads existing `results.csv` only. Not yet run.
 
 ## Registered probability sequence
 
