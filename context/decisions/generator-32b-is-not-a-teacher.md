@@ -82,13 +82,21 @@ The 18-July availability search is **still accurate 13 days later** (web re-chec
 
 | candidate | state |
 |---|---|
-| **SurgVLM** (arXiv 2506.02555) | arXiv only — no weights repository confirmed |
+| **SurgVLM** (arXiv 2506.02555) | 👀 **the one to watch.** Official repo `github.com/jinlab-imvr/SurgVLM` and project page checked directly on 2026-07-31: the variants are **named** (`SurgVLM-9B-Instruct`, `-9B-Reasoning`; the paper also lists 7B/32B/72B) and the 🤗 icons beside them are **placeholders, not links** — no download, no HF repo, no "coming soon" either. Only `SurgVLM-DB` is released, and partially. 🟢 **But the repo is MIT**, so if the weights ever land the licence is *not* a blocker — unlike EndoChat or Gemma — and a **9B** mounts on-pod trivially. **Reopen the teacher question the day these weights exist.** |
 | **LLaVA-Surg · Surgical-LVLM · GP-VLS** | no released weights |
 | **EndoChat** (arXiv 2501.11347, *Med. Image Analysis* 2025) | published, but no weights repo/licence; the 18-Jul blocker was a Llama-2 output-usage clause conflicting with training our Qwen |
 | **Gemma / MedGemma** | excluded by Gemma Terms — a model trained on Gemma outputs is a *Model Derivative*, which would propagate onto our released Apache-2.0 8B |
 
 ⇒ **The line does not close because this teacher failed. It closes because there is no eligible
-teacher to switch to.** Revisit only if SurgVLM or EndoChat publish weights.
+teacher to switch to.** The single named reopening condition: **SurgVLM publishes its weights** —
+MIT-licensed and 9B, so it would clear both the licence and the hardware bar that EndoChat and
+Gemma do not.
+
+🆕 **Unrelated but noted while checking: `SurgVLM-DB` IS partially released** — 1.81M frames /
+7.79M surgical conversations. That is *public external data*, a different category from a teacher
+under both the DUA and the challenge's eligibility rule ("external data public + documented +
+released"). It belongs to the external-data line ([[no-external-api-for-challenge-data]] does not
+restrict it), not to this one. Recorded, not pursued.
 
 ## The literature does not contradict this — it predicts it
 
