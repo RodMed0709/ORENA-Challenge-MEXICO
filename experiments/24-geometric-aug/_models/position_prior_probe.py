@@ -127,7 +127,10 @@ def interaction_ci(labelled: pd.DataFrame, results_a: Path, results_b: Path, *,
         columns={"correctness": "correct_b"})
     merged = labelled.merge(res_a, on="qID", how="inner").merge(
         res_b[["qID", "correct_b"]], on="qID", how="inner")
-    merged["diff"] = merged["correct_b"] - merged["correct_a"]
+    # correctness comes back from results.csv as bool -- numpy/pandas no longer allow
+    # subtracting two bool Series directly ("numpy boolean subtract... not supported"),
+    # so cast explicitly rather than relying on an implicit numeric coercion.
+    merged["diff"] = merged["correct_b"].astype(float) - merged["correct_a"].astype(float)
 
     def _groups(sub: pd.DataFrame) -> dict:
         vk = _video_key(sub)
