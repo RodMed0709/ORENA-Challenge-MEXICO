@@ -107,6 +107,51 @@ def label_typicality(test_pairs: pd.DataFrame, modal: dict[str, str]) -> pd.Data
     return out
 
 
+def interaction_ci(labelled: pd.DataFrame, results_a: Path, results_b: Path, *,
+                    n_boot: int = 2000, seed: int = 0) -> dict:
+    """Paired, video-clustered bootstrap of the INTERACTION between arm and typicality.
+
+    Both arms are scored on the SAME questions, so the direct test of "did arm B narrow
+    or widen the shortcut gap relative to arm A" is not two independently-bootstrapped
+    gaps eyeballed side by side -- it is whether the PAIRED per-question delta
+    (correct_b - correct_a) itself differs between typical and atypical rows. That
+    quantity is algebraically identical to (gap_b - gap_a), computed through the pairing
+    instead of around it, so it is a tighter CI on exactly the comparison that matters.
+
+    Positive interaction = arm B improved (or degraded less) on ATYPICAL rows relative to
+    TYPICAL rows, i.e. arm B narrowed the shortcut gap.
+    """
+    res_a = pd.read_csv(results_a, usecols=["qID", "video", "correctness"]).rename(
+        columns={"correctness": "correct_a"})
+    res_b = pd.read_csv(results_b, usecols=["qID", "correctness"]).rename(
+        columns={"correctness": "correct_b"})
+    merged = labelled.merge(res_a, on="qID", how="inner").merge(
+        res_b[["qID", "correct_b"]], on="qID", how="inner")
+    merged["diff"] = merged["correct_b"] - merged["correct_a"]
+
+    def _groups(sub: pd.DataFrame) -> dict:
+        vk = _video_key(sub)
+        return {v: g["diff"].to_numpy(float) for v, g in sub.groupby(vk)}
+
+    typ_g, atyp_g = _groups(merged[merged.is_typical]), _groups(merged[~merged.is_typical])
+    if not typ_g or not atyp_g:
+        return {"n": int(len(merged)), "interaction": float("nan"),
+                "ci_low": float("nan"), "ci_high": float("nan")}
+
+    point = float(np.mean([g.mean() for g in atyp_g.values()])) - \
+        float(np.mean([g.mean() for g in typ_g.values()]))
+    rng = np.random.default_rng(seed)
+    boots = np.empty(n_boot)
+    t_keys, a_keys = list(typ_g), list(atyp_g)
+    for i in range(n_boot):
+        t_pick = rng.choice(t_keys, size=len(t_keys), replace=True)
+        a_pick = rng.choice(a_keys, size=len(a_keys), replace=True)
+        t_mean = np.mean([rng.choice(typ_g[k], size=len(typ_g[k]), replace=True).mean() for k in t_pick])
+        a_mean = np.mean([rng.choice(atyp_g[k], size=len(atyp_g[k]), replace=True).mean() for k in a_pick])
+        boots[i] = a_mean - t_mean
+    return {"n": int(len(merged)), "interaction": point,
+            "ci_low": float(np.percentile(boots, 2.5)), "ci_high": float(np.percentile(boots, 97.5))}
+
 def score_against_run(labelled: pd.DataFrame, results_csv: Path, *, n_boot: int = 2000,
                        seed: int = 0) -> dict:
     """Accuracy on typical vs atypical class/quadrant pairs, for one run's results.csv.
