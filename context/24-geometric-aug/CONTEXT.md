@@ -30,19 +30,31 @@ fixed-quadrant class selection (question change), object-centre quadrant
 is classified; none requires manual review. The 313 train and 111 test `1e`
 situs rows remain explicitly excluded.
 
+## Results (final) — CLOSED, NOT A WIN, but a real mechanistic effect confirmed
+
+`24_flip_p25_v1` (`p=0.25`, three epochs) trained and was scored against rung 21 arm A's same
+epoch. **Pre-registered verdict: NOT A WIN at any epoch** — `margin_OOD` falls every epoch, and
+the targeted 871-row check is non-significant throughout. A separate `fo_class × ID`
+class-balanced-F1 regression also surfaced, unexplained.
+
+A real export bug was found (the `1e`/situs exclusion never fired at export time — capability
+isn't in the training JSONL) and fixed: quantified at 32/14,415 rows (≈0.22%) plausibly
+mislabeled, too small to explain the headline.
+
+**The actual finding**, motivated by ["Your other Left!"](https://arxiv.org/abs/2508.00549)
+(MICCAI 2025): built `24_position_prior_probe.ipynb` to test whether FRAME's model shows the
+same class→position shortcut that paper found in medical VLMs generally. **It does, and
+significantly**, on the unaffected control (rung 21 arm A). **The flip augmentation
+significantly narrows that shortcut** (paired interaction test, CI excludes zero) — the
+augmentation measurably does what it was designed to do, even though that didn't convert into a
+net accuracy win at this dose.
+
+Full writeup: `context/decisions/flip-narrows-shortcut-not-a-win.md`.
+
 ## Next
 
-The audit has no `manual_review` rows. The flip-export engine
-(`_models/horizontal_flip.py`) landed with a deterministic flip rate, image
-materialisation, and a flag-off byte-identity gate against the rung-21
-control, keyed on the frozen rung-21 control JSONL's SHA-256 and row number
-(preserving rung 18's minted/paraphrased rows exactly).
-
-`24_flip_p25_v1` (`p=0.25`, three epochs) has been trained. `24b_epoch_eval.ipynb`
-is built (not yet run): scores each epoch against **rung 21 arm A's same
-epoch** (this experiment's baseline, not rung 18), plus a targeted paired
-check on the 871 `transformable` test rows against arm A — the direct read on
-whether the flip policy moved the population it targets, separate from the
-generic leaderboard proxy. Needs a live GPU pod to execute (merge + infer);
-`p=0.50` (24c) stays gated on this evaluation per the README's registered
-sequence.
+Experiment closed. `p=0.50` (24c) is **not** pursued as a direct scale-up — it would scale the
+validated benefit and the unexplained `fo_class` regression together with no new information.
+If revisited, the better-motivated next step is a differently-scoped rung (flip only genuinely
+spatial rows, not the whole dataset) — a new decision against the campaign's other levers, not
+one this rung's own evidence forces.
