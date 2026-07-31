@@ -4,8 +4,10 @@
 > number looks wrong, a gate looks weak, or a phase looks mis-ordered, **edit this file** rather
 > than settling it in chat. Every claim below carries its source so it can be checked.
 >
-> Status: **phase 0 COMPLETE · phase 1 RUN → STOP · phase 3 CLOSED unrun · the perceptual branch (phase 4) is the only live one.** Updated 2026-07-31.
-> Last updated 2026-07-29. Personal working copy: `local/tasks/roadmap-coa-cot-covt.md` (Spanish).
+> Status: **phase 0 COMPLETE · phase 1 RUN → STOP · phase 3 CLOSED unrun · the perceptual branch
+> is the only live one, and it now has TWO entries — 4b (SurgVLM-DB domain adaptation, screen
+> pending, no blockers) and 4 (CoVT-lite, which still owes an answer to v05).**
+> Last updated 2026-07-31. Personal working copy: `local/tasks/roadmap-coa-cot-covt.md` (Spanish).
 
 ## Why one document for three routes
 
@@ -157,6 +159,40 @@ reported · 1–2 epochs, number-aware selection · booked as a **cold start for
 not a standalone win. Honest prior: `bucket_mean` ≈ 0 (−0.02 to +0.02).
 
 </details>
+
+### Phase 4b — 🆕 surgical domain adaptation from SurgVLM-DB (candidate, screen pending, zero GPU)
+
+**The only new avenue found on 2026-07-31 that carries no DUA, licence or hardware blocker.** Not
+task supervision — ours supplies that. The idea is to make the model **literate in surgery** before
+specialising it: general *in surgery*, not general like the models rung 17 just killed.
+
+**Verified at source.** `SurgVLM-DB` **is partially released** — 1.81M frames / 7.79M conversations
+aggregating **23 public datasets** (Cholec80-VQA, EndoVis-18-VQA, EndoVis-VQLA, PSI-AVA-VQA,
+CoPESD, SSG-VQA, Surg-396K…), including **laparoscopic cholecystectomy**. Annotations are
+**`QA Pairs; Bbox`** — boxes, **not masks**. SurgVLM itself is built on **Qwen2.5-VL**: our own
+family, one generation back — they are doing exactly what we are.
+
+🔴 **The obstacle, which turns into the argument.** The corpus annotates **instruments**, and FOCUS
+explicitly **excludes** them (*"graspers, scissors, trocars, staplers, cameras are not foreign
+objects"*). As task supervision it is useless — rung 19 said so of this same well. 🔑 **But our
+measured failure is over-enumeration**: the model keeps the correct class and **adds false ones**,
+with `Clip` the constant intruder (precision 0.619, 212 of 327 FPs). A clip resembles a stapler jaw,
+a grasper tip, a trocar. **Learning instruments is learning not to mistake them for foreign
+objects.** The corpus does not teach the task; it teaches not to get it wrong.
+
+🔑 **And it inverts the SAM 2 relationship, favourably.** You do not *train* SAM 2 on this (SAM 2
+trains on masks; these are boxes) — **SAM 2 is box-promptable**, so the boxes are exactly what it
+consumes to *produce* masks. ⇒ **public boxes + frozen SAM 2 = surgical masks at scale**, with no
+annotation and no expert training. Same mechanism phase 4 already wanted, with a prompt source we
+did not have.
+
+**The screen — one question, zero GPU, and it can kill this for free:** *what fraction of
+`SurgVLM-DB` is laparoscopic cholecystectomy, and how many boxes cover the classes we confuse
+(clips, needles, sponges, specimen bags)?* Answered by reading the released part. Card:
+`local/tasks/surgvlm-db-domain-adapt.md`.
+
+⚠️ **Not a free win.** It is extra training on a model that already works (A2); it may move nothing
+or hurt. Precedent exists (LLaVA-Med's curriculum recipe, ficha #5) but precedent is not a guarantee.
 
 ### Phase 4 — CoVT-lite
 One expert (**SAM 2, 8 segmentation tokens**), expert-generated GT, auxiliary loss with the
