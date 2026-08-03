@@ -1,10 +1,21 @@
 # Rung 25 — does the model individuate? The first measurement we have never been able to make
 
+> 🔴 **STATUS 2026-08-03: CLOSED-UNRUN.** Built and pre-registered, never launched, and the August
+> plan does not call for it — see [[august-plan-closes-the-ladder]] and
+> `local/tasks/plan-accion.md`. This is **not** a pending item; do not resurrect it in a sweep.
+>
+> - It was parked *"deliberately behind rung 24"*, and rung 24 is now closed-unrun too, so its
+>   queue position no longer exists.
+> - Its own pre-registration declares the ceiling: **CholecInstanceSeg tops out at 3**, while our
+>   failure lives at **5–12**. A success here says nothing about our range — by its own rule.
+> - Its blocking gate **G-NO-OVERLAP** (dHash against our `lapchole` split) was never run.
+> - The question it asks — *does the model HAVE the objects?* — stays live, and the August plan
+>   asks it a cheaper way: **step 6, the SAM 2 temporal probe**, on our own frames with no external
+>   corpus and no overlap gate.
+
 > **PRE-REGISTRATION.** Written 2026-07-29, before any GPU time. Every threshold and gate below is
 > fixed *before* the run. A threshold adjusted after seeing a number stops being a gate and becomes
 > a story.
->
-> ⏸ **NOT LAUNCHED, and deliberately behind rung 24.** Built now so the design is not lost.
 
 ## The question, and why we have never been able to ask it
 
