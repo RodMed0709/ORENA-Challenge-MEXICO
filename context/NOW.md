@@ -2,7 +2,69 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-07-31**.
+> Last updated: **2026-08-03**.
+
+## 🟢 2026-08-03 — the organizers answered on licences, and the ladder is closed
+
+**Zero GPU, zero pod.** A rules-and-hygiene session. `main` is at `81656bb` and carries everything.
+
+1. 🟢 **External data is PERMITTED, and the licence was never the test** —
+   [[external-data-policy]]. The organizers answered in writing: training on public
+   `CC BY-NC-SA` / `CC BY-SA` **is allowed**, and *"documenting all data sources in the method
+   description is both necessary and sufficient"*. **Three obligations replace the licence
+   question** (now RULES §15–19, sourced to `ORena-FOCUS-challenge-design-FRAME-track.pdf` pp. 7–9,
+   tracked at the repo root — cite the PDF, never a paraphrase):
+   🔴 the dataset must have been **publicly accessible by 2026-07-15** (pre-eval launch — check the
+   DATE before the licence, it is the cheaper kill); **all** training data must be specified; and
+   annotations we create on **third-party public** data must be **published** with the submission
+   while annotations on **challenge** data must **NOT** be (DUA clause 3) — disjoint scope, so the
+   two duties never collide. 🔑 **Whether trained weights are a derivative work is unsettled and the
+   organizers decline to rule — and it does not gate us:** the award criterion says *"make their
+   model … public"* and **names no licence**, so ShareAlike would constrain WHICH licence we release
+   under, never whether we may release. ⇒ supersedes the *reasoning* (not the verdict) of the
+   2026-07-31 dataset sweep, which rested on a `lapchole` DUA clause the organizers had in front of
+   them and still would not confirm. **Closes the open baseline question**: a zero-shot frontier VLM
+   + an organizer-fine-tuned open VLM, *"clearly identified as such on the leaderboard"*. And
+   co-authorship is capped at **three per team** — exactly our headcount.
+
+2. 🔴 **The ladder is closed: rungs 24 and 25 will never run** — [[august-plan-closes-the-ladder]].
+   A sweep of every branch, experiment dir and vault card against the August plan's ten steps found
+   three designs marked `todo`/`parked`/*"built, not launched"* being read back as **pending work**.
+   They are not. 🔑 **The rule installed: a rung is revived because the plan asks for it, never
+   because it exists.** Rung 24's `A_low` was answered by `A3_vitlr` (significant negative);
+   **`B_high` is the ladder's ONLY genuinely open arm and still does not enter**, and the `24` slot
+   is Yingyu's ⇒ revived it becomes **rung 27**. Rung 25 was parked behind 24, never ran its
+   blocking `G-NO-OVERLAP`, and declares its own ceiling — CholecInstanceSeg tops out at **3** where
+   our failure lives at **5–12**. Nothing deleted; each `PLAN.md` opens with a CLOSED-UNRUN banner.
+   🟢 **Both questions survive, asked cheaper by the plan:** *does the model HAVE the objects?* →
+   **step 6**, SAM 2 on our own frames; *does it count or emit a near-constant?* → **step 5**, the
+   entropy gate. **Rung 22 (loss-mass) is the only unrun rung that survives**, as the pre-decided
+   Plan B if step 5 fails.
+
+3. 🟢 **`main` is the single source of truth again.** Fast-forwarded **+50 commits** (rungs 17, 21,
+   24, 25, 26, the metrics gates, submission 02) and **two branches deleted after verifying by
+   content, not by history**: `task/covt-sam-route` (0 unique commits, identical trees) and
+   `task/enumeration-probe` — whose only delta over `main` was an **older** `07-enumeration/CONTEXT.md`
+   reinstating the retracted *"+16.3 for the format"* ([[coa-sft-published-null]]), i.e. merging it
+   would have **reintroduced a falsified premise**. Remaining branches are not ours:
+   `task/audit-rung12` (Rodrigo, 4 commits of real rung-12c artifacts, his call), `task/r3-rung16`
+   (contributes nothing, but it is the pod's checkout — do not switch it), `experiment/geometric_aug`
+   (Yingyu, live on rung 24b).
+
+⚠️ **`assert_decisions_indexed` is RED on `main`** — 5 pre-existing notes put prose inside
+`status:` (`covt-reduced-sam-route`, `recipe-axis-is-the-learning-rate`,
+`seed-variance-is-small-when-clean`, `synthetic-counting-reconciled`, `target-noise-is-the-harmful-kind`).
+RULES says this gate RAISES and is never disabled; it has been red and unrun. Five one-line fixes.
+
+⚠️ **Tooling trap, paid for once today:** `grep` in an interactive shell may be a wrapper function
+that silently swallows matches — it reported **zero** hits for `public` in a file with 33. It caused
+a false claim that the challenge policies were absent from the repo when they had been extracted all
+along. **Use `command grep` when a zero result is load-bearing.**
+
+🔴 **Still open, all zero-GPU, all from 2026-08-01:** submission 02 is **not uploaded** (the whole
+31-day plan calibrates against an unconfirmed score, 9 of 10 slots free), the **significance rule is
+unsigned** (blocks everything), and the **CAMMA e-mail is unsent** (now with no licence or date
+blocker in front of it).
 
 ## 🔴 2026-07-31 — the teacher cannot see: phase 3 is closed, and the perceptual branch is the only one left
 
