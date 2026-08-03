@@ -1,5 +1,20 @@
 # Rung 24 — one variable: the learning rate nobody ever chose for the vision tower
 
+> 🔴 **STATUS 2026-08-03: CLOSED-UNRUN.** Built and pre-registered, never launched, and the
+> August plan does not call for it — see [[august-plan-closes-the-ladder]] and
+> `local/tasks/plan-accion.md`. This is **not** a pending item; do not resurrect it in a sweep.
+>
+> - `A_low` was effectively answered by `A3_vitlr` rebased on lr 2e-4 (a significant NEGATIVE:
+>   slowing the tower HURTS), so the branch-ordering question this rung existed to settle is
+>   already settled — the perceptual branch is the live one.
+> - **`B_high` (`vit_lr` 5e-4) never ran** and is the only genuinely open arm here.
+> - The `24` slot is **taken** by Yingyu's `24-geometric-aug` (`origin/experiment/geometric_aug`).
+>   If this is ever resumed it goes as **rung 27**, not 24.
+>
+> The design below is kept because it is good and its three gates (G-COV, G-EQUIV,
+> `assert_vit_is_trainable`) are reusable. Reviving it requires a reason from the plan, not the
+> fact that it exists.
+
 > **PRE-REGISTRATION.** Written 2026-07-29, before any GPU time. Every threshold, arm and gate
 > below is fixed *before* the runs. A threshold adjusted after seeing a number stops being a gate
 > and becomes a story.
