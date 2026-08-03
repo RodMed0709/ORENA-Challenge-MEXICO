@@ -175,6 +175,39 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
     Qwen, documented use); it must only permit **using its outputs to train** our model. Full
     reasoning + retroactive flag (this session leaked annotations to DeepSeek via MCP):
     [[no-external-api-for-challenge-data]].
+
+## EXTERNAL DATA — permitted, with three obligations (BINDING, challenge rules)
+
+Source of truth is the tracked PDF at the repo root,
+**`ORena-FOCUS-challenge-design-FRAME-track.pdf`** — cite it and its page, never a paraphrase.
+Rationale + the organizers' written answer (2026-08-03): [[external-data-policy]].
+
+15. **A licence is NOT the test — `CC BY-NC-SA` and `CC BY-SA` are permitted.** Confirmed in
+    writing by the organizers. Public datasets and publicly released pre-trained models may be
+    used (§Training data policy, p.7). **Do not re-litigate this**; the 2026-07-31 sweep's
+    DUA-based argument is superseded by the organizers' own answer.
+
+16. **🔴 The date gate: any external dataset or pre-trained model must have been publicly
+    accessible by 2026-07-15**, the pre-evaluation launch (§Training data policy p.7 +
+    §Schedule p.9). Released later = ineligible, however good or however permissive. **Check the
+    date BEFORE the licence** — it is the cheaper kill.
+
+17. **All training/fine-tuning data must be specified** in the method description. The organizers
+    call this *"both necessary and sufficient"*. Every rung that touches external data owes its
+    row in that list.
+
+18. **Annotation publication splits by scope, and the two halves are opposites.** Annotations we
+    create on **third-party public** data MUST be published with the submission (§Training data
+    policy, p.7). Annotations on **challenge** data (`heico`/`lapchole`) MUST NOT be published
+    (DUA clause 3, §Data usage agreement p.9). SAM 2 masks over our own videos are probe output
+    and stay in the secure environment; masks over a public corpus that train the model ship.
+
+19. **Weights-as-derivative-work is unsettled, and it does not gate us.** The organizers decline
+    to rule and note the conservative view is that weights ARE derivative. Irrelevant here: the
+    award criterion is *"make their model … public"* and **names no licence** (§Award policy,
+    p.7), so ShareAlike inheritance would constrain WHICH licence we release under, never
+    whether we may release. Do not spend another session on this question inside this challenge.
+
 ## BEFORE proposing an experiment — check `context/MEASURED.md` (BINDING)
 Read **`context/MEASURED.md`** before proposing any measurement, probe or rung. It is
 **generated** (`python -m frame.measured`) from four sources — decision notes, the ladders,
