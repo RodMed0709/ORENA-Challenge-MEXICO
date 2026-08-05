@@ -1,7 +1,8 @@
 ---
 question: Does Chain-of-Visual-Thought (CoVT) transfer to FRAME, and if not, what survives of it?
 verdict: CoVT AS PUBLISHED = NO-GO (774.6k-row corpus, 17K steps, outside any recipe framework). But its gains land in `object_recognition`, which is 50% of the leaderboard headline — so the perceptual branch is REOPENED via a bespoke SAM 2 route.
-status: SETTLED (paper read end-to-end incl. supplementary) · route OPEN
+status: SETTLED
+scope: paper read end-to-end incl. supplementary; the bespoke SAM 2 route stays OPEN
 date: 2026-07-26
 measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought.pdf (ficha §v46) · local/fuentes/analisis-articulos-legokna.md
 ---

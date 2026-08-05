@@ -1,7 +1,8 @@
 ---
 question: Is synthetic-counting SFT a live lever or a discarded one — and what exactly does the ±0.86 label-noise number measure?
 verdict: DISCARDED stands. Calibration's death did not promote it, and rung 15 already ran the only half of it our labels can support — null.
-status: SETTLED (reconciliation, zero GPU)
+status: SETTLED
+kind: reconciliation of two contradicting records, zero GPU
 date: 2026-07-26
 measured_in: context/ERROR_ANATOMY.md · context/decisions/epoch-matched-control.md · experiments/15-count-target/
 ---

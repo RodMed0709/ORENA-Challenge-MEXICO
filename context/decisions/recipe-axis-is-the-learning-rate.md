@@ -1,7 +1,8 @@
 ---
 question: The recipe axis was never swept. Now that five arms have run — which knob actually moves the score, and which ones only looked like they should?
 verdict: THE LEARNING RATE IS THE LARGEST LEVER ON THIS AXIS. 2e-5 -> 1e-4 -> 2e-4 compounds to a leaderboard proxy of 0.5421 -> 0.6104 and `bucket_mean` 0.5721 -> 0.6496 — the largest move SINCE rung 02. It is NOT the only lever: rank 32 buys a statistically indistinguishable +0.0193 and PASSES the pre-registered win condition, and the gradient clip produces a significant epoch-1 effect that converges away. LOWERING the ViT learning rate costs 0.028 — but that arm moved TWO flags and its mechanism is NOT established
-status: MEASURED, WITH ONE HEADLINE DOWNGRADED — see the audit section
+status: MEASURED
+caveat: one headline was DOWNGRADED by the same-day audit — read the audit section, never the verdict alone
 date: 2026-07-30
 measured_in: experiments/21-recipe-sweep/ — RESULTS_{A_lr,A2_lr,B_rank,D_clip,A3_vitlr}.csv + RESULTS_paired_ci*.csv (5 arms x 3 epochs, full 6252)
 ---
