@@ -165,6 +165,46 @@ A raw accuracy is meaningless without its trivial floor. Read numbers this way:
     convert into exact-match points. ⇒ a lever that raises `r` has NOT thereby raised
     `bucket_mean`; report the rise as a rise in `r`.
 
+## SIGNIFICANCE — when a delta is acted on (BINDING)
+
+Full rule and its price in [[significance-rule]]; the calibration it rests on is
+[[local-eval-vs-judge-calibration]]. Adopted 2026-08-05, replacing the unsigned 2026-08-01
+draft whose ε = 0.05 floor was **larger than the whole competitive field** (rank 1 → rank 11
+spans 0.0365; adjacent ranks near the top differ by 0.002–0.009).
+
+S1. **Large ships, small gets discussed.** A local delta **≳ 0.03** on the declared primary
+    cell is acted on: direction transferred in **8 of 8** bucket comparisons over both scored
+    submissions and never reversed. Below that there is **no evidence of transfer** — we have
+    never shipped a small move — so it does not run automatically; it becomes *"is this worth
+    1 of 8 slots?"*, a team call with the cost stated. ⚠️ Evidence, not a guarantee: both
+    calibration points are large moves. Read the result on return.
+
+S2. **The threshold is derived and it moves.** ~0.03 is what survives the measured deflation
+    (÷1 `agg_ID`, ÷1.5 `obj_ID`, ÷2 `obj_OOD`, ÷3.8 `agg_OOD`) and still moves rank. Each new
+    submission adds a calibration point and may move it.
+
+S3. **One primary cell, declared before the run.** 🔴 It may NOT be local `bucket_mean` —
+    that number overstates the judge by **+0.12** and **inverts the bucket ordering**
+    (`obj_OOD` is our best bucket locally, our worst on the judge). Use the ID cells or an
+    explicitly deflated OOD cell.
+
+S4. **Below |Δ| = 0.01 nothing is readable.** The seed band is borrowed literature
+    ([[seed-variance-is-small-when-clean]]) and **no run has ever been repeated under a
+    different seed**. A delta that is noise has no sign to transfer. One seed repeat on the
+    best arm retires this; nothing else does.
+
+S5. **Reserved vocabulary.** `WIN`/`NULL`/`LOSS` apply to the primary cell only; every other
+    cell is exploratory (*"consistent with"*). ⚠️ The 10 cells per epoch are **not
+    independent** — 3 are aggregates of the other 7, and `ALL` is **64% OOD by question
+    count** while the challenge weights ID and OOD equally. Significance on `ALL` is not
+    significance on the metric that pays.
+
+S6. **Retroactive one way.** Cells already read are not relabelled; but no NEW argument leans
+    on a secondary cell as a win. A load-bearing old cell is re-read under S3–S5 first.
+
+S7. **A faithful NULL is published.** No re-cutting a rung after the fact to find a cell that
+    clears the bar. Post-hoc slicing IS the multiplicity problem.
+
 ## COMPLIANCE — challenge data never leaves the secure environment (BINDING, DUA)
 
 14. **No challenge data — frames OR annotations (questions + gold) — to any external API.**
