@@ -4,6 +4,67 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-03**.
 
+## 🟢 2026-08-05 — submission 02 is scored, BOTH baselines are beaten, and the local eval is inverted on OOD
+
+**Zero GPU, zero pod.** The whole session ran off two files: the official per-bucket scores
+(`local/fuentes/metrics.json`) and 15 `stratified.json` pulled off the volume over S3.
+
+1. 🟢 **Submission 02 scored 0.5288 — rank 11 — and it clears BOTH official baselines.**
+   Fine-tuned baseline is rank **13** (0.5189), proprietary rank **30** (0.3883). Submission 01
+   was rank 23 (0.4767), so 01 → 02 is **+0.0521**. **The campaign's core value is nominally
+   reached.** 🔴 **But the margin over the fine-tuned baseline is +0.0099 and we cannot test
+   it** — the adjudicating significance test needs the baseline's per-question answers, held
+   only by the organizers; an unpaired estimate gives se ≈ 0.0178 (ratio 0.56 vs the 1.96
+   needed), and by `challenge_design.txt:1032-1033` a non-significant delta **collapses to the
+   same rank**. Treat it as unconfirmed, not banked. Podium is +0.0258 away, rank 1 +0.0365.
+   🟢 Confirmed the headline is the mean of the **four** populated buckets — reproduces the
+   reported score **to 1e-9 for all seven entries**; bucket sizes recovered from the rationals
+   sum to exactly 2000 (`agg_ID` 553, `obj_ID` 747, `agg_OOD` **188**, `obj_OOD` 512).
+
+2. 🔴 **The local eval is calibrated on ID and inverted on OOD** —
+   [[local-eval-vs-judge-calibration]]. Same checkpoint, both sides: `agg_ID` **−0.034**,
+   `obj_ID` +0.071, `agg_OOD` +0.080, **`obj_OOD` +0.367**. Local `bucket_mean` **0.6496** vs a
+   real **0.5288** ⇒ the local headline overstates by **+0.121**, and the error **grows**
+   between submissions (+0.302 → +0.367). 🔑 **The ordering is inverted at both extremes:
+   `obj_OOD` is our BEST bucket locally and our WORST on the judge.** Any prioritisation read
+   off local buckets pointed at the wrong one — the cheapest explanation yet for why nineteen
+   rungs of data work never moved the headline and one LR flag did. ⚠️ Reverses a criticism
+   made the same day: the **ID-only `proxy_leaderboard` is the least misleading local number we
+   own**; the defect is local `bucket_mean`. 🟢 **Direction survives — 8 of 8 comparisons keep
+   their sign, none reversed** (`agg_ID` 0.98×, `obj_ID` 1.48×, `obj_OOD` 2.03×, `agg_OOD`
+   3.76×), so past work is usable for the sign and not for the size. ⚠️ **Both calibration
+   points are LARGE moves; nothing says a small delta transfers.**
+   🔴 **Two things this is NOT:** the OOD split is **not** the defect — `heico`=OOD is the
+   organizers' own partition (`RULES §3`) and redefining it fixes nothing (claimed and
+   retracted in-session, before it was acted on); and **`kfold_lopo` is not the cheap probe** —
+   `split.py:342` costs **one training run per fold**. The cheap thing is a jackknife over
+   videos re-scoring predictions that already exist.
+   **Best explanation standing:** `acc_OOD` — half the challenge score — rests on **10 videos**
+   against 28 for ID, and checkpoints are selected by `idxmax(acc_ood)` over those same 10 and
+   reported on a set containing them. Already on record as *selection bias, unmeasured*; it now
+   has 0.30–0.37 of evidence. Second: against our own trivial floors the judge puts `agg_OOD`
+   at **−0.018** and `obj_OOD` at **+0.019** — at the constant ([[frequency-prior-is-the-failure-shape]]).
+
+3. 🟢 **The significance rule is settled, in legokna's formulation** — [[significance-rule]],
+   now `RULES §S1–S7`. **Large ships on sign (≳ 0.03); small does not run automatically, it
+   becomes a team call about spending 1 of 8 slots.** The unsigned 2026-08-01 draft is
+   superseded: its ε = 0.05 floor was **larger than the entire competitive field**. The seed
+   clause survives (**|Δ| < 0.01 unreadable**) because a delta that is noise has no sign to
+   transfer. 🔴 The primary cell may **not** be local `bucket_mean`.
+
+⚠️ **Tooling, paid for once:** the S3 endpoint sits behind Cloudflare, which rejects `urllib`'s
+TLS fingerprint with **`403 error code: 1010` on signed and unsigned requests alike** — it reads
+like a credentials failure and is not. **`curl` passes**; SigV4 signed with stdlib
+`hmac`/`hashlib`, transport shelled to `curl`, region `eu-ro-1`, `ListObjectsV2` fine.
+🔑 **The two OOD buckets are absent from every `RESULTS_*.csv`** — they store `aggregation_ID`
+and `object_recognition_ID` only, while `bucket_mean` silently averages all four. The desglose
+exists **only** in `stratified.json`.
+
+🔴 **Still open, all zero-GPU:** the **jackknife over the 10 OOD videos** (if `acc_OOD` swings
+±0.05 dropping one video, no OOD comparison in 27 rungs meant anything), **one seed repeat**
+(the only thing that retires `RULES §S4`), the **CAMMA e-mail**, and
+`assert_decisions_indexed` **still RED** (5 pre-existing notes, unrelated to the two added today).
+
 ## 🟢 2026-08-03 — the organizers answered on licences, and the ladder is closed
 
 **Zero GPU, zero pod.** A rules-and-hygiene session. `main` is at `81656bb` and carries everything.
