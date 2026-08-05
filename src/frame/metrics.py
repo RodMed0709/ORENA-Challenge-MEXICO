@@ -1405,3 +1405,60 @@ def predictions_frame(run_dir: str | Path, results_csv: str | Path | None = None
         if "video" in res.columns:
             df = df.merge(res[["qID", "video"]].drop_duplicates("qID"), on="qID", how="left")
     return df
+
+
+# ── jackknife over videos — how much does a bucket estimate rest on one video? ────
+
+
+def jackknife_by_video(
+    results_df: pd.DataFrame, *, group: str | None = None, distribution: str | None = None
+) -> dict:
+    """Leave-one-VIDEO-out spread of a bucket's accuracy, from answers that already exist.
+
+    🔴 **Why this measurement exists.** ``acc_OOD`` is half the challenge score and rests on
+    **10 videos** against 28 for ID, and every rung selects its checkpoint by
+    ``idxmax(acc_ood)`` over those same 10 and then reports on a set containing them
+    ([[local-eval-vs-judge-calibration]]). If dropping ONE video moves the estimate by more
+    than the deltas the ladder has been calling results, then no OOD comparison in the
+    campaign meant anything. This answers that for the cost of re-reading a CSV.
+
+    ⚠️ **This is NOT** ``split.kfold_lopo``, which holds out a whole procedure and costs one
+    TRAINING RUN per fold. Nothing is retrained here; it is a spread of the estimator over
+    the videos it happens to have.
+
+    ``results_df`` is a scored ``results.csv``: needs ``video``, ``correctness`` and — when
+    filtering — ``primary`` and ``ood``.
+
+    Returns ``full``, ``lo``/``hi`` (min/max over the leave-one-out estimates), ``spread``
+    (hi − lo), ``worst_video`` (the one whose removal moves it most) and ``n_videos``.
+    """
+    df = results_df
+    if group is not None:
+        df = df[df["primary"].map(_group) == group] if "primary" in df else df
+    if distribution is not None:
+        want = distribution.upper() == "OOD"
+        df = df[df["ood"].astype(bool) == want]
+    if df.empty or "video" not in df.columns:
+        return {"full": float("nan"), "n_videos": 0}
+
+    corr = df["correctness"].astype(float)
+    full = float(corr.mean())
+    loo = {
+        v: float(corr[df["video"] != v].mean())
+        for v in df["video"].unique()
+        if (df["video"] != v).any()
+    }
+    if not loo:
+        return {"full": full, "n_videos": 1}
+    lo, hi = min(loo.values()), max(loo.values())
+    worst = max(loo, key=lambda v: abs(loo[v] - full))
+    return {
+        "full": full,
+        "lo": lo,
+        "hi": hi,
+        "spread": hi - lo,
+        "max_shift": abs(loo[worst] - full),
+        "worst_video": worst,
+        "n_videos": len(loo),
+        "n": int(len(df)),
+    }
