@@ -49,10 +49,15 @@ from `/workspace/repo` works. **Nothing was lost**: 7 of its 8 dirty files were 
 `main` and the eighth (`src/frame/metrics.py`) was an **older** draft of `jackknife_by_video`
 missing the RULES §2 assert. Backups in `/workspace/tmp/leo_backup_20260806/`.
 
-⚠️ **`assert_decisions_indexed` is still RED**, now on **2** notes, not 5 —
-`seed-variance-is-small-when-clean` and `target-noise-is-the-harmful-kind` put prose in `status:`.
-Both are literature-based notes and the closed vocabulary has no `LITERATURE` member, so the fix
-is a judgement about which enum value they take, not a typo. Today's two new notes pass.
+🟢 **`assert_decisions_indexed` is GREEN for the first time since it was recorded red** (2026-08-03).
+Three of the five offending notes had been fixed at some point; the last two —
+`seed-variance-is-small-when-clean` and `target-noise-is-the-harmful-kind` — put prose in `status:`
+beginning `LITERATURE (…)`. 🔑 **The closed vocabulary was not missing a member; the field was
+carrying the wrong fact.** Provenance already lives in these notes' own `measured_in:` (arXiv
+2604.12469v1, named tables), while `status` describes the **standing** of the verdict — and both
+verdicts are adopted and operative (one of them installed a rule), so both are **`SETTLED`**.
+Nothing is lost: that the evidence is external stays in `measured_in` and in the bodies, which
+already state the transfer limits.
 
 ## 🟢 2026-08-05 (pm) — step 5 RAN: phase C survives, but only for `number`
 
