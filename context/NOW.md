@@ -4,6 +4,62 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-03**.
 
+## 🔴 2026-08-06 (pm) — step 6 is BUILT and BLOCKED ON ITS OWN PREMISE: there is no sub-second population
+
+**Found by the first smoke, zero GPU spent on a verdict. `experiments/29-sam2-temporal/`.**
+🔴 **OPEN DECISION — nothing is decided here and the analysis is deferred to the next session.**
+
+1. 🔴 **Every timestamp in the corpus is `HH:MM:SS` with no fractional part** — checked across
+   **all 12 parquets, all three tracks, 40,000 rows: zero fractional values**. The minimum gap
+   between two annotated frames is therefore **1 second**, and `frame_index` cannot rescue it
+   because `data.py:117` derives it as `round(start_time * base_fps)` from the same coarse field.
+   ⇒ **The `≤1 s` band step 6 rests on is not a band, it is a single value.**
+
+2. 🔴 **And that reaches back into three cited numbers.** `ERROR_ANATOMY.md:139-148` reports
+   *"≤0.5 s, n=1257"*, *"`8 → 14 → 6` in 690 ms"*, *"`7 → 7 → 1` in 270 ms"* — **not computable
+   from this corpus**. So the **31.1% of pairs at ≤1 s** in [[covt-reduced-sam-route]] and the
+   **±0.86** attributed to *"frames less than a second apart"* rest on a resolution the data does
+   not have. ⚠️ **Neither is refuted** — they may come from an earlier corpus version or a
+   derivation not visible in the repo — **but neither is reproducible from what is on the volume
+   today.** 📌 **Wording fix owed regardless of the outcome:** the ±0.86 is at best *"at exactly
+   one second"*, and it is quoted as *"under a second"* in three documents.
+
+3. **What is buildable** (same template, `number` gold, consecutive within a video), the census
+   that replaces the assumption — full table in the experiment's README:
+
+   | gap ≤ | arm J (jump ≥3), gold ≥5 | arm S (Δ=0) |
+   |---|---|---|
+   | **1 s** | **11** | 68 |
+   | 3 s | 24 | 115 |
+   | 30 s | 86 | 142 |
+
+   🔴 **n=11 cannot carry the pre-registered 0.10 difference in persistence**, and widening the
+   gap is **not** a free parameter change — the entire argument is that at ≤1 s a track is the
+   same physical instance **by construction**. At 30 s that claim is gone. **Not widened without
+   a decision.** Three options, none taken: run at ≤3 s (n=24, the wording `plan-accion.md`
+   itself uses) and accept the weaker claim; find the finer-grained source someone computed the
+   1,257 from; or close the probe — which also closes step 7, which needs its masks.
+
+🟢 **The code is sound and runnable**, and needs **no new dependency**: SAM 2 ships inside our
+pinned `transformers` 4.57.6 as `Sam2VideoModel`, and the checkpoint on the volume declares
+exactly that architecture. Meta's package is NOT added. The port has no automatic mask generator,
+so seeding is a point lattice with area filters and IoU NMS, in `_models/sam2_probe.py`.
+⚠️ **The area cap is load-bearing, not hygiene:** one centre point on a `heico` frame returns
+**90% of the image** — SAM 2 is class-agnostic and segments tissue.
+
+⚠️ **Three code defects, all invisible off-GPU, all found by smokes and fixed:** the same-template
+test compared **raw questions**, which embed their own `HH:MM:SS` and are therefore unique per row
+(rung 08 §3's artifact, and `template_of` exists for it); `obj_ids` must be a **list** or the
+processor's `len()` raises a `TypeError` that reads like a shape bug; and **the conditioning frame
+must be forward-passed before propagating** — adding masks only registers the prompt, the memory
+bank is built by the forward pass.
+
+🔴 **Rodrigo's C1 negative control is restated, not dropped, and the departure is flagged for him.**
+His literal test (`K == 1` on a `gold == 1` frame) cannot run on a class-agnostic segmenter. What
+is blocking instead is **separation** between `gold ≥ 5` and `gold == 1` frames. A C1 failure
+reports **NO VERDICT** rather than falling back to persistence-only — that fallback is deliberately
+not pre-registered, because reading it after the fact would be moving the goalposts.
+
 ## 🔴 2026-08-06 — week 1's two gates are CLOSED: VCD dies, phase C replicates on `number`
 
 **One pod session, 1× RTX 5090, ~1 h 40 of GPU, zero training.** Both remaining week-1 gates of
