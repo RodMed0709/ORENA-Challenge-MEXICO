@@ -229,6 +229,13 @@ def seed_instances(
             inference_session=session, frame_idx=frame_idx, obj_ids=[oid],
             input_masks=[torch.from_numpy(m)],
         )
+    # 🔴 The conditioning frame must be RUN before anything propagates: adding masks only
+    # registers the prompt, and the memory bank the tracker reads is built by this forward
+    # pass. Without it propagation raises "maskmem_features in conditioning outputs cannot
+    # be empty when not is_initial_conditioning_frame" — measured 2026-08-06.
+    if obj_ids:
+        with torch.inference_mode():
+            model(inference_session=session, frame_idx=frame_idx)
     return session, obj_ids, masks
 
 
