@@ -1,5 +1,11 @@
 # Rung 10 — Self-consistency (k-voting on `number`)
 
+> 📌 **This directory also hosts step 5 of the August plan — the entropy gate.** Not a rung (the
+> ladder is closed): it reuses this rung's `predict_samples()`/`vote.py` machinery to ask whether
+> GRPO has a gradient. Ran twice — **SEED 42 (2026-08-05) and SEED 43 (2026-08-06)** — and both
+> samples give the same verdict: **phase C lives, scoped to `number`.** Section 7 below; verdict
+> in [`context/decisions/entropy-gate-scopes-phase-c-to-number.md`](../../context/decisions/entropy-gate-scopes-phase-c-to-number.md).
+
 > **Status: CLOSED — FAITHFUL NEGATIVE (2026-07-20).** Ran in full on 1× RTX 5090: identity gate,
 > T0 pilot, T1 over the whole 2094-question `number` population in three pre-registered arms, T2
 > scoring. **All three arms negative; k=16 significantly HARMS OOD.** Verdict and mechanism in
@@ -133,3 +139,35 @@ trivial floor** (margin −0.0047 at k=8, −0.0189 at k=16). Full reasoning:
 **Cost, for the record:** k=8 ≈ 1.15 s/q, k=16 ≈ 1.96 s/q vs greedy 0.173 s — sublinear in k
 because the k candidates share one prefill. Cold start 8.7–23.9 s load + ≤1.3 s first inference
 against the pooled 120 s setup allowance. **The lever died on quality, not on latency.**
+
+## 7. Step 5 (August plan) — the entropy gate, run twice
+
+**Not part of rung 10.** `10b_entropy_gate.ipynb`, 600 train questions, k=8, T=1.0, on **A2 ep3**
+(`21_lr_2e4_v1/checkpoint-2703` — not rung 06, which we are about to replace). Scored by the SDK
+verifier, 9 evaluator passes. Both thresholds pre-registered before the first run.
+
+| format | n | `zero_adv` s42 | `zero_adv` s43 | headroom s42 | headroom s43 | verdict |
+|---|---|---|---|---|---|---|
+| `binary` | 200 | 0.720 | 0.735 | +0.050 | +0.040 | 🔴 DEAD (both) |
+| `fo_class` | 200 | 0.660 | 0.705 | +0.090 | +0.045 | 🔴 DEAD (both) |
+| **`number`** | 200 | **0.280** | **0.270** | **+0.240** | **+0.310** | 🟢 **ALIVE (both)** |
+
+Kill lines: `zero_advantage >= 0.60`, `headroom < +0.05`. ⇒ **GRPO with a set-F1 reward is scoped
+to `number`**; rung 22 (loss-mass) stays parked as the pre-decided Plan B.
+
+🔴 **What the second seed changed.** `zero_advantage` is stable (±0.015) and carries the decision.
+`headroom` is not: `fo_class` halved between samples and **would have flipped** had its verdict
+rested on that leg — the conjunction saved it. And greedy on `number` moved **10.5 points**
+(0.705 → 0.600) between two independent 200-question draws, so **a per-format delta below ~0.10
+at n=200 is not separable from the draw.**
+
+⚠️ **Two operational facts, paid for once.** The run is **~58 min**, not the 1h48 first recorded
+(papermill's own cell timings; the generation cell is 56.7 min and all nine evaluator passes are
+~38 s). And `FrameProvider` (`src/frame/data.py:154`) reads straight from the source video with
+decord and **never touches `/workspace/frames_cache`** — during a run the GPU sits near 0% while
+one CPU thread seeks inside multi-GB AVIs on the network volume. That profile looks hung and is
+not; the frame cache failing to grow is not a symptom.
+
+**Artifacts:** `RESULTS_step5_{gate,verdict,per_question}*.csv|json`, seed 42 unsuffixed and seed
+43 with a `_seed43` suffix. ⚠️ The notebook writes both runs to the same `runs/.../full/`, so a
+re-run overwrites — copy the artifacts out before launching another seed.

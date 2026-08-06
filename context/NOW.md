@@ -4,6 +4,56 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-03**.
 
+## 🔴 2026-08-06 — week 1's two gates are CLOSED: VCD dies, phase C replicates on `number`
+
+**One pod session, 1× RTX 5090, ~1 h 40 of GPU, zero training.** Both remaining week-1 gates of
+`local/tasks/plan-accion.md` ran to a verdict.
+
+1. 🔴 **Step 4 ran and VCD is dead — [[vcd-has-nothing-to-subtract]].** On all **228** frames
+   where `Clip` is a false positive, degrading the image makes the model **less** confident in
+   `Clip`: p(`Clip`) **0.7794 → 0.6198**, paired delta **−0.1596** against a pre-declared ±0.02
+   band. 🟢 **The blocking `manipulation_check` passes by 26×** (0.2615 vs 0.0100) — the control
+   is what makes the null readable, because "unchanged" is also what a too-weak corruption looks
+   like and would have killed the lever for the wrong reason. 🔑 **Of the two deaths this is the
+   informative one: VCD is not a no-op here, it has nothing to subtract** — the model **does** use
+   the pixels on the exact error we wanted it to fix. ⇒ **step 8 does not exist**; week 2 keeps
+   step 7 only, and nothing else in the plan moves. 🔑 The wider consequence: any lever whose
+   mechanism is *"stop it answering blind"* is aimed at a defect this model does not have here —
+   the over-enumeration of [[margin-is-vision-not-phrasing]] fails **after** seeing. ⚠️ Not
+   unanimous (146 sink / 27 flat / **70 rise**), ID leans on the image harder than OOD (−0.2683
+   on n=49 vs −0.1299 on n=179), and the scope is one class, one σ, one checkpoint, first token.
+
+2. 🟢 **Step 5 ran a second time (SEED 43) and the scoping REPLICATES — [[entropy-gate-scopes-phase-c-to-number]].**
+   `zero_advantage` **0.280 / 0.270** for `number` against a 0.60 kill line; `binary`
+   (0.720/0.735) and `fo_class` (0.660/0.705) dead in both. **GRPO stays scoped to `number`, rung
+   22 stays parked.** 🔴 **But only `zero_advantage` is stable (±0.015).** `headroom` is not:
+   `fo_class` halved (+0.090 → +0.045) and would have flipped had its verdict rested on that leg
+   — **the conjunction saved it, not the margin.** 🔑 **Instrument finding:** greedy on `number`
+   moved **10.5 points** between two independent 200-question draws (~2 se) ⇒ **a per-format delta
+   below ~0.10 at n=200 is not separable from the draw** — the same class of limit as the video
+   jackknife's 0.024 on `acc_OOD`, and it bears on `RULES §S1–S7`. 🟢 Seed 42's `binary` float
+   artifact (`0.04999999999999993`) closes on its own: at seed 43 it is 0.040.
+
+⚠️ **Two operational facts, paid for once.** Step 5 costs **~58 min, not 1h48** (papermill's own
+cell timings: 56.7 min is the generation cell, all nine evaluator passes are ~38 s; the 1h48
+included the smoke and the chain). And **`FrameProvider` never touches `/workspace/frames_cache`**
+(`src/frame/data.py:154`) — it reads straight from the source video with decord, so mid-run the
+GPU sits near 0% while one CPU thread seeks inside multi-GB AVIs on the network volume. **That
+profile looks hung and is not**, and a frame cache that does not grow is not a symptom.
+⚠️ `pgrep -f "papermill <nb>"` **matches its own `bash -c` wrapper**, so a wait-loop built on it
+never exits and blocks the launch behind it. Cost one silent non-start of step 5. Use `[p]apermill`.
+
+🟢 **The pod checkout `/workspace/repo_leo` is on `main` again** (it sat on `task/covt-sam-route`,
+200+ commits back, unable to fetch). Its remote carries no token by design; fetching with the URL
+from `/workspace/repo` works. **Nothing was lost**: 7 of its 8 dirty files were byte-identical to
+`main` and the eighth (`src/frame/metrics.py`) was an **older** draft of `jackknife_by_video`
+missing the RULES §2 assert. Backups in `/workspace/tmp/leo_backup_20260806/`.
+
+⚠️ **`assert_decisions_indexed` is still RED**, now on **2** notes, not 5 —
+`seed-variance-is-small-when-clean` and `target-noise-is-the-harmful-kind` put prose in `status:`.
+Both are literature-based notes and the closed vocabulary has no `LITERATURE` member, so the fix
+is a judgement about which enum value they take, not a typo. Today's two new notes pass.
+
 ## 🟢 2026-08-05 (pm) — step 5 RAN: phase C survives, but only for `number`
 
 **600 train questions, k=8, on A2 ep3. 5,400 generations, 0 errors, 9 evaluator passes, 1 h 48.**
