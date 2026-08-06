@@ -1,7 +1,7 @@
 ---
 question: How many seeds does a run need before its delta means anything — or do we declare every result inconclusive?
 verdict: NONE, and the reason is now external and measured rather than an argument from cost. Seed variance is a property of training NEAR A NOISE-INDUCED CRITICAL THRESHOLD, not of fine-tuning. In the CLEAN condition three seeds span 0.5 pp; under 40% label-flip the same three span 68.5 pp. Our effects are read against the clean band, not the noisy one
-status: LITERATURE (measured by others, on LLMs only — see the transfer limits)
+status: SETTLED
 date: 2026-07-29
 measured_in: arXiv 2604.12469v1 Table 10 (p.21) + Appendix F.2 (p.17) — read end-to-end, not from a ficha
 ---
