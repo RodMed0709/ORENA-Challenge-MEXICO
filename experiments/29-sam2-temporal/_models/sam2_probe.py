@@ -57,6 +57,8 @@ def build_pairs(
     """
     import pandas as pd
 
+    from frame.metrics import template_of
+
     rows = []
     for it in items:
         g = read_gold(it.reference)
@@ -70,7 +72,12 @@ def build_pairs(
                 "frame_index": it.frame_index,
                 "t": float(it.request.start_time),
                 "gold": int(g),
-                "template": str(it.request.question),
+                # 🔴 template_of, NOT the raw question: every open_ended question embeds its
+                # own HH:MM:SS, so the raw string is unique per row and a same-template test
+                # against it is always False. Rung 08 §3 measured the same artifact inflating
+                # 188 real templates to 393. Using the raw string here cost 11 usable pairs
+                # where there are hundreds (measured on the first smoke, 2026-08-06).
+                "template": template_of(it.request.question),
             }
         )
     df = pd.DataFrame(rows)
@@ -216,9 +223,11 @@ def seed_instances(
     session = processor.init_video_session(video=frames, inference_device=device, dtype=dtype)
     obj_ids = list(range(len(masks)))
     for oid, m in zip(obj_ids, masks):
+        # obj_ids must be a LIST — the processor calls len() on it, so a bare int raises
+        # a TypeError that reads like a shape bug and is not one.
         processor.process_new_mask_for_video_frame(
-            inference_session=session, frame_idx=frame_idx, obj_ids=oid,
-            input_masks=torch.from_numpy(m),
+            inference_session=session, frame_idx=frame_idx, obj_ids=[oid],
+            input_masks=[torch.from_numpy(m)],
         )
     return session, obj_ids, masks
 
