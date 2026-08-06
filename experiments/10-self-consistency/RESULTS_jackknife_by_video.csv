@@ -1,0 +1,79 @@
+run,dist,n,videos,acc,spread,max_shift,worst
+runs/02_lora_sft_v1/ep1_full,ID,2252,28,0.4876,0.017,0.0092,0183 - Laparoscopic Cholecystectomy.mp4
+runs/02_lora_sft_v1/ep1_full,OOD,4000,10,0.5833,0.0489,0.0285,0021 - Heico - Sigma - 2.avi
+runs/02_lora_sft_v1/eval_best,ID,6252,38,0.5662,0.0311,0.0187,0021 - Heico - Sigma - 2.avi
+runs/06_vit_lora_v1/ep1_full,ID,2252,28,0.5062,0.0134,0.0076,0183 - Laparoscopic Cholecystectomy.mp4
+runs/06_vit_lora_v1/ep1_full,OOD,4000,10,0.5785,0.0481,0.026,0021 - Heico - Sigma - 2.avi
+runs/06_vit_lora_v1/ep3_full,ID,2252,28,0.5595,0.0164,0.0084,0070 - Laparoscopic Cholecystectomy.mp4
+runs/06_vit_lora_v1/ep3_full,OOD,4000,10,0.6045,0.0403,0.0233,0023 - Heico - Sigma - 4.avi
+runs/06_vit_lora_v1/eval_best,ID,6252,38,0.5849,0.0275,0.015,0021 - Heico - Sigma - 2.avi
+runs/13_wise_ft_v1/eval_a0.50,ID,2252,28,0.4645,0.0157,0.0091,0183 - Laparoscopic Cholecystectomy.mp4
+runs/13_wise_ft_v1/eval_a0.50,OOD,4000,10,0.5507,0.0514,0.0294,0021 - Heico - Sigma - 2.avi
+runs/13_wise_ft_v1/eval_a0.70,ID,2252,28,0.5284,0.0161,0.0086,0045 - Laparoscopic Cholecystectomy.mp4
+runs/13_wise_ft_v1/eval_a0.70,OOD,4000,10,0.5952,0.0472,0.0255,0021 - Heico - Sigma - 2.avi
+runs/13_wise_ft_v1/eval_a0.85,ID,2252,28,0.5426,0.0152,0.0076,0045 - Laparoscopic Cholecystectomy.mp4
+runs/13_wise_ft_v1/eval_a0.85,OOD,4000,10,0.604,0.0467,0.0237,0021 - Heico - Sigma - 2.avi
+runs/13_wise_ft_v1/gate_alpha1_probe,ID,100,2,0.56,0.2051,0.1067,0019 - Laparoscopic Cholecystectomy.mp4
+runs/13_wise_ft_v1/gate_alpha1_probe,OOD,100,2,0.52,0.1809,0.0922,0023 - Heico - Sigma - 4.avi
+runs/13_wise_ft_v1/gate_control_probe,ID,100,2,0.56,0.2051,0.1067,0019 - Laparoscopic Cholecystectomy.mp4
+runs/13_wise_ft_v1/gate_control_probe,OOD,100,2,0.52,0.1809,0.0922,0023 - Heico - Sigma - 4.avi
+runs/14_appearance_aug_v1/eval_checkpoint-1720,ID,2252,28,0.5324,0.0161,0.0085,0045 - Laparoscopic Cholecystectomy.mp4
+runs/14_appearance_aug_v1/eval_checkpoint-1720,OOD,4000,10,0.6155,0.0447,0.023,0021 - Heico - Sigma - 2.avi
+runs/14_appearance_aug_v1/eval_checkpoint-2580,ID,2252,28,0.5355,0.015,0.0075,0070 - Laparoscopic Cholecystectomy.mp4
+runs/14_appearance_aug_v1/eval_checkpoint-2580,OOD,4000,10,0.6055,0.04,0.0226,0023 - Heico - Sigma - 4.avi
+runs/14_appearance_aug_v1/eval_checkpoint-860,ID,2252,28,0.4947,0.0166,0.0086,0027 - Laparoscopic Cholecystectomy.mp4
+runs/14_appearance_aug_v1/eval_checkpoint-860,OOD,4000,10,0.5803,0.0514,0.0278,0021 - Heico - Sigma - 2.avi
+runs/15_count_target_v1/eval_best__checkpoint-1720,ID,2252,28,0.5391,0.0147,0.0074,0027 - Laparoscopic Cholecystectomy.mp4
+runs/15_count_target_v1/eval_best__checkpoint-1720,OOD,4000,10,0.6022,0.0475,0.0242,0021 - Heico - Sigma - 2.avi
+runs/15_count_target_v1/eval_best__checkpoint-2580,ID,2252,28,0.5613,0.0152,0.0082,0027 - Laparoscopic Cholecystectomy.mp4
+runs/15_count_target_v1/eval_best__checkpoint-2580,OOD,4000,10,0.5968,0.0408,0.0235,0023 - Heico - Sigma - 4.avi
+runs/15_count_target_v1/eval_best__checkpoint-860,ID,2252,28,0.5,0.0143,0.0074,0045 - Laparoscopic Cholecystectomy.mp4
+runs/15_count_target_v1/eval_best__checkpoint-860,OOD,4000,10,0.5707,0.0497,0.0277,0021 - Heico - Sigma - 2.avi
+runs/18_count_aug_v1/ep1_full,ID,2252,28,0.5031,0.0145,0.0077,0183 - Laparoscopic Cholecystectomy.mp4
+runs/18_count_aug_v1/ep1_full,OOD,4000,10,0.5655,0.0472,0.0255,0021 - Heico - Sigma - 2.avi
+runs/18_count_aug_v1/ep2_full,ID,2252,28,0.524,0.0141,0.0076,0070 - Laparoscopic Cholecystectomy.mp4
+runs/18_count_aug_v1/ep2_full,OOD,4000,10,0.594,0.0428,0.0221,0023 - Heico - Sigma - 4.avi
+runs/18_count_aug_v1/ep3_full,ID,2252,28,0.5586,0.0145,0.0089,0070 - Laparoscopic Cholecystectomy.mp4
+runs/18_count_aug_v1/ep3_full,OOD,4000,10,0.6052,0.0411,0.0217,0023 - Heico - Sigma - 4.avi
+runs/21_clip10_v1/ep1_full,ID,2252,28,0.54,0.018,0.0096,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_clip10_v1/ep1_full,OOD,4000,10,0.6425,0.0444,0.0244,0023 - Heico - Sigma - 4.avi
+runs/21_clip10_v1/ep2_full,ID,2252,28,0.5928,0.0166,0.0086,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_clip10_v1/ep2_full,OOD,4000,10,0.6797,0.0431,0.025,0023 - Heico - Sigma - 4.avi
+runs/21_clip10_v1/ep3_full,ID,2252,28,0.6234,0.0169,0.0097,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_clip10_v1/ep3_full,OOD,4000,10,0.6917,0.0397,0.0241,0023 - Heico - Sigma - 4.avi
+runs/21_lr_1e4_v1/ep1_full,ID,2252,28,0.5173,0.0147,0.008,0027 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_1e4_v1/ep1_full,OOD,4000,10,0.6222,0.0392,0.0222,0023 - Heico - Sigma - 4.avi
+runs/21_lr_1e4_v1/ep2_full,ID,2252,28,0.5848,0.0168,0.0088,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_1e4_v1/ep2_full,OOD,4000,10,0.6733,0.0458,0.0251,0023 - Heico - Sigma - 4.avi
+runs/21_lr_1e4_v1/ep3_full,ID,2252,28,0.6066,0.0184,0.0099,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_1e4_v1/ep3_full,OOD,4000,10,0.6757,0.04,0.0242,0024 - Heico - Sigma - 5.avi
+runs/21_lr_2e4_v1/ep1_full,ID,2252,28,0.5151,0.0166,0.0084,0000 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_2e4_v1/ep1_full,OOD,4000,10,0.624,0.0472,0.0246,0021 - Heico - Sigma - 2.avi
+runs/21_lr_2e4_v1/ep2_full,ID,2252,28,0.5924,0.018,0.0098,0027 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_2e4_v1/ep2_full,OOD,4000,10,0.66,0.035,0.0206,0023 - Heico - Sigma - 4.avi
+runs/21_lr_2e4_v1/ep3_full,ID,2252,28,0.6288,0.018,0.0098,0027 - Laparoscopic Cholecystectomy.mp4
+runs/21_lr_2e4_v1/ep3_full,OOD,4000,10,0.694,0.0428,0.0232,0024 - Heico - Sigma - 5.avi
+runs/21_rank32_v1/ep1_full,ID,2252,28,0.5053,0.0168,0.0086,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_rank32_v1/ep1_full,OOD,4000,10,0.631,0.0464,0.0238,0021 - Heico - Sigma - 2.avi
+runs/21_rank32_v1/ep2_full,ID,2252,28,0.591,0.0166,0.0098,0027 - Laparoscopic Cholecystectomy.mp4
+runs/21_rank32_v1/ep2_full,OOD,4000,10,0.6825,0.0378,0.0242,0023 - Heico - Sigma - 4.avi
+runs/21_rank32_v1/ep3_full,ID,2252,28,0.6279,0.0184,0.0093,0027 - Laparoscopic Cholecystectomy.mp4
+runs/21_rank32_v1/ep3_full,OOD,4000,10,0.6913,0.0392,0.0254,0024 - Heico - Sigma - 5.avi
+runs/21_vitlr_v1/ep1_full,ID,2252,28,0.5222,0.017,0.0089,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_vitlr_v1/ep1_full,OOD,4000,10,0.625,0.0444,0.0225,0023 - Heico - Sigma - 4.avi
+runs/21_vitlr_v1/ep2_full,ID,2252,28,0.5782,0.0161,0.0091,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_vitlr_v1/ep2_full,OOD,4000,10,0.663,0.0442,0.0253,0023 - Heico - Sigma - 4.avi
+runs/21_vitlr_v1/ep3_full,ID,2252,28,0.6017,0.0189,0.0101,0183 - Laparoscopic Cholecystectomy.mp4
+runs/21_vitlr_v1/ep3_full,OOD,4000,10,0.6587,0.0447,0.0243,0023 - Heico - Sigma - 4.avi
+runs/20_judge_swap_v1/Qwen3-4B,ID,2252,28,0.5595,0.0164,0.0084,0070 - Laparoscopic Cholecystectomy.mp4
+runs/20_judge_swap_v1/Qwen3-4B,OOD,4000,10,0.6045,0.0403,0.0233,0023 - Heico - Sigma - 4.avi
+runs/20_judge_swap_v1/Qwen3_5-4B,ID,2252,28,0.5617,0.0159,0.0085,0070 - Laparoscopic Cholecystectomy.mp4
+runs/20_judge_swap_v1/Qwen3_5-4B,OOD,4000,10,0.5995,0.0414,0.0238,0023 - Heico - Sigma - 4.avi
+runs/20_judge_swap_v1/_src,ID,2252,28,0.5595,0.0164,0.0084,0070 - Laparoscopic Cholecystectomy.mp4
+runs/20_judge_swap_v1/_src,OOD,4000,10,0.6045,0.0403,0.0233,0023 - Heico - Sigma - 4.avi
+runs/24_flip_p25_v1/ep1_full,ID,2252,28,0.5018,0.0173,0.0096,0183 - Laparoscopic Cholecystectomy.mp4
+runs/24_flip_p25_v1/ep1_full,OOD,4000,10,0.6052,0.0322,0.02,0023 - Heico - Sigma - 4.avi
+runs/24_flip_p25_v1/ep2_full,ID,2252,28,0.6021,0.0166,0.0087,0183 - Laparoscopic Cholecystectomy.mp4
+runs/24_flip_p25_v1/ep2_full,OOD,4000,10,0.6633,0.0417,0.0259,0023 - Heico - Sigma - 4.avi
+runs/24_flip_p25_v1/ep3_full,ID,2252,28,0.6181,0.0157,0.008,0027 - Laparoscopic Cholecystectomy.mp4
+runs/24_flip_p25_v1/ep3_full,OOD,4000,10,0.6705,0.0392,0.0242,0023 - Heico - Sigma - 4.avi
