@@ -114,9 +114,44 @@ work**, not hygiene: without `MAX_AREA_FRAC` the dominant "instance" is the tiss
 
 ## Status
 
-**BEING WRITTEN.** API verified end-to-end on the pod (session → point prompt → `post_process_masks`
-→ `propagate_in_video_iterator`, 2-frame round trip on a real `heico` video). Population not yet
-built, nothing run.
+🔴 **BLOCKED ON ITS OWN PREMISE — the sub-second population does not exist.** 2026-08-06, found by
+the first smoke, zero GPU spent on a verdict.
+
+**Every timestamp in the corpus is `HH:MM:SS` with no fractional part** — checked across **all 12
+parquets, all three tracks, 40,000 rows: zero fractional values.** The minimum possible gap
+between two annotated frames is therefore **1 second**, and `frame_index` cannot rescue it because
+`data.py:117` derives it as `round(start_time * base_fps)` from the same coarse field.
+
+⇒ 🔴 **The `≤1 s` band this probe is built on is not a band, it is a single value**, and
+`ERROR_ANATOMY.md:139-148` — *"≤0.5 s, n=1257"*, *"`8 → 14 → 6` in 690 ms"*, *"`7 → 7 → 1` in
+270 ms"* — **cannot have been computed from this corpus.** So the `31.1%` of pairs at ≤1 s quoted
+in [[covt-reduced-sam-route]], and the `±0.86` attributed to *"frames less than a second apart"*,
+both rest on a resolution the data does not have. ⚠️ **Neither number is refuted here** — they may
+come from an earlier corpus version or a different derivation — **but neither is reproducible from
+what is on the volume today, and this probe cannot be run on the population they describe.**
+
+**What is actually buildable** (same template, `number` gold, consecutive within a video):
+
+| gap ≤ | gold ≥ 5: arm J (jump ≥3) | arm S (Δ=0) | any gold: J | S |
+|---|---|---|---|---|
+| **1 s** | **11** | 68 | 11 | 355 |
+| 2 s | 14 | 102 | 14 | 492 |
+| 3 s | 24 | 115 | 25 | 578 |
+| 5 s | 33 | 125 | 37 | 656 |
+| 10 s | 50 | 135 | 56 | 746 |
+| 30 s | 86 | 142 | 99 | 834 |
+
+🔴 **n = 11 cannot carry a 0.10 difference in persistence**, and widening the gap is not a free
+parameter change: the whole argument is that at ≤1 s a track is *the same physical instance by
+construction*. At 30 s that claim is gone and a broken track means nothing about annotation.
+**The threshold is load-bearing, so it is not being widened without a decision.** Options, none
+taken here: run at ≤3 s (n=24, the wording the plan itself uses) and accept the weaker claim;
+re-derive the sub-second pairs if a finer-grained source exists; or close the probe.
+
+**Code state:** runnable. Three defects found and fixed by the smokes — the same-template test
+compared raw questions carrying their own timestamps, `obj_ids` needs a list, and the conditioning
+frame must be forward-passed before propagation or the memory bank is empty. Both controls and
+the arms execute; only the population is missing.
 
 Run order: `SMOKE=True` (a handful of pairs) → read → `-p SMOKE False`.
 
