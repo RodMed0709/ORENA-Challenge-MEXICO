@@ -1,7 +1,7 @@
 ---
 question: Why did our input-side data lever return a null and our label-side data lever return a null too — and what does that predict about the levers we have not run yet?
 verdict: THEY ARE NOT THE SAME NULL. Noise on the INPUT is near-harmless and sometimes regularising (+2 pts measured on Qwen2-QA); noise on the TARGET is the single most damaging thing you can do to a fine-tune (21% average degradation). Rung 14 perturbed inputs and rung 18's L1 minted imperfect labels — the literature predicts exactly the two outcomes we got. Every pseudo-label route we have proposed is target-side
-status: LITERATURE (external), explaining OUR OWN measured results retrospectively
+status: SETTLED
 date: 2026-07-29
 measured_in: arXiv 2604.12469v1 Tables 2, 5, 6 — cross-read against experiments/14-appearance-aug/ and 18-count-aug/
 ---
