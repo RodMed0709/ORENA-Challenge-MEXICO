@@ -1434,7 +1434,10 @@ def jackknife_by_video(
     """
     df = results_df
     if group is not None:
-        df = df[df["primary"].map(_group) == group] if "primary" in df else df
+        # RULES EVAL §2: leaf→group ALWAYS through the canonical mapper, never a
+        # hand-rolled prefix rule.
+        assert "primary" in df.columns, "group= needs the `primary` column"
+        df = df[df["primary"].map(_leaf_to_group) == group]
     if distribution is not None:
         want = distribution.upper() == "OOD"
         df = df[df["ood"].astype(bool) == want]
