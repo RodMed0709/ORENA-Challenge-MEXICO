@@ -30,11 +30,35 @@ step 6.
 
 ## Status
 
-**BUILT, NOT RUN** — needs a GPU. Pre-flight done off-GPU against A2 ep3's scored artifacts:
-**228 `Clip` false positives** over 2,675 `fo_class` questions (8.5%; 49 ID / 179 OOD), all
-distinct frames, so the gate is executable and its `n >= 10` guard passes with room.
+🔴 **RUN AND CLOSED — 2026-08-06. `DIES`, and it dies of "sinks": the model does use the frame.**
+1× RTX 5090, ~35 min, zero training. Smoke (24) then full (228), both `DIES`, same direction.
 
-Run order: `SMOKE=True` (24 frames) → read → `-p SMOKE False`.
+| | smoke n=24 | **full n=228** |
+|---|---|---|
+| p(`Clip`) real frame | 0.7715 | **0.7794** |
+| p(`Clip`) degraded | 0.6404 | **0.6198** |
+| **paired delta** | −0.1311 | **−0.1596** |
+| `manipulation_check` | 0.2353 | **0.2615** (min 0.0100) 🟢 |
+| verdict | DIES | **DIES — sinks** |
+
+🟢 **The blocking control passes by 26×**, so this is a readable result and not the artifact it
+was built to catch: the corruption demonstrably moves the model, and under it the prior asserts
+`Clip` **less**, not more. Of the two ways to die, this is the informative one — VCD is not a
+no-op here, it has **nothing to subtract**.
+
+⚠️ **Not unanimous, and the split is recorded:** 146 of 228 sink (delta < −0.02), 27 sit inside
+the eps band, **70 rise**. The paired mean is nowhere near the band, but a minority of frames do
+behave the way VCD assumes. ID sinks harder than OOD (**−0.2683** on n=49 vs **−0.1299** on
+n=179) — where the model knows the domain is where it leans on the pixels most.
+
+⇒ **Step 8 does not exist.** Nothing else in the August plan moves either way. The `Clip`
+false-positive rate is untouched by this and remains without an assigned cause: whatever fails,
+it fails **after** seeing, so no decode-time trick that penalises the language prior will reach it.
+
+Verdict in [[vcd-has-nothing-to-subtract]]. Artifacts: `RESULTS_step4_verdict.json`,
+`RESULTS_step4_per_question.csv` (228 rows).
+
+Run order used: `SMOKE=True` (24 frames) → read → `-p SMOKE False`.
 
 ## Files
 

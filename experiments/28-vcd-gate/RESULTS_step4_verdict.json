@@ -1,0 +1,17 @@
+{
+  "mean_p_real": 0.7793900535294884,
+  "mean_p_degraded": 0.6197528434649779,
+  "mean_delta": -0.15963721006451043,
+  "eps": 0.02,
+  "n": 228,
+  "verdict": "DIES",
+  "reading": "sinks -> the model does use the image; the error is elsewhere",
+  "manipulation_check": {
+    "mean_abs_entropy_shift": 0.26148988043668825,
+    "mean_abs_top_prob_shift": 0.1510665029810186,
+    "moved": 0.26148988043668825,
+    "min_shift": 0.01,
+    "passes": true,
+    "n": 228
+  }
+}
