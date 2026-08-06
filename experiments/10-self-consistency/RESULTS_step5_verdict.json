@@ -1,0 +1,24 @@
+{
+  "binary": {
+    "n": 200,
+    "dead": true,
+    "why": [
+      "zero_advantage 0.720 >= 0.6",
+      "headroom +0.050 < +0.05"
+    ]
+  },
+  "fo_class": {
+    "n": 200,
+    "dead": true,
+    "why": [
+      "zero_advantage 0.660 >= 0.6"
+    ]
+  },
+  "number": {
+    "n": 200,
+    "dead": false,
+    "why": [
+      "passes both"
+    ]
+  }
+}

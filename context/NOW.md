@@ -4,6 +4,54 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-03**.
 
+## 🟢 2026-08-05 (pm) — step 5 RAN: phase C survives, but only for `number`
+
+**600 train questions, k=8, on A2 ep3. 5,400 generations, 0 errors, 9 evaluator passes, 1 h 48.**
+Both thresholds were pre-registered before the run (`10b_entropy_gate.ipynb`).
+
+| format | n | `zero_advantage` | `pass@8` | greedy | headroom | verdict |
+|---|---|---|---|---|---|---|
+| `binary` | 200 | 0.720 | 0.985 | 0.935 | +0.050 | 🔴 DEAD |
+| `fo_class` | 200 | 0.660 | 0.975 | 0.885 | +0.090 | 🔴 DEAD |
+| **`number`** | 200 | **0.280** | 0.945 | 0.705 | **+0.240** | 🟢 **ALIVE** |
+
+🔑 **Phase C does not die — it narrows to `number`**, by the rung's own pre-registered rule
+(a single live format keeps it, scoped to that format). And `number` does not scrape through:
+0.28 against a 0.60 kill line, and **+0.240 of headroom against a +0.05 minimum — nearly 5×**.
+Sampling finds the right answer 94.5% of the time where greedy scores 70.5%: **24 points the
+model can already reach and does not.** It lands where it pays — `number` is 80.4% of
+`aggregation`, one of the four scored buckets. ⇒ **GRPO with a set-F1 reward is scoped to
+`number`; rung 22 (loss-mass) stays parked as contingency and is NOT triggered.**
+The two dead formats die of **no gradient, not no ceiling** (`mode_share` 0.94 and 0.90).
+⚠️ **`binary`'s headroom is a float artifact**: 0.985 − 0.935 = `0.04999999999999993`, so the
+strict `<` killed it on a threshold it exactly meets. Verdict unaffected (it also fails
+`zero_advantage`), but the comparison needs a tolerance before another arm dies of epsilon.
+
+🔴 **The jackknife over videos is in, and it bites** (`RESULTS_jackknife_by_video.csv`, 40 ID /
+38 OOD runs, zero GPU, re-scoring answers that already existed):
+
+```
+ID  : max_shift median 0.0086   worst 0.1067   (28 videos)
+OOD : max_shift median 0.0242   worst 0.0922   (10 videos)
+```
+
+**Dropping ONE video moves `acc_OOD` by a median of 0.024** — larger than `+0.0211`, the
+campaign's best and the arm that shipped in submission 02. And it is **the same video**:
+`0023 - Heico - Sigma - 4.avi` is worst case in **23 of 38** OOD runs, `0021 - Heico - Sigma - 2`
+in 12 — all **Sigma**, the procedure absent from training that *defines* our OOD. ID is fine
+(0.0086 over 28 videos), which matches [[local-eval-vs-judge-calibration]] exactly: the ID side
+predicts the judge and the OOD side does not.
+⚠️ **Read narrowly:** this does NOT falsify the paired OOD deltas — pairing shares the dominant
+video across both arms and cancels part of it. It says the **absolute level of `acc_OOD` has less
+precision than assumed**, and an OOD delta under ~0.024 is not separable from which video landed.
+⇒ `RULES §S4` now rests on our own number instead of borrowed literature.
+
+🟢 **SAM 2 is on the volume** (`models/sam2/sam2.1-hiera-large`, 1.7 GB, verified) — step 6's
+missing piece, no GPU spent. 🟢 Migration phase 0 extracted: **4.5 GB / 562 files** of adapters
+and results (not <1 GB as estimated — rank-32 adapters are large).
+⚠️ **The pod is down; `/workspace` is the network volume, so everything survived** and was
+recovered over S3 with no pod. Artifacts written to `/tmp` would not have been.
+
 ## 🟢 2026-08-05 — submission 02 is scored, BOTH baselines are beaten, and the local eval is inverted on OOD
 
 **Zero GPU, zero pod.** The whole session ran off two files: the official per-bucket scores
