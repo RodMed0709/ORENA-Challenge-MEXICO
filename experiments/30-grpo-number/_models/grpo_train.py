@@ -137,7 +137,10 @@ def build_argv(cfg: Config) -> list[str]:
         "--model", str(cfg.base_model),
         "--adapters", str(cfg.adapters),
         "--dataset", str(data),
-        "--train_type", "lora",
+        # 🔻 NOT `--train_type`. ms-swift 4.4.1 renamed it to `tuner_type`
+        # (base_args.py:93, default 'lora'); `--train_type lora` -- which CLAUDE.md and the
+        # official Qwen3-VL recipe both still document -- is an unknown flag on this build.
+        "--tuner_type", "lora",
         "--lora_rank", str(cfg.lora_rank),
         "--lora_alpha", str(cfg.lora_alpha),
         "--target_modules", cfg.target_modules,
