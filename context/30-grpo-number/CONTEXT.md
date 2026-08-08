@@ -24,7 +24,8 @@ are safe on the network volume either way, but the card is not.
 | Reward plugin | ✅ `_models/grpo_reward.py`, 9/9 unit cases, both guards raise |
 | Pre-registration under S8/R9 | ✅ committed **before** the run (`d770ccd`) |
 | Smoke, 10 steps | ✅ rc=0, and it caught the reference-policy trap |
-| **GRPO full, 600 steps** | ⏳ launched 2026-08-08, ~2h40 at 15.9 s/it, `save_steps=100` |
+| **GRPO full, 600 steps** | ✅ **rc=0**, 2h40 at 15.9 s/it, **6 checkpoints written** |
+| **Step-matched SFT control** | ⏳ launched right after, same 600 steps / same lr / fresh cosine |
 
 ### What is NOT done — pick up here
 
@@ -32,10 +33,11 @@ are safe on the network volume either way, but the card is not.
    This is not optional bookkeeping — with `beta=0` there is **no KL anchor**, so per-checkpoint
    evaluation *is* the collapse guard. Score `object_recognition_{ID,OOD}` at every one; it is
    the declared veto cell.
-2. 🔴 **The step-matched SFT control.** `Config(arm="control", ...)` with the SAME optimizer-step
-   count and a **FRESH cosine** — never `--resume_from_checkpoint`. A2's cosine is at lr 0.0 by
-   step 2703, so a resumed control learns nothing and would flatter GRPO for free. Without this
-   run the rung measures *"more training"*, not *"RL"*.
+2. ✅ **The step-matched SFT control is LAUNCHED** (`runs/30_grpo_v1_control_full/`) — same data,
+   same 600 optimizer steps, **same lr 1e-6**, fresh cosine. Matching the LR is deliberate: it
+   makes the OBJECTIVE the single variable. Giving the control A2's 2e-4 would change two things.
+   🔴 Never `--resume_from_checkpoint` — A2's cosine is at lr 0.0 by step 2703, so a resumed
+   control learns nothing and would flatter GRPO for free. **Check it finished (rc=0) on return.**
 3. **Read the holdout.** `grpo_holdout.jsonl` (493 rows, seed 42) never entered training. If the
    arm moves train and not holdout, the gain is memorisation-sharpening, not learning.
 4. **Then** adjudicate against the pre-registration: primary cell `aggregation_ID`, MDE ≈0.036,
