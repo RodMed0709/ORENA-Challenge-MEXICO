@@ -10,8 +10,8 @@ column, because in GRPO the model generates the answer and the reward reads `sol
 
 `swift sft` masks every token that is not assistant content. No assistant turn ⇒ no labels ⇒ no
 gradient. The full control ran **1h20 on a 5090 with `'loss': 0.0` and `'grad_norm': 0.0` on
-492 of 492 logged steps** and was 18 minutes from finishing `rc=0` holding an adapter identical to
-the A2 checkpoint it started from.
+492 of 492 logged steps** and was 18 minutes from finishing `rc=0` holding an adapter that had
+learned nothing.
 
 Nothing about the run looked wrong from outside: `rc` would have been 0, four checkpoints were on
 disk, the LR schedule was annealing on cue, elapsed time was plausible. Only the loss column said
@@ -43,6 +43,25 @@ training_check  {logged_steps: 10, nonzero_grad_steps: 10, nonzero_grad_frac: 1.
 
 Full 600-step control launched: step 8/600, loss ~0.15, `grad_norm` ~4.3, ETA 1h37.
 The dead run is kept as evidence at `runs/30_grpo_v1_control_full_VOID_no_gradient`.
+
+### The weight diff, and the guard it ruled out
+
+`checkpoint-100` of both runs against A2's `adapter_model.safetensors`:
+
+| | tensors moved | `max\|Δ\|` | `sum\|Δ\|` |
+|---|---|---|---|
+| A2 vs the real run | 720/720 | 5.60e-05 | **252.2** |
+| A2 vs the dead run | 720/720 | 6.63e-07 | **1.34** |
+
+The real run moved 189× more, and `5.6e-05` is what the arithmetic predicts (Adam steps ≈ `lr`
+1e-6, 100 steps ≈ 1e-4). So the fix is confirmed at the weights.
+
+🔴 **But it also retires a guard that looked obvious.** AdamW's decoupled `weight_decay` (0.1)
+moves every weight at zero gradient, so the dead run's checkpoint differs from A2 on **720 of 720
+tensors too** — a "did the checkpoint change?" test passes a run that learned nothing. Only the
+magnitude separates them. `_assert_learned` reads `grad_norm` for this reason, and the earlier
+claim in this task that the dead adapter was *"bit-identical to A2"* was wrong; it is A2 plus 100
+steps of pure decay.
 
 ## Why it matters beyond this rung
 

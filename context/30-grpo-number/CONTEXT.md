@@ -37,8 +37,15 @@ column, because in GRPO the model generates the answer and the reward reads `sol
 `swift sft` masks every token that is not assistant content ⇒ no labels ⇒ no gradient.
 
 The first control ran **1h20 on the 5090 with `'loss': 0.0` and `'grad_norm': 0.0` on 492 of 492
-logged steps**, 18 minutes from finishing `rc=0` with an adapter bit-identical to A2. Nothing
+logged steps**, 18 minutes from finishing `rc=0` with an adapter that had learned nothing. Nothing
 looked wrong from outside — checkpoints on disk, LR annealing on cue, plausible elapsed time.
+
+⚠️ **A checkpoint diff does not detect it — measured, not assumed.** AdamW's decoupled
+`weight_decay` (0.1) moves weights at zero gradient, so the dead `checkpoint-100` differs from A2
+on **720/720 tensors**; a "did the checkpoint change?" guard would have passed it. Only the
+magnitude separates them — `sum|Δ|` **1.34** dead vs **252.2** real (189×), `max|Δ|` 6.6e-07 vs
+5.6e-05. The real run's 5.6e-05 is also the arithmetic sanity check: Adam steps ≈ `lr` 1e-6 over
+100 steps ≈ 1e-4. **The instrument is the `grad_norm` log, not the weights.**
 
 ⚠️ **This is the same OUTCOME the engine already warned about for a resumed cosine** (lr 0.0 at
 step 2703 ⇒ control learns nothing ⇒ GRPO wins for free), reached by a completely different route.

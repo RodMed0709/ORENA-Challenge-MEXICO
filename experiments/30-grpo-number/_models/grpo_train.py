@@ -37,9 +37,16 @@ turn means no labels, which means no gradient::
 
     'loss': 0.0, 'grad_norm': 0.0     # 492 of 492 logged steps, zero exceptions
 
-1h20 of a 5090 produced an adapter bit-identical to A2, and it would have been read as a
-legitimate step-matched control. Same failure as the resume above — a control that never moves a
-weight hands GRPO a free win — reached by a different route.
+1h20 of a 5090 produced an adapter that learned nothing, and it would have been read as a
+legitimate step-matched control. Same failure as the resume above — a control that learns nothing
+hands GRPO a free win — reached by a different route.
+
+⚠️ **A checkpoint diff does NOT detect this, and it was measured.** AdamW's decoupled
+``weight_decay`` (0.1 here) moves every weight at zero gradient, so the dead run's
+``checkpoint-100`` differs from A2 on **720 of 720 tensors** — a naive "did the checkpoint change?"
+guard passes it. The separation is only in magnitude: ``sum|delta|`` **1.34** for the dead run
+against **252.2** for the real one, 189x. That is why the guard below reads the ``grad_norm`` log
+and not the weights.
 
 So the control gets ``_materialize_control_data``: the assistant turn is re-attached from
 ``solution``, derived **from ``grpo_train.jsonl`` itself** so the frozen train/holdout split is
