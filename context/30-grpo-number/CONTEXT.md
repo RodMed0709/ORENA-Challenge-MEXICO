@@ -27,7 +27,7 @@ are safe on the network volume either way, but the card is not.
 | **GRPO full, 600 steps** | ✅ **rc=0**, 2h40 at 15.9 s/it, **6 checkpoints written** |
 | First SFT control attempt | 🔴 **VOID — trained on nothing.** See the trap below. Kept as evidence at `runs/30_grpo_v1_control_full_VOID_no_gradient` |
 | Control fix + smoke | ✅ `f5aec95`; smoke 10/10 steps with gradient, `loss_mean` 0.276 |
-| **Step-matched SFT control, relaunched** | ⏳ running since 18:21 UTC 2026-08-08, ~1h40, `runs/30_grpo_v1_control_full` |
+| **Step-matched SFT control, relaunched** | ✅ **rc=0** 20:06 UTC 2026-08-08, 1h45. `training_check`: **600/600 steps with gradient**, `loss_mean` 0.240, **6 checkpoints** — matching GRPO's six |
 
 ### 🔴 The second trap — a control that completes `rc=0` having moved no weight
 
@@ -63,11 +63,12 @@ That is the argument for making it a property of the run instead of a note in pr
    This is not optional bookkeeping — with `beta=0` there is **no KL anchor**, so per-checkpoint
    evaluation *is* the collapse guard. Score `object_recognition_{ID,OOD}` at every one; it is
    the declared veto cell. Needs the GPU the control now holds.
-2. ⏳ **The control is training for real** (`runs/30_grpo_v1_control_full/`) — same rows, same 600
-   optimizer steps, **same lr 1e-6**, fresh cosine. Matching the LR is deliberate: it makes the
-   OBJECTIVE the single variable. Giving the control A2's 2e-4 would change two things.
-   🔴 Never `--resume_from_checkpoint`. On return, check `RESULTS_run.json.training_check` —
-   `rc=0` alone does not clear it.
+2. ✅ **The control is trained and verified** (`runs/30_grpo_v1_control_full/`) — same rows, same
+   600 optimizer steps, **same lr 1e-6**, fresh cosine. Matching the LR is deliberate: it makes
+   the OBJECTIVE the single variable. Giving the control A2's 2e-4 would change two things.
+   `training_check` 600/600 nonzero-gradient steps, `loss_mean` 0.240.
+   🔴 Never `--resume_from_checkpoint`, and never read `rc=0` alone as evidence.
+   **Both arms now hold six checkpoints; the comparison is unblocked and the GPU is idle.**
 3. **Read the holdout.** `grpo_holdout.jsonl` (493 rows, seed 42) never entered training. If the
    arm moves train and not holdout, the gain is memorisation-sharpening, not learning.
 4. **Then** adjudicate against the pre-registration: primary cell `aggregation_ID`, MDE ≈0.036,
