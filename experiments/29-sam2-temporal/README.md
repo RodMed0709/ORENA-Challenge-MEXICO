@@ -1,5 +1,19 @@
 # 29 — SAM 2 temporal probe (August plan, step 6)
 
+> 🔴 **STATUS 2026-08-08: CLOSED-UNRUN. Step 7 closes with it, unbuilt.**
+> **Do not resurrect this in a sweep** — see [[sam2-temporal-probe-closed]] for the full analysis.
+> The short version: the probe was designed to decompose the **±0.86** quoted two paragraphs
+> below, and that figure is a unit error ([[label-noise-was-a-unit-error]]). The real movement at
+> the corpus's true minimum separation is **0.384**, jumps ≥3 fell from 6–11 % to **2.4 %**, and
+> the question the probe was to arbitrate — model or label — is already answered by arithmetic:
+> the model's error is **2.6×** the label's movement, so the label cannot be the dominant cause.
+> Arm J is **n=11** against a pre-registered `EPS_PERSIST` of 0.10, and widening the gap trades
+> away the *"same physical instance by construction"* argument that IS the design.
+> 🟢 **Zero GPU was ever spent on a verdict** — the first smoke found the blocker. The code below
+> is sound and stays for whoever revives the question with a different instrument.
+> ⚠️ **Everything below this banner was written against the ±0.86 and is NOT relabelled** (R7);
+> read it as the design it was, not as current fact.
+
 > **Not a rung.** The ladder is closed ([[august-plan-closes-the-ladder]]); this is step 6 of
 > `local/tasks/plan-accion.md`. Numbered 29 after 28 (the VCD gate). Spec: A.4 in
 > `local/tasks/roadmap-percepcion-rl.md`, design in [[covt-reduced-sam-route]].
