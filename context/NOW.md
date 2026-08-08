@@ -4,6 +4,52 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-08**.
 
+## 🟢 2026-08-08 (pm) — rung 30 is TRAINING: GRPO on `number`, and phase C reopened on arithmetic
+
+**Pod `vugto0zhhtm97z`, RTX 5090, 600 steps at 15.9 s/it (~2h40). 🔴 LEAVE THE POD RUNNING.**
+Full state and the resume list: `context/30-grpo-number/CONTEXT.md`.
+
+1. 🔑 **Phase C was closed for the wrong reason.** The August thread retired GRPO as *"diluted —
+   it only touches `number`"*. The arithmetic says otherwise: `number` is **80.4% of
+   `aggregation`**, `aggregation` is **2 of the 4 populated buckets**, so `number` carries
+   **~40% of the headline**. **+4.5pp** on `number` clears S8 on `aggregation_ID`; **+7.5pp**
+   clears S1; capturing half of the measured 24pt headroom (pass@8 0.945 vs greedy 0.705) lands
+   **0.5770** against today's rank 1 of **0.5653**. It is the largest single lever identified.
+
+2. 🔴 **The smoke caught a trap that would have wrecked the run silently.** `kl` read **4.06 at
+   step 1, before any update**, and pinned at exactly **5.0** — one of two completion tokens
+   saturating the ±10 per-token clamp (`grpo_trainer.py:964`). Cause: with a PEFT model and no
+   explicit `ref_model`, ms-swift's KL reference is `null_ref_context` → `disable_adapter()`
+   (`rlhf_mixin.py:186-194`) — **the raw base model, not A2**. The penalty was pulling the policy
+   back toward the un-fine-tuned checkpoint, against the **+0.317** the campaign rests on.
+   `ref_adapter_name` is not exposed in 4.4.1; `--ref_model <merged A2>` needs 16 GB we do not
+   have at 30.4 of 32.6 GiB. ⇒ **`beta = 0`** (`grpo_trainer.py:755` short-circuits it; DAPO and
+   Dr.GRPO drop the KL term too). ⚠️ **Cost, stated not hidden:** the S8(c) collapse guard moves
+   from the loss to the protocol — `save_steps=100` and `object_recognition` scored at every
+   checkpoint. Weaker, and only real if it is actually run.
+
+3. 🟢 **The entropy gate replicates on a third instrument.** `frac_reward_zero_std` averaged
+   **0.30** across the smoke against step 5's `zero_advantage` of **0.280/0.270**. Different
+   instrument, different slice, same number. 🔻 A first reading of that same smoke reported 0.0
+   off a single step and was wrong — three of ten steps carry no gradient at all.
+
+4. 🔻 **Two ms-swift facts that break copied recipes.** `--train_type` **does not exist** on this
+   build (renamed `tuner_type`, `base_args.py:93`) — `CLAUDE.md` and the official Qwen3-VL
+   best-practice both still document the dead flag. And `model_type` must be pinned: the volume
+   weights match three registered types and ms-swift refuses to guess. 205 lines of the cited
+   ms-swift source are now vendored at `experiments/30-grpo-number/RESULTS_msswift_source.txt`,
+   so no rung-30 claim is unverifiable.
+
+5. 📌 **Side finding, own rung:** 32 counting questions carry golds malformed for `Number`
+   (`'2.'`, `'Two.'`, `'Intestine: 1.'`), **all** under the phrasing *"Please provide a single
+   integer"*, which appears nowhere else in the corpus. A candidate source of the trailing-period
+   habit probe 16a measured at **86.7% ID**. Not fixed here — this arm must not change the corpus.
+
+⚠️ **Not done, and the rung cannot be read without them:** score the six checkpoints (that IS the
+collapse guard now), run the **step-matched SFT control with a FRESH cosine** (a resume restores
+lr 0.0 and would flatter GRPO for free), and read the 493-row holdout to separate learning from
+memorisation-sharpening.
+
 ## 🟢 2026-08-08 — the ladder is single-valued again: rung 24 lands, the vit-lr rung becomes 27
 
 **Zero GPU, record-keeping only.** Two items the 31-day thread agreed on and nobody executed.
