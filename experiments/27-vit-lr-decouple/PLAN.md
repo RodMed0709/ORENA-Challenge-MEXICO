@@ -1,4 +1,4 @@
-# Rung 24 — one variable: the learning rate nobody ever chose for the vision tower
+# Rung 27 (was rung 24) — one variable: the learning rate nobody ever chose for the vision tower
 
 > 🔴 **STATUS 2026-08-03: CLOSED-UNRUN.** Built and pre-registered, never launched, and the
 > August plan does not call for it — see [[august-plan-closes-the-ladder]] and

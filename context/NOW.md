@@ -489,7 +489,7 @@ turned up four things the records did not have.
    `lapchole` 91 GB) plus a 1.7 GB `frames_cache`. Step 1 (SAM 2 video-mode over the 1,946
    consecutive pairs) is runnable whenever a GPU is free.
 
-5. 🆕 **Rung 24 is built and pre-registered — `24-vit-lr-decouple`, the other half of the recipe.**
+5. 🆕 **Rung 24 is built and pre-registered — `24-vit-lr-decouple` (renumbered to `27-vit-lr-decouple` on 2026-08-08), the other half of the recipe.**
    ms-swift falls back to `vit_lr = learning_rate` (`optimizers/multimodal.py:56`), so the tower has
    trained at the LLM's rate for twenty-two rungs **by default rather than by choice** — and at
    rung 21's 1e-4 it now runs **5× hotter than it ever has**. Control is **arm A itself**, all three

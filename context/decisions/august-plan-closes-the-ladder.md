@@ -24,7 +24,7 @@ close it is the expensive one.
 
 | what | built | why it does not come back |
 |---|---|---|
-| **rung 24** `24-vit-lr-decouple` | `PLAN.md`, engine, `_tools`, three gates. No notebook. | `A_low` was answered by `A3_vitlr` rebased on lr 2e-4 — a **significant negative**, so slowing the tower hurts and the branch-ordering question is settled. **`B_high` never ran** and is the ladder's only genuinely open arm; no step needs it. The `24` slot belongs to Yingyu's `24-geometric-aug`. Revived ⇒ **rung 27**. |
+| **rung 27** `27-vit-lr-decouple` (was rung 24) | `PLAN.md`, engine, `_tools`, three gates. No notebook. | `A_low` was answered by `A3_vitlr` rebased on lr 2e-4 — a **significant negative**, so slowing the tower hurts and the branch-ordering question is settled. **`B_high` never ran** and is the ladder's only genuinely open arm; no step needs it. The `24` slot belongs to Yingyu's `24-geometric-aug`, merged 2026-08-08. **Renumbered to 27 in the same commit**; still `CLOSED-UNRUN`. |
 | **rung 25** `25-individuation-probe` | `PLAN.md`, engine, `_tools`. No notebook. | Parked *behind* rung 24, which is now closed too. Its blocking gate **G-NO-OVERLAP** never ran. And its own pre-registration declares the ceiling: **CholecInstanceSeg tops out at 3** while our failure lives at **5–12**, so a success there says nothing about our range. |
 | **`number-probe` card** | design only (vault) | Sub-task of `roadmap-coa-cot-covt` **Fase 2b**. That roadmap is CLOSED — its phase 1 fired the rung-17 STOP. The probe existed to size **NTL**; with no Fase 2b there is no NTL to size. |
 
