@@ -35,12 +35,18 @@ from typing import Any, List
 
 from swift.rewards import ORM, orms
 
-# The shipped container's repair, byte-for-byte: submissions/02-rung21-a2/inference.py:337-367.
+# The shipped container's repair: submissions/02-rung21-a2/inference.py:333.
 # Fine-tuning taught the model to emit "1." on 86.7% (ID) / 87.5% (OOD) of number questions
 # phrased outside the corpus templates, and Number.verify rejects the period. Training against a
 # reward that did NOT apply this repair would optimise a predicate the deployed pipeline does not
 # use, so the reward would disagree with the thing being shipped.
-_TRAILING_DOT_INT = re.compile(r"^(\d+)\.$")
+# 🔻 This pattern read `^(\d+)\.$` and was described as matching the container "byte-for-byte".
+# It did not: the container tolerates whitespace before the period, so `"3 ."` was repaired in
+# deployment and scored 0 in training. Low frequency, but it made the reward STRICTER than what
+# ships, which is the wrong direction for a reward that claims to BE the scorer. Caught in
+# review 2026-08-08. ⚠️ The 600-step run was trained under the old pattern; this corrects the
+# code and the claim, it does not retroactively change that run.
+_TRAILING_DOT_INT = re.compile(r"^(\d+)\s*\.$")
 
 
 def normalize_answer(text: str) -> str:

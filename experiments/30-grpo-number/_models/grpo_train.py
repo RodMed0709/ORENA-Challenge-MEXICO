@@ -234,7 +234,13 @@ def _assert_learned(cfg: Config, min_nonzero_frac: float = 0.5) -> dict:
     """
     logs = sorted((cfg.run_dir / "ckpt").glob("*/logging.jsonl"))
     if not logs:
-        return {"checked": False, "reason": "no logging.jsonl under ckpt/"}
+        # 🔴 An instrument that cannot measure must NOT report OK (review 2026-08-08, blocking).
+        # A log that lands elsewhere -- an ms-swift layout change, a different output_dir, a
+        # relaunch into a fresh directory -- would otherwise sail through the one guard whose
+        # entire value is being trustworthy when nobody is watching.
+        return {"checked": False, "reason": "no logging.jsonl under ckpt/",
+                "error": "the training log could not be found, so the run is UNVERIFIED. A "
+                         "guard that cannot see its instrument is not a passing guard."}
     steps, nonzero, losses = 0, 0, []
     for row in (json.loads(l) for l in open(logs[-1], encoding="utf-8") if l.strip()):
         if "grad_norm" not in row:
