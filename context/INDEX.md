@@ -28,6 +28,12 @@
 ## DECISIONS — settled verdicts (do NOT re-litigate)
 - [[local-eval-vs-judge-calibration]] — 🟢 **Submission 02 = 0.5288, rank 11, BOTH official baselines beaten** (FT baseline rank 13, proprietary rank 30). 🔴 **But the margin over the FT baseline is +0.0099 and is untestable by us** — the adjudicating test needs their per-question answers; a non-significant delta collapses to the same rank. 🔴 **The local eval is calibrated on ID and inverted on OOD:** `agg_ID` −0.034 but **`obj_OOD` +0.367**, local `bucket_mean` 0.6496 vs a real 0.5288. 🔑 **`obj_OOD` is our BEST bucket locally and our WORST on the judge** — prioritisation read off local buckets pointed at the wrong one. 🟢 **Direction survives 8 of 8**; use the sign, deflate the magnitude, never quote the local OOD level. ⚠️ The OOD split is **not** the defect (`RULES §3`), and `kfold_lopo` costs a training run per fold.
 - [[significance-rule]] — 🟢 **Large ships, small gets discussed** (`RULES §S1–S7`). A local delta ≳ **0.03** is acted on: direction transferred 8 of 8. Below that, no automatic run — it becomes *"is this worth 1 of 8 slots?"*, a team call. Supersedes the unsigned 2026-08-01 draft, whose **ε = 0.05 floor was larger than the entire competitive field** (rank 1 → 11 spans 0.0365). 🔴 **|Δ| < 0.01 stays unreadable** — no seed has ever been repeated, and noise has no sign to transfer. 🔴 The primary cell may **not** be local `bucket_mean`.
+- [[flip-narrows-shortcut-not-a-win]] — rung 24 (label-aware horizontal flip, `p=0.25`) is
+  **CLOSED, NOT A WIN** on the pre-registered headline (`margin_OOD` falls every epoch) — but a
+  position-prior probe confirms FRAME's model has a **real, significant class→position
+  shortcut** (matching ["Your other Left!"](https://arxiv.org/abs/2508.00549), MICCAI 2025) and
+  the augmentation **significantly narrows it** (paired interaction CI excludes zero), just not
+  enough to win on raw accuracy at this dose. `p=0.50` NOT pursued as a blind scale-up.
 - [[viT-swap-nogo]] — swapping Qwen3-VL's ViT = **NO-GO** (license + full realignment).
 - [[qwen-size-ladder]] — next size up = **30B-A3B MoE FP8** (measured wildcard, not the cheap step). 🔒 Gated by [[vit-lora-partial]].
 - [[unused-metadata]] — 🔴 **90% of questions carry `secondary_capabilities` we never read**: aggregation supervision is **+77% larger** than we thought (9,762 train questions, not 5,524) at zero annotation cost. Also `generation` (automatic/anchor/manual) unused, and **`clinical_relevance` is all-False** — a second landmine beside `ood`.
