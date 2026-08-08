@@ -64,6 +64,39 @@ is re-read under R4–R6 first.
 **R8 — A faithful NULL is published.** No re-cutting or re-slicing a rung after the fact to
 find a cell that clears the bar. Post-hoc slicing IS the multiplicity problem.
 
+**R9 — Multiplicity is asymmetric: one cell may WIN, every cell may VETO.** Only the cell
+declared under R4 can grant a win. **Any** cell in the grid whose CI excludes zero *in the
+control's favour* takes one away. A rung is a win only if (a) the pre-registered cell's paired
+CI excludes zero in the arm's favour, (b) that holds on **ID and OOD jointly** — never the
+aggregate alone, never one side — and (c) no cell anywhere shows significant harm.
+🔑 **A positive point estimate whose CI includes zero is a NULL, not weak evidence.** It does
+not win, regardless of what raw `bucket_mean` did.
+
+⚠️ **The asymmetry is the point, and it is deliberate.** Reading 10 cells and keeping the one
+that rose is exactly the 0.188 below. Restricting wins to a single pre-declared cell prices
+multiplicity out of the win path at zero statistical cost, while leaving the harm path
+generous — we would rather over-detect damage than under-detect it. This is the asymmetry every
+past adjudication already used ([[self-consistency-dead]], [[epoch-matched-control]],
+[[undertrained-was-real]]); R9 only writes it down.
+
+📌 **Significance is not worth.** Clearing R9 says the effect is real; whether to spend GPU
+scaling it is R1/R2, a separate question. Rung 24 is the worked example — its interaction
+effect was genuinely significant (CI **[+0.0023, +0.1225]**) and scaling it was **still
+correctly declined**, because Copeland collapses small deltas to the same rank
+([[flip-narrows-shortcut-not-a-win]]). Below the floor, log it **real-but-closed**.
+
+🔴 **R9 does not rescue a cell the instrument cannot resolve.** Per-format greedy on `number`
+moved **10.5 points between two independent 200-question draws** ([[entropy-gate-scopes-phase-c-to-number]]),
+and dropping one video moves `acc_OOD` by a median of 0.024. A CI can exclude zero on a cell
+whose draw-to-draw noise is larger than the effect. R9 gates *fishing*, not *resolution* — R5
+and the jackknife still bind.
+
+**Credit:** proposed by **Yingyu** in the 31-day-plan thread (Q1), independently of R1–R8, and
+adopted verbatim on the substance. Her companion proposal — gate on `capability_group × ID/OOD`,
+`bucket_mean`'s own buckets — is **not** adopted as the primary cell, because R4 forbids exactly
+that grid (the local `bucket_mean` ordering is inverted). The split agreed in-thread stands:
+**her grid describes where an effect lands; R4's calibrated ID cells make the go/no-go call.**
+
 ## The problem this still solves
 
 The repo called WIN on **3 of 30 cells** in a single rung, where Binomial(30, 0.05) gives
