@@ -235,8 +235,15 @@ def seed_instances(
         # output — do not "tidy" it into a batched call without re-checking this.
         # obj_ids must be a LIST — the processor calls len() on it, so a bare int raises
         # a TypeError that reads like a shape bug and is not one.
+        # 🔴 `list(obj_ids)` — pass a COPY. `processing_sam2_video.py:815` stores the list by
+        # REFERENCE (`inference_session.obj_with_new_inputs = obj_ids`) and the forward pass
+        # then drains it with `.remove(obj_id)` (`modeling_sam2_video.py:1750`), so handing it
+        # our own list leaves the caller with `obj_ids == []` while `masks` still holds 34
+        # entries. Nothing raises: propagation is simply skipped and the pair silently
+        # produces no statistic. Measured 2026-08-08 — it emptied all 30 C2 pairs while C1,
+        # which only reads `len(masks)`, was unaffected and looked healthy.
         processor.process_new_mask_for_video_frame(
-            inference_session=session, frame_idx=frame_idx, obj_ids=obj_ids,
+            inference_session=session, frame_idx=frame_idx, obj_ids=list(obj_ids),
             input_masks=[torch.from_numpy(m) for m in masks],
         )
     # 🔴 The conditioning frame must be RUN before anything propagates: adding masks only
