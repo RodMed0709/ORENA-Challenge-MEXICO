@@ -27,6 +27,26 @@ A2's cosine anneals to lr 0.0 at its last planned step (2703); restoring ``sched
 hand the control lr 0, it would learn nothing, and GRPO would look spectacular for free. Without
 this run the rung measures *"more training"*, not *"RL"*.
 
+## 🔴 The control needs its OWN data file — the same failure through a second door
+
+The first full control run trained on nothing. It read ``grpo_train.jsonl``, which is GRPO-format
+by construction: ``build_number_subset.py`` (``to_grpo``) **strips the assistant turn** and moves
+the gold to a ``solution`` column, because in GRPO the model generates the answer and the reward
+reads ``solution``. ``swift sft`` masks every token that is not assistant content, so no assistant
+turn means no labels, which means no gradient::
+
+    'loss': 0.0, 'grad_norm': 0.0     # 492 of 492 logged steps, zero exceptions
+
+1h20 of a 5090 produced an adapter bit-identical to A2, and it would have been read as a
+legitimate step-matched control. Same failure as the resume above — a control that never moves a
+weight hands GRPO a free win — reached by a different route.
+
+So the control gets ``_materialize_control_data``: the assistant turn is re-attached from
+``solution``, derived **from ``grpo_train.jsonl`` itself** so the frozen train/holdout split is
+preserved byte-for-byte. Two guards make the class of bug loud instead of silent:
+``_assert_supervised`` before the GPU is touched, and ``_assert_learned`` on the run's own
+``grad_norm`` log after it finishes.
+
 ## Inherited recipe — read from A2's own `args.json`, not from prose
 
 lora_rank 8 · lora_alpha 32 · target_modules all-linear · max_grad_norm 1.0 · cosine ·
@@ -137,9 +157,9 @@ class Config:
         return Path(self.train_jsonl or (Path(self.data_dir) / "grpo_train.jsonl"))
 
 
-def _smoke_slice(cfg: Config) -> Path:
+def _smoke_slice(cfg: Config, src: Path) -> Path:
     """Write a tiny copy of the data so a smoke cannot silently read the full corpus."""
-    src, dst = cfg.data, cfg.run_dir / "smoke_train.jsonl"
+    dst = cfg.run_dir / "smoke_train.jsonl"
     dst.parent.mkdir(parents=True, exist_ok=True)
     with open(src, encoding="utf-8") as fh:
         lines = [next(fh) for _ in range(cfg.smoke_rows)]
@@ -147,8 +167,95 @@ def _smoke_slice(cfg: Config) -> Path:
     return dst
 
 
+def _assert_supervised(path: Path) -> int:
+    """Every row must end in a non-empty assistant turn, or ``swift sft`` has nothing to learn.
+
+    🔴 This is the pre-flight for the failure documented in the module docstring. It costs one
+    pass over a 16 MB file and it runs BEFORE the GPU is touched, because the alternative is
+    discovering it 1h20 later in a log full of ``'loss': 0.0``.
+    """
+    n = 0
+    with open(path, encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, 1):
+            msgs = json.loads(line).get("messages", [])
+            last = msgs[-1] if msgs else {}
+            if last.get("role") != "assistant" or not str(last.get("content", "")).strip():
+                raise AssertionError(
+                    f"{path}:{lineno} does not end in a non-empty assistant turn "
+                    f"(last role={last.get('role')!r}). `swift sft` masks everything that is not "
+                    "assistant content, so this file would train with loss identically 0.0 and "
+                    "produce an adapter identical to the one it started from. Refusing to launch."
+                )
+            n += 1
+    if n == 0:
+        raise AssertionError(f"{path} is empty.")
+    return n
+
+
+def _materialize_control_data(cfg: Config) -> Path:
+    """Re-attach the assistant turn that the GRPO builder deliberately stripped.
+
+    Derived from ``grpo_train.jsonl`` rather than rebuilt from the source corpus: the split is
+    seeded and frozen, and the control must see **exactly** the rows GRPO saw. ``solution`` is
+    dropped once it has been promoted back into the messages — it has done its job.
+    """
+    src, dst = cfg.data, cfg.run_dir / "control_train.jsonl"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with open(src, encoding="utf-8") as fh, open(dst, "w", encoding="utf-8") as out:
+        for lineno, line in enumerate(fh, 1):
+            row = json.loads(line)
+            gold = str(row.get("solution", "")).strip()
+            if not gold:
+                raise AssertionError(
+                    f"{src}:{lineno} carries no `solution`, so there is no gold to supervise on. "
+                    "Rebuild the subset with _tools/build_number_subset.py."
+                )
+            msgs = [m for m in row["messages"] if m["role"] != "assistant"]
+            msgs.append({"role": "assistant", "content": gold})
+            out.write(json.dumps({"messages": msgs, "images": row["images"]},
+                                 ensure_ascii=False) + "\n")
+    _assert_supervised(dst)
+    return dst
+
+
+def _assert_learned(cfg: Config, min_nonzero_frac: float = 0.5) -> dict:
+    """Read the run's own ``grad_norm`` log and refuse to call a no-op run a result.
+
+    The pre-flight above catches the one cause we know about. This catches the CLASS: any wiring
+    in which the trainer completes ``rc=0`` without moving a weight. A control that did not learn
+    does not merely fail to inform the rung — it hands the treatment arm a free win.
+    """
+    logs = sorted((cfg.run_dir / "ckpt").glob("*/logging.jsonl"))
+    if not logs:
+        return {"checked": False, "reason": "no logging.jsonl under ckpt/"}
+    steps, nonzero, losses = 0, 0, []
+    for row in (json.loads(l) for l in open(logs[-1], encoding="utf-8") if l.strip()):
+        if "grad_norm" not in row:
+            continue
+        steps += 1
+        nonzero += int(float(row["grad_norm"]) > 0.0)
+        if "loss" in row:
+            losses.append(float(row["loss"]))
+    frac = nonzero / steps if steps else 0.0
+    stats = {"checked": True, "logged_steps": steps, "nonzero_grad_steps": nonzero,
+             "nonzero_grad_frac": frac, "loss_mean": (sum(losses) / len(losses)) if losses else None,
+             "log": str(logs[-1])}
+    if steps and frac < min_nonzero_frac:
+        stats["error"] = (
+            f"only {nonzero}/{steps} logged steps have grad_norm > 0 (need >= "
+            f"{min_nonzero_frac:.0%}). The run completed without training. Do NOT read this as a "
+            "control — an unmoved adapter makes the treatment arm look good for free."
+        )
+    return stats
+
+
 def build_argv(cfg: Config) -> list[str]:
-    data = _smoke_slice(cfg) if cfg.smoke else cfg.data
+    # 🔴 The control cannot read the GRPO file: it has no assistant turn (module docstring).
+    data = _materialize_control_data(cfg) if cfg.arm == "control" else cfg.data
+    if cfg.smoke:
+        data = _smoke_slice(cfg, data)
+    if cfg.arm == "control":
+        _assert_supervised(data)
     common = [
         "--model", str(cfg.base_model),
         # Required, not optional: the weights on the volume match three registered types
@@ -219,5 +326,10 @@ def main(cfg: Config) -> dict:
         p = subprocess.run(argv, env=env, stdout=fh, stderr=subprocess.STDOUT, text=True)
     result = {"arm": cfg.arm, "returncode": p.returncode, "run_dir": str(cfg.run_dir),
               "log": str(log), "argv": argv}
+    # rc=0 is not evidence that anything was learned -- the first control proved that.
+    result["training_check"] = _assert_learned(cfg) if p.returncode == 0 else {"checked": False}
+    # written BEFORE the raise, so the artifact survives the failure it is reporting
     (cfg.run_dir / "RESULTS_run.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    if err := result["training_check"].get("error"):
+        raise AssertionError(f"{cfg.run_dir.name}: {err}")
     return result
