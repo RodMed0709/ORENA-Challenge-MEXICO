@@ -2,7 +2,33 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-08-03**.
+> Last updated: **2026-08-08**.
+
+## 🟢 2026-08-08 — the ladder is single-valued again: rung 24 lands, the vit-lr rung becomes 27
+
+**Zero GPU, record-keeping only.** Two items the 31-day thread agreed on and nobody executed.
+
+1. 🟢 **PR #2 is merged — rung 24 (geometric-aug) is on `main` after eight days open.**
+   27 files, **17,533 insertions, 0 deletions**: nothing of Yingyu's was dropped. Both conflicts
+   were additive and both sides are kept — `context/NOW.md` takes her 2026-07-31 entry in date
+   order (after "the teacher cannot see", before the 07-30 recipe sweep), and `context/INDEX.md`
+   gains [[flip-narrows-shortcut-not-a-win]] alongside the two 08-05 notes.
+   🔑 **The delay had a cost beyond delay.** Because `experiments/24-geometric-aug/` and
+   `context/decisions/flip-narrows-shortcut-not-a-win.md` existed only on the branch, a reader
+   working from `main` concluded the evidence was **invented**. It was not — it was on the PR the
+   whole time. ⚠️ **An unmerged branch is not a record**: anything cited in a cross-team thread
+   has to be on `main` before it is cited, or the citation reads as fabrication.
+
+2. 🟢 **`24-vit-lr-decouple` → `27-vit-lr-decouple`.** [[august-plan-closes-the-ladder]]:27 had
+   already ruled it (*"Revived ⇒ rung 27"*) and it was never executed, so two rung 24s coexisted.
+   Status **unchanged: still `CLOSED-UNRUN`** — `A_low` was answered by `A3_vitlr` as a
+   significant negative, `B_high` never ran, no step needs it. All three references follow,
+   including the hard `exp_dir` path at `_models/vit_lr_train.py:124`; titles read
+   *"Rung 27 (was rung 24)"* so older prose still resolves.
+
+📌 **Still owed from the same thread, not done here:** R9 (Yingyu's multiplicity asymmetry — only
+the pre-registered cell may grant a win, any cell may veto one) is **not yet written**;
+`significance-rule.md` still stops at R8. And the CAMMA email still has no owner.
 
 ## 🔴 2026-08-06 (pm) — step 6 is BUILT and BLOCKED ON ITS OWN PREMISE: there is no sub-second population
 
