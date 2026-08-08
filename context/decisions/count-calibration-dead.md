@@ -7,6 +7,15 @@ measured_in: experiments/05-bottleneck-audit/05c_count_confusion.ipynb
 ---
 # Decision: post-hoc count calibration is DEAD — measured, three ways
 
+> 📌 **Pointer, 2026-08-08 — one supporting number changed; the verdict is NOT reopened here.**
+> This note's *"poor prognosis"* framing cites the gold count moving **±0.86** between frames
+> <1 s apart. That figure does not reproduce: it was a unit error, and the true movement at the
+> corpus's real minimum separation is **0.384** — see [[label-noise-was-a-unit-error]].
+> 🟢 **The verdict does not rest on it.** Its three pre-registered rules stand on their own
+> mechanism: true 2, 3 and 4 share the same modal prediction, so a LUT can only send `pred=1` one
+> place and trades one error for another. That is untouched. Recorded so the change is visible,
+> not to re-litigate the call.
+
 - **Status:** MEASURED · 2026-07-19 · zero GPU · **faithful negative**
 - **Applies when:** anyone proposes correcting the `number` under-count bias after the fact
   (a LUT, isotonic regression, a learned offset). It has been the "cheapest idea on the list"

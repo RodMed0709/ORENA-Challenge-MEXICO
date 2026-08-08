@@ -8,6 +8,19 @@ measured_in: context/ERROR_ANATOMY.md · context/decisions/epoch-matched-control
 ---
 # Decision: synthetic-counting SFT — the contradiction, reconciled
 
+> 📌 **Pointer, 2026-08-08 — this note's second question is now answered differently.**
+> Its frontmatter asks *"what exactly does the ±0.86 label-noise number measure?"* and answers
+> *"mean |Δ| in the gold clip count between annotated frames <1 s apart, 1,946 pairs"*. The pairs
+> are right; **the time window is not**. That gap column was the true gap in seconds divided by
+> the video's fps, so there is no sub-second population — at the corpus's true minimum of 1 s the
+> movement is **0.384**, not 0.86. See [[label-noise-was-a-unit-error]].
+> 🔴 **Consequence for the argument, stated but NOT acted on here:** this note reasons that a
+> pseudo-label route *"must agree with a gold that moves ±0.86 → a self-contradicting target"*.
+> At 0.384, with `jump ≥3` at **2.4 %** rather than 6–11 %, that target is much less
+> self-contradicting than argued. The DISCARDED verdict has a second, independent leg — rung 15
+> ran the label-supported half and returned a null — so it is not reopened by this pointer.
+> **Re-reading it is a decision of its own.**
+
 - **Status:** SETTLED · 2026-07-26 · zero GPU · **reconciliation, no new measurement**
 - **Applies when:** anyone proposes counting-focused SFT, synthetic count QA, or a
   perception-grounded counting target (point-then-count, CoVT-style visual tokens).

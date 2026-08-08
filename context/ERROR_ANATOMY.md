@@ -133,8 +133,28 @@ at what.
 "how many instances in total" template with a known breakdown, **93 % of the counted mass is
 clips** and **82 %** of those frames are clips *and nothing else*.
 
-**The label is unstable between frames a fraction of a second apart** (1,946 consecutive
-pairs inside the same video, clip counts from the golds):
+> 🔴 **CORRECTED 2026-08-08 — the table below was wrong and is superseded. Do not cite it.**
+> Its `gap` column is the true gap in **seconds divided by the video's fps**, so its sub-second
+> rows describe pairs that are in fact **12–25 s apart**. There is no sub-second population in
+> this corpus and there never was: every `timestamp_start` is `HH:MM:SS` with no fractional part
+> (12 parquets, 40,000 rows), so the minimum separation is **1 second**. The population is
+> unaffected — the 1,946 pairs reproduce exactly — only the time axis was wrong.
+> **Full verdict and the runnable derivation: [[label-noise-was-a-unit-error]] /
+> `experiments/29-sam2-temporal/_tools/label_gap_audit.py`.** The original computation was never
+> committed, which is why this stood for 17 days.
+
+**The label moves between consecutive annotated frames** (1,946 consecutive pairs inside the same
+video, clip counts from the golds). Separation is **not** sub-second and not contiguous: min
+**1 s**, p25 **2 s**, median **8 s**, p75 **31 s**, p90 **128 s** — only 23.7 % of pairs sit at
+the 1 s minimum and 15.4 % are more than a minute apart.
+
+| gap | n | mean \|Δcount\| | identical | jump ≥3 | max |
+|---|---|---|---|---|---|
+| **1 s** (the true minimum) | **461** | **0.384** | 70.1 % | **2.4 %** | **4** |
+| 1–3 s | 263 | 0.66 | 53.2 % | 3.4 % | 5 |
+
+<details>
+<summary>🔴 Superseded table as published 2026-07-22 — kept for provenance, not for citation</summary>
 
 | gap | n | mean \|Δcount\| | identical | jump ≥3 | max |
 |---|---|---|---|---|---|
@@ -142,18 +162,26 @@ pairs inside the same video, clip counts from the golds):
 | 0.5–1 s | 242 | 1.33 | 16.9 % | 11.2 % | 7 |
 | 1–3 s | 236 | 1.54 | 12.3 % | 14.8 % | 7 |
 
-In windows **≤1 s the count changes in 56.6 % of pairs**, by **±0.86** on average — against
-frames a human observer describes as nearly identical. Observed extremes: `8 → 14 → 6` in
-690 ms, `7 → 7 → 1` in 270 ms.
+*"In windows ≤1 s the count changes in 56.6 % of pairs, by ±0.86 on average … Observed extremes:
+`8 → 14 → 6` in 690 ms, `7 → 7 → 1` in 270 ms."* Those extremes were **~17 s** and **~7 s** of
+real time — ordinary scene change in laparoscopic surgery, which is the opposite of what they were
+cited for.
 
-🔴 **Set that beside the model: its mean absolute counting error is 1.01 clips.** The model
-is within ~1.2× of how much the *target itself* moves between adjacent frames.
+</details>
 
-⚠️ **The honest caveat:** frame-to-frame change mixes genuine scene change (the laparoscope
-moves fast, clips are being placed, things occlude) with annotation noise, so 0.86 is an
-**upper bound** on the noise, not a clean estimate of it. It does not prove the labels are
-wrong. What it does establish is that **the target is not stable at the timescale the model
-is asked to resolve**, which caps how much any counting lever can buy.
+At the true minimum separation the count changes in **29.9 %** of pairs, by **±0.384** on average.
+
+🔴 **Set that beside the model: its mean absolute counting error is 1.01 clips.** The model is at
+**~2.6×** how much the *target itself* moves — **not** at its label's noise floor. The published
+1.2× was the artefact of the gap error. This is consistent with step 5's independently measured
+24-point headroom on `number` (pass@8 0.945 vs greedy 0.705), which a model at its label's noise
+floor could not have.
+
+⚠️ **The honest caveat survives, applied to 0.384:** frame-to-frame change mixes genuine scene
+change (the laparoscope moves fast, clips are being placed, things occlude) with annotation noise,
+so **0.384 is an upper bound** on the noise, not a clean estimate of it. It does not prove the
+labels are wrong. Separating the two is what step 6 (`experiments/29-sam2-temporal/`) was built to
+do — against a quantity less than half the size, with `jump ≥3` at **2.4 %** rather than 6–11 %.
 
 **Corroborated independently by a human pass** (40 frames, gold 3–6, gold hidden): a
 motivated non-clinical observer scored **r = −0.17 against the gold** — no relationship at

@@ -8,6 +8,18 @@ measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought
 ---
 # Decision: CoVT as published is NO-GO — but it re-aims the perceptual branch
 
+> 📌 **Pointer, 2026-08-08 — the two numbers framing the SAM 2 route do not reproduce.**
+> This note's route argument is *"at ≤1 s apart — **31.1 % of pairs** — a track is the same
+> physical instance by construction while the gold moves **±0.86** ⇒ steady track + jumping gold =
+> the gold is wrong"*. Both figures come from a `gap` column that is the true gap in seconds
+> divided by the video's fps. There is no sub-second population: the corpus minimum is **1 s**,
+> only **23.7 %** of pairs sit there, and the movement is **0.384** with `jump ≥3` at **2.4 %**.
+> See [[label-noise-was-a-unit-error]].
+> 🔴 **The NO-GO on CoVT-as-published is untouched** — it rests on the 774.6k-row corpus and the
+> pipeline no recipe framework expresses. **What changes is the size of the prize for the SAM 2
+> route it unlocks**, i.e. step 6 (`experiments/29-sam2-temporal/`), which is a smaller quantity
+> to decompose on a smaller population. That re-reading is an open decision, not made here.
+
 - **Status:** SETTLED for the method · **OPEN** for the route it unlocks · 2026-07-26 · zero GPU
 - **Source:** arXiv 2511.19418v2, read end-to-end including the supplementary (pp. 13–16).
   Human reading pass + notes: `local/fuentes/analisis-articulos-legokna.md` §3.
