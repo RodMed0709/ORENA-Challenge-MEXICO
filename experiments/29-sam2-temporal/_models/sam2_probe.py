@@ -222,12 +222,22 @@ def seed_instances(
     # de-duplicated set rather than every grid hypothesis.
     session = processor.init_video_session(video=frames, inference_device=device, dtype=dtype)
     obj_ids = list(range(len(masks)))
-    for oid, m in zip(obj_ids, masks):
+    if obj_ids:
+        # 🔴 ALL objects in ONE call, never a loop. `processing_sam2_video.py:815` does
+        # `inference_session.obj_with_new_inputs = obj_ids` — it ASSIGNS, so prompting one
+        # object at a time leaves only the LAST one registered as having new input. Every
+        # earlier object then takes the memory-conditioned path with an empty memory bank
+        # and raises "maskmem_features in conditioning outputs cannot be empty", which
+        # reads like a memory-bank bug and is a prompt-registration bug. Measured
+        # 2026-08-08 on the first GPU execution of this function.
+        # ⚠️ The point loop above survives the same assignment only because each prompt is
+        # followed by its own forward, which consumes the input and leaves a conditioning
+        # output — do not "tidy" it into a batched call without re-checking this.
         # obj_ids must be a LIST — the processor calls len() on it, so a bare int raises
         # a TypeError that reads like a shape bug and is not one.
         processor.process_new_mask_for_video_frame(
-            inference_session=session, frame_idx=frame_idx, obj_ids=[oid],
-            input_masks=[torch.from_numpy(m)],
+            inference_session=session, frame_idx=frame_idx, obj_ids=obj_ids,
+            input_masks=[torch.from_numpy(m) for m in masks],
         )
     # 🔴 The conditioning frame must be RUN before anything propagates: adding masks only
     # registers the prompt, and the memory bank the tracker reads is built by this forward
