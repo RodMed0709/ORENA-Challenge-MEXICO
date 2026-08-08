@@ -1,0 +1,205 @@
+# ms-swift source excerpts, verbatim, for rung 30 (GRPO)
+# ms_swift==4.4.1  captured 2026-08-08T13:38:29Z on the ORENA pod
+# Reason: every prior ms-swift line citation in this repo was unverifiable (not vendored);
+#         two contradicted each other and one was proven FALSE on 2026-08-08.
+
+==================== arguments/base_args/base_args.py:90-100  --  external_plugins field ====================
+89+1          use_swift_lora (bool): Whether to use swift lora. This is a compatible argument. Default is False.
+89+2      """
+89+3      tuner_backend: Literal['peft', 'unsloth'] = 'peft'
+89+4      tuner_type: str = field(default='lora', metadata={'help': f'tuner_type choices: {list(get_supported_tuners())}'})
+89+5      adapters: List[str] = field(default_factory=list)
+89+6      external_plugins: List[str] = field(default_factory=list)
+89+7      # This parameter is kept for swift3.x compatibility. Please use `external_plugins` as a replacement.
+89+8      custom_register_path: List[str] = field(default_factory=list)
+89+9  
+89+10      seed: int = 42
+89+11      model_kwargs: Optional[Union[dict, str]] = None
+
+==================== arguments/base_args/base_args.py:142-158  --  _import_external_plugins loader ====================
+141+1      def _import_external_plugins(self):
+141+2          if isinstance(self.external_plugins, str):
+141+3              self.external_plugins = [self.external_plugins]
+141+4          # swift v3.x compatibility
+141+5          if isinstance(self.custom_register_path, str):
+141+6              self.custom_register_path = [self.custom_register_path]
+141+7          if self.custom_register_path:
+141+8              self.external_plugins += self.custom_register_path
+141+9  
+141+10          if not self.external_plugins:
+141+11              return
+141+12          for external_plugin in self.external_plugins:
+141+13              import_external_file(external_plugin)
+141+14          logger.info(f'Successfully imported external_plugins: {self.external_plugins}.')
+141+15  
+141+16      @staticmethod
+141+17      def _check_is_adapter(adapter_dir: str) -> bool:
+
+==================== rewards/orm.py:12-40  --  the ORM base class contract ====================
+11+1      from swift.megatron.arguments import MegatronArguments
+11+2      from swift.rlhf_trainers import GRPOConfig
+11+3  
+11+4  
+11+5  class ORM:
+11+6      """Base class for synchronous outcome reward models (ORM).
+11+7  
+11+8      Subclasses should implement the __call__ method to compute rewards.
+11+9  
+11+10      Example:
+11+11          class MyReward(ORM):
+11+12              def __call__(self, completions, **kwargs) -> List[float]:
+11+13                  return [1.0 if len(c) > 100 else 0.0 for c in completions]
+11+14      """
+11+15  
+11+16      def __init__(self, args: Optional[Union['GRPOConfig', 'MegatronArguments']] = None, **kwargs):
+11+17          self.args = args
+11+18  
+11+19      def __call__(self, **kwargs) -> List[float]:
+11+20          raise NotImplementedError
+11+21  
+11+22  
+11+23  class AsyncORM:
+11+24      """Base class for asynchronous outcome reward models (ORM).
+11+25  
+11+26      Use this for reward functions that involve I/O operations (e.g., API calls,
+11+27      database queries) that can benefit from async execution.
+11+28  
+11+29      Async reward functions are executed in parallel using asyncio.gather,
+
+==================== rl_core/grpo_algorithm.py:17-70  --  compute_rewards_per_func - how a reward is called ====================
+16+1  def compute_rewards_per_func(
+16+2      samples: List[GRPOSample],
+16+3      reward_funcs: List[Callable],
+16+4      reward_model_plugins: List[Optional[Any]],
+16+5      device: torch.device,
+16+6      trainer_state: Optional[Any] = None,
+16+7      extra_reward_kwargs: Optional[Dict[str, Any]] = None,
+16+8  ) -> torch.Tensor:
+16+9      """Compute per-function rewards for ``samples``.
+16+10  
+16+11      Supports sync reward callables, async reward callables (auto-detected and
+16+12      run via ``asyncio.run``), and reward models (``nn.Module`` instances) via
+16+13      ``reward_model_plugins``.
+16+14  
+16+15      Args:
+16+16          samples: On-policy samples carrying completions in ``messages[-1]``.
+16+17          reward_funcs: Reward callables / models.
+16+18          reward_model_plugins: Optional model plugins aligned with ``reward_funcs``.
+16+19          device: Target device for the returned tensor.
+16+20          trainer_state: Passed to reward functions as ``trainer_state`` kwarg.
+16+21  
+16+22      Returns:
+16+23          ``[N, n_funcs]`` tensor of rewards.
+16+24      """
+16+25      if reward_model_plugins is None:
+16+26          reward_model_plugins = [None] * len(reward_funcs)
+16+27      async_indices = [i for i, func in enumerate(reward_funcs) if _is_async_reward(func)]
+16+28  
+16+29      rewards_per_func = torch.zeros((len(samples), len(reward_funcs)), device=device)
+16+30      completions = [s.messages[-1]['content'] for s in samples]
+16+31  
+16+32      reward_kwargs: Dict[str, Any] = {'trainer_state': trainer_state}
+16+33      if extra_reward_kwargs:
+16+34          reward_kwargs.update(extra_reward_kwargs)
+16+35      reward_rows = [s.to_reward_row() for s in samples]
+16+36      if reward_rows:
+16+37          from swift.dataset import RowPreprocessor
+16+38          reward_kwargs.update(RowPreprocessor.rows_to_batched(reward_rows))
+16+39  
+16+40      for i, (reward_func, reward_model_plugin) in enumerate(zip(reward_funcs, reward_model_plugins)):
+16+41          if isinstance(reward_func, nn.Module):
+16+42              output = reward_model_plugin(inputs=reward_rows, **reward_kwargs)
+16+43              output = [reward if reward is not None else torch.nan for reward in output]
+16+44              rewards_per_func[:, i] = torch.tensor(output, dtype=torch.float32, device=device)
+16+45          elif i in async_indices:
+16+46              # Async rewards are executed below.
+16+47              pass
+16+48          else:
+16+49              output = reward_func(completions, **reward_kwargs)
+16+50              output = [reward if reward is not None else torch.nan for reward in output]
+16+51              rewards_per_func[:, i] = torch.tensor(output, dtype=torch.float32, device=device)
+16+52  
+16+53      if async_indices:
+16+54          import asyncio
+
+==================== rl_core/data.py:126-149  --  GRPOSample.to_reward_row - dataset columns reach the reward ====================
+125+1          return {k: getattr(self, k) for k in StandardKeys if getattr(self, k)}
+125+2  
+125+3      def to_reward_row(self) -> Dict[str, Any]:
+125+4          """Build the dict consumed by reward functions.
+125+5  
+125+6          Flattens ``extra`` to top level so dataset columns (``solution``,
+125+7          ``target``, ...) remain accessible as keyword args after
+125+8          ``RowPreprocessor.rows_to_batched``. ``encoded`` is excluded (heavy,
+125+9          model-internal). Keeps the legacy column contract intact so existing
+125+10          reward functions need no change.
+125+11          """
+125+12          row: Dict[str, Any] = {
+125+13              'messages': self.messages,
+125+14              'prompt_id': self.prompt_id,
+125+15              'request_id': self.request_id,
+125+16              'finish_reason': self.finish_reason,
+125+17              'is_truncated': self.is_truncated,
+125+18              'rollout_infos': self.rollout_infos,
+125+19              'response_token_ids': self.response_token_ids,
+125+20          }
+125+21          row.update(self._standard_fields())
+125+22          row.update(self.extra)
+125+23          return row
+125+24  
+
+==================== optimizers/multimodal.py:30-90  --  MultimodalOptimizerCallback.create_optimizer ====================
+29+1                  is_rejected = True
+29+2                  break
+29+3          if is_rejected:
+29+4              continue
+29+5          for prefix in chosen_prefix:
+29+6              if n.startswith(prefix):
+29+7                  if is_peft_model:
+29+8                      n = f'base_model.model.{n}'
+29+9                  res.append((n, p))
+29+10                  break
+29+11      return res
+29+12  
+29+13  
+29+14  class MultimodalOptimizerCallback(OptimizerCallback):
+29+15  
+29+16      def create_optimizer(self, model=None):
+29+17          """ViT/Aligner/LLM use different learning rates."""
+29+18          args = self.args
+29+19          if model is None:
+29+20              model = self.trainer.model
+29+21          decay_parameters = set(HfTrainer.get_decay_parameter_names(None, model))
+29+22          model_arch = model.model_meta.model_arch
+29+23          vit_parameters = get_param_startswith(model, model_arch.vision_tower, model_arch.aligner)
+29+24          aligner_parameters = get_param_startswith(model, model_arch.aligner)
+29+25          llm_parameters = get_param_startswith(model, model_arch.language_model)
+29+26          optimizer_grouped_parameters = []
+29+27          vit_lr = args.vit_lr if args.vit_lr is not None else args.learning_rate
+29+28          aligner_lr = args.aligner_lr if args.aligner_lr is not None else args.learning_rate
+29+29          logger.info(f'vit_lr: {vit_lr}, aligner_lr: {aligner_lr}, llm_lr: {args.learning_rate}')
+29+30          for lr, parameters in zip([vit_lr, aligner_lr, args.learning_rate],
+29+31                                    [vit_parameters, aligner_parameters, llm_parameters]):
+29+32              for use_wd, wd in zip([False, True], [0., args.weight_decay]):
+29+33                  if use_wd:
+29+34                      params = [p for n, p in parameters if n in decay_parameters]
+29+35                  else:
+29+36                      params = [p for n, p in parameters if n not in decay_parameters]
+29+37                  if not params:
+29+38                      continue
+29+39                  optimizer_grouped_parameters.append({
+29+40                      'params': params,
+29+41                      'weight_decay': wd,
+29+42                      'lr': lr,
+29+43                  })
+29+44          optimizer_cls, optimizer_kwargs = HfTrainer.get_optimizer_cls_and_kwargs(args, model)
+29+45          return optimizer_cls(optimizer_grouped_parameters, **optimizer_kwargs)
+
+==================== trainers/arguments.py:246-252  --  vit_lr auto-selects the multimodal optimizer ====================
+245+1              raise ValueError('liger_kernel does not support device_map. '
+245+2                               'Please use DDP/DeepSpeed for multi-GPU training.')
+245+3  
+245+4          if self.optimizer is None and (self.vit_lr is not None or self.aligner_lr is not None):
+245+5              self.optimizer = 'multimodal'
+245+6          self._init_callbacks()
+245+7          if self.gradient_accumulation_steps is None:
