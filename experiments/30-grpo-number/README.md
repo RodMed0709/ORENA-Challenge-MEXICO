@@ -60,6 +60,27 @@ this rung.** 🔻 It was to be bounded by `beta` (KL to A2) — but the smoke sh
 is the **raw base model**, not A2 (see below), so `beta = 0` and the guard is now protocol-side:
 frequent checkpoints with `object_recognition` scored at each. Weaker, and stated as such.
 
+### 🔴 Which checkpoint carries the verdict — declared 2026-08-08, before ANY eval was run
+
+The clauses above are a gate. **One level down they were not**, and Leo's review caught it: the
+paragraph says *"scored at each"* and never says which checkpoint decides. Six checkpoints per arm
+with no declared rule means scoring all twelve and then reading a verdict is post-hoc selection
+with six degrees of freedom — the collapse guard silently becomes a checkpoint picker. Nothing had
+been scored when this was written, so it is pre-registered rather than excused.
+
+1. **The verdict pair is `checkpoint-600` vs `checkpoint-600`.** Step-matching is the entire
+   design of this rung; comparing any other pair breaks it.
+2. **The five intermediates are the collapse guard ONLY, never selection.** If 600 shows
+   significant harm on `object_recognition`, the arm is **NO-GO**. We do not fall back to a
+   surviving earlier checkpoint — that converts the guard into a picker and un-matches the
+   control.
+3. **Declared tension, left for the review to rule on:** CONSTITUTION §IV.2 says select by OOD,
+   never the last checkpoint by default. That rule is written for SFT rungs choosing a checkpoint
+   to **ship**. The claim here is *"does the RL objective beat step-matched SFT"*, and
+   OOD-selecting within each arm answers a different, weaker question. Read as out of scope for a
+   paired A/B — if the review reads §IV.2 as binding, OOD-selection applied **symmetrically to
+   both arms** replaces clause 1, and that substitution must be recorded here before the eval.
+
 **Minimum detectable effect: ≈0.036** on `aggregation_ID` (rung 21's ID-cell CI half-width 0.023,
 √n-rescaled to n=955; video clustering makes that optimistic). **Predicted effect: unknown** —
 which is the honest statement, and the reason the arm runs at all.
