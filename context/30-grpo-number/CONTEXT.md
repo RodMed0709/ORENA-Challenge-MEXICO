@@ -28,6 +28,7 @@ are safe on the network volume either way, but the card is not.
 | First SFT control attempt | 🔴 **VOID — trained on nothing.** See the trap below. Kept as evidence at `runs/30_grpo_v1_control_full_VOID_no_gradient` |
 | Control fix + smoke | ✅ `f5aec95`; smoke 10/10 steps with gradient, `loss_mean` 0.276 |
 | **Step-matched SFT control, relaunched** | ✅ **rc=0** 20:06 UTC 2026-08-08, 1h45. `training_check`: **600/600 steps with gradient**, `loss_mean` 0.240, **6 checkpoints** — matching GRPO's six |
+| **Independent review gate** | 🟡 **GO-WITH-FIXES** — `_docs/REVIEW_2026-08-08.md`. One blocking fix left (`_assert_learned` reports success when it cannot find its log); two earlier blockers were closed in flight by `fa811ab` and this file's own §2. The §IV.2 tension `fa811ab` referred to the review is ruled on in the writeup |
 
 ### 🔴 The second trap — a control that completes `rc=0` having moved no weight
 
