@@ -25,27 +25,50 @@ are safe on the network volume either way, but the card is not.
 | Pre-registration under S8/R9 | ✅ committed **before** the run (`d770ccd`) |
 | Smoke, 10 steps | ✅ rc=0, and it caught the reference-policy trap |
 | **GRPO full, 600 steps** | ✅ **rc=0**, 2h40 at 15.9 s/it, **6 checkpoints written** |
-| **Step-matched SFT control** | ⏳ launched right after, same 600 steps / same lr / fresh cosine |
+| First SFT control attempt | 🔴 **VOID — trained on nothing.** See the trap below. Kept as evidence at `runs/30_grpo_v1_control_full_VOID_no_gradient` |
+| Control fix + smoke | ✅ `f5aec95`; smoke 10/10 steps with gradient, `loss_mean` 0.276 |
+| **Step-matched SFT control, relaunched** | ⏳ running since 18:21 UTC 2026-08-08, ~1h40, `runs/30_grpo_v1_control_full` |
+
+### 🔴 The second trap — a control that completes `rc=0` having moved no weight
+
+Both arms read `runs/30_grpo_v1/grpo_train.jsonl`, and that file is GRPO-format by construction:
+`build_number_subset.py` `to_grpo` **strips the assistant turn** and moves the gold to a `solution`
+column, because in GRPO the model generates the answer and the reward reads `solution`.
+`swift sft` masks every token that is not assistant content ⇒ no labels ⇒ no gradient.
+
+The first control ran **1h20 on the 5090 with `'loss': 0.0` and `'grad_norm': 0.0` on 492 of 492
+logged steps**, 18 minutes from finishing `rc=0` with an adapter bit-identical to A2. Nothing
+looked wrong from outside — checkpoints on disk, LR annealing on cue, plausible elapsed time.
+
+⚠️ **This is the same OUTCOME the engine already warned about for a resumed cosine** (lr 0.0 at
+step 2703 ⇒ control learns nothing ⇒ GRPO wins for free), reached by a completely different route.
+That is the argument for making it a property of the run instead of a note in prose:
+
+* `_materialize_control_data` re-attaches the assistant turn, derived **from `grpo_train.jsonl`**
+  so the seeded train/holdout split is preserved byte-for-byte.
+* `_assert_supervised` — pre-flight, raises before the GPU is touched.
+* `_assert_learned` — reads the run's own `grad_norm` log, raises below 50% nonzero steps.
+  **Generalise this**: `rc=0` is not evidence that anything was learned, in any rung.
 
 ### What is NOT done — pick up here
 
 1. 🔴 **Score the six checkpoints.** `runs/30_grpo_v1_grpo_full/ckpt/*/checkpoint-{100..600}`.
    This is not optional bookkeeping — with `beta=0` there is **no KL anchor**, so per-checkpoint
    evaluation *is* the collapse guard. Score `object_recognition_{ID,OOD}` at every one; it is
-   the declared veto cell.
-2. ✅ **The step-matched SFT control is LAUNCHED** (`runs/30_grpo_v1_control_full/`) — same data,
-   same 600 optimizer steps, **same lr 1e-6**, fresh cosine. Matching the LR is deliberate: it
-   makes the OBJECTIVE the single variable. Giving the control A2's 2e-4 would change two things.
-   🔴 Never `--resume_from_checkpoint` — A2's cosine is at lr 0.0 by step 2703, so a resumed
-   control learns nothing and would flatter GRPO for free. **Check it finished (rc=0) on return.**
+   the declared veto cell. Needs the GPU the control now holds.
+2. ⏳ **The control is training for real** (`runs/30_grpo_v1_control_full/`) — same rows, same 600
+   optimizer steps, **same lr 1e-6**, fresh cosine. Matching the LR is deliberate: it makes the
+   OBJECTIVE the single variable. Giving the control A2's 2e-4 would change two things.
+   🔴 Never `--resume_from_checkpoint`. On return, check `RESULTS_run.json.training_check` —
+   `rc=0` alone does not clear it.
 3. **Read the holdout.** `grpo_holdout.jsonl` (493 rows, seed 42) never entered training. If the
    arm moves train and not holdout, the gain is memorisation-sharpening, not learning.
 4. **Then** adjudicate against the pre-registration: primary cell `aggregation_ID`, MDE ≈0.036,
    S8's three clauses, veto on `object_recognition`.
 
-### Live numbers from the run in flight (step 588/600)
+### Final numbers from the GRPO run (600/600, rc=0)
 
-`reward` 0.6875 (early steps sat at 0.31–0.44) · `frac_reward_zero_std` fluctuating around 0.3 ·
+`reward` 0.6875 at step 588 (early steps sat at 0.31–0.44) · `frac_reward_zero_std` around 0.3 ·
 `completions/mean_length` 2.0, `clipped_ratio` 0.0 · memory 29.1 GiB stable, no leak ·
 15.9 s/it (faster than the smoke's 19.5 — `beta=0` skips the reference forward pass).
 ⚠️ The reward rise is **across different batches** and is NOT evidence of a gain. Only the

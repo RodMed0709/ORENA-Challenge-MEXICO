@@ -70,6 +70,7 @@ None yet.
 | 260727-n87 | Harden the FRAME submission container and prove it on the official template fixture | 2026-07-27 | 7d7a451 | Complete — first answer.json this container has ever produced; batch.json layout now read | [260727-n87-harden-the-frame-submission-container-ag](./quick/260727-n87-harden-the-frame-submission-container-ag/) |
 | 260727-qbn | Land the submission-forensics findings in the brain | 2026-07-27 | 8242285 | Complete — metric decoded, aggregation lead retracted, OOD provenance recorded | [260727-qbn-land-the-submission-forensics-findings-i](./quick/260727-qbn-land-the-submission-forensics-findings-i/) |
 | 260728-oda | Class-balanced (macro) F1 for `fo_class` in `frame.metrics` — the metric exact-set accuracy hides | 2026-07-28 | 0674f02 | Complete — reproduces probe0's rung 06 ep3 numbers exactly (n=920, exact 0.6391, macro 0.5116) | [260728-oda-add-class-balanced-macro-f1-for-fo-class](./quick/260728-oda-add-class-balanced-macro-f1-for-fo-class/) |
+| 260808-h0l | The rung-30 SFT control trained on a GRPO-format corpus with no assistant turn — loss identically 0.0 | 2026-08-08 | f5aec95 | Complete — 1h20 of GPU produced an adapter identical to A2; materializer + pre-flight + `grad_norm` post-run guard; smoke 10/10 steps with gradient, full relaunched | [260808-h0l-fix-rung-30-sft-control-dataset-has-no-a](./quick/260808-h0l-fix-rung-30-sft-control-dataset-has-no-a/) |
 
 ## Session Continuity
 
