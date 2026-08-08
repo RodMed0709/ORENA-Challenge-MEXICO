@@ -143,17 +143,23 @@ def load_arm(cfg: Config, adapter: Path | None):
 def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     """One forward pass; attention and embeddings read at the readout position."""
     import torch
+    from qwen_vl_utils import process_vision_info
 
     from frame.engine import SYSTEM_PROMPT
 
+    # 🔴 Built exactly as `engine.py:157-168` builds it — apply_chat_template(tokenize=False)
+    # then process_vision_info then processor(...). A different path would tokenise the image
+    # differently and the probe would describe a prompt the model is never asked.
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": [{"type": "image", "image": image},
                                      {"type": "text", "text": question}]},
     ]
-    inputs = processor.apply_chat_template(
-        messages, tokenize=True, add_generation_prompt=True,
-        return_dict=True, return_tensors="pt",
+    text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    image_inputs, video_inputs = process_vision_info(messages)
+    inputs = processor(
+        text=[text], images=image_inputs, videos=video_inputs,
+        padding=True, return_tensors="pt",
     ).to(model.device)
 
     with torch.inference_mode():
