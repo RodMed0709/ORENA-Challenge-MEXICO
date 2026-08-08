@@ -69,6 +69,7 @@ class Config:
     train_jsonl: Path | None = None               # defaults to <data_dir>/grpo_train.jsonl
 
     base_model: Path = BASE_MODEL
+    model_type: str = "qwen3_vl"
     adapters: Path = A2_CKPT                      # start from A2, the shipped checkpoint
 
     # ── inherited from A2's args.json, do not drift ──────────────────────────
@@ -135,6 +136,10 @@ def build_argv(cfg: Config) -> list[str]:
     data = _smoke_slice(cfg) if cfg.smoke else cfg.data
     common = [
         "--model", str(cfg.base_model),
+        # Required, not optional: the weights on the volume match three registered types
+        # ('qwen3_vl', 'qwen3_vl_emb', 'qwen3_vl_reranker') and ms-swift refuses to guess.
+        # 'qwen3_vl' is what A2's own args.json recorded.
+        "--model_type", cfg.model_type,
         "--adapters", str(cfg.adapters),
         "--dataset", str(data),
         # 🔻 NOT `--train_type`. ms-swift 4.4.1 renamed it to `tuner_type`
