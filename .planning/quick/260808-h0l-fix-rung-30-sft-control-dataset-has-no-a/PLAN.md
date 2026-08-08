@@ -15,7 +15,7 @@ gradient. Measured on `runs/30_grpo_v1_control_full`:
 'loss': 0.0, 'grad_norm': 0.0     # 492 of 492 logged steps, zero exceptions
 ```
 
-1h20 of a 5090 produced an adapter bit-identical to A2. Had it finished `rc=0` it would have been
+1h20 of a 5090 produced an adapter that learned nothing. Had it finished `rc=0` it would have been
 read as a legitimate step-matched control, and GRPO would have won the comparison against a run
 that never moved a weight — the exact "flatters GRPO for free" failure the engine's own docstring
 warns about for `--resume_from_checkpoint`, entering through a second door.
