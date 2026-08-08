@@ -109,12 +109,18 @@ class RecipeSweepConfig(ViTLoRAConfig):
     # vision tower and never gave it its own LR, so `swift/optimizers/multimodal.py:56` falls
     # back to `args.learning_rate` and the tower has ridden the LLM's rate for the whole
     # campaign. At lr 2e-4 that runs the tower at 5-10x the Qwen3-VL default.
-    # ⚠️ `--vit_lr` ALONE IS A SILENT NO-OP. `swift/arguments/sft_args.py:213-217` only
-    # auto-selects an optimizer for `lorap_lr_ratio` or `use_galore`, so without
-    # `--optimizer multimodal` the MultimodalOptimizerCallback never runs and the flag is
-    # ignored with no error. Both flags are emitted together, and the BASELINE carries them too
-    # (with vit_lr == learning_rate, which is what the fallback already computes), so the diff
-    # is exactly one value rather than the optimizer machinery appearing as a change.
+    # 🔻 RETRACTED 2026-08-08 — this block used to say `--vit_lr` alone is a SILENT NO-OP,
+    # citing `swift/arguments/sft_args.py:213-217`. That is FALSE, and it was never checkable
+    # from the repo because ms-swift is not vendored. Read on the pod, ms-swift 4.4.1
+    # `swift/trainers/arguments.py:249-250` does the auto-select:
+    #     if self.optimizer is None and (self.vit_lr is not None or self.aligner_lr is not None):
+    #         self.optimizer = 'multimodal'
+    # So setting `vit_lr` DOES select the multimodal optimizer on its own. The consequence is
+    # the opposite of the retracted reading: you cannot set `vit_lr` WITHOUT switching optimizer.
+    # Emitting both flags together is still correct — it is explicit, not load-bearing.
+    # 🟢 And the optimizer switch is harmless at equal LR: with 0 orphaned trainable parameters
+    # (A2: 720 = 216 vit + 0 aligner + 504 llm) MultimodalOptimizerCallback builds a
+    # mathematically identical optimizer to the default. See [[multimodal-optimizer-is-an-identity]].
     vit_lr: float | None = None          # None = same as learning_rate (the campaign's default)
 
     # The control's data, used as-is. NOT re-exported — see the module docstring.

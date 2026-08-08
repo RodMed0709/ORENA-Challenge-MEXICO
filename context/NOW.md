@@ -618,7 +618,11 @@ every step. ⚠️ The decision note's original "confirmed at the source" quotat
 `seq2seq_trainer.py:196` sits under `if num_items_in_batch is None:` and, had the guard been
 open, would have meant training was ALREADY per-sample and the whole 62.4/20.8 table an
 artefact. Free findings from the same probe: `max_grad_norm` is **1.0** (never set by us), and
-`swift/plugin/loss_scale/` **does not exist** in ms-swift 4.4.1 — the hook is `compute_loss_func`.
+`swift/plugin/` **does not exist** in ms-swift 4.4.1 — but ⚠️ **`swift/loss_scale/` DOES**, at top level
+(`base.py`, `mapping.py`), and it was found and **ruled out with a reason**, not missed: `--loss_scale`
+multiplies the per-token loss and **leaves the denominator alone**, which IS the ~3.3× magnitude shrink
+rung 22 exists to avoid ([[loss-mass-is-token-weighted]] §hooks). The hook is `compute_loss_func`
+because it is the only one that receives `num_items_in_batch`.
 
 🟢 **`frame.metrics.class_f1_report`** landed (`0674f02`) — class-balanced F1 on `fo_class`,
 validated against probe0 (rung 06 ep3 ID: n=920, exact 0.6391, macro 0.5116). It is what can
