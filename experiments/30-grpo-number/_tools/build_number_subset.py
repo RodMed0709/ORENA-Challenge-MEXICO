@@ -18,13 +18,32 @@ join one from. So the format is recovered two ways and the run **aborts on disag
 * **gold side** — the assistant turn satisfies ``focus.data.formats.Number.verify``
   (``text.strip().isdigit()``). Gold answers are correct by construction, so a gold that verifies
   as a Number is a Number row.
-* **question side** — the prompt carries the corpus's number template marker
-  (``"provide a number"``).
+* **question side** — the prompt expresses counting intent (``how many`` / ``total number of`` /
+  ``count the`` / ``provide a number``).
 
-⚠️ Neither alone is safe. ``open_ended`` rows can carry a digit-only gold (the census found 1,291
-rows in an "other" shape), and a question-text match alone would trust a template string that
-[[rung-08]] already showed to be an unreliable key. Requiring both, and refusing to proceed when
-they disagree by more than ``max_disagree``, is what makes the subset defensible.
+🔴 **The literal marker ``"provide a number"`` was the first attempt and it was WRONG** — it
+missed **1,284** rows (26% of the format), all of them counting questions that simply carry no
+suffix (``"How many Clips appear in this frame?"``). Those are rung 18's paraphrases, and they
+are exactly the out-of-template phrasings probe 16a measured the trailing-period bug on. Training
+on the suffix-only slice would have silently excluded the sub-population the arm most needs.
+
+## The asymmetry, and the 32 rows it exposed
+
+The two detectors are NOT interchangeable and the gate treats them differently:
+
+* **gold-only (digit gold, no counting intent) must be 0** — a number row the question side
+  missed is a row dropped from training, and it is the dangerous direction. Measured: **0**.
+* **question-only (counting intent, non-digit gold) is reported, not fatal** — these are counting
+  questions in another answer format. Measured: **32**, correctly excluded.
+
+⚠️ **Those 32 are a finding, not noise.** Their golds are ``'2.'``, ``'3.'``, ``'0.'``,
+``'Two.'``, ``'Intestine: 1.'`` — malformed for `Number` and every one of them sits under the
+template *"Please provide a single integer"*, a phrasing that appears nowhere else in the corpus.
+So the only examples the model ever saw of that phrasing answer it **with a trailing period**.
+That is a plausible source of the habit `normalize_answer` exists to patch
+(probe 16a: ``"1."`` on 86.7% ID / 87.5% OOD of out-of-template number questions, base-model rate
+0.0000). 📌 Not fixed here — it is a data defect, it belongs to its own rung, and this arm must
+not change the corpus. Recorded in ``RESULTS_subset.json`` under ``question_only_rows``.
 
 ## Output schema — what GRPO needs, and why the assistant turn is dropped
 
@@ -55,7 +74,9 @@ CONTROL_ROWS = 14_415
 # Measured on the control corpus 2026-08-08; asserted so a corpus change is loud, not silent.
 EXPECTED_NUMBER_ROWS = 4_929
 
-_NUMBER_TEMPLATE = re.compile(r"provide a number", re.IGNORECASE)
+#: Counting INTENT, not the corpus suffix. See the module docstring: keying on the literal
+#: "provide a number" missed 1,284 of 4,929 rows (26%).
+_COUNTING_INTENT = re.compile(r"how many|total number of|count the|provide a number", re.IGNORECASE)
 
 
 @dataclass
@@ -84,6 +105,10 @@ def _sha256(p: Path) -> str:
     return h.hexdigest()
 
 
+def _user(messages: list[dict]) -> str:
+    return next((m["content"] for m in messages if m["role"] == "user"), "")
+
+
 def _is_number_gold(text: str) -> bool:
     """The SDK's own predicate — ``Number.verify`` is ``text.strip().isdigit()``."""
     return text.strip().isdigit()
@@ -91,7 +116,7 @@ def _is_number_gold(text: str) -> bool:
 
 def _is_number_question(messages: list[dict]) -> bool:
     user = next((m["content"] for m in messages if m["role"] == "user"), "")
-    return bool(_NUMBER_TEMPLATE.search(user))
+    return bool(_COUNTING_INTENT.search(user))
 
 
 def build(cfg: Config) -> dict:
@@ -108,25 +133,25 @@ def build(cfg: Config) -> dict:
     if len(rows) != CONTROL_ROWS:
         raise AssertionError(f"expected {CONTROL_ROWS} rows, read {len(rows)}")
 
-    kept, disagree = [], []
+    kept, gold_only, question_only = [], [], []
     for i, r in enumerate(rows):
         msgs = r["messages"]
         gold_side = _is_number_gold(msgs[-1]["content"])
         q_side = _is_number_question(msgs)
-        if gold_side != q_side:
-            disagree.append({"i": i, "gold_side": gold_side, "q_side": q_side,
-                             "gold": msgs[-1]["content"][:40]})
-            continue
-        if gold_side:
+        if gold_side and q_side:
             kept.append(r)
+        elif gold_side:  # a number row the question side missed — the dangerous direction
+            gold_only.append({"i": i, "q": _user(msgs)[:120], "gold": msgs[-1]["content"][:40]})
+        elif q_side:     # a counting question in another answer format — correctly excluded
+            question_only.append({"i": i, "q": _user(msgs)[:120],
+                                  "gold": msgs[-1]["content"][:40]})
 
-    if len(disagree) > cfg.max_disagree:
-        census = Counter((d["gold_side"], d["q_side"]) for d in disagree)
+    if len(gold_only) > cfg.max_disagree:
         raise AssertionError(
-            f"{len(disagree)} rows disagree between the gold-side and question-side detectors "
-            f"(budget {cfg.max_disagree}). Census {{(gold,question): n}} = {dict(census)}.\n"
-            f"First 5: {disagree[:5]}\n"
-            "Refusing to guess the answer format — resolve the detector before training."
+            f"{len(gold_only)} rows have a Number-valid gold but no counting intent in the "
+            f"question (budget {cfg.max_disagree}). These would be DROPPED from training.\n"
+            f"First 5: {gold_only[:5]}\n"
+            "Broaden _COUNTING_INTENT — do not train on a silently truncated format."
         )
 
     if len(kept) != cfg.expected_rows:
@@ -170,7 +195,12 @@ def build(cfg: Config) -> dict:
         "source_sha256": CONTROL_SHA256,
         "source_rows": len(rows),
         "number_rows": len(kept),
-        "disagreements": len(disagree),
+        "gold_only_rows": len(gold_only),
+        # counting questions in another answer format -- excluded. Their golds are malformed for
+        # Number ('2.', 'Two.', 'Intestine: 1.') and all sit under one phrasing that appears
+        # nowhere else, which is a candidate source of the trailing-period habit. See docstring.
+        "question_only_rows": len(question_only),
+        "question_only_examples": question_only[:40],
         "outputs": paths,
         "gold_histogram": dict(sorted(gold_hist.items(), key=lambda kv: -kv[1])),
         # the accuracy a model gets by ALWAYS emitting the modal count -- the floor any
