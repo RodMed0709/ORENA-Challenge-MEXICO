@@ -56,7 +56,9 @@ number = 80.4% of aggregation ;  aggregation = 2 of 4 populated buckets = 50% of
 🔴 **Declared veto cells, named now so they cannot be discovered later:**
 `object_recognition_{ID,OOD}` first. `fo_class` is **71%** of `object_recognition`, and a
 `number`-only objective is free to walk the policy away from it. **This is the modal failure of
-this rung**, and `beta` (KL to A2) exists to bound it.
+this rung.** 🔻 It was to be bounded by `beta` (KL to A2) — but the smoke showed that reference
+is the **raw base model**, not A2 (see below), so `beta = 0` and the guard is now protocol-side:
+frequent checkpoints with `object_recognition` scored at each. Weaker, and stated as such.
 
 **Minimum detectable effect: ≈0.036** on `aggregation_ID` (rung 21's ID-cell CI half-width 0.023,
 √n-rescaled to n=955; video clustering makes that optimistic). **Predicted effect: unknown** —
