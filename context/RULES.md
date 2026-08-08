@@ -205,6 +205,19 @@ S6. **Retroactive one way.** Cells already read are not relabelled; but no NEW a
 S7. **A faithful NULL is published.** No re-cutting a rung after the fact to find a cell that
     clears the bar. Post-hoc slicing IS the multiplicity problem.
 
+S8. **Multiplicity is asymmetric — one cell may WIN, every cell may VETO.** Only the cell
+    declared under S3 can grant a win. **Any** cell whose CI excludes zero *in the control's
+    favour* takes one away. A rung wins only if (a) the pre-registered cell's paired CI
+    excludes zero in the arm's favour, (b) that holds on **ID and OOD jointly** — never the
+    aggregate alone, never one side — and (c) no cell anywhere shows significant harm.
+    🔑 A positive point estimate whose CI includes zero is a **NULL**, not weak evidence.
+    ⚠️ Significance ≠ worth: clearing S8 says the effect is real, S1 says whether to spend GPU
+    on it. Rung 24 cleared S8 (CI [+0.0023, +0.1225]) and scaling it was still correctly
+    declined. 🔴 S8 gates **fishing, not resolution** — it does not rescue a cell whose
+    draw-to-draw noise exceeds the effect (`number` greedy moved 10.5 pts between two n=200
+    draws; one dropped video moves `acc_OOD` by a median 0.024). S4 and the jackknife still
+    bind. Proposed by **Yingyu**; full statement and the grid split in [[significance-rule]].
+
 ## COMPLIANCE — challenge data never leaves the secure environment (BINDING, DUA)
 
 14. **No challenge data — frames OR annotations (questions + gold) — to any external API.**
