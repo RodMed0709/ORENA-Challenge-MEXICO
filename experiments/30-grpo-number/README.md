@@ -110,3 +110,46 @@ question — with **gold-only disagreement = 0** enforced as a hard gate.
 (`'2.'`, `'Two.'`, `'Intestine: 1.'`), *all* under the phrasing *"Please provide a single
 integer"* which appears nowhere else in the corpus. A candidate source of the trailing-period
 habit probe 16a measured at 86.7%. It is a data defect and belongs to its own rung.
+
+---
+
+## Smoke — 10 steps, rc=0, `runs/30_grpo_v1_grpo_smoke/`
+
+| gate | result |
+|---|---|
+| rollouts generate | 🟢 `completions/mean_length` **2.0**, min=max=2, `clipped_ratio` 0.0 |
+| reward VARIES (not the rung-22 disease) | 🟢 mean 0.31–0.81 across steps, `reward_std` up to 0.53 |
+| groups carrying gradient | 🟢 `frac_reward_zero_std` mean **0.30** over 10 steps |
+| memory | ⚠️ **26.7 → 30.4 GiB of 32.6** — grew over 10 steps |
+| speed | 19.46 s/it (`train_runtime` 194.6 s / 10) |
+| illegal answers | 🟢 none observed |
+
+🔑 **The gradient rate independently reproduces the entropy gate.** `frac_reward_zero_std`
+averaged **0.30** here against step 5's `zero_advantage` of **0.280 / 0.270** — two different
+instruments, two different data slices, the same number. Phase C's scoping is not an artifact.
+
+🔻 **Correction to a first reading of this smoke.** A single step showed `frac_reward_zero_std`
+0.0 and it was reported as *"zero groups without gradient"*. Over all ten steps the values are
+`0, 1, .5, 0, 0, 1, 0, 1, 0, .5` — three steps produce **no gradient at all** (`grad_norm`
+1.8e-06, 0.0056, 0.0). The mean 0.30 is the honest figure, and it is the one that matches step 5.
+
+## 🔴 The reference-policy trap, found by the smoke and fixed before the full run
+
+`kl` was **4.06 at step 1 — before a single update** — and pinned at exactly **5.0** on four
+steps. 5.0 is not a measurement: completions are 2 tokens and the per-token KL is clamped to
+±10 (`grpo_trainer.py:964`), so 5.0 is one token saturating the clamp.
+
+Cause: with a PEFT model and no explicit `ref_model`, ms-swift's reference is
+`null_ref_context` → `disable_adapter()` (`rlhf_mixin.py:186-194`) — **the raw base model, not
+A2**. The KL penalty was pulling the policy back toward the un-fine-tuned checkpoint, i.e.
+against the **+0.317** that fine-tuning bought and that the whole campaign rests on.
+
+Neither proper fix is available here: `ref_adapter_name` is not an exposed argument in 4.4.1
+(read only via `getattr`, always `None`), and `--ref_model <merged A2>` needs a second ~16 GB
+model beside a run already at 30.4 of 32.6 GiB.
+
+⇒ **`beta = 0.0`**, which `grpo_trainer.py:755` short-circuits to skip the reference entirely —
+also what DAPO and Dr.GRPO do. ⚠️ **The cost is real and is recorded here:** the S8(c) collapse
+guard moves from the loss to the protocol — small LR, frequent checkpoints, and
+`object_recognition` evaluated at each one. That is an empirical veto, it is weaker than a KL
+anchor, and it only works if it is actually run.

@@ -92,9 +92,24 @@ class Config:
     learning_rate: float = 1e-6
     #: k. Step 5 measured zero_advantage 0.28 at k=8 -- 72% of groups carry gradient.
     num_generations: int = 8
-    #: KL anchor to A2. This is the S8(c) veto guard: it is what stops the number-only objective
-    #: walking the policy away from fo_class, which is 71% of object_recognition.
-    beta: float = 0.04
+    #: 🔴 **0.0, and the reason is a trap that would have silently wrecked the run.**
+    #: The obvious setting is beta > 0, to anchor the policy to A2 and bound the S8(c) veto risk
+    #: (a `number`-only objective walking away from `fo_class`, 71% of object_recognition).
+    #: But with a PEFT model and no explicit `ref_model`, ms-swift's reference policy is
+    #: `null_ref_context` -> `disable_adapter()` (rlhf_mixin.py:186-194) -- i.e. the RAW BASE
+    #: MODEL, not A2. A KL penalty against that pulls the policy back toward the un-fine-tuned
+    #: checkpoint and destroys the +0.317 fine-tuning bought. The smoke showed it: `kl` was
+    #: **4.06 at step 1, before any training**, and pinned at exactly 5.0 on four steps -- one of
+    #: the two completion tokens saturating the +-10 per-token clamp (grpo_trainer.py:964).
+    #: `ref_adapter_name` would fix it properly but is NOT exposed as an argument in 4.4.1
+    #: (only read via getattr, always None), and `--ref_model <merged A2>` needs a second ~16 GB
+    #: model that does not fit beside a run already at 30.4 of 32.6 GiB.
+    #: ⇒ beta = 0.0, which `grpo_trainer.py:755` short-circuits to skip the reference entirely.
+    #: This is also standard modern practice (DAPO, Dr.GRPO both drop the KL term).
+    #: 🔑 The collapse guard therefore moves from the LOSS to the PROTOCOL: small LR, frequent
+    #: checkpoints, and `object_recognition` evaluated at each one. An empirical veto, not an
+    #: analytic one -- weaker, and it must be actually run.
+    beta: float = 0.0
     temperature: float = 1.0
     #: `number` answers are 2 tokens. A long budget only buys the model room to ramble itself
     #: out of a legal answer -- and an illegal answer scores 0, here and on the platform.
