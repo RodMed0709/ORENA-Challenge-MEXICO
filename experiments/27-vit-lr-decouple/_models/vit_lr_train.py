@@ -1,4 +1,4 @@
-"""Rung 24 — the training engine: arm A of rung 21 with ONE flag added, ``--vit_lr``.
+"""Rung 27 (was rung 24) — the training engine: arm A of rung 21 with ONE flag added, ``--vit_lr``.
 
 Importable engine; the notebook calls ``main(cfg, stage=...)``. Nothing here is a hand-run
 launcher.
@@ -121,7 +121,7 @@ class ViTLRConfig(RecipeSweepConfig):
     baseline moved when arm A won, exactly as rung 21's own `BASELINES` table records.
     """
 
-    exp_dir: Path = Path("/workspace/repo/experiments/24-vit-lr-decouple")
+    exp_dir: Path = Path("/workspace/repo/experiments/27-vit-lr-decouple")
     run_name: str = "24_vit_lr_2e5_v1"
 
     # 🎯 THE VARIABLE. None = ms-swift's fallback = the LLM's rate = arm A = the control.

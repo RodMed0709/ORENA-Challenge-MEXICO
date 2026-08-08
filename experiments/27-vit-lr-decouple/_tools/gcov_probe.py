@@ -1,6 +1,6 @@
-"""Rung 24 · G-COV + G-EQUIV — measure that ``--vit_lr`` does what its name says.
+"""Rung 27 (was rung 24) · G-COV + G-EQUIV — measure that ``--vit_lr`` does what its name says.
 
-Folder-private glue for rung 24. Importable; the notebook calls ``run_probe(cfg)``. Not a
+Folder-private glue for rung 27. Importable; the notebook calls ``run_probe(cfg)``. Not a
 launcher — nothing here is meant to be run by hand.
 
 ## Why this file exists rather than a paragraph of reasoning
