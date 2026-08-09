@@ -83,6 +83,12 @@ class Config:
     max_steps: int = 5
     rows: int = 32
 
+    #: 🔴 Absolute path, not the bare name. A papermill kernel does not inherit the shell's
+    #: activated venv, so `subprocess.run(["swift", ...])` raises
+    #: `FileNotFoundError: [Errno 2] ... 'swift'` seven seconds in, before any GPU work and
+    #: before any artifact is written. Measured 2026-08-08.
+    swift: Path = Path("/workspace/envs/infer/bin/swift")
+
     @property
     def run_dir(self) -> Path:
         leg = "unfrozen" if not self.freeze_aligner else "control_frozen"
@@ -102,7 +108,7 @@ def _slice(cfg: Config) -> Path:
 
 def build_argv(cfg: Config, data: Path) -> list[str]:
     return [
-        "swift", "sft",
+        str(cfg.swift), "sft",
         "--model", str(cfg.base_model),
         "--model_type", cfg.model_type,
         "--adapters", str(cfg.adapters),
@@ -145,6 +151,9 @@ def smoke(cfg: Config) -> dict:
     env = dict(os.environ)
     env.setdefault("HF_HUB_OFFLINE", "1")
     env.setdefault("TRANSFORMERS_OFFLINE", "1")
+    # the console script's shebang resolves against PATH; a papermill kernel may not carry
+    # the venv's bin, so put it in front explicitly
+    env["PATH"] = f"{cfg.swift.parent}:{env.get('PATH', '')}"
     log = cfg.run_dir / "train.log"
     with open(log, "w", encoding="utf-8") as fh:
         p = subprocess.run(argv, env=env, stdout=fh, stderr=subprocess.STDOUT, text=True)
