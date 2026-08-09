@@ -1,0 +1,3 @@
+arm,run,step,checkpoint,smoke,n_scored,aggregation_ID,aggregation_OOD,object_recognition_ID,object_recognition_OOD,bucket_mean,judge_model
+control,30_grpo_v1_control_full,600,checkpoint-600,False,6252,0.5026178010471204,0.6021333333333333,0.7276234567901234,0.7727058823529411,0.6512701183808796,Qwen/Qwen3-4B
+grpo,30_grpo_v1_grpo_full,600,checkpoint-600,False,6252,0.4931937172774869,0.6053333333333333,0.7214506172839507,0.7712941176470588,0.6478179463854574,Qwen/Qwen3-4B

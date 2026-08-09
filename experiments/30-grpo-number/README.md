@@ -10,7 +10,7 @@
 | 28 | VCD gate | 🔴 **dead** — p(`Clip`) *falls* 0.7794 → 0.6198 under degradation. The model is looking |
 | 10b | entropy gate, per format | 🟢 `number` ALIVE (`zero_advantage` 0.280/0.270 over two seeds); `binary` + `fo_class` **dead, no gradient** |
 | 22 | loss-mass | 🔴 **NO-GO** — the committed hook is an arithmetic identity at `per_device=1` |
-| **30** | **GRPO with a 0/1 exact-match reward, `number` only** | **⏳ pre-registered, this file** |
+| **30** | **GRPO with a 0/1 exact-match reward, `number` only** | 🔴 **NO-GO** — `aggregation_ID` **−0.0094** vs step-matched SFT at equal steps/data/LR. S8(1) fails outright: the primary is negative, and an order below the MDE of 0.036 |
 
 ## The question
 
@@ -176,3 +176,50 @@ also what DAPO and Dr.GRPO do. ⚠️ **The cost is real and is recorded here:**
 guard moves from the loss to the protocol — small LR, frequent checkpoints, and
 `object_recognition` evaluated at each one. That is an empirical veto, it is weaker than a KL
 anchor, and it only works if it is actually run.
+
+---
+
+## 🔴 RESULT — NO-GO. GRPO does not beat step-matched SFT on `number`.
+
+Both arms scored at `checkpoint-600` on the full eval set (6,252 questions, judge `Qwen/Qwen3-4B`),
+`rc=0` on both. `RESULTS_verdict.csv`.
+
+| cell | GRPO | control (SFT) | Δ |
+|---|---|---|---|
+| **`aggregation_ID`** (primary) | 0.4932 | 0.5026 | **−0.0094** |
+| `aggregation_OOD` | 0.6053 | 0.6021 | +0.0032 |
+| `object_recognition_ID` (veto) | 0.7215 | 0.7276 | −0.0062 |
+| `object_recognition_OOD` (veto) | 0.7713 | 0.7727 | −0.0014 |
+| `bucket_mean` (reference only) | 0.6478 | 0.6513 | −0.0035 |
+
+**S8 clause 1 fails outright.** It requires the `aggregation_ID` CI to exclude zero **in the arm's
+favour**; the point estimate is **negative**, so no CI is needed to resolve it. The gap is also an
+order below the pre-registered MDE of ≈0.036 — this is a null, pointed the wrong way, not a near
+miss. Clause 1 is not satisfiable, so clauses 2 and 3 are not reached.
+
+Per the pre-registration, **the verdict is `checkpoint-600` vs `checkpoint-600` and there is no
+fallback to a surviving earlier checkpoint.** The five intermediates were the collapse guard, never
+selection, so the collapse sweep cannot rescue a failed primary and was not run. The rung closes
+without further GPU.
+
+### What this actually falsifies
+
+The premise was that `pass@8` reaching 0.945 where greedy reaches 0.705 is **24 points the model
+already holds and merely fails to emit**, and that GRPO — which re-weights a policy's own samples
+rather than teaching it to see — is the instrument matched to exactly that defect. That premise is
+now measured and it does not convert: at equal steps, equal data and equal LR, the RL objective
+bought **nothing over ordinary SFT**, and trended slightly negative on every cell but one.
+
+⚠️ **The headroom itself is not refuted** — `pass@8` was measured on TRAIN data the model had seen
+for three epochs (risk #1 above, recorded before the run). What is refuted is that *this* objective
+converts it. Whether the 24 points are reachable capability or memorisation slack remains open, and
+the 493-row holdout is the instrument that would separate them.
+
+### 🔑 Why this result is trustworthy at all
+
+The first control ran 1h20 with `loss` and `grad_norm` identically **0.0** and was 18 minutes from
+finishing `rc=0`. Against that control GRPO would have "won" — it would have been compared to a
+frozen A2 that never moved a weight, and the rung would have shipped a false positive into a
+campaign whose whole value is a real leaderboard number. The control fix (`f5aec95`) is the reason
+this is a truthful negative instead. **A faithful negative is a valid result; a flattering positive
+is not.**
