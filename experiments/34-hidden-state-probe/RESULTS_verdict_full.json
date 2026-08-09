@@ -1,0 +1,6 @@
+{
+  "token_argmax_acc": 0.468,
+  "best_layer": 24,
+  "best_acc_OOD_transfer": 0.526395173453997,
+  "THESIS_CONFIRMED": true
+}
