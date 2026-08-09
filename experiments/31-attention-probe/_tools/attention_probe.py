@@ -115,14 +115,24 @@ def select_questions(cfg: Config):
         (df.answer_format == "number")
         & df.question.str.contains("Clip", case=False, na=False)
     ].copy()
-    q["gold"] = __import__("pandas").to_numeric(q.answer, errors="coerce")
-    q = q.dropna(subset=["gold"])
+    q["gold"] = pd.to_numeric(q.answer, errors="coerce")
+    q = q.dropna(subset=["gold"]).copy()
+    # 🔴 OOD is the DATASET, not the `ood` column. `RULES §3`: `heico` is the organizers' own
+    # OOD partition. The parquets' `ood` field is False on all 2,071 clip-count rows, so
+    # splitting on it silently produced an empty OOD half and the probe ran 6 ID-only
+    # questions instead of 12 balanced ones. Measured 2026-08-08 — the run looked healthy,
+    # every arm returned rc=0, and only the file count gave it away.
+    q["is_ood"] = q.ds.eq("heico")
     half = max(cfg.n_questions // 2, 1)
-    ood = q[q.ood]
-    idd = q[~q.ood]
+    idd, ood = q[~q.is_ood], q[q.is_ood]
+    if len(ood) < cfg.n_questions - half or len(idd) < half:
+        raise AssertionError(
+            f"cannot balance: {len(idd)} ID and {len(ood)} OOD rows available for "
+            f"{cfg.n_questions} questions"
+        )
     return pd.concat([
-        idd.sample(min(half, len(idd)), random_state=cfg.seed),
-        ood.sample(min(cfg.n_questions - half, len(ood)), random_state=cfg.seed),
+        idd.sample(half, random_state=cfg.seed),
+        ood.sample(cfg.n_questions - half, random_state=cfg.seed),
     ]).reset_index(drop=True)
 
 
@@ -281,9 +291,9 @@ def main(cfg: Config, arm: str) -> dict:
         res = probe_one(cfg, model, processor, img, r.question)
         np.save(out_dir / "heat" / f"{arm}_q{i:02d}.npy", res.pop("heat"))
         np.save(out_dir / "heat" / f"{arm}_q{i:02d}_last.npy", res.pop("heat_last_layer"))
-        res.update({"i": i, "ds": r.ds, "ood": bool(r.ood), "gold": int(r.gold)})
+        res.update({"i": i, "ds": r.ds, "ood": bool(r.is_ood), "gold": int(r.gold)})
         per_q.append(res)
-        print(f"  q{i:02d} {r.ds:<8} ood={bool(r.ood)!s:<5} gold={int(r.gold):>2} | "
+        print(f"  q{i:02d} {r.ds:<8} ood={bool(r.is_ood)!s:<5} gold={int(r.gold):>2} | "
               f"img_tok={res['n_image_tokens']:>3} | "
               f"visual_mass mean={res['visual_mass_mean']:.4f} "
               f"last={res['visual_mass_last_layer']:.4f} | "

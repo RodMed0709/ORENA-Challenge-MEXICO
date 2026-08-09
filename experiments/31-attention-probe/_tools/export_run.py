@@ -44,7 +44,7 @@ def package(cfg: Config, dest: Path = Path("/workspace/tmp/leo_31_export")) -> P
         (resized,), _ = process_vision_info(msg)
         resized.convert("RGB").save(dest / "frames" / f"q{i:02d}.jpg", quality=88)
         meta.append({"i": i, "ds": r.ds, "video": r.video, "frame_index": int(r.fi),
-                     "ood": bool(r.ood), "gold": int(r.gold), "question": r.question,
+                     "ood": bool(r.is_ood), "gold": int(r.gold), "question": r.question,
                      "width": resized.width, "height": resized.height})
 
     (dest / "questions.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
