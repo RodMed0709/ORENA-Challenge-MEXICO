@@ -45,11 +45,37 @@ class NTLWasLoss(BaseLoss):
 
     def __init__(self, args, trainer):
         super().__init__(args, trainer)
-        tok = getattr(trainer, "processing_class", None) or getattr(trainer, "tokenizer", None)
-        if tok is None:
-            raise RuntimeError("no tokenizer on the trainer; cannot resolve the digit token ids")
-        tok = getattr(tok, "tokenizer", tok)
+        # 🔻 The digit ids are resolved LAZILY, at the first step, not here. Measured: ms-swift
+        # constructs the loss from `create_loss_and_eval_metric` BEFORE the trainer carries a
+        # `processing_class`, so an eager lookup raises on a healthy run. The guard did its job
+        # -- it refused to guess -- and the fix is to bind later rather than to soften it.
+        self.digit_token_ids = None
+        self.digit_values = None
+        self._trainer = trainer
 
+        # lam lives in the env so the arm is a launcher-visible variable, not a code edit
+        self.lam = float(os.environ.get("NTL_LAMBDA", "0.3"))
+        # 🔴 rung 22: a hook that never fires is worse than no hook. Counted, and asserted
+        # by the smoke before any full run is scheduled.
+        self.n_calls = 0
+        self.n_fired = 0
+        self.ntl_sum = 0.0
+        print(f"[ntl_was] registered | lam {self.lam} | digit ids resolved at first step",
+              flush=True)
+
+    def _resolve_digits(self):
+        """Find the tokenizer wherever this ms-swift build keeps it, and pin the digit ids."""
+        t = self._trainer
+        cands = [getattr(t, "processing_class", None), getattr(t, "tokenizer", None),
+                 getattr(getattr(t, "template", None), "tokenizer", None),
+                 getattr(getattr(t, "data_collator", None), "tokenizer", None)]
+        tok = next((getattr(c, "tokenizer", c) for c in cands if c is not None), None)
+        if tok is None or not hasattr(tok, "encode"):
+            raise RuntimeError(
+                "no tokenizer found on the trainer (tried processing_class, tokenizer, "
+                "template.tokenizer, data_collator.tokenizer); refusing to guess the digit ids, "
+                "because a wrong id makes every Wasserstein distance wrong on a healthy-looking run."
+            )
         ids, vals = [], []
         for d in range(10):
             enc = tok.encode(str(d), add_special_tokens=False)
@@ -61,14 +87,6 @@ class NTLWasLoss(BaseLoss):
             ids.append(enc[0])
             vals.append(float(d))
         self.digit_token_ids, self.digit_values = ids, vals
-
-        # lam lives in the env so the arm is a launcher-visible variable, not a code edit
-        self.lam = float(os.environ.get("NTL_LAMBDA", "0.3"))
-        # 🔴 rung 22: a hook that never fires is worse than no hook. Counted, and asserted
-        # by the smoke before any full run is scheduled.
-        self.n_calls = 0
-        self.n_fired = 0
-        self.ntl_sum = 0.0
         print(f"[ntl_was] digit ids {ids} | lam {self.lam}", flush=True)
 
     def __call__(self, outputs, labels, *, num_items_in_batch=None, loss_scale=None, **kwargs):
@@ -84,6 +102,8 @@ class NTLWasLoss(BaseLoss):
         if self.lam == 0.0:      # the null arm: arithmetically the framework default
             return loss
 
+        if self.digit_token_ids is None:
+            self._resolve_digits()
         logits = outputs["logits"] if isinstance(outputs, dict) else outputs.logits
         ntl = ntl_was(logits, labels, self.digit_token_ids, self.digit_values)
         v = float(ntl.detach())
