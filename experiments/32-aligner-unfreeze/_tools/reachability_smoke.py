@@ -160,7 +160,10 @@ def smoke(cfg: Config) -> dict:
 
     result: dict = {"freeze_aligner": cfg.freeze_aligner, "returncode": p.returncode,
                     "run_dir": str(cfg.run_dir), "log": str(log)}
-    ckpts = sorted((cfg.run_dir / "ckpt").glob("*/checkpoint-*"))
+    # 🔴 the FILE, not the checkpoint directory. `gcov_probe.static_leg` opens what it is
+    # given (`_safetensors_keys(Path(adapter))`) and only globs when handed None, so a
+    # directory raises `IsADirectoryError` AFTER the training has already been paid for.
+    ckpts = sorted((cfg.run_dir / "ckpt").glob("*/checkpoint-*/adapter_model.safetensors"))
     if p.returncode == 0 and ckpts:
         cov = static_leg(ckpts[-1])
         result["gcov"] = cov
@@ -169,7 +172,7 @@ def smoke(cfg: Config) -> dict:
             else bool(cov["n_aligner"] == 0)
     else:
         result["passes"] = False
-        result["reason"] = "no checkpoint written" if p.returncode == 0 else "trainer failed"
+        result["reason"] = "no adapter_model.safetensors written" if p.returncode == 0 else "trainer failed"
 
     (cfg.run_dir / "RESULTS_reachability.json").write_text(json.dumps(result, indent=2),
                                                           encoding="utf-8")
