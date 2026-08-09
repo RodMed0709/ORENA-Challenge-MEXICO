@@ -163,7 +163,7 @@ def fit(cfg: Config, token_argmax_acc: float = 0.4680) -> dict:
     for li, layer in enumerate(layers):
         Z = X[:, li].astype("float32")
         sc = StandardScaler().fit(Z[~ood])
-        clf = LogisticRegression(max_iter=2000, C=0.1, multi_class="multinomial")
+        clf = LogisticRegression(max_iter=2000, C=0.1)  # multinomial is the default; the arg was removed in sklearn 1.9
         try:
             clf.fit(sc.transform(Z[~ood]), y[~ood])
         except Exception as e:      # a degenerate layer must not kill the sweep
