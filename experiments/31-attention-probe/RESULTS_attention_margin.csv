@@ -1,0 +1,5 @@
+arm,margin_fraction,content_fraction,visual_mass_raw,visual_mass_content,vs_base,top5_content,entropy_content,hot_patches,margin_area_fraction
+base,0.3768,0.6232,0.05192,0.032358,1.0,0.2876,0.8427,18.2,0.2154
+rung02,0.3314,0.6686,0.093685,0.062638,1.936,0.3396,0.8097,16.7,0.2154
+rung06,0.2524,0.7476,0.080178,0.059937,1.852,0.36,0.798,16.7,0.2154
+a2,0.2072,0.7928,0.128306,0.101717,3.143,0.4106,0.7725,12.8,0.2154

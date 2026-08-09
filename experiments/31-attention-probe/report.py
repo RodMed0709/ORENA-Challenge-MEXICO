@@ -83,6 +83,78 @@ def _jpg_b64(p: Path) -> str:
     return base64.b64encode(p.read_bytes()).decode()
 
 
+#: a patch is "black margin" below this mean luminance. Laparoscopic frames are a circular
+#: scope image letterboxed into a rectangle, so the corners are dead pixels carrying no scene.
+MARGIN_LUM = 20
+
+
+def margin_analysis(pkg: Path, exp: Path, arms: dict) -> dict:
+    """Split the attention mass into black margin vs scene content, and measure concentration.
+
+    🔑 **The observation is legokna's, not the tool's.** Reading the 12 frames by eye they
+    wrote, in q00/q01/q02/q03/q04/q06/q08/q11, that every arm puts attention on *"los margenes
+    negros"* — and separately that A2 finds one zone strongly where rung 06 finds both
+    (*"a2 solo detecta una zona, rung06 si que detecta ambas"*). Source:
+    ``local/fuentes/analisis mascaras de atencion rung 31.md``, 2026-08-08. Both are measured
+    here because a described pattern that is never quantified is the ±0.86 failure again.
+
+    Margin fraction matters twice over: it is a finding on its own, and it corrects the
+    headline. ``visual_mass`` counts attention on image tokens, and a token on the letterbox
+    is an image token carrying no scene, so the raw number overstates every arm — unevenly.
+    """
+    from PIL import Image
+
+    meta = json.loads((pkg / "questions.json").read_text(encoding="utf-8"))
+    n_tok = arms[next(iter(arms))]["agg"]["n_image_tokens"]
+    rows_g, cols_g = grid_shape(n_tok, meta[0]["width"], meta[0]["height"])
+
+    def patch_lum(i: int) -> np.ndarray:
+        im = np.asarray(Image.open(pkg / "frames" / f"q{i:02d}.jpg").convert("L"), float)
+        h, w = im.shape
+        ph, pw = h // rows_g, w // cols_g
+        return np.array([[im[r * ph:(r + 1) * ph, c * pw:(c + 1) * pw].mean()
+                          for c in range(cols_g)] for r in range(rows_g)])
+
+    lum = {m["i"]: patch_lum(m["i"]) for m in meta}
+    area = float(np.mean([(v < MARGIN_LUM).mean() for v in lum.values()]))
+
+    out = {"margin_area_fraction": area, "arms": {}}
+    for arm, d in arms.items():
+        marg, top5, ent, hot = [], [], [], []
+        for m in meta:
+            h = np.load(pkg / "heat" / f"{arm}_q{m['i']:02d}.npy").reshape(rows_g, cols_g)
+            h = h / h.sum()
+            bg = lum[m["i"]] < MARGIN_LUM
+            marg.append(float(h[bg].sum()))
+            v = h[~bg]
+            v = v / v.sum()
+            top5.append(float(np.sort(v)[-5:].sum()))
+            ent.append(float(-(v * np.log(v + 1e-12)).sum() / np.log(len(v))))
+            hot.append(int((v > 2 * v.mean()).sum()))
+        raw = d["agg"]["visual_mass_mean"]
+        content = 1.0 - float(np.mean(marg))
+        out["arms"][arm] = {
+            "margin_fraction": float(np.mean(marg)), "content_fraction": content,
+            "visual_mass_raw": raw, "visual_mass_content": raw * content,
+            "top5_content": float(np.mean(top5)), "entropy_content": float(np.mean(ent)),
+            "hot_patches": float(np.mean(hot)),
+        }
+
+    base = out["arms"].get("base", {}).get("visual_mass_content") or 1.0
+    with open(exp / "RESULTS_attention_margin.csv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["arm", "margin_fraction", "content_fraction", "visual_mass_raw",
+                    "visual_mass_content", "vs_base", "top5_content", "entropy_content",
+                    "hot_patches", "margin_area_fraction"])
+        for arm, v in out["arms"].items():
+            w.writerow([arm, round(v["margin_fraction"], 4), round(v["content_fraction"], 4),
+                        round(v["visual_mass_raw"], 6), round(v["visual_mass_content"], 6),
+                        round(v["visual_mass_content"] / base, 3), round(v["top5_content"], 4),
+                        round(v["entropy_content"], 4), round(v["hot_patches"], 1),
+                        round(area, 4)])
+    return out
+
+
 def write_csvs(pkg: Path, exp: Path) -> dict:
     arms = {}
     for a in ARM_ORDER:
@@ -127,6 +199,7 @@ def write_csvs(pkg: Path, exp: Path) -> dict:
 def build(pkg: Path, exp: Path, out_html: Path) -> Path:
     pkg, exp = Path(pkg), Path(exp)
     arms = write_csvs(pkg, exp)
+    marg = margin_analysis(pkg, exp, arms)
     questions = json.loads((pkg / "questions.json").read_text(encoding="utf-8"))
     present = [a for a in ARM_ORDER if a in arms]
 
@@ -173,6 +246,18 @@ def build(pkg: Path, exp: Path, out_html: Path) -> Path:
         f'<td class="num">{arms[a]["agg"]["emb_norm_visual"]:.2f}</td>'
         f'<td class="num">{arms[a]["agg"]["emb_norm_text"]:.2f}</td>'
         f'<td class="num">{arms[a]["agg"]["emb_cos_visual_to_text"]:.4f}</td></tr>'
+        for a in present
+    )
+    _mb = marg["arms"].get("base", {}).get("visual_mass_content") or 1.0
+    mrows = "".join(
+        f'<tr><td><code>{a}</code></td>'
+        f'<td class="num">{marg["arms"][a]["margin_fraction"]*100:.1f}%</td>'
+        f'<td class="num">{marg["arms"][a]["content_fraction"]*100:.1f}%</td>'
+        f'<td class="num">{marg["arms"][a]["visual_mass_raw"]:.4f}</td>'
+        f'<td class="num"><b>{marg["arms"][a]["visual_mass_content"]:.4f}</b></td>'
+        f'<td class="num">{marg["arms"][a]["visual_mass_content"]/_mb:.2f}x</td>'
+        f'<td class="num">{marg["arms"][a]["top5_content"]*100:.1f}%</td>'
+        f'<td class="num">{marg["arms"][a]["entropy_content"]:.3f}</td></tr>'
         for a in present
     )
     sparks = "".join(
@@ -230,6 +315,14 @@ about score.</div>
 
 <table><thead><tr><th>arm</th><th>checkpoint</th><th>visual mass</th><th>last layer</th>
 <th>‖visual‖</th><th>‖text‖</th><th>cos v↔t</th></tr></thead><tbody>{trows}</tbody></table>
+
+<h2 style="font-size:1.05rem;margin:0 0 .2rem">Black margin vs scene content</h2>
+<p class="sub" style="margin-bottom:.6rem">Observation by <b>legokna</b>, measured here —
+<code>local/fuentes/analisis mascaras de atencion rung 31.md</code>. The letterbox is
+<b>{marg["margin_area_fraction"]*100:.1f}%</b> of the frame, so that is the chance level.</p>
+<table><thead><tr><th>arm</th><th>on margin</th><th>on content</th><th>visual mass (raw)</th>
+<th>corrected</th><th>vs base</th><th>top-5 patches</th><th>entropy</th></tr></thead><tbody>
+{mrows}</tbody></table>
 
 <h2 style="font-size:1.05rem;margin:0 0 .2rem">Visual mass over depth</h2>
 <p class="sub" style="margin-bottom:.8rem">layer 0 → {n_layers - 1}, shared y-axis</p>
