@@ -1,0 +1,5 @@
+arm,label,n_questions,n_image_tokens,visual_mass_mean,visual_mass_last_layer,emb_norm_visual,emb_norm_text,emb_cos_visual_to_text,nearest_vocab_tokens
+base,"base — Qwen3-VL-8B, no fine-tuning",12,231,0.05192,0.027387,14.2371,1.5633,0.016447,𝆣 口腔 6 5 � 痛苦 ␠ M
+rung02,rung 02 — first LoRA SFT,12,231,0.093685,0.029658,14.2371,1.5633,0.016447,𝆣 口腔 6 5 � 痛苦 ␠ M
+rung06,rung 06 — ViT-LoRA (freeze_vit=false),12,231,0.080178,0.026016,18.5205,1.5633,0.014345,口腔 输卵管 痛苦 invasive � 𝆣 viêm surgery
+a2,"A2 — 21_lr_2e4_v1 ep3, shipped as submission 02",12,231,0.128306,0.042945,22.0183,1.5633,0.009486,强奸 쿅 VIII `: 뇜 ⁺ 𦭜 ⮳
