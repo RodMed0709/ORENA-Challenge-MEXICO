@@ -4,6 +4,60 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-08**.
 
+## 🟢 2026-08-08 (night) — the attention probe, and seven silent no-ops
+
+**Pod RTX PRO 4500 32 GB, ~40 min of GPU total, zero training.** Full artifacts:
+`experiments/31-attention-probe/`, `experiments/32-aligner-unfreeze/`, and two viewers —
+`docs/viewers/attention_viewer.html` and `docs/viewers/sam2_masks_viewer.html`.
+
+1. 🟢 **Rung 31 — where the model looks, measured across four checkpoints.** 12 questions
+   (6 ID / 6 OOD) paired over `base`, `rung02`, `rung06` and `a2`, 231 image tokens on a
+   21×11 grid, read at the last prompt token. 🔑 **The headline is legokna's eye observation,
+   quantified** (`local/fuentes/analisis mascaras de atencion rung 31.md`): **every arm
+   attends the black letterbox**, which is **21.5% of the frame** — and fine-tuning
+   progressively removes the bias. `base` **37.7%** (1.75× chance) → `rung02` 33.1% →
+   `rung06` 25.2% → **`a2` 20.7%, i.e. at chance.** Correcting for it, content-only visual
+   mass runs **0.0324 → 0.1017, a 3.14×** rather than the 2.5× the raw number gave. **A2
+   attends more AND better distributed.** And A2 concentrates: top-5 patches 28.8% → 41.1%,
+   entropy 0.843 → 0.772. ⚠️ Whether concentration causes undercounting is **inference over
+   12 questions, not measured against gold.** ⚠️ `max_pixels` is 512×512 here, not the eval's
+   1280×720 — between-arm comparison holds, the absolute level does not transfer.
+
+2. 🟢 **Step 6's two blocking controls RAN, alone, and both PASS.** The closure
+   ([[sam2-temporal-probe-closed]]) rested on four measured facts and **none was a measurement
+   of SAM 2** — legokna refused to close on that deduction, correctly. C1 separation
+   **6.475** against 0.5 (32.0 vs 25.5 masks, n=40+40); C2 persistence **0.9167** against
+   0.90 (n=30). **SAM 2 tracks this footage and its instance count carries count information.**
+   ⇒ **Step 6 still closes** — its four reasons never depended on SAM — **but it now closes
+   with no flank.** 🔴 **And step 7 is REOPENED: closing it "by dependency on step 6" was
+   wrong.** It needs SAM masks, not step 6's verdict, and both halves now exist. The margin
+   analysis in item 1 is a crude step 7 done with luminance instead of masks.
+
+3. 🔴 **Rung 32 (aligner) FAILS its reachability gate — the rung is not one flag.**
+   `--freeze_aligner false` and `true` give **byte-identical** coverage: 720 tensors =
+   504 LLM + 216 ViT + **0 aligner**. The arithmetic names the cause: the model has 253 LLM,
+   108 vision and **8 merger** `Linear` layers; the adapter holds 252, 108 and **0**. ms-swift's
+   `all-linear` does not expand to `model.visual.merger` or `deepstack_merger_list.{0,1,2}`.
+   ⇒ the rung needs an explicit `target_modules`, a SECOND variable and a different
+   pre-registration. **~10 min of GPU bought that**, against a full arm whose null would have
+   read as *"unfreezing the aligner does not help"* with nothing unfrozen. **Parked as an
+   optional parallel rung**, to be retried on a larger card or after the server migration.
+
+⚠️ **Seven silent no-ops measured in one session. None raised; all passed with `rc=0`:**
+`sdpa` returns `None` for `output_attentions`; mask prompts one at a time
+(`obj_with_new_inputs` is assigned, not appended); `obj_ids` drained by aliasing from the
+caller's list; **`max_pixels` on the processor does nothing** — the resize obeys only the
+in-message key, **and `engine.py:43` sets it the same ineffective way**; four 8B models in one
+process (`del`+`empty_cache` is not a teardown); the parquet `ood` column is False on all 2,071
+clip-count rows so the OOD half sampled zero; and `--freeze_aligner false` above.
+
+📌 **Recorded, not acted on: legokna could not identify the gold objects by eye** — *"no son
+los típicos clips… son como cinchos o bridas de plástico blancos"* (q01/q02/q10). A competent
+observer with the class description in hand cannot decide what counts as a `Clip`. Against a
+gold that is **stable** (0.384, identical on 70.1% of adjacent pairs) that supports the
+**expert-knowledge** reading over the label-noise one, and it is a different hypothesis from
+the one step 6 was built to test.
+
 ## 🟢 2026-08-08 (pm) — rung 30 is TRAINING: GRPO on `number`, and phase C reopened on arithmetic
 
 **Pod `vugto0zhhtm97z`, RTX 5090, 600 steps at 15.9 s/it (~2h40). 🔴 LEAVE THE POD RUNNING.**
