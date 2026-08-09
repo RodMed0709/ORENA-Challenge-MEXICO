@@ -254,52 +254,70 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     return result
 
 
-def main(cfg: Config) -> dict:
+def main(cfg: Config, arm: str) -> dict:
+    """Run ONE arm and write its own JSON.
+
+    🔴 One arm per PROCESS, not per loop iteration. Four 8B models in one process does not
+    fit: ``del model`` + ``empty_cache()`` is not enough because PEFT wraps the base and
+    nothing is collected until Python's GC runs, so arm 2 loads its 16 GB beside arm 1's and
+    OOMs on a 32 GB card (measured 2026-08-08 — arm 1 finished all 12 questions, arm 2 died
+    at load). Process isolation is the only teardown that is actually guaranteed, and it has
+    a second benefit: a crash in arm 3 no longer destroys arms 1 and 2.
+    """
     import sys
 
     sys.path.insert(0, str(cfg.repo / "src"))
-    import torch
 
+    adapter = cfg.arms[arm]
     rows = select_questions(cfg)
     out_dir = Path(cfg.out)
     (out_dir / "heat").mkdir(parents=True, exist_ok=True)
-    print(f"{len(rows)} questions, paired across {len(cfg.arms)} arms", flush=True)
+    print(f"== {arm} == {adapter or cfg.base} | {len(rows)} questions", flush=True)
 
-    images = [_frame(cfg, r.ds, r.video, int(r.fi)) for r in rows.itertuples()]
-    summary: dict[str, list] = {}
-
-    for arm, adapter in cfg.arms.items():
-        print(f"\n== {arm} == {adapter or cfg.base}", flush=True)
-        model, processor = load_arm(cfg, adapter)
-        per_q = []
-        for i, (r, img) in enumerate(zip(rows.itertuples(), images)):
-            res = probe_one(cfg, model, processor, img, r.question)
-            np.save(out_dir / "heat" / f"{arm}_q{i:02d}.npy", res.pop("heat"))
-            np.save(out_dir / "heat" / f"{arm}_q{i:02d}_last.npy", res.pop("heat_last_layer"))
-            res.update({"i": i, "ds": r.ds, "ood": bool(r.ood), "gold": int(r.gold)})
-            per_q.append(res)
-            print(f"  q{i:02d} {r.ds:<8} ood={bool(r.ood)!s:<5} gold={int(r.gold):>2} | "
-                  f"visual_mass mean={res['visual_mass_mean']:.4f} "
-                  f"last={res['visual_mass_last_layer']:.4f} | "
-                  f"|v|={res['emb_norm_visual']:.2f} |t|={res['emb_norm_text']:.2f}", flush=True)
-        summary[arm] = per_q
-        del model
-        torch.cuda.empty_cache()
+    model, processor = load_arm(cfg, adapter)
+    per_q = []
+    for i, r in enumerate(rows.itertuples()):
+        img = _frame(cfg, r.ds, r.video, int(r.fi))
+        res = probe_one(cfg, model, processor, img, r.question)
+        np.save(out_dir / "heat" / f"{arm}_q{i:02d}.npy", res.pop("heat"))
+        np.save(out_dir / "heat" / f"{arm}_q{i:02d}_last.npy", res.pop("heat_last_layer"))
+        res.update({"i": i, "ds": r.ds, "ood": bool(r.ood), "gold": int(r.gold)})
+        per_q.append(res)
+        print(f"  q{i:02d} {r.ds:<8} ood={bool(r.ood)!s:<5} gold={int(r.gold):>2} | "
+              f"img_tok={res['n_image_tokens']:>3} | "
+              f"visual_mass mean={res['visual_mass_mean']:.4f} "
+              f"last={res['visual_mass_last_layer']:.4f} | "
+              f"|v|={res['emb_norm_visual']:.2f} |t|={res['emb_norm_text']:.2f}", flush=True)
 
     agg = {
-        arm: {
-            "visual_mass_mean": float(np.mean([q["visual_mass_mean"] for q in qs])),
-            "visual_mass_last_layer": float(np.mean([q["visual_mass_last_layer"] for q in qs])),
-            "visual_mass_curve": np.mean([q["visual_mass_per_layer"] for q in qs], axis=0).tolist(),
-            "emb_norm_visual": float(np.mean([q["emb_norm_visual"] for q in qs])),
-            "emb_norm_text": float(np.mean([q["emb_norm_text"] for q in qs])),
-            "emb_cos_visual_to_text": float(np.mean([q["emb_cos_visual_to_text_mean"] for q in qs])),
-            "nearest_vocab_tokens": qs[0]["nearest_vocab_tokens"],
-        }
-        for arm, qs in summary.items()
+        "adapter": str(adapter) if adapter else None,
+        "visual_mass_mean": float(np.mean([q["visual_mass_mean"] for q in per_q])),
+        "visual_mass_last_layer": float(np.mean([q["visual_mass_last_layer"] for q in per_q])),
+        "visual_mass_curve": np.mean([q["visual_mass_per_layer"] for q in per_q], axis=0).tolist(),
+        "emb_norm_visual": float(np.mean([q["emb_norm_visual"] for q in per_q])),
+        "emb_norm_text": float(np.mean([q["emb_norm_text"] for q in per_q])),
+        "emb_cos_visual_to_text": float(np.mean([q["emb_cos_visual_to_text_mean"] for q in per_q])),
+        "nearest_vocab_tokens": per_q[0]["nearest_vocab_tokens"],
+        "n_image_tokens": per_q[0]["n_image_tokens"],
     }
-    result = {"config": {"n_questions": cfg.n_questions, "max_pixels": cfg.max_pixels,
-                         "seed": cfg.seed}, "per_arm": agg, "per_question": summary}
-    (out_dir / "RESULTS_attention.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-    print("\n" + json.dumps(agg, indent=2)[:2000], flush=True)
+    result = {"arm": arm, "config": {"n_questions": cfg.n_questions,
+                                     "max_pixels": cfg.max_pixels, "seed": cfg.seed},
+              "agg": agg, "per_question": per_q}
+    (out_dir / f"RESULTS_{arm}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print("\n" + json.dumps(agg, indent=2)[:1200], flush=True)
     return result
+
+
+def merge(cfg: Config) -> dict:
+    """Combine the per-arm JSONs into the one comparable artifact."""
+    out_dir = Path(cfg.out)
+    per_arm = {}
+    for arm in cfg.arms:
+        p = out_dir / f"RESULTS_{arm}.json"
+        if p.exists():
+            per_arm[arm] = json.loads(p.read_text(encoding="utf-8"))["agg"]
+        else:
+            print(f"⚠️  {arm} missing — not merged", flush=True)
+    merged = {"arms_present": list(per_arm), "per_arm": per_arm}
+    (out_dir / "RESULTS_attention.json").write_text(json.dumps(merged, indent=2), encoding="utf-8")
+    return merged
