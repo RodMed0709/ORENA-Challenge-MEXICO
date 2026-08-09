@@ -1,0 +1,16 @@
+{
+  "rows": 2094,
+  "path": "/workspace/repo_rodri/experiments/33-number-logit-probe/runs/33_logits_v1/RESULTS_value_probs_full.csv",
+  "adapters": "/workspace/repo/experiments/21-recipe-sweep/runs/21_lr_2e4_v1/ckpt/v0-20260729-172404/checkpoint-2703",
+  "smoke": false,
+  "gate": {
+    "A_gold_in_top2_given_wrong": 0.45601436265709155,
+    "A_kill_line": 0.55,
+    "D_median_p_top1": 0.5362813783211094,
+    "D_kill_line": 0.97,
+    "acc_greedy": 0.4680038204393505,
+    "acc_greedy_legal_support": 0.4804202483285578,
+    "median_value_mass": 0.9999729755760103,
+    "PASSES": false
+  }
+}
