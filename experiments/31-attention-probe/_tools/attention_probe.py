@@ -88,6 +88,8 @@ class Config:
     #: which is the whole point — stays valid; the absolute visual-mass level does not
     #: transfer to the deployed configuration.
     max_pixels: int = 512 * 512
+    #: blocking sanity bound on the resize actually happening — 512x512 measures 231 tokens
+    max_image_tokens: int = 400
     seed: int = 42
     top_k_tokens: int = 8
     arms: dict = field(default_factory=lambda: dict(ARMS))
@@ -159,9 +161,15 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     # 🔴 Built exactly as `engine.py:157-168` builds it — apply_chat_template(tokenize=False)
     # then process_vision_info then processor(...). A different path would tokenise the image
     # differently and the probe would describe a prompt the model is never asked.
+    # 🔴 `max_pixels` MUST go inside the message dict. `AutoProcessor.from_pretrained(...,
+    # max_pixels=N)` is a NO-OP on this path: the resize is done by `process_vision_info`,
+    # which only reads the per-message key. Measured 2026-08-08 on a 1280x720 frame —
+    # processor kwarg 262144 gave 920 image tokens (resized to 1288x728, i.e. UP), the
+    # in-message key gave 231 (672x364). Same finding applies to `engine.py:43`.
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": [{"type": "image", "image": image},
+        {"role": "user", "content": [{"type": "image", "image": image,
+                                      "max_pixels": cfg.max_pixels},
                                      {"type": "text", "text": question}]},
     ]
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -188,6 +196,15 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     n_img = int(is_img.sum())
     if n_img == 0:
         raise AssertionError("no image tokens found in the prompt; image_token_id is wrong")
+    if n_img > cfg.max_image_tokens:
+        # 🔴 The guard for the no-op above. A resize that silently does not happen shows up
+        # only as an OOM 36 layers later, which reads like a memory problem and is a config
+        # problem. Fail here, cheaply, with the number in the message.
+        raise AssertionError(
+            f"{n_img} image tokens, expected <= {cfg.max_image_tokens} at max_pixels="
+            f"{cfg.max_pixels}. The resize did not take effect — check that `max_pixels` is "
+            "inside the message dict and not only on the processor."
+        )
 
     # (a) visual mass per layer and (b) the spatial map, in ONE pass over the layers.
     # The readout row is extracted and moved to CPU immediately: a second loop over
