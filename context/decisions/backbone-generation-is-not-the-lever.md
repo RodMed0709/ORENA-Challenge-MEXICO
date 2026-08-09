@@ -91,3 +91,43 @@ say that if a backbone swap ever becomes cheap, `object_recognition` OOD is wher
   the image's `2.8.0+cu128` and desynced `torchvision`, whose symptom
   (`Could not import module 'Qwen3_5ForCausalLM'`) blames the model. Uninstall torch/torchvision
   from the venv and let it fall back to the image's matched pair.
+
+---
+
+## ⚠️ AMENDED 2026-08-09 — scope corrected at Rodrigo's instruction: this NO-GO is ZERO-SHOT only
+
+The verdict above is sound for what it measured and **overstated in what it was taken to mean**.
+It has been quoted as *"the 5.x migration is closed"*. It is not, and the record should say so.
+
+**What was measured:** `Qwen3.6-27B` **zero-shot** against `Qwen3-VL-8B` **zero-shot** (+0.036),
+and separately our fine-tuned 8B (+0.317 over its own zero-shot). The amendment above adds that
+the zero-shot 27B sits **below the template-aware floor** in both halves, which is a real and
+damning reading — **of a zero-shot model**.
+
+🔴 **What was NEVER measured: a FINE-TUNED gen-3.6 checkpoint.** The two lifts were never shown to
+be non-additive, and no experiment in this repo has fine-tuned that generation on this corpus.
+Reading "+0.036 zero-shot" as "+0.036 after fine-tuning" assumes the generations respond
+identically to LoRA, which is an assumption, not a measurement.
+
+**The standing recommendation does not change, and the reasons are cost and risk, not capability:**
+
+1. Our entire score comes from fine-tuning (+0.317), not from the backbone (+0.036 zero-shot).
+   A migration moves the variable that has demonstrated the least return.
+2. It is not a flag. It pulls `transformers`, whether ms-swift supports that model class,
+   the LoRA recipe, and the shipped container — three weeks from the close.
+3. We already hold **0.5288 with both official baselines beaten**, which is the co-authorship
+   condition. Risking the recipe that won it against a measured +0.036 is a bad trade.
+
+**But it is OPEN, not closed.** The evidence that would reopen it is being gathered rather than
+assumed, and either of these suffices:
+
+* verified confirmation that a leading entry **fine-tunes** a gen-3.6 model and that its score
+  comes from there — a competitor's zero-shot number says nothing;
+* a cheap fine-tuned screen of our own: **one epoch** of the A2 recipe on a gen-3.6 model,
+  ~2.5 GPU-h, read against A2's own epoch-1 checkpoint, which we already hold and have scored.
+  Rung 21 showed arm effects are visible at epoch 1, so this is a real gate and not a token
+  gesture.
+
+📌 Recorded so the earlier phrasing cannot be quoted against a future proposal: **"never
+re-propose without new evidence" applies to the zero-shot claim.** A fine-tuned screen is not a
+re-proposal of a settled question — it is the measurement that was never taken.
