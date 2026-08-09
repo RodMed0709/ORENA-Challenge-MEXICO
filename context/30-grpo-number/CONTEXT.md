@@ -6,10 +6,20 @@
 
 ## RESUME HERE — the state a fresh session must load first
 
-**Pod `vugto0zhhtm97z`** — RTX 5090 32 GB, EU-RO-1, `[redacted-host]:24557` (ssh root).
-🔴 **Leave it RUNNING.** Stopping it on 2026-08-08 cost us the GPU: a stopped RunPod pod holds no
-reservation and the restart failed with *"not enough free GPUs on the host machine"*. Artifacts
-are safe on the network volume either way, but the card is not.
+## 🔴 THE RUNG IS CLOSED — NO-GO. Read `experiments/30-grpo-number/README.md` §RESULT.
+
+`aggregation_ID` **0.4932 (GRPO) vs 0.5026 (SFT control) = −0.0094**, full 6,252-question eval,
+both arms `rc=0`. S8(1) requires the primary CI to exclude zero *in the arm's favour*; the point
+estimate is negative, so it fails without a CI, and the gap is an order below the MDE of 0.036.
+No further GPU is owed: the pre-registration fixed the verdict at `checkpoint-600` with no
+fallback, so the collapse sweep cannot rescue a failed primary.
+
+**Pod `vugto0zhhtm97z` is EXITED** — the unattended chain stopped it on completion, at the
+operator's explicit instruction, 22:01 UTC 2026-08-08. ⚠️ A stopped pod holds no GPU reservation
+and a restart may fail with *"not enough free GPUs on the host machine"*; that already happened
+once. Everything survives on network volume `gf78k60nlt`, reachable **without any pod** over the
+S3 API (`boto3`, endpoint `RUNPOD_S3_ENDPOINT`, bucket = volume id) — note `HeadObject` returns
+403 there, so use `get_object`, not `download_file`.
 
 **Env:** `source /workspace/envs/infer/bin/activate`. `ms_swift==4.4.1`, `transformers==4.57.6`,
 `torch==2.8.0+cu128`. The only package added for this rung is `msgspec==0.21.1`.
@@ -60,7 +70,11 @@ That is the argument for making it a property of the run instead of a note in pr
 
 ### What is NOT done — pick up here
 
-1. 🔴 **Score the six checkpoints.** `runs/30_grpo_v1_grpo_full/ckpt/*/checkpoint-{100..600}`.
+0. ✅ **DONE — the verdict pair is scored and the rung is NO-GO** (see the top of this file).
+   The three items below are what the pre-registration *would* have owed had the primary
+   survived; they are recorded as not-owed rather than deleted, so the closure is auditable.
+
+1. ⛔️ **Superseded — score the six checkpoints.** `runs/30_grpo_v1_grpo_full/ckpt/*/checkpoint-{100..600}`.
    This is not optional bookkeeping — with `beta=0` there is **no KL anchor**, so per-checkpoint
    evaluation *is* the collapse guard. Score `object_recognition_{ID,OOD}` at every one; it is
    the declared veto cell. Needs the GPU the control now holds.
@@ -70,8 +84,12 @@ That is the argument for making it a property of the run instead of a note in pr
    `training_check` 600/600 nonzero-gradient steps, `loss_mean` 0.240.
    🔴 Never `--resume_from_checkpoint`, and never read `rc=0` alone as evidence.
    **Both arms now hold six checkpoints; the comparison is unblocked and the GPU is idle.**
-3. **Read the holdout.** `grpo_holdout.jsonl` (493 rows, seed 42) never entered training. If the
-   arm moves train and not holdout, the gain is memorisation-sharpening, not learning.
+3. **The holdout is now the ONLY live question here.** `grpo_holdout.jsonl` (493 rows, seed 42)
+   never entered training. The arm is dead, but the *premise* is not: `pass@8` 0.945 vs greedy
+   0.705 was measured on TRAIN data the model saw for three epochs. The holdout separates
+   reachable capability from memorisation slack, and that answer outlives GRPO — it decides
+   whether any future arm should chase this headroom at all. Cheap: `number` is scored by
+   `Number.verify`, so it needs no judge.
 4. **Then** adjudicate against the pre-registration: primary cell `aggregation_ID`, MDE ≈0.036,
    S8's three clauses, veto on `object_recognition`.
 
