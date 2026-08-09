@@ -77,8 +77,17 @@ class Config:
 
     #: questions per arm. Paired: the SAME rows for every arm.
     n_questions: int = 12
-    #: same cap the eval uses (`src/frame/config.py:54`), so the token grid is the real one
-    max_pixels: int = 1280 * 720
+    #: 🔴 NOT the eval's 1280*720 (`src/frame/config.py:54`), and the reason is memory, stated
+    #: rather than hidden. `output_attentions=True` on eager attention materialises ALL 36
+    #: layers: at ~1,000 sequence positions that is 1000^2 x 32 heads x 36 layers x 4 bytes
+    #: ~= 4.6 GB of attention on top of the 16 GB model, and it OOMs a 32 GB card (measured
+    #: 2026-08-08, died after 6 questions). At 512x512 the sequence is ~400 and the same
+    #: tensors cost ~0.7 GB.
+    #: ⚠️ The consequence is a COARSER heatmap and a model that sees fewer visual tokens than
+    #: it does at eval. Every arm uses the identical value, so the BETWEEN-ARM comparison —
+    #: which is the whole point — stays valid; the absolute visual-mass level does not
+    #: transfer to the deployed configuration.
+    max_pixels: int = 512 * 512
     seed: int = 42
     top_k_tokens: int = 8
     arms: dict = field(default_factory=lambda: dict(ARMS))
@@ -180,23 +189,19 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     if n_img == 0:
         raise AssertionError("no image tokens found in the prompt; image_token_id is wrong")
 
-    # (a) visual mass per layer, from the readout position (last prompt token)
-    mass = []
-    last_layer_img = None
-    for li, att in enumerate(out.attentions):          # [1, heads, seq, seq]
+    # (a) visual mass per layer and (b) the spatial map, in ONE pass over the layers.
+    # The readout row is extracted and moved to CPU immediately: a second loop over
+    # `out.attentions` would hold all 36 full matrices alive for twice as long.
+    mass: list[float] = []
+    per_layer_img: list[np.ndarray] = []
+    for att in out.attentions:                         # [1, heads, seq, seq]
         row = att[0, :, -1, :].float()                 # heads x seq, attention FROM readout
         row = row / row.sum(-1, keepdim=True).clamp_min(1e-9)
-        m = row[:, is_img].sum(-1)                     # per head
-        mass.append(float(m.mean()))
-        if li == len(out.attentions) - 1:
-            last_layer_img = row[:, is_img].mean(0).cpu().numpy()
-
-    # (b) spatial map: mean over ALL layers, restricted to image tokens
-    per_layer_img = []
-    for att in out.attentions:
-        row = att[0, :, -1, :].float()
-        row = row / row.sum(-1, keepdim=True).clamp_min(1e-9)
-        per_layer_img.append(row[:, is_img].mean(0).cpu().numpy())
+        img = row[:, is_img]
+        mass.append(float(img.sum(-1).mean()))
+        per_layer_img.append(img.mean(0).cpu().numpy())
+        del row, img
+    last_layer_img = per_layer_img[-1]
     heat = np.mean(np.stack(per_layer_img), axis=0)     # [n_img]
 
     # (c) embedding plane: hidden_states[0] at image positions IS the post-merger embedding
@@ -210,7 +215,7 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
     top = sim.mean(0).topk(cfg.top_k_tokens)
     nearest = [processor.tokenizer.decode([i]) for i in top.indices.tolist()]
 
-    return {
+    result = {
         "n_image_tokens": n_img,
         "n_text_tokens": int((~is_img).sum()),
         "visual_mass_per_layer": mass,
@@ -224,6 +229,12 @@ def probe_one(cfg: Config, model, processor, image, question: str) -> dict:
         "nearest_vocab_tokens": nearest,
         "nearest_vocab_cos": [round(v, 4) for v in top.values.tolist()],
     }
+    # free the forward's tensors before the next question; the attention tuple is the
+    # single largest allocation in this function and Python will not drop it on its own
+    # while `out` is still bound in the caller's frame.
+    del out, sim, vn, Wn, emb0, vis, txt, per_layer_img
+    torch.cuda.empty_cache()
+    return result
 
 
 def main(cfg: Config) -> dict:
