@@ -137,21 +137,32 @@ def run(cfg: Config) -> dict:
         inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
                                return_tensors="pt").to(eng.model.device)
 
+        # 🔴 Driven through `generate`, NOT a hand-rolled second forward. Qwen3-VL uses 3D
+        # mRoPE, so continuing from a `past_key_values` without supplying the matching
+        # position_ids indexes the rope table out of range -- measured, it faults the vision
+        # attention with an illegal memory access. `generate` owns that bookkeeping.
         with torch.no_grad():
-            out1 = eng.model(**inputs, use_cache=True)
-            p1 = torch.softmax(out1.logits[0, -1].float(), dim=-1)
+            g = eng.model.generate(**inputs, max_new_tokens=2, do_sample=False,
+                                   output_scores=True, return_dict_in_generate=True)
+        p1 = torch.softmax(g.scores[0][0].float(), dim=-1)
+        first = int(g.sequences[0, inputs.input_ids.shape[1]])
 
-            # split the "1" prefix: what stops at 1 vs what continues into 10/11/12
-            one = torch.tensor([[dig[1]]], device=eng.model.device)
-            out2 = eng.model(input_ids=one, past_key_values=out1.past_key_values, use_cache=False)
-            p2 = torch.softmax(out2.logits[0, -1].float(), dim=-1)
-
-        cont = float(p2[dig_ids].sum())                    # P(a digit follows "1")
         pv = {d: float(p1[dig[d]]) for d in range(10)}
         p_one = pv[1]
-        pv[1] = p_one * (1.0 - cont)                       # P(value == 1) = stops after "1"
-        for d in (0, 1, 2):                                # 10, 11, 12
-            pv[10 + d] = p_one * float(p2[dig[d]])
+        # The continuation distribution is only observable on the branch generate actually took.
+        # When the greedy first token IS "1", the split is exact. When it is not, `p_one` is not
+        # the mode and the 10..12 mass it could carry is bounded by `p_one` itself -- recorded
+        # as `one_split_exact` rather than silently assumed either way.
+        one_split_exact = first == dig[1]
+        if one_split_exact:
+            p2 = torch.softmax(g.scores[1][0].float(), dim=-1)
+            cont = float(p2[dig_ids].sum())                 # P(a digit follows "1")
+            pv[1] = p_one * (1.0 - cont)                    # P(value == 1) = stops after "1"
+            for d in (0, 1, 2):                             # 10, 11, 12
+                pv[10 + d] = p_one * float(p2[dig[d]])
+        else:
+            for d in (0, 1, 2):
+                pv[10 + d] = 0.0
 
         tot = sum(pv[v] for v in VALUES)
         gold = int(str(r.ground_truth).strip())
@@ -165,6 +176,7 @@ def run(cfg: Config) -> dict:
             "margin_top2": (pv[ranked[0]] - pv[ranked[1]]) / max(tot, 1e-9),
             "gold_rank": ranked.index(gold) + 1 if gold in ranked else -1,
             "value_mass": tot,                              # belief that lands on a legal value
+            "one_split_exact": one_split_exact,
             **{f"p{v}": pv[v] for v in VALUES},
         })
         if i % 100 == 0:
