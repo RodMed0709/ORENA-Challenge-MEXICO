@@ -89,3 +89,39 @@ Ties: [[counting-deficit-is-symbolic-mapping]] (confirmed, and scoped to `gold �
 [[count-calibration-dead]] (an output-space remap failed; this is a loss-space intervention) ·
 [[rung30-grpo-number-state]] (0/1 reward carried no ordinal information) ·
 [[significance-rule]] (the +0.045 arithmetic against S8/S1).
+
+---
+
+## Addendum 2026-08-09 — the output-space family is dead FOUR times over
+
+The obvious reading of *"65.6% of errors are off by one, bias −0.415"* is that the model has a
+systematic offset and a shift fixes it. Measured on the same 2,094 rows, it does not:
+
+| fix, applied to the EMITTED integer | accuracy |
+|---|---|
+| baseline | **0.4718** |
+| add +1 to every prediction | 0.2197 |
+| add −1 | 0.1270 |
+| **oracle LUT** (best possible per-value remap) | **0.4866** (+0.0148) |
+| oracle LUT fitted per dataset | 0.5019 (+0.0301, and it is fitted on its own eval) |
+
+**The bias is an average, not an offset.** Most predictions are already correct; shifting all of
+them breaks the good ones to fix the bad ones.
+
+And the oracle LUT reproduces [[count-calibration-dead]]'s mechanism exactly, on a checkpoint
+three weeks newer: `argmax_injective` is **False** — predictions `0` and `1` both map to gold `1`,
+predictions `2` and `3` both map to gold `2`. A lookup can send each predicted value exactly one
+place, so it trades one error for another. Its ceiling is **+0.0148**, against the +0.045 the
+opportunity is worth.
+
+🔑 **What this rules out, and what it leaves.** Four independent interventions on the *emitted
+integer* have now failed: global shift, post-hoc LUT, k-sample majority voting
+([[self-consistency-dead]]) and exact-match RL re-ranking ([[rung30-grpo-number-state]]). They
+share one property — **they all operate after the distribution has been collapsed to a single
+number, so they cannot use the probability mass the argmax discarded.**
+
+That is precisely what the number-token logit dump does not do, and it is why it remains the one
+live candidate in the decoding family rather than being killed alongside them. A statistic over
+the full digit distribution (expectation, soft-argmax, a shifted decision threshold) is a
+different object from a map over emitted values. ⚠️ It may still fail — but it fails for its own
+reasons, and it has not been tested.
