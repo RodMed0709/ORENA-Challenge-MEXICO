@@ -93,7 +93,12 @@ def dump(cfg: Config) -> Path:
     df = pd.read_csv(cfg.inspect_csv)
     df = df[df.answer_format == "number"].copy()
     if cfg.smoke:
-        df = df.head(cfg.smoke_rows)
+        # 🔻 NOT head(): inspect.csv is sorted by dataset, so head(24) is 24 `heico` rows and the
+        # ID half comes back EMPTY -- the fit then dies in StandardScaler with a shape error
+        # that says nothing about the real cause. Sample across both halves so the smoke
+        # exercises the ID-fit -> OOD-transfer path the full run depends on.
+        df = df.groupby("dataset", group_keys=False).apply(
+            lambda g: g.head(max(2, cfg.smoke_rows // 2)))
 
     eng = QwenFrameEngine(BaselineConfig(model_path=cfg.base_model, max_pixels=cfg.max_pixels,
                                          max_new_tokens=4))
@@ -147,6 +152,12 @@ def fit(cfg: Config, token_argmax_acc: float = 0.4680) -> dict:
     layers = json.loads((out_dir / f"layers_{tag}.json").read_text(encoding="utf-8"))
     y = m.gold.values
     ood = (m.dataset == "heico").values
+
+    # both halves must exist or the headline (ID-fit -> OOD-transfer) is undefined. Raise with
+    # the cause rather than letting sklearn report an empty-array shape.
+    assert (~ood).sum() and ood.sum(), (
+        f"need both halves: {(~ood).sum()} ID rows, {ood.sum()} OOD rows. The ID-fit -> "
+        "OOD-transfer headline cannot be computed from one dataset.")
 
     rows = []
     for li, layer in enumerate(layers):
