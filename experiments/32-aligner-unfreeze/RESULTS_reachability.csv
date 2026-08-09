@@ -1,0 +1,3 @@
+leg,freeze_aligner,total_tensors,n_llm,n_vit,n_aligner,n_orphans,passes,note
+unfrozen,false,720,504,216,0,0,False,"--freeze_aligner false does not add the merger to the adapter"
+control_frozen,true,720,504,216,0,0,True,"control behaves as expected: no aligner tensors"
