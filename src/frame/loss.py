@@ -209,7 +209,71 @@ def weighted_ce(logits, labels, weights, num_items_in_batch=None, *,
     return weighted.sum() / denom.clamp(min=1)
 
 
-def make_compute_loss_func(weight_fn=None, *, enabled: bool = False):
+def ntl_was(logits, labels, digit_token_ids, digit_values, *,
+            ignore_index: int = IGNORE_INDEX):
+    """Number Token Loss, Wasserstein-1 variant (Zausinger et al., **ICML 2025**, arXiv 2411.02083).
+
+    Cross-entropy treats number tokens as a **nominal** scale: predicting "3" when the gold is "4"
+    costs exactly what predicting "9" costs. Nothing in the objective knows that 4 is near 5. This
+    adds the missing structure — the Wasserstein-1 distance between the predicted distribution
+    over digit tokens and a point mass at the target value::
+
+        L_NTL = mean_i  sum_j  p_ij * |value(label_i) - value_j|
+
+    computed **only at positions whose LABEL is a digit token**, so it is self-masking: rows whose
+    answer contains no digit contribute nothing and need no row-level plumbing.
+
+    🔴 **WAS, not MSE, and the reason is load-bearing.** The paper documents that the MSE variant
+    has **non-unique minima** — 50% mass on "0" and 50% on "8" scores zero loss against a target of
+    4. That is a bimodal escape hatch, and under our exact-match scoring it would actively train
+    the model into the shape that hurts us most. The Wasserstein form has no such degenerate
+    optimum.
+
+    ## Why this rung and not earlier
+
+    Gated on `number-probe` in this module's header since July. Both halves of the gate now have
+    numbers: rung 33 measured median ``P(top-1) = 0.536`` — the distribution is **not** collapsed,
+    so there is something to widen — and rung 34 showed the count IS linearly decodable from the
+    hidden states at layers 18-24 (**0.5264 vs the head's 0.4680**), i.e. the information survives
+    to the last layer and is lost in the projection to tokens. This term acts on exactly that
+    projection.
+
+    ⚠️ **Stated confound, not hidden:** an auxiliary term that only fires on digit positions also
+    raises ``number``'s share of the gradient, which [[loss-mass-is-token-weighted]] measured at
+    20.8% off 34.2% of rows. So the arm is *"ordinal supervision AND more number gradient"*. The
+    clean separator would be a format-reweight-only control; rung 22 was meant to be it and was
+    NO-GO for an unrelated reason (its hook was an arithmetic identity). Recorded in the
+    pre-registration rather than papered over.
+
+    ``digit_values[k]`` is the numeric value of ``digit_token_ids[k]``. Both are supplied by the
+    caller because this module never imports a tokenizer — that is what keeps it offline-testable.
+    """
+    torch = _torch()
+
+    ids = torch.as_tensor(digit_token_ids, device=logits.device)
+    vals = torch.as_tensor(digit_values, device=logits.device, dtype=torch.float32)
+
+    sl = logits[..., :-1, :].contiguous()
+    tl = labels[..., 1:].contiguous()
+    flat_logits = sl.view(-1, sl.size(-1)).float()
+    flat_labels = tl.view(-1)
+
+    # a position participates only if it is supervised AND its gold token is a digit
+    is_digit = (flat_labels.unsqueeze(-1) == ids.unsqueeze(0)).any(-1)
+    keep = is_digit & flat_labels.ne(ignore_index)
+    if not bool(keep.any()):
+        return torch.zeros((), device=logits.device, dtype=flat_logits.dtype)
+
+    sel = flat_logits[keep][:, ids]
+    p = torch.softmax(sel, dim=-1)                      # renormalised over the digits alone
+    # value of each kept position's gold token
+    gold_tok = flat_labels[keep]
+    gold_val = vals[(gold_tok.unsqueeze(-1) == ids.unsqueeze(0)).float().argmax(-1)]
+    return (p * (gold_val.unsqueeze(-1) - vals.unsqueeze(0)).abs()).sum(-1).mean()
+
+
+def make_compute_loss_func(weight_fn=None, *, enabled: bool = False,
+                          ntl: dict | None = None):
     """The trainer callback, or ``None`` when disabled.
 
     🔴 **``enabled=False`` returns ``None``, and that is the point.** ms-swift checks
@@ -230,18 +294,35 @@ def make_compute_loss_func(weight_fn=None, *, enabled: bool = False):
     """
     if not enabled:
         return None
-    if weight_fn is None:
-        raise ValueError("enabled=True needs a weight_fn; an enabled no-op hook is a silent variable")
+    if weight_fn is None and ntl is None:
+        raise ValueError(
+            "enabled=True needs a weight_fn or an ntl config; an enabled no-op hook is a silent "
+            "variable -- exactly rung 22's failure, where a committed hook was an arithmetic "
+            "identity and its trigger never fired."
+        )
+    if ntl is not None:
+        missing = {"digit_token_ids", "digit_values", "lam"} - set(ntl)
+        if missing:
+            raise ValueError(f"ntl config is missing {sorted(missing)}; refusing to guess")
 
     def compute_loss(outputs, labels, num_items_in_batch=None, **kwargs):
+        torch = _torch()
         logits = outputs["logits"] if isinstance(outputs, dict) else outputs.logits
-        weights = weight_fn(labels, **kwargs)
-        return weighted_ce(logits, labels, weights, num_items_in_batch)
+        if weight_fn is None:
+            # plain CE, the trainer's own numerator, so `ntl` alone is the single variable
+            ones = torch.ones_like(labels, dtype=logits.dtype)
+            loss = weighted_ce(logits, labels, ones, num_items_in_batch)
+        else:
+            loss = weighted_ce(logits, labels, weight_fn(labels, **kwargs), num_items_in_batch)
+        if ntl is not None:
+            loss = loss + ntl["lam"] * ntl_was(
+                logits, labels, ntl["digit_token_ids"], ntl["digit_values"])
+        return loss
 
     return compute_loss
 
 
 __all__ = [
     "IGNORE_INDEX", "make_compute_loss_func", "normalise_weights", "row_group_weights",
-    "scale_schedule", "segment_weights", "weighted_ce",
+    "ntl_was", "scale_schedule", "segment_weights", "weighted_ce",
 ]
