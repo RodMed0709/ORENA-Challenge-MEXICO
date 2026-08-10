@@ -37,7 +37,11 @@ Closing a rung does not close its question. Both were re-aimed by the plan, and 
 
 - *Does the model **have** the objects?* — rung 25's question. The plan asks it as **step 6, the SAM 2
   temporal probe**, on our own frames: no external corpus, no overlap gate, and it decomposes the
-  ±0.86 label noise at the same time ([[covt-reduced-sam-route]]).
+  label noise at the same time ([[covt-reduced-sam-route]]).
+  🔴 **SUPERSEDED 2026-08-08.** That label noise is **0.384**, not the ±0.86 this bullet quoted
+  ([[label-noise-was-a-unit-error]]), and **step 6 is now CLOSED-UNRUN** on that correction
+  ([[sam2-temporal-probe-closed]]) — so rung 25's question is **no longer asked by step 6**, and
+  is currently asked by nothing. ⚠️ **Step 7 is REOPENED** and is the nearest live instrument.
 - *Does the model count, or emit a near-constant?* — the `number-probe` question, which is
   [[the-gap-is-the-number-format]]'s failure shape. The plan asks it as **step 5, the entropy gate**
   (k=8, split by format, on A2 ep3) — and unlike the probe, its output **decides something**: whether

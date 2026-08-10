@@ -156,17 +156,37 @@ at random. The bottleneck is **discrimination, not access**.
 
 * **Counting is counting clips**: 83 % of per-class counting questions are `Clip`; 93 % of the
   total counted mass is clips.
-* **The label moves ±0.86 between frames ≤1 s apart**, changing in **56.6 %** of pairs.
-  Extremes: `8 → 14 → 6` in 690 ms, `7 → 7 → 1` in 270 ms.
-* **The model's mean absolute error is 1.01** — within ~1.2× of how much the target itself moves.
+* 🔴 **CORRECTED 2026-08-08 — the `±0.86` was a unit error and is RETRACTED**
+  ([[label-noise-was-a-unit-error]]). July's `gap` column is the true gap in seconds **divided by
+  the video's fps**, so its "sub-second" rows describe pairs **12–25 s apart**. There is no
+  sub-second population: every `timestamp_start` is `HH:MM:SS`, so the corpus minimum is **1 s**.
+  **At that true minimum (n=461) the label moves ±0.384 and changes in 29.9 % of pairs**, jumps ≥3
+  are **2.4 %** (not 6–11 %) and the largest jump is **4** (not 8). The `8 → 14 → 6 in 690 ms`
+  extreme was **~17 real seconds** — ordinary scene change, the opposite of what it was cited for.
+* 🔑 **And the conclusion this section drew INVERTS.** **The model's mean absolute error is 1.01** —
+  that is `1.01 / 0.384 = **2.6×**` how much the target itself moves, **not the ~1.2× this section
+  published.** The model is **not** at its label's noise floor; the target is markedly *more*
+  stable than the model, i.e. there is room. Re-derive in a minute with
+  `experiments/29-sam2-temporal/_tools/label_gap_audit.py`.
+
+  <details>
+  <summary>🔴 Superseded bullets as published 2026-07-22 — kept for provenance, not for citation</summary>
+
+  * **The label moves ±0.86 between frames ≤1 s apart**, changing in **56.6 %** of pairs.
+    Extremes: `8 → 14 → 6` in 690 ms, `7 → 7 → 1` in 270 ms.
+  * **The model's mean absolute error is 1.01** — within ~1.2× of how much the target itself moves.
+
+  </details>
 * At **gold ≥7 accuracy is exactly 0.000**.
 * **Blind human check** (40 frames, gold hidden): a non-clinical observer scored **r = −0.17**
   against the gold; **the model scores +0.43**. The model beats an untrained human here, and the
   task needs clinical training to adjudicate.
 
-⚠️ Upper bound, not a clean estimate: frame-to-frame change mixes real scene change with
-annotation noise. It does not prove the labels are wrong — it establishes the target is not
-stable at the timescale the model is asked to resolve.
+⚠️ Upper bound, not a clean estimate — **the caveat survives, applied to 0.384**: frame-to-frame
+change mixes real scene change with annotation noise, and nothing here separates them. It does not
+prove the labels are wrong. 🔴 **But it no longer supports the sentence it used to carry**: at a
+1 s minimum the target is *stable* (identical in 70.1 % of adjacent pairs), so "the target is not
+stable at the timescale the model is asked to resolve" is withdrawn with the ±0.86.
 
 ## 11. Error anatomy (zero GPU, from the committed answers)
 
@@ -242,7 +262,7 @@ gain is diluted twice:
 | **`max_pixels`** | **does not exist as a lever**: 52 % of frames are 960×540 against a 921,600 px cap — **no frame exceeds it** |
 | Transformations at inference | −0.056, monotone |
 | Transformations, trained | null, and **+0.004** of headline even if real |
-| Synthetic counting data | poor prognosis: it teaches well-annotated visible objects; the real label moves ±0.86. **Confirmed 2026-07-26** — [[synthetic-counting-reconciled]]: rung 15 ran the only half our labels support → null |
+| Synthetic counting data | poor prognosis: it teaches well-annotated visible objects; the real label moves **±0.384** (🔴 **corrected 2026-08-08** — this cell said ±0.86, a unit error, [[label-noise-was-a-unit-error]]; the prognosis leg is **weaker** at the true value). **Confirmed 2026-07-26** — [[synthetic-counting-reconciled]]: rung 15 ran the only half our labels support → null, **and that null is the load-bearing reason, not the label movement** |
 | Point-then-count / v05 target grounding | **that IS rung 15** (`number` target `2` → `{"label","counts"}`): +0.0032 headline, `margin_OOD` −0.0110, `number`-OOD below floor, 0/10 cells exclude zero. The pointing arm needs localization labels the dataset does not have |
 
 ## 16. Open, in priority order
