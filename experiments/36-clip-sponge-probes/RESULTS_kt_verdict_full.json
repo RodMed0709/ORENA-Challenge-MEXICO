@@ -1,0 +1,18 @@
+{
+  "n_swap": 148,
+  "n_pair": 529,
+  "smoke": false,
+  "KT_C": {
+    "n": 148,
+    "base_correct_where_a2_wrong": 0.16216216216216217,
+    "verdict": "NOT FORGETTING \u2014 base cannot do it either"
+  },
+  "KT_A": {
+    "n": 529,
+    "gold_in_top2": 0.5916824196597353,
+    "gold_rank1": 0.05671077504725898,
+    "rung33_number_analogue": 0.456,
+    "kill_line": 0.55,
+    "verdict": "LICENSED \u2014 the gold set is reachable"
+  }
+}
