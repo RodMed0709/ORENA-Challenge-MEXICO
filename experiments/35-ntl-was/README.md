@@ -10,7 +10,7 @@
 | 30 | GRPO, 0/1 exact-match reward on `number` | 🔴 NO-GO, `aggregation_ID` −0.0094 |
 | 33 | read P(value) before the argmax | 🔴 gate A failed; the decoding family is worth ~+0.01 headline |
 | 34 | linear probe on the hidden states | 🟢 **the count IS there** — 0.5264 vs the head's 0.4680 at layer 24 |
-| **35** | **+ λ·NTL-WAS on the number tokens** | ⏳ this file |
+| **35** | **+ λ·NTL-WAS on the number tokens** | 🔴 **NO-GO** — `aggregation_ID` **−0.0262**, and the declared veto `object_recognition_ID` **−0.0880**. Every cell down |
 
 ## The argument, and why it is not rung 30 again
 
@@ -89,3 +89,69 @@ most.
 is not installed locally, so the call signature and the shapes it hands over **must be confirmed
 on the pod with a 3-step smoke that prints the received args** before any full run — the same
 precondition rung 22 discharged.
+
+---
+
+## 🔴 RESULT — NO-GO, and the declared veto fired hard.
+
+Epoch-3 checkpoints of both arms, full 6,252-question eval, same path, same judge
+(`Qwen/Qwen3-4B`), `rc=0` on both.
+
+| cell | NTL-WAS | A2 | Δ |
+|---|---|---|---|
+| **`aggregation_ID`** (primary) | 0.4639 | 0.4901 | **−0.0262** |
+| `aggregation_OOD` | 0.5904 | 0.6064 | −0.0160 |
+| **`object_recognition_ID`** (veto) | 0.6427 | 0.7307 | **−0.0880** |
+| **`object_recognition_OOD`** (veto) | 0.7289 | 0.7713 | −0.0424 |
+| `bucket_mean` (reference) | 0.6065 | 0.6496 | −0.0431 |
+
+**Every cell is down.** S8 clause 1 needs the primary CI to exclude zero *in the arm's favour* and
+the point estimate is **negative**; clause 3 forbids significant harm anywhere and
+`object_recognition_ID` lost **8.8 points**. It is not a trade — the arm lost on the cell it was
+built to help *and* on the cell it was pre-registered to protect.
+
+### 🟢 The instrument is sound, and this is the strongest control the campaign has run
+
+A2 was **recomputed through this exact path**, not transcribed. It reproduces rung 21's committed
+epoch-3 row **to every printed digit**:
+
+```
+aggregation_ID          rung 21  0.490052356   this run  0.490052356   diff 0.00e+00
+object_recognition_ID   rung 21  0.730709877   this run  0.730709877   diff 0.00e+00
+bucket_mean             rung 21  0.649614088   this run  0.649614088   diff 0.00e+00
+```
+
+Zero drift across three weeks, a different pod and a rebuilt eval path. So the −0.026 and the
+−0.088 are the arm, not the instrument. ⚠️ It also tightens
+[[archived-results-not-bit-reproducible]]: that note's ~0.5% answer drift on a GPU swap does **not**
+propagate to these bucket statistics.
+
+### The pre-registered risk that materialised, in the direction it was predicted
+
+Risk #1, written before the run: *"a term that fires only on digit positions also raises `number`'s
+share of the gradient, so the arm is ordinal supervision AND more number gradient."* The harm is
+**concentrated in `object_recognition`** — 71% `fo_class`, the format that loses gradient when
+`number` gains it — and it is 3.4× the loss on the primary cell. That is the confound's signature,
+not the objective's.
+
+🔑 **So this does not cleanly falsify ordinal supervision.** It falsifies *"NTL-WAS at λ=0.3 bolted
+onto A2's recipe without rebalancing the formats"*. The separator remains the control we do not
+own: a format-reweight-only arm. Rung 22 was meant to be it and was NO-GO because its hook was an
+arithmetic identity.
+
+⚠️ **What would be dishonest here:** reading "λ was too high" or "it needs the rebalance" as a
+reason to run it again. Both are post-hoc, neither was pre-registered, and the measured cost of
+this arm is −0.043 `bucket_mean`. If it returns, it returns as a **new** pre-registration with the
+rebalance as part of the arm and a declared λ sweep — not as a retry.
+
+### What is not in doubt
+
+Rung 34 stands: the count **is** in the hidden states at layers 18–24 and the head loses it. This
+rung tested one specific repair of the head and that repair costs more than it buys. The diagnosis
+survives; this treatment does not.
+
+📌 **Artefact naming, recorded:** the rows landed in `RESULTS_collapse_guard.csv` rather than
+`RESULTS_verdict.csv` because `30b_checkpoint_eval.ipynb` hardcodes `VERDICT_STEP = 600` from rung
+30 while rung 35's verdict step is 2703. The routing did exactly what it was written to do; the
+constant belongs to another rung and must become a parameter before those file names can be
+trusted to mean what they say.
