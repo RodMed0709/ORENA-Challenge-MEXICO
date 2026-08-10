@@ -1,12 +1,18 @@
 ---
 question: Step 6 (SAM 2 temporal probe) and step 7 (VLM attention vs SAM masks) were built to decide how much of the counting failure is the model and how much is the label. Do they still have a question to answer?
-verdict: No. Step 6 is CLOSED-UNRUN and step 7 closes with it, unbuilt. The probe was designed to decompose a ±0.86 that turned out to be a unit error; the real quantity is 0.384, big jumps fell from 6–11% to 2.4%, and the headline question it was to arbitrate is already answered by arithmetic — the model's error is 2.6× the label's movement, so the label cannot be the dominant cause. Its treatment arm is n=11 against a pre-registered 0.10 threshold, and widening the gap would abandon the "same physical instance by construction" argument that is the design. Closed on the premise, not on a failed run — zero GPU was ever spent on it.
-status: NO_GO
+verdict: Step 6, no — CLOSED-UNRUN. The probe was designed to decompose a ±0.86 that turned out to be a unit error; the real quantity is 0.384, big jumps fell from 6–11% to 2.4%, and the headline question it was to arbitrate is already answered by arithmetic — the model's error is 2.6× the label's movement, so the label cannot be the dominant cause. Its treatment arm is n=11 against a pre-registered 0.10 threshold, and widening the gap would abandon the "same physical instance by construction" argument that is the design. Closed on the premise, not on a failed run. ⚠️ Step 7, YES — REOPENED 2026-08-08. It was closed "by dependency on step 6", which was wrong: it needs step 6's MASKS, not step 6's verdict, and both halves now exist. Step 6's two blocking controls ran alone and both PASS (C1 separation 6.475 vs 0.5, C2 persistence 0.9167 vs 0.90), so SAM 2 is measured to work on this footage.
+status: RE_SCOPED
 date: 2026-08-08
-basis: Zero GPU across the whole life of the rung. Built and smoked 2026-08-06 (`experiments/29-sam2-temporal/`), blocked by its own census in the first smoke; closed 2026-08-08 after the ±0.86 was re-derived in `_tools/label_gap_audit.py`
+withdrawn: REOPENED 2026-08-08 — "step 7 closes by dependency" is withdrawn. Step 6's closure is unaffected (none of its four reasons was a measurement of SAM 2), but step 7 was never dependent on that verdict, only on the masks, and C1/C2 now show the segmenter is competent on our material. Step 7 is OPEN and unbuilt.
+basis: Zero GPU across the whole life of the rung. Built and smoked 2026-08-06 (`experiments/29-sam2-temporal/`), blocked by its own census in the first smoke; closed 2026-08-08 after the ±0.86 was re-derived in `_tools/label_gap_audit.py`. Step 7 reopened the same day on the C1/C2 controls (`context/NOW.md:26-34`, `_tools/run_controls.py`)
 ---
 
-# Steps 6 and 7 are closed: the probe was built to arbitrate a tie that does not exist
+# Step 6 is closed: the probe was built to arbitrate a tie that does not exist
+
+> ⚠️ **AMENDED 2026-08-08 — this note originally closed step 7 too, and that half is withdrawn.**
+> Step 6's closure stands on every reason below. **Step 7 does not close with it** — see
+> [§ Step 7 is REOPENED](#step-7-is-reopened-it-needed-the-masks-not-the-verdict) at the end.
+> The title of this note said "Steps 6 and 7"; it now says step 6.
 
 ## What they were for
 
@@ -20,7 +26,9 @@ The counting failure has two candidate causes, and they lead opposite ways:
 **Step 6** was the instrument that would separate them. SAM 2 in video mode over pairs of
 annotated frames from the same video: where the gold jumped by ≥3 but the tracks held steady, the
 jump is annotation noise, not scene change. **Step 7** would then ask whether the VLM's attention
-lands on those masks. Step 7 was never built; it depends on step 6's masks and closes with it.
+lands on those masks. Step 7 was never built. 🔴 **This paragraph used to end "it depends on step
+6's masks and closes with it" — that inference is withdrawn.** Depending on the masks is not
+depending on the verdict, and the masks exist.
 
 `plan-accion.md` calls step 6 *"el denominador de todo"*. That is exactly right, and it is why the
 closure matters rather than being bookkeeping.
@@ -99,6 +107,36 @@ A gold that is *stable* (identical in 70.1 % of adjacent pairs, jumps ≥3 in 2.
 model still cannot match is not a noisy gold — it is a gold **carrying information the model does
 not extract**, plausibly expert judgement not recoverable from the pixels by a non-expert.
 That hypothesis needs a different question than *"does the gold jump?"*, and step 6 cannot ask it.
+
+## Step 7 is REOPENED: it needed the masks, not the verdict
+
+🔴 **Closing step 7 "by dependency on step 6" was an error, and it is withdrawn.** Step 7 asks a
+different question — *does the VLM's attention land where the objects are?* — and what it consumes
+from step 6 is the **masks**, not the answer to *"is the gold noisy?"*. Step 6 can be closed as an
+instrument while its masks remain a perfectly good target to compare attention against.
+
+**And the flank the closure was written without has since been measured.** Step 6's two blocking
+controls ran alone (`context/NOW.md:26-34`, `_tools/run_controls.py`) and **both PASS**:
+
+| control | threshold | measured |
+|---|---|---|
+| **C1** separation (Rodrigo's negative control) | 0.5 | **6.475** — 32.0 vs 25.5 masks, n=40+40 |
+| **C2** tracker persistence | 0.90 | **0.9167**, n=30 |
+
+⇒ **SAM 2 tracks this footage and its instance count carries count information.** Note what this
+does and does not do to the section above: **step 6's four reasons never depended on SAM 2**, so
+they are untouched and step 6 stays closed — but it now closes *with no flank*, and the segmenter
+it was going to use is measured competent rather than assumed so. Step 7's only real precondition
+was that competence.
+
+🟢 **A crude version of step 7 has already been run.** Rung 31's margin analysis
+(`experiments/31-attention-probe/`) is step 7 done with **luminance instead of masks**: the black
+letterbox is 21.5 % of the frame and `base` gives it 37.7 % of its attention against `a2`'s 20.7 %.
+That is the same instrument at lower resolution, and it returned a real result — which is the
+strongest argument that the masked version is worth building.
+
+🔴 **Step 7 is OPEN and UNBUILT.** It is not pre-registered, has no arms and no thresholds; this
+note reopens it, it does not design it.
 
 ## The one thing that should be verified
 
