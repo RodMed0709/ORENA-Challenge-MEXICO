@@ -1,0 +1,2 @@
+arm,run,step,checkpoint,smoke,n_scored,aggregation_ID,aggregation_OOD,object_recognition_ID,object_recognition_OOD,bucket_mean,judge_model
+a2,21_lr_2e4_v1,2703,checkpoint-2703,False,6252,0.4900523560209424,0.6064,0.7307098765432098,0.7712941176470588,0.6496140875528028,Qwen/Qwen3-4B
