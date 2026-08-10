@@ -56,6 +56,85 @@
    *fresh, uncapped* processor). The slow processor does not have it. Rung 31 builds four
    processors in one process — same `max_pixels` in all four, so between-arm comparison holds.
 
+## 🟡 2026-08-10 (pm) — `fo_class` is the new front, and Rodrigo's single-class hypothesis is ON THE TABLE
+
+**Two kill tests are RUNNING autonomously** (`experiments/36-clip-sponge-probes/`, pod
+`qsmsncno58eij8`, pushes and stops itself). Nothing to babysit.
+
+### Why `fo_class` at all
+
+`fo_class` is **42.8%** of the eval (2,675 of 6,252), accuracy **0.7473**, and **78.3% of its 676
+errors involve `Clip` or `Sponge` being misplaced** — 529 of 676, strict swaps `{Clip}→{Sponge}`
+**95×** and `{Sponge}→{Clip}` **53×**. Ceiling if that one confusion were fixed: `fo_class`
+0.7473 → **0.9450**, ≈ **+0.0702 headline** — more than double the S1 ship bar, and 3× anything
+found in `number` in three days.
+
+Error anatomy: **53% substitutions** (predicted set shares nothing with gold), **47% enumeration**
+— and of the "missed an item" cases, **136 of 140 missed exactly ONE**. Accuracy by gold set size:
+1 item 0.800, 2 items 0.601, 3 items 0.298, 4 items **0.000**.
+
+### The data audit killed the imbalance story
+
+Not a starved-class problem: Sponge is only ~19% under-supplied relative to its eval load (vs
+`External drain` at 1,123 rows scoring F1 0.922), the two classes co-occur **below** chance, the
+corpus already carries **144 balanced explicit Clip-vs-Sponge discrimination rows**, and — decisive
+— **the model's marginal emission is calibrated**: it predicts Clip 1,099 vs 1,089 gold, Sponge
+886 vs 867. A prior-driven imbalance failure does not look like that.
+
+🔴 **What it is instead: `heico` train is `Prokto`+`Rektum`; `heico` eval is `Sigma`, which appears
+NOWHERE in training.** 89.5% of heico's `fo_class` errors involve the pair against 59.6% on
+`lapchole`; Clip F1 falls **0.858 → 0.761** across that boundary; **half of the 529 errors sit in 5
+of 38 videos**, behind only 466 distinct frames. Sharpest datum: video `0025-Heico-Sigma-6` has
+gold Clip **90** and gold Sponge **0**, and the model emits Sponge **38 times** — **41 of the 95
+Clip→Sponge errors occur in videos where Sponge is never a gold answer at all.**
+⚠️ The audit could **not** separate *"Sigma looks different"* (domain shift) from *"a bloodied
+sponge and a metal clip are genuinely hard to tell apart"* (fine-grained vision). They are
+perfectly confounded — every affected video is Sigma and we own no Sigma training data.
+
+### 🔑 Rodrigo's hypothesis, recorded as his and NOT yet adjudicated
+
+> *"Con que aprendas qué son los clips también es importante. No necesitan estar en el mismo
+> dataset para que el LLM lo sepa identificar. No importa si empujan la frontera hacia esponja."*
+
+**Claim: a clips-only segmentation source is sufficient. The two classes do NOT have to appear in
+one dataset for the model to learn the distinction, and the asymmetry risk is acceptable.**
+
+This directly overrides the literature sweep's caution, which argued that gauze-only data can only
+push the boundary toward `Sponge` — our larger error direction (95 vs 53) — producing a loss
+disguised as a wash. **Rodrigo's counter is that `Clip` is where we actually bleed, so a
+clip-only source pushes the RIGHT way.** He also accepts dropping gauze entirely (the only real
+gauze set is simulator + animal, and the good one is unreleased).
+
+**The dataset that makes it testable, and it corrects a false claim in our own repo:**
+🔻 `experiments/19-external-count/README.md:22` states that *"no public dataset annotates applied
+surgical clips"*, attributed to three prior sweeps. **That is FALSE and must be amended.**
+**HeiSurF** (HeiChole Full Scene Segmentation, EndoVis 2021, Synapse `syn25101790`, public since
+**2021** ⇒ clears the 2026-07-15 gate) annotates **applied clips at pixel level in laparoscopic
+cholecystectomy**, plus **`Specimen bag`** and **`External drain`**. CC BY-NC-SA, which
+[[external-data-policy]] already settled as permitted. Its 720×576 matches our `frames_cache`
+exactly, and the challenge design confirms our 170 cholecystectomies are Wellcome Leap SAVE and
+**not public**, so there is **zero overlap** with HeiSurF by construction.
+
+**Gate before any training, pre-registered:** count HeiSurF's clip-bearing frames, the instance
+distribution, the median clip area as a fraction of frame at our `max_pixels`, and — the one that
+matters — what fraction of clip masks include clips **still inside the applier jaws**, which the
+ORENA definition explicitly excludes. Die if `n_clip_frames < 300` or if >20% violate the
+applier-jaw exclusion (that is target-side noise, priced at ~21% damage by
+[[target-noise-is-the-harmful-kind]]).
+
+### The two tests deciding what is fundable, running now
+
+* **KT-C** — ask the **un-fine-tuned base** the 148 strict swaps A2 got wrong. Base right where A2
+  is wrong ⇒ **our fine-tune FORGOT it** ⇒ LiNeS/WiSE-FT, **zero further training**. Base wrong too
+  ⇒ concept genuinely absent ⇒ concept learning from images (which is Rodrigo's route).
+* **KT-A** — for **SETS**, the quantity rung 33 measured for single tokens: is the gold reachable
+  by re-ranking? Rung 33's **45.6%** explains all five failed `number` arms; the set analogue has
+  never been measured. ≥0.55 licenses candidate-set re-ranking and phrase-level contrastive losses;
+  near 0.456 kills them together.
+  ⚠️ Smoke at n=12 showed base 41.7% and gold-in-top-2 12/12 — **noise, not a result.**
+
+---
+
 ## 🔴 2026-08-10 — the `number` output side is CLOSED on a mechanism, and rung 34 is what survives
 
 Five rungs in three days. Everything below is measured; the GPU is off and nothing is running.
