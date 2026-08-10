@@ -56,6 +56,68 @@
    *fresh, uncapped* processor). The slow processor does not have it. Rung 31 builds four
    processors in one process — same `max_pixels` in all four, so between-arm comparison holds.
 
+## 🔴 2026-08-10 — the `number` output side is CLOSED on a mechanism, and rung 34 is what survives
+
+Five rungs in three days. Everything below is measured; the GPU is off and nothing is running.
+
+1. 🔴 **Rung 30 (GRPO on `number`) NO-GO** — `aggregation_ID` 0.4932 vs the step-matched SFT
+   control's 0.5026. Before that, **the control was training on nothing**: both arms read the
+   GRPO-format JSONL, which has no assistant turn, so `swift sft` masked every label and the run
+   posted `loss` and `grad_norm` identically **0.0 on 492 of 492 steps** while looking healthy.
+   Guards added (`_assert_supervised`, `_assert_learned`). ⚠️ **A checkpoint diff does NOT catch
+   this** — AdamW's decoupled weight decay moves all 720 tensors at zero gradient; only
+   `sum|Δ|` separates them (1.34 vs 252.2). [[rc-zero-is-not-evidence]]
+
+2. 🔑 **Counting is TWO defects and the campaign had been averaging them.**
+   `gold <= 4` is **83%** of the format, bias only **−0.125**, and **77.8%** of its errors are
+   adjacent. `gold >= 5` is 17%, bias **−1.841**. The brain's "Spearman 0.49 / bias ≈ −2" replicates
+   — **on the tail only**, which is where it was measured.
+   [[counting-has-two-failure-modes]]
+
+3. 🟢 **Rung 34 — the count IS in the hidden states, and this is the finding that survives.** A
+   linear probe on the last-prompt state, **fitted on `lapchole` (ID) videos and read on the
+   `heico` half it never saw**, beats the model's own output: **0.5264 vs 0.4680 at layer 24**.
+   Depth profile: below the head through layer 16, **crosses at 18**, peaks **20–24**, and is
+   **still there at layer 36**. The model holds the answer and emits a worse one — the loss is in
+   the **projection into tokens**. 📌 Layers 18–24 is the band *Counting Circuits* (arXiv
+   2603.18523) names on **Qwen3-VL-8B, our backbone**; we hit it from the other side.
+   ⚠️ First fit was inadmissible (memorised, `acc_ID_insample` 1.0 everywhere) and was thrown out.
+   [[hidden-states-hold-the-count]]
+
+4. 🔴 **Rung 35 (NTL-WAS) NO-GO, and its own veto fired** — `aggregation_ID` **−0.0262**,
+   `object_recognition_ID` **−0.0880**, every cell down.
+   🔑 **And the autopsy is worth more than the arm.** NTL did **exactly** what it was built to do:
+   bias **−0.420 → −0.342**, mean prediction 2.27 → 2.35, off-by-≥3 **14.3% → 13.3%**. Accuracy
+   fell anyway. Of the **271** questions A2 got right and NTL lost, **161 moved +1 against 87 that
+   moved −1** — it pushed already-correct answers one step off, and the off-by-one rate did not
+   budge (65.8% → 65.7%). It is the global "+1" shift (dead at 0.4718 → 0.2197) in soft form.
+   ⇒ **Five interventions have failed and all five MOVE PROBABILITY MASS**: shift, LUT, k-voting,
+   GRPO, NTL. Rung 33 said why first — when greedy is wrong the gold is the runner-up only
+   **45.6%** of the time. **Off-by-one describes the residual, not a fixable displacement**, which
+   retires the 0.8185 ceiling. [[moving-the-distribution-cannot-fix-off-by-one]]
+   📌 The veto damage was **gradient starvation, not leakage** — 0.00% of `fo_class` answers carry
+   a digit in either arm. The pre-registered confound fired as written.
+
+5. 🟢 **The instrument is now the best-controlled thing we own.** A2 was **recomputed** through the
+   same eval path, not transcribed, and reproduces rung 21's committed epoch-3 row **to every
+   printed digit** (0.490052356 / 0.730709877 / 0.649614088, diff 0.00e+00) across three weeks, a
+   different pod and a rebuilt path. So every delta above is the arm, not the harness.
+
+**Nothing shipped changed. We remain 0.5288, rank 11, both official baselines beaten.**
+
+### What this leaves open, honestly
+
+* **Rung 34's branch** — a second READ of the hidden state is a different object from a
+  re-weighting of the head's output, and it is the only counting lever with a measured basis. As a
+  standalone channel it is worth ≈ **+0.023 headline**: above the readable floor, **below the S1
+  bar**.
+* **Point supervision as TRAINING** — never run. Gated on measuring SAM 2's pseudo-label error
+  rate first ([[target-noise-is-the-harmful-kind]] prices target noise at ~21%).
+* 🔴 **And the option nobody has priced: stop spending on `number`.** Five arms, three GPU-days,
+  every one negative. `fo_class` is 71% of `object_recognition` and has had far less attention.
+
+---
+
 ## 🟢 2026-08-08 (night) — the attention probe, and seven silent no-ops
 
 **Pod RTX PRO 4500 32 GB, ~40 min of GPU total, zero training.** Full artifacts:
