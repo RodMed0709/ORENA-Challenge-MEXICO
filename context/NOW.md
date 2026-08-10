@@ -4,6 +4,58 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-08**.
 
+## 🟡 2026-08-09 — step 7 is pre-registered as rung 36, and C1 dies to an eye
+
+**Zero GPU, zero pod.** Everything below ran locally or over the S3 gateway.
+
+1. 🔒 **Rung 36 is CLAIMED — `experiments/36-attention-vs-masks/`. PRE-REGISTERED, NOT BUILT.**
+   Do not reassign the number; take 37. Do not build it — there is no engine and that is
+   deliberate. ⏸️ `G-BOUNDARY`'s formulation is under review by legokna, next session.
+2. 🔴 **C1 is dead as a clip-count control, and not because it failed.** It passed (separation
+   6.475 vs 0.5; the recovered raw data gives bootstrap **CI [+1.05, +11.83]**, Cohen **d 0.52**,
+   P(superiority) **0.627** — a medium effect with near-total range overlap, against a threshold
+   of 0.5 that never separated the two competing stories). 🔑 **A human eye pass over its own 8
+   exported frames killed the interpretation**: in **all three `gold == 1` frames where a clip was
+   visible, SAM masked none of them**, and the clips it does catch are the white/plastic ones ⇒
+   **the separation is scene complexity, not clip count**
+   (`local/fuentes/analisis-mascaras-sam2.md`).
+3. 🟢 **And the same eye pass supplies rung 36's enabling fact:** SAM segments instruments, gauze
+   and plastic clips well, and **does not merge tissue regions with foreign objects even where it
+   over-segments tissue**. That is what makes the masks a usable localization target.
+4. ⚠️ **C2 passes as pre-registered and its margin is thin.** 0.9167 against a 0.90 floor, but
+   bootstrap **CI [0.8557, 0.9670] contains the floor**, **5 of 30** pairs sit below it, minimum
+   **0.367**, and a ~40 ms gap is one breath — it is a floor test, so passing proves little.
+   ⇒ rung 36 carries C2′ at **1 s** and exports the five failures.
+5. 🟢 **`RESULTS_controls.json` RECOVERED and committed** to `experiments/29-sam2-temporal/`,
+   **outside `runs/`**. It had existed only as prose in this file: `run_controls.py:52` writes into
+   a gitignored `runs/` dir, and the committed notebook carries `SMOKE = True`, which runs **one
+   frame per group** — so the repo as committed did not reproduce the reported n=40+40 / n=30.
+   The recovered JSON carries `smoke: false`, `grid: 16`, `seed: 42`. **Same failure shape as the
+   ±0.86: a number that moved a decision, computed once, never committed.**
+6. 🟢 **The 0.384 is independently re-derived** — a second implementation written from the parquet
+   schema, not reusing `label_gap_audit.py`, reproduces **1,946 pairs, n=461, 0.384, 70.1 %,
+   2.4 %, max 4, 2.63×**. And it is **robust to the definition**: counting *any* class rather than
+   Clip gives 0.498 ⇒ 2.03×, still far from 1.2×. ⚠️ Under that broader definition the largest
+   jump is **9**, not 4 — "the gold is stable" is definition-dependent and should name its
+   definition.
+7. 🔴 **`number` is NOT mostly clips.** `CAMPAIGN_LOG`'s *"83 % of counting is Clip"* is true of
+   **per-class** questions, which are 39.3 % of the format. Over all 6,356 counting questions:
+   *"how many foreign object **instances**"* **41.3 %**, *"how many **classes**"* **19.4 %**,
+   *"how many **Clips**"* **32.6 %**. ⇒ **60.7 % of counting names no class at all**, and both the
+   0.384 and C1 were measured on the Clip third.
+8. ⚠️ **`max_pixels`, measured on CPU with no weights.** The image-processor class **does** honour
+   it (1280×720: 1196 → **1125** visual tokens at the 921,600 cap — exactly what
+   `config.py:40-50` predicts; 960×540 and 720×576 are below the cap and unchanged). 🔴 **But
+   `engine.py:161` resizes through `qwen_vl_utils.process_vision_info`, and `_messages()` carries
+   no `max_pixels` key** — so no-op #4 stands on the path the container actually uses.
+   **Untested link:** whether `AutoProcessor.from_pretrained(..., max_pixels=N)` forwards to the
+   image processor at all. Needs the checkpoint's config JSONs, no GPU.
+9. 🔴 **Upstream bug, `transformers` 4.57.6:** `Qwen2VLImageProcessorFast.__init__` mutates the
+   **class-level** `size` dict, so constructing one processor with `max_pixels` changes the default
+   for every processor built afterwards in the same process (1280×720 → 72 tokens through a
+   *fresh, uncapped* processor). The slow processor does not have it. Rung 31 builds four
+   processors in one process — same `max_pixels` in all four, so between-arm comparison holds.
+
 ## 🟢 2026-08-08 (night) — the attention probe, and seven silent no-ops
 
 **Pod RTX PRO 4500 32 GB, ~40 min of GPU total, zero training.** Full artifacts:

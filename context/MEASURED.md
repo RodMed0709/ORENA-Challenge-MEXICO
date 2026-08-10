@@ -238,4 +238,5 @@ from this index. Reported rather than dropped silently:
 - `experiments/33-number-logit-probe/README.md`
 - `experiments/34-hidden-state-probe/README.md`
 - `experiments/35-ntl-was/README.md`
+- `experiments/36-attention-vs-masks/README.md`
 - `experiments/splits/README.md`
