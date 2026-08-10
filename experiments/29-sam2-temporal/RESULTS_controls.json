@@ -1,0 +1,287 @@
+{
+  "smoke": false,
+  "grid": 16,
+  "seed": 42,
+  "C1": {
+    "mean_k_gold_high": 32.0,
+    "mean_k_gold_one": 25.525,
+    "separation": 6.475000000000001,
+    "min_separation": 0.5,
+    "passes": true,
+    "n_high": 40,
+    "n_one": 40
+  },
+  "C2": {
+    "persistence_adjacent": 0.9167138620031001,
+    "floor": 0.9,
+    "passes": true,
+    "n": 30
+  },
+  "c2_pairs": [
+    {
+      "n_seed": 34,
+      "n_survived": 34,
+      "persistence": 1.0,
+      "mean_iou": 0.928886148328376
+    },
+    {
+      "n_seed": 38,
+      "n_survived": 38,
+      "persistence": 1.0,
+      "mean_iou": 0.8854224585662634
+    },
+    {
+      "n_seed": 48,
+      "n_survived": 48,
+      "persistence": 1.0,
+      "mean_iou": 0.8940291841989897
+    },
+    {
+      "n_seed": 23,
+      "n_survived": 22,
+      "persistence": 0.9565217391304348,
+      "mean_iou": 0.806900517957698
+    },
+    {
+      "n_seed": 2,
+      "n_survived": 2,
+      "persistence": 1.0,
+      "mean_iou": 0.8923567348221217
+    },
+    {
+      "n_seed": 12,
+      "n_survived": 12,
+      "persistence": 1.0,
+      "mean_iou": 0.9109046560322533
+    },
+    {
+      "n_seed": 18,
+      "n_survived": 11,
+      "persistence": 0.6111111111111112,
+      "mean_iou": 0.5526249251763431
+    },
+    {
+      "n_seed": 32,
+      "n_survived": 30,
+      "persistence": 0.9375,
+      "mean_iou": 0.8380736240927257
+    },
+    {
+      "n_seed": 33,
+      "n_survived": 32,
+      "persistence": 0.9696969696969697,
+      "mean_iou": 0.8095501676146208
+    },
+    {
+      "n_seed": 14,
+      "n_survived": 14,
+      "persistence": 1.0,
+      "mean_iou": 0.9101877284483797
+    },
+    {
+      "n_seed": 7,
+      "n_survived": 4,
+      "persistence": 0.5714285714285714,
+      "mean_iou": 0.48595136710025866
+    },
+    {
+      "n_seed": 46,
+      "n_survived": 44,
+      "persistence": 0.9565217391304348,
+      "mean_iou": 0.7981666079828057
+    },
+    {
+      "n_seed": 48,
+      "n_survived": 48,
+      "persistence": 1.0,
+      "mean_iou": 0.8858107081006056
+    },
+    {
+      "n_seed": 38,
+      "n_survived": 37,
+      "persistence": 0.9736842105263158,
+      "mean_iou": 0.8510550132816249
+    },
+    {
+      "n_seed": 13,
+      "n_survived": 8,
+      "persistence": 0.6153846153846154,
+      "mean_iou": 0.5972111021502974
+    },
+    {
+      "n_seed": 28,
+      "n_survived": 27,
+      "persistence": 0.9642857142857143,
+      "mean_iou": 0.8855576764769488
+    },
+    {
+      "n_seed": 26,
+      "n_survived": 26,
+      "persistence": 1.0,
+      "mean_iou": 0.7506488816089155
+    },
+    {
+      "n_seed": 34,
+      "n_survived": 31,
+      "persistence": 0.9117647058823529,
+      "mean_iou": 0.8505571056481823
+    },
+    {
+      "n_seed": 6,
+      "n_survived": 6,
+      "persistence": 1.0,
+      "mean_iou": 0.8603628819113633
+    },
+    {
+      "n_seed": 17,
+      "n_survived": 17,
+      "persistence": 1.0,
+      "mean_iou": 0.8788646969227963
+    },
+    {
+      "n_seed": 26,
+      "n_survived": 20,
+      "persistence": 0.7692307692307693,
+      "mean_iou": 0.6308672614646604
+    },
+    {
+      "n_seed": 30,
+      "n_survived": 28,
+      "persistence": 0.9333333333333333,
+      "mean_iou": 0.8421764829600458
+    },
+    {
+      "n_seed": 23,
+      "n_survived": 23,
+      "persistence": 1.0,
+      "mean_iou": 0.9155488027976936
+    },
+    {
+      "n_seed": 10,
+      "n_survived": 10,
+      "persistence": 1.0,
+      "mean_iou": 0.8708559729530687
+    },
+    {
+      "n_seed": 56,
+      "n_survived": 56,
+      "persistence": 1.0,
+      "mean_iou": 0.8986285184924341
+    },
+    {
+      "n_seed": 30,
+      "n_survived": 11,
+      "persistence": 0.36666666666666664,
+      "mean_iou": 0.47496984174343915
+    },
+    {
+      "n_seed": 23,
+      "n_survived": 23,
+      "persistence": 1.0,
+      "mean_iou": 0.8307260829561158
+    },
+    {
+      "n_seed": 16,
+      "n_survived": 16,
+      "persistence": 1.0,
+      "mean_iou": 0.9019748509299859
+    },
+    {
+      "n_seed": 8,
+      "n_survived": 8,
+      "persistence": 1.0,
+      "mean_iou": 0.9345480801571561
+    },
+    {
+      "n_seed": 28,
+      "n_survived": 27,
+      "persistence": 0.9642857142857143,
+      "mean_iou": 0.8518983477791071
+    }
+  ],
+  "k_high": [
+    29,
+    26,
+    13,
+    51,
+    36,
+    31,
+    39,
+    37,
+    32,
+    55,
+    44,
+    13,
+    33,
+    28,
+    42,
+    48,
+    35,
+    25,
+    41,
+    29,
+    58,
+    31,
+    39,
+    22,
+    57,
+    16,
+    23,
+    26,
+    16,
+    16,
+    17,
+    45,
+    48,
+    11,
+    28,
+    35,
+    17,
+    13,
+    36,
+    39
+  ],
+  "k_one": [
+    17,
+    30,
+    28,
+    37,
+    31,
+    30,
+    26,
+    20,
+    20,
+    19,
+    44,
+    36,
+    40,
+    49,
+    28,
+    10,
+    30,
+    4,
+    14,
+    38,
+    20,
+    42,
+    29,
+    15,
+    26,
+    26,
+    31,
+    20,
+    11,
+    37,
+    46,
+    27,
+    8,
+    14,
+    13,
+    44,
+    20,
+    25,
+    8,
+    8
+  ],
+  "note": "controls only -- arms J and S deliberately not run"
+}
