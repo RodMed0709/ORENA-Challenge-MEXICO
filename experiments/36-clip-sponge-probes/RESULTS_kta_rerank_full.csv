@@ -1,0 +1,530 @@
+qID,gold,a2,gold_rank,top1,n_cands,dataset
+heico__1973640,Sponge,Clip,2,Clip,3,heico
+heico__1973775,Sponge,Clip,2,Clip,3,heico
+heico__1973790,Clip,Sponge,2,Sponge,3,heico
+heico__1973933,Clip,Sponge,1,Clip,3,heico
+heico__1975589,Sponge,Clip,1,Sponge,3,heico
+heico__1975953,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2004346,Sponge,Clip,2,Clip,3,heico
+heico__2004381,Sponge,Clip,2,Clip,3,heico
+heico__2004384,Sponge,Clip,2,Clip,3,heico
+heico__2004415,Clip,Sponge,2,Sponge,3,heico
+heico__2004419,Clip,Sponge,2,Sponge,3,heico
+heico__2015580,Sponge,Clip,2,Clip,3,heico
+heico__2015581,Sponge,Clip,2,Clip,3,heico
+heico__2015582,Sponge,Clip,1,Sponge,3,heico
+heico__2015585,Sponge,Clip,2,Clip,3,heico
+heico__2031412,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2031418,"Needle, Sponge","Clip, Needle, Sponge",4,Clip,5,heico
+heico__2031426,"Needle, Sponge","Clip, Needle, Sponge",2,"Clip, Needle, Sponge",5,heico
+heico__2031427,"Needle, Sponge","Clip, Needle",2,"Clip, Needle",5,heico
+heico__2031428,"Needle, Sponge","Clip, Needle, Sponge",2,"Clip, Needle, Sponge",5,heico
+heico__2031430,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2041123,Needle,Clip,2,Clip,4,heico
+heico__2041178,Needle,Sponge,2,Sponge,4,heico
+heico__2041224,Needle,Clip,2,Clip,4,heico
+heico__2041302,Needle,Clip,2,Clip,4,heico
+heico__2041362,Sponge,Clip,2,Clip,3,heico
+heico__2041547,Needle,Clip,2,Clip,4,heico
+heico__2041574,Sponge,Clip,2,Clip,3,heico
+heico__2041615,Needle,Clip,2,Clip,4,heico
+heico__2044999,Needle,"Clip, Needle",1,Needle,5,heico
+heico__2045014,Needle,Clip,4,Clip,4,heico
+heico__2045036,"Needle, Sponge",Needle,2,Needle,5,heico
+heico__2045070,Needle,"Clip, Needle",2,"Clip, Needle",5,heico
+heico__2045175,Needle,"Clip, Needle",3,"Clip, Needle",5,heico
+heico__2045176,Sponge,Clip,3,Clip,3,heico
+heico__2045206,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2045285,Needle,"Clip, Needle",2,"Clip, Needle",5,heico
+heico__2045305,External drain,Clip,4,Clip,4,heico
+heico__2045316,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2045359,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2045379,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2045403,Needle,"Clip, Needle",1,Needle,5,heico
+heico__2045408,Needle,Clip,4,Clip,4,heico
+heico__2045440,Sponge,Clip,2,Clip,3,heico
+heico__2045450,Needle,"Clip, Needle",3,"Clip, Needle",5,heico
+heico__2045457,Sponge,Clip,3,Clip,3,heico
+heico__2045458,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2045462,"Needle, Sponge",Clip,4,Clip,4,heico
+heico__2045465,"Needle, Sponge","Clip, Needle, Sponge",4,"Clip, Sponge",5,heico
+heico__2045466,"Needle, Sponge",Clip,2,Clip,4,heico
+heico__2045467,"Needle, Sponge",Needle,2,Needle,5,heico
+heico__2079723,Needle,Clip,2,Clip,4,heico
+heico__2079844,Sponge,Clip,2,Clip,3,heico
+heico__2079845,Sponge,Clip,2,Clip,3,heico
+heico__2079853,Needle,Clip,2,Clip,4,heico
+heico__2079859,Needle,Clip,2,Clip,4,heico
+heico__2079865,Needle,Clip,2,Clip,4,heico
+heico__2079866,Needle,Clip,2,Clip,4,heico
+heico__2079887,External drain,Clip,3,Clip,4,heico
+heico__2096346,Needle,Sponge,2,Sponge,4,heico
+heico__2096348,Needle,Sponge,2,Sponge,4,heico
+heico__2096356,Sponge,Needle,2,Needle,4,heico
+heico__2096358,Sponge,Needle,2,Needle,4,heico
+heico__2112755,Clip,Sponge,2,Sponge,3,heico
+heico__2112758,Clip,Sponge,2,Sponge,3,heico
+heico__2112802,Clip,Sponge,2,Sponge,3,heico
+heico__2112824,Clip,Sponge,3,Sponge,3,heico
+heico__2123633,Clip,Sponge,2,Sponge,3,heico
+heico__2148096,Sponge,Clip,2,Clip,3,heico
+heico__2150252,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2150254,Sponge,Specimen,2,Specimen,4,heico
+heico__2150271,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150342,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150354,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150372,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150393,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150397,Sponge,Clip,1,Sponge,3,heico
+heico__2150405,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2150466,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2184038,Sponge,Clip,2,Clip,3,heico
+heico__2184111,Clip,Sponge,2,Sponge,3,heico
+heico__2196889,Clip,Sponge,2,Sponge,3,heico
+heico__2196892,Clip,Sponge,2,Sponge,3,heico
+heico__2196895,Clip,Sponge,2,Sponge,3,heico
+heico__2196898,Clip,Sponge,2,Sponge,3,heico
+heico__2196910,Clip,Sponge,2,Sponge,3,heico
+heico__2196980,Sponge,Clip,1,Sponge,3,heico
+heico__2196981,Sponge,Clip,1,Sponge,3,heico
+heico__2196982,Clip,Sponge,2,Sponge,3,heico
+heico__2211547,"Clip, Sponge","Clip, External drain",3,Clip,4,heico
+heico__2219531,Sponge,Clip,1,Sponge,3,heico
+heico__2219551,Sponge,Clip,2,Clip,3,heico
+heico__2219647,Sponge,Clip,2,Clip,3,heico
+heico__2219668,Clip,Sponge,2,Sponge,3,heico
+heico__2219696,Clip,Sponge,2,Sponge,3,heico
+heico__2219738,Sponge,Clip,2,Clip,3,heico
+heico__2219885,Clip,Sponge,2,Sponge,3,heico
+heico__2219951,Clip,Specimen,3,Specimen,4,heico
+heico__2220028,Clip,Sponge,2,Sponge,3,heico
+heico__2221686,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2221743,Sponge,"Clip, Sponge",3,Clip,3,heico
+heico__2221756,Clip,Sponge,3,Sponge,3,heico
+heico__2221877,Sponge,Clip,3,Clip,3,heico
+heico__2221883,"Clip, Sponge",Sponge,3,Sponge,3,heico
+heico__2221908,"Clip, Sponge",Clip,2,Sponge,3,heico
+heico__2221989,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2221992,Clip,Sponge,3,Sponge,3,heico
+heico__2222095,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2222123,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2222151,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2222157,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2222158,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2222168,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2250760,Clip,Specimen,3,Specimen,4,heico
+heico__2250791,Sponge,Clip,1,Sponge,3,heico
+heico__2262204,Clip,Sponge,2,Sponge,3,heico
+heico__2262224,Clip,Sponge,2,Sponge,3,heico
+heico__2262249,Sponge,Clip,2,Clip,3,heico
+heico__2262256,Clip,Sponge,2,Sponge,3,heico
+heico__2262260,Clip,Sponge,2,Sponge,3,heico
+heico__2262265,Clip,Sponge,2,Sponge,3,heico
+heico__2278501,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2278502,"Needle, Sponge","Clip, Needle, Specimen, Sponge",4,Clip,5,heico
+heico__2278505,"Needle, Sponge","Clip, Needle, Sponge",3,"Clip, Needle, Sponge",5,heico
+heico__2278507,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2278510,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2278511,"Specimen, Specimen bag","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2278512,"Specimen, Specimen bag","Clip, External drain",3,"Clip, External drain",5,heico
+heico__2278513,"Specimen, Specimen bag","Clip, External drain",3,"Clip, External drain",5,heico
+heico__2278519,"Specimen, Specimen bag","Clip, Specimen bag",3,"Clip, Specimen bag",5,heico
+heico__2278520,"Specimen, Specimen bag","Clip, Specimen bag",3,Clip,5,heico
+heico__2278521,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,heico
+heico__2278523,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,heico
+heico__2278525,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,heico
+heico__2278526,"Specimen, Specimen bag","Clip, Specimen bag",3,Clip,5,heico
+heico__2278535,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2278543,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2278563,"Needle, Sponge","Clip, Needle, Sponge",1,"Needle, Sponge",5,heico
+heico__2278578,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2278579,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2278588,"Clip, Needle","Needle, Silicone loop",2,"Needle, Silicone loop",5,heico
+heico__2278592,"Clip, Needle","Needle, Silicone loop",2,"Needle, Silicone loop",5,heico
+heico__2278593,"Clip, Needle","Needle, Silicone loop",2,"Needle, Silicone loop",5,heico
+heico__2278600,"Clip, Sponge","Specimen, Sponge",2,"Specimen, Sponge",4,heico
+heico__2294171,Specimen bag,Sponge,3,Sponge,4,heico
+heico__2294224,Clip,Needle,3,Needle,4,heico
+heico__2294249,Clip,Sponge,2,Sponge,3,heico
+heico__2294281,Clip,Needle,3,Needle,4,heico
+heico__2294302,Specimen bag,Clip,3,Clip,4,heico
+heico__2294312,Clip,Needle,3,Needle,4,heico
+heico__2294431,Sponge,Clip,1,Sponge,3,heico
+heico__2294506,Needle,Clip,2,Sponge,4,heico
+heico__2294512,Needle,Sponge,3,Sponge,4,heico
+heico__2294528,Specimen bag,Clip,3,Clip,4,heico
+heico__2294545,Clip,Needle,3,Needle,4,heico
+heico__2294555,Clip,Sponge,2,Sponge,3,heico
+heico__2294556,Specimen,Clip,3,Clip,4,heico
+heico__2294560,Specimen,Clip,3,Sponge,4,heico
+heico__2294561,Specimen,Clip,4,Clip,4,heico
+heico__2294563,Specimen,Sponge,3,Sponge,4,heico
+heico__2294568,Specimen,Clip,3,Clip,4,heico
+heico__2298246,Clip,Needle,3,Needle,4,heico
+heico__2298247,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2298252,"Needle, Sponge","Clip, Needle",3,"Clip, Needle",5,heico
+heico__2298264,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2298333,Sponge,Clip,3,Clip,3,heico
+heico__2298340,Clip,Needle,2,Needle,4,heico
+heico__2298343,"Needle, Sponge",Clip,2,Clip,4,heico
+heico__2298350,Specimen bag,"Clip, Specimen bag",3,"Clip, Specimen bag",5,heico
+heico__2298353,"Needle, Sponge","Clip, Sponge",4,"Clip, Sponge",4,heico
+heico__2298431,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2298436,Clip,Needle,2,Needle,4,heico
+heico__2298461,Specimen bag,Sponge,4,Sponge,4,heico
+heico__2298474,"Clip, Needle",Needle,2,Needle,5,heico
+heico__2298476,Sponge,Clip,3,Clip,3,heico
+heico__2298486,Sponge,Clip,2,Clip,3,heico
+heico__2298497,Specimen bag,"Clip, Silicone loop, Specimen bag",3,Clip,5,heico
+heico__2298504,Specimen bag,"Clip, Specimen bag",1,Specimen bag,5,heico
+heico__2298529,Sponge,Clip,1,Sponge,3,heico
+heico__2298537,"Needle, Sponge",Needle,2,Needle,5,heico
+heico__2298538,"Needle, Sponge","Clip, Needle, Sponge",2,"Clip, Needle, Sponge",5,heico
+heico__2298539,Needle,Sponge,3,Sponge,4,heico
+heico__2298543,Sponge,Clip,1,Sponge,3,heico
+heico__2298550,Needle,"Clip, Needle",3,Clip,5,heico
+heico__2298556,Sponge,Clip,3,Clip,3,heico
+heico__2298562,Needle,Sponge,4,Sponge,4,heico
+heico__2298569,Specimen bag,"Clip, Specimen bag",2,"Clip, Specimen bag",5,heico
+heico__2298597,Needle,Clip,4,Clip,4,heico
+heico__2298602,"Clip, Needle",Needle,2,Needle,5,heico
+heico__2298606,"Clip, Needle",Needle,2,Needle,5,heico
+heico__2298659,Specimen bag,"Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,heico
+heico__2298665,Specimen,Clip,4,Clip,4,heico
+heico__2298670,Specimen,Clip,4,Clip,4,heico
+heico__2298686,Specimen bag,"Specimen bag, Sponge",2,"Specimen bag, Sponge",5,heico
+heico__2298697,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2298709,Clip,Needle,3,Needle,4,heico
+heico__2298712,"Specimen, Specimen bag","Clip, Specimen bag",3,"Clip, Specimen bag",5,heico
+heico__2359153,Specimen bag,Sponge,3,Sponge,4,heico
+heico__2359154,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359155,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359156,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359157,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359158,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359159,Specimen bag,Sponge,2,Sponge,4,heico
+heico__2359160,Specimen bag,Sponge,3,Clip,4,heico
+heico__2359163,Needle,Clip,3,Clip,4,heico
+heico__2359201,Specimen bag,Clip,3,Clip,4,heico
+heico__2359202,Needle,Sponge,2,Sponge,4,heico
+heico__2359203,Needle,Sponge,2,Sponge,4,heico
+heico__2359222,Clip,Needle,3,Needle,4,heico
+heico__2359223,Clip,Needle,2,Needle,4,heico
+heico__2359224,Clip,Needle,3,Needle,4,heico
+heico__2359225,Clip,Needle,3,Needle,4,heico
+heico__2359381,Sponge,Clip,1,Sponge,3,heico
+heico__2359424,Specimen,Sponge,3,Sponge,4,heico
+heico__2359425,Specimen,Clip,3,Sponge,4,heico
+heico__2359426,Specimen,Sponge,3,Sponge,4,heico
+heico__2359427,Specimen,Clip,3,Clip,4,heico
+heico__2359428,Specimen,Clip,3,Clip,4,heico
+heico__2359429,Specimen,Clip,3,Clip,4,heico
+heico__2359430,Specimen,Sponge,3,Sponge,4,heico
+heico__2359431,Specimen,Sponge,3,Sponge,4,heico
+heico__2359441,Sponge,Clip,2,Clip,3,heico
+heico__2359446,Sponge,Clip,2,Clip,3,heico
+heico__2383197,Needle,Clip,2,Clip,4,heico
+heico__2383199,Needle,Clip,2,Clip,4,heico
+heico__2383211,Needle,Clip,2,Sponge,4,heico
+heico__2383216,Clip,Needle,3,Needle,4,heico
+heico__2383217,Clip,Needle,3,Needle,4,heico
+heico__2383218,Clip,Needle,3,Needle,4,heico
+heico__2383219,Clip,Needle,3,Needle,4,heico
+heico__2383220,Clip,Needle,3,Needle,4,heico
+heico__2405187,Clip,Sponge,2,Sponge,3,heico
+heico__2405188,Clip,Sponge,2,Sponge,3,heico
+heico__2405189,Clip,Sponge,2,Sponge,3,heico
+heico__2405190,Clip,Sponge,2,Sponge,3,heico
+heico__2405191,Clip,Sponge,2,Sponge,3,heico
+heico__2405192,Clip,Sponge,2,Sponge,3,heico
+heico__2405193,Clip,Sponge,2,Sponge,3,heico
+heico__2405194,Clip,Sponge,2,Sponge,3,heico
+heico__2405195,Clip,Sponge,2,Sponge,3,heico
+heico__2405196,Clip,Sponge,2,Sponge,3,heico
+heico__2405197,Clip,Sponge,2,Sponge,3,heico
+heico__2405198,Clip,Sponge,2,Sponge,3,heico
+heico__2405200,Clip,External drain,3,Sponge,4,heico
+heico__2405204,Clip,Sponge,2,Sponge,3,heico
+heico__2405209,Clip,Sponge,2,Sponge,3,heico
+heico__2405211,Clip,Sponge,2,Sponge,3,heico
+heico__2405212,Clip,Sponge,2,Sponge,3,heico
+heico__2405213,Clip,Sponge,2,Sponge,3,heico
+heico__2405222,Clip,Sponge,2,Sponge,3,heico
+heico__2405223,Clip,Sponge,2,Sponge,3,heico
+heico__2405225,Clip,Sponge,2,Sponge,3,heico
+heico__2405227,Clip,Sponge,2,Sponge,3,heico
+heico__2405232,Clip,Sponge,2,Sponge,3,heico
+heico__2405236,Clip,Sponge,2,Sponge,3,heico
+heico__2405367,External drain,Sponge,3,Sponge,4,heico
+heico__2405864,Clip,Sponge,3,Sponge,3,heico
+heico__2405869,Clip,Sponge,3,Sponge,3,heico
+heico__2405870,Clip,Sponge,3,Sponge,3,heico
+heico__2405872,Clip,Sponge,3,Sponge,3,heico
+heico__2405873,Clip,Sponge,3,Sponge,3,heico
+heico__2405874,Clip,Sponge,3,Sponge,3,heico
+heico__2405875,Clip,External drain,4,External drain,4,heico
+heico__2405876,Clip,External drain,4,Sponge,4,heico
+heico__2405877,Clip,External drain,4,Sponge,4,heico
+heico__2405879,Clip,Sponge,3,Sponge,3,heico
+heico__2405881,Clip,Sponge,3,Sponge,3,heico
+heico__2405883,Clip,Sponge,3,Sponge,3,heico
+heico__2405892,Clip,Sponge,3,Sponge,3,heico
+heico__2405899,Clip,Sponge,3,Sponge,3,heico
+heico__2405900,Clip,Sponge,3,Sponge,3,heico
+heico__2405902,Clip,Sponge,3,Sponge,3,heico
+heico__2405909,Clip,Needle,4,Sponge,4,heico
+heico__2405933,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2405946,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2405977,External drain,Clip,4,Clip,4,heico
+heico__2405978,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2405980,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2405996,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2405999,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406000,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406007,External drain,"Clip, External drain, Silicone loop",3,Clip,5,heico
+heico__2406021,External drain,"Clip, External drain, Silicone loop",3,"Clip, External drain, Silicone loop",5,heico
+heico__2406028,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406035,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406044,External drain,Sponge,4,Sponge,4,heico
+heico__2406051,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406052,External drain,"Clip, External drain",3,"Clip, External drain",5,heico
+heico__2406059,External drain,"Clip, External drain",2,"Clip, External drain",5,heico
+heico__2451266,External drain,Sponge,2,Sponge,4,heico
+heico__2452380,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2452389,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452405,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452409,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452466,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452534,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452558,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452670,External drain,Clip,4,Clip,4,heico
+heico__2452738,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2452837,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2482815,Sponge,Clip,2,Clip,3,heico
+heico__2482859,Clip,Sponge,3,Sponge,3,heico
+heico__2482861,Clip,Sponge,2,Sponge,3,heico
+heico__2482980,Sponge,Specimen,2,Specimen,4,heico
+heico__2482985,Sponge,Clip,2,Clip,3,heico
+heico__2495327,Clip,Sponge,2,Sponge,3,heico
+heico__2495332,Clip,Sponge,2,Sponge,3,heico
+heico__2495333,Clip,Sponge,2,Sponge,3,heico
+heico__2495336,Clip,Sponge,2,Sponge,3,heico
+heico__2495339,Clip,Sponge,2,Sponge,3,heico
+heico__2495346,Clip,Sponge,2,Sponge,3,heico
+heico__2495386,Clip,Sponge,2,Sponge,3,heico
+heico__2495391,Clip,Sponge,2,Sponge,3,heico
+heico__2495396,Clip,Sponge,2,Sponge,3,heico
+heico__2495397,Clip,Sponge,2,Sponge,3,heico
+heico__2495400,Clip,Sponge,2,Sponge,3,heico
+heico__2495402,Clip,Sponge,2,Sponge,3,heico
+heico__2495406,Clip,Sponge,2,Sponge,3,heico
+heico__2524925,Clip,External drain,3,External drain,4,heico
+heico__2525017,Needle,Clip,3,Sponge,4,heico
+heico__2525055,Needle,Clip,2,Clip,4,heico
+heico__2525058,Clip,External drain,3,External drain,4,heico
+heico__2525161,Needle,Clip,3,Clip,4,heico
+heico__2525180,External drain,Clip,2,Clip,4,heico
+heico__2528892,"Clip, Sponge",Clip,2,Clip,3,heico
+heico__2528939,Clip,Sponge,3,Sponge,3,heico
+heico__2528961,"Clip, Sponge",Clip,2,Clip,3,heico
+heico__2528962,"Clip, Sponge",Clip,3,Clip,3,heico
+heico__2528971,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2528987,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2529017,Needle,Clip,1,Needle,4,heico
+heico__2529053,Needle,Sponge,3,Sponge,4,heico
+heico__2529100,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2529200,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2529203,Clip,Sponge,3,Sponge,3,heico
+heico__2529218,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2569374,Clip,Silicone loop,3,Silicone loop,4,heico
+heico__2569522,Sponge,Clip,2,Clip,3,heico
+heico__2569527,Sponge,Silicone loop,2,Silicone loop,4,heico
+heico__2569549,Needle,Clip,3,Clip,4,heico
+heico__2569553,Needle,Clip,3,Sponge,4,heico
+heico__2586621,Clip,Specimen bag,3,Specimen bag,4,heico
+heico__2586622,Clip,Specimen bag,3,Specimen bag,4,heico
+heico__2604725,"Needle, Sponge","Clip, Needle, Sponge",2,"Clip, Needle, Sponge",5,heico
+heico__2604727,"Needle, Sponge","Clip, Needle, Sponge",3,"Clip, Needle, Sponge",5,heico
+heico__2604728,"Needle, Sponge","Clip, Needle, Sponge",3,"Clip, Needle, Sponge",5,heico
+heico__2604729,"Needle, Sponge","Clip, Sponge",3,Clip,4,heico
+heico__2604730,"Needle, Sponge","Clip, Sponge",3,Clip,4,heico
+heico__2604731,"Needle, Sponge","Clip, Sponge",3,Clip,4,heico
+heico__2604732,"Needle, Sponge","Clip, Sponge",3,Clip,4,heico
+heico__2604733,"Needle, Sponge","Clip, Sponge",3,Clip,4,heico
+heico__2604734,"Needle, Sponge","Clip, Needle, Sponge",4,"Clip, Needle, Sponge",5,heico
+heico__2604735,"Needle, Sponge","Clip, Sponge",3,"Clip, Sponge",4,heico
+heico__2604736,"Needle, Sponge","Clip, Needle, Sponge",3,"Clip, Needle, Sponge",5,heico
+heico__2615448,Sponge,Clip,2,Clip,3,heico
+heico__2615580,Needle,Clip,2,Clip,4,heico
+heico__2615752,Needle,Clip,3,Clip,4,heico
+heico__2618355,Needle,"Needle, Silicone loop, Sponge",1,Needle,5,heico
+heico__2618415,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,heico
+heico__2618493,Needle,"Clip, Needle",3,"Clip, Needle",5,heico
+heico__2618587,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2618631,Needle,Clip,2,Clip,4,heico
+heico__2618647,"Clip, Sponge",Clip,2,Clip,3,heico
+heico__2618667,Sponge,Clip,3,Clip,3,heico
+heico__2618668,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2618709,"Clip, Sponge",Sponge,2,Sponge,3,heico
+heico__2657446,External drain,Clip,3,Clip,4,heico
+heico__2657466,External drain,Clip,3,Sponge,4,heico
+heico__2657581,Sponge,Clip,2,Clip,3,heico
+heico__2657596,Clip,Sponge,2,Sponge,3,heico
+heico__2657598,Needle,Sponge,3,Sponge,4,heico
+heico__2657802,External drain,Clip,3,Clip,4,heico
+heico__2673208,Clip,Sponge,2,Sponge,3,heico
+heico__2673209,Clip,Sponge,2,Sponge,3,heico
+heico__2673211,Clip,Sponge,2,Sponge,3,heico
+heico__2673213,Clip,Sponge,2,Sponge,3,heico
+lapchole__1001769,Specimen,Clip,3,Clip,4,lapchole
+lapchole__1051141,"Clip, Gallstone, Sponge","Clip, Specimen",4,Clip,5,lapchole
+lapchole__1051150,"Clip, Gallstone","Clip, Sponge",3,Clip,4,lapchole
+lapchole__1051221,"Gallstone, Sponge","Clip, Specimen, Sponge",4,Clip,5,lapchole
+lapchole__1051235,"Gallstone, Specimen, Sponge","Clip, Specimen, Sponge",3,"Clip, Specimen, Sponge",5,lapchole
+lapchole__1051253,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1051257,"Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1062838,Gallstone,Clip,3,Clip,4,lapchole
+lapchole__1066854,"Clip, Gallstone, Sponge","Clip, Specimen",4,Clip,5,lapchole
+lapchole__1066927,"Clip, Specimen",Specimen,1,"Clip, Specimen",5,lapchole
+lapchole__1067051,"Specimen bag, Sponge",Specimen bag,2,Specimen bag,5,lapchole
+lapchole__1067102,"Clip, Sponge",Sponge,1,"Clip, Sponge",3,lapchole
+lapchole__1067108,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1067151,Gallstone,Clip,3,Clip,4,lapchole
+lapchole__1067251,"Gallstone, Specimen, Sponge","Clip, Specimen, Sponge",3,"Clip, Specimen, Sponge",5,lapchole
+lapchole__1067273,"Gallstone, Sponge","Clip, Sponge",3,"Clip, Sponge",4,lapchole
+lapchole__1111637,Gallstone,Clip,3,Clip,4,lapchole
+lapchole__1129934,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__1129963,Gallstone,Clip,3,Clip,4,lapchole
+lapchole__11350,Clip,Specimen,3,Specimen,4,lapchole
+lapchole__11391,Clip,External drain,3,External drain,4,lapchole
+lapchole__1143304,"Clip, Specimen, Sponge","Specimen, Sponge",2,"Specimen, Sponge",5,lapchole
+lapchole__1150586,"Specimen, Sponge",Clip,2,Clip,4,lapchole
+lapchole__1150621,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__1150622,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__1177630,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__1177685,Specimen,Sponge,2,Sponge,4,lapchole
+lapchole__127066,"External drain, Sponge","External drain, Specimen bag",2,"External drain, Specimen bag",5,lapchole
+lapchole__12863,Clip,Specimen bag,3,Specimen bag,4,lapchole
+lapchole__1291675,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1291676,"Clip, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1299829,"Clip, Specimen, Specimen bag",Specimen bag,2,Specimen bag,5,lapchole
+lapchole__1330241,Specimen,Clip,2,Clip,4,lapchole
+lapchole__134034,Clip,External drain,2,External drain,4,lapchole
+lapchole__134160,Sponge,Clip,2,Clip,3,lapchole
+lapchole__1347581,Specimen,Clip,2,Clip,4,lapchole
+lapchole__1349333,Specimen,"Clip, Specimen",3,Clip,5,lapchole
+lapchole__1349602,Specimen,"Clip, Specimen",3,"Clip, Specimen",5,lapchole
+lapchole__1349671,Specimen,Clip,2,Clip,4,lapchole
+lapchole__1712593,"Clip, Specimen","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__1716451,Clip,External drain,2,External drain,4,lapchole
+lapchole__1717407,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__1830598,"Specimen, Specimen bag","Specimen, Sponge",2,"Specimen, Sponge",5,lapchole
+lapchole__1846100,"Specimen, Specimen bag","Clip, Specimen bag",2,"Clip, Specimen bag",5,lapchole
+lapchole__1881573,Specimen,Clip,1,Specimen,4,lapchole
+lapchole__1898185,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__2411784,"Clip, Sponge","Clip, External drain",3,Clip,4,lapchole
+lapchole__2412113,"Specimen, Specimen bag, Sponge","Clip, Specimen, Specimen bag, Sponge",2,"Clip, Specimen, Specimen bag, Sponge",5,lapchole
+lapchole__2412254,"Clip, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2427228,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",1,"Specimen, Specimen bag",5,lapchole
+lapchole__2427371,"Clip, Specimen bag, Sponge","Specimen, Specimen bag, Sponge",2,"Specimen, Specimen bag, Sponge",5,lapchole
+lapchole__2427389,"Clip, Sponge",Sponge,2,Sponge,3,lapchole
+lapchole__2427543,"Clip, Specimen bag",Specimen bag,1,"Clip, Specimen bag",5,lapchole
+lapchole__2427550,"Clip, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2427676,"Clip, Specimen bag",Specimen bag,1,"Clip, Specimen bag",5,lapchole
+lapchole__2427717,"Clip, Sponge",Sponge,2,Sponge,3,lapchole
+lapchole__2487257,Sponge,Clip,2,Clip,3,lapchole
+lapchole__2501701,"Clip, Sponge","Clip, Specimen",3,Clip,4,lapchole
+lapchole__2501739,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,lapchole
+lapchole__2512881,Sponge,Clip,3,Clip,3,lapchole
+lapchole__2512984,"Clip, Sponge",Clip,2,Clip,3,lapchole
+lapchole__2513192,"Clip, Sponge",Sponge,1,"Clip, Sponge",3,lapchole
+lapchole__2662584,Specimen,Clip,2,Clip,4,lapchole
+lapchole__2679368,Specimen,Clip,3,Clip,4,lapchole
+lapchole__2693256,"Specimen, Sponge","Clip, Sponge",3,Clip,4,lapchole
+lapchole__2693270,"Clip, Specimen, Sponge","Specimen, Sponge",2,"Specimen, Sponge",5,lapchole
+lapchole__2698930,Sponge,Specimen,2,Specimen,4,lapchole
+lapchole__2700457,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__2700517,"Clip, Specimen, Sponge","Specimen, Sponge",3,"Specimen, Sponge",5,lapchole
+lapchole__2700586,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,lapchole
+lapchole__2700665,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__2700714,"Clip, Specimen, Sponge","Specimen, Sponge",2,"Specimen, Sponge",5,lapchole
+lapchole__2720373,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__2792156,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2792163,"Clip, Specimen bag","Specimen bag, Sponge",1,"Clip, Specimen bag",5,lapchole
+lapchole__2792165,"Clip, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2799506,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__2799820,Specimen bag,Clip,2,Clip,4,lapchole
+lapchole__2837900,Clip,Specimen,3,Specimen,4,lapchole
+lapchole__2898881,"Clip, Specimen","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2898886,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__2898988,"Clip, Specimen bag","Clip, Sponge",3,Clip,4,lapchole
+lapchole__2899119,"Clip, Specimen bag","Clip, Sponge",3,Clip,4,lapchole
+lapchole__2909963,Sponge,Specimen bag,2,Specimen bag,4,lapchole
+lapchole__2912682,"Clip, Specimen bag",Sponge,3,Sponge,4,lapchole
+lapchole__2912775,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",1,"Clip, Specimen, Specimen bag",5,lapchole
+lapchole__2912962,Sponge,Specimen,2,Specimen,4,lapchole
+lapchole__2947082,Clip,Specimen bag,2,Specimen bag,4,lapchole
+lapchole__2947243,Sponge,Clip,2,Clip,3,lapchole
+lapchole__2961544,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__2961545,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__2961553,Sponge,Specimen bag,2,Specimen bag,4,lapchole
+lapchole__3027874,"External drain, Specimen bag","Clip, Specimen bag, Sponge",1,"External drain, Specimen bag",5,lapchole
+lapchole__3041397,"Clip, Specimen",Specimen,1,"Clip, Specimen",5,lapchole
+lapchole__3041613,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__3156543,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__3205035,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__3210880,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__3210887,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__3212271,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__3212295,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__3231812,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__3406731,Specimen bag,"Specimen bag, Sponge",1,Specimen bag,5,lapchole
+lapchole__3494464,Clip,Specimen,3,Specimen,4,lapchole
+lapchole__3494916,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,Clip,5,lapchole
+lapchole__3744678,"Clip, Specimen","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__3751750,"Clip, Specimen",Specimen,2,Specimen,5,lapchole
+lapchole__4649549,"Clip, Specimen, Specimen bag","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__4655746,"Clip, Specimen, Specimen bag",Specimen,2,Specimen,5,lapchole
+lapchole__4655806,"Clip, Specimen, Specimen bag",Specimen,2,Specimen,5,lapchole
+lapchole__4674040,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__4681380,Specimen,Clip,2,Clip,4,lapchole
+lapchole__4691526,"Specimen, Sponge","Clip, Specimen",4,"Clip, Specimen",5,lapchole
+lapchole__4691528,"Specimen, Sponge","Clip, Specimen",3,"Clip, Specimen",5,lapchole
+lapchole__4691531,"Specimen, Sponge","Clip, Specimen",3,"Clip, Specimen",5,lapchole
+lapchole__4698961,Specimen,Clip,3,Clip,4,lapchole
+lapchole__4700433,"Specimen, Sponge",Specimen,2,Specimen,5,lapchole
+lapchole__4700616,"Clip, Sponge",Clip,2,Clip,3,lapchole
+lapchole__4700677,"Specimen, Sponge",Specimen,2,Specimen,5,lapchole
+lapchole__4700738,Sponge,Clip,3,Clip,3,lapchole
+lapchole__4700784,"Specimen, Sponge",Specimen,2,Specimen,5,lapchole
+lapchole__4912530,"Specimen, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__4923456,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,lapchole
+lapchole__4923864,"Clip, Sponge","Clip, Specimen",3,Clip,4,lapchole
+lapchole__4923914,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,lapchole
+lapchole__4950776,Sponge,Clip,2,Clip,3,lapchole
+lapchole__4962712,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__4962738,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__4962748,Specimen,Sponge,2,Sponge,4,lapchole
+lapchole__5026645,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__5026646,"Specimen, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__582532,Clip,Specimen,2,Specimen,4,lapchole
+lapchole__607036,"Clip, Gallstone","Clip, Sponge",3,Clip,4,lapchole
+lapchole__607052,"Gallstone, Sponge","Clip, Sponge",3,Clip,4,lapchole
+lapchole__607076,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__607087,"Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__616970,Sponge,Clip,2,Clip,3,lapchole
+lapchole__620726,Sponge,"Clip, Sponge",3,"Clip, Sponge",3,lapchole
+lapchole__620871,"Specimen bag, Sponge",Specimen bag,2,Specimen bag,5,lapchole
+lapchole__621028,"Specimen, Specimen bag, Sponge",Specimen bag,2,Specimen bag,5,lapchole
+lapchole__621133,"Gallstone, Sponge",Clip,2,Clip,4,lapchole
+lapchole__685532,Clip,Sponge,2,Sponge,3,lapchole
+lapchole__685559,Gallstone,Clip,2,Clip,4,lapchole
+lapchole__723120,"Specimen, Specimen bag, Sponge","Clip, Specimen, Specimen bag",3,"Clip, Specimen, Specimen bag",5,lapchole
+lapchole__723128,"Specimen, Specimen bag, Sponge","Clip, Specimen, Sponge",3,Clip,5,lapchole
+lapchole__723141,"Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__723168,"Clip, Sponge","Clip, Specimen",3,"Clip, Specimen",4,lapchole
+lapchole__733714,Sponge,Clip,2,Clip,3,lapchole
+lapchole__737626,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__737692,"Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__737762,"Specimen, Specimen bag, Sponge","Specimen, Specimen bag",2,"Specimen, Specimen bag",5,lapchole
+lapchole__995573,"Specimen, Specimen bag","Clip, Specimen, Specimen bag",2,"Clip, Specimen, Specimen bag",5,lapchole
