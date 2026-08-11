@@ -16,6 +16,11 @@ neither the object nor its absence, so a forced binary silently becomes either a
 kills the gate on the instrument, or a skipped frame that inflates it. **`unadjudicable` is the
 third state**, and it is exported so the rate is a measurement rather than a hidden bias.
 
+🔻 **Corrected 2026-08-11:** the case for this mark was first argued from **r = −0.17**, which is
+RETIRED (`gold-is-signal-model-underuses-it`) — range-restricted to gold 3–6, superseded by a blind
+full-range pass at **r = +0.7230** with **2.8 % "cannot tell"**. Expect the unadjudicable rate to be
+LOW; the mark earns its place on metallic clips specifically, not on a blind adjudicator.
+
 ⚠️ This tool does not decide the gate. It records marks and their counts; the thresholds stay in
 `PLAN.md`, still unamended, and `RESULTS_gboundary.json` is written by hand from the export — the
 number that moves a decision does not get to live only in a browser tab.

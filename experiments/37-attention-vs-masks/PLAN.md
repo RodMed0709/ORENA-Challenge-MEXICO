@@ -14,7 +14,17 @@
 > presume its outcome: the same 45 frames serve any wording of the gate. **The thresholds below are
 > as pre-registered and have NOT been amended.** What is now known against them:
 >
-> 🔴 **Dry run, 2026-08-11 — the gate can die from the instrument, not from SAM.** Scoring the 8
+> 🔻 **CORRECTION, same day, before anything was adjudicated.** The dry run below was first written
+> under the headline *"the gate can die from the instrument, not from SAM"*, argued from a blind
+> human scoring **r = −0.17** against the counting gold (`CAMPAIGN_LOG` §10). **That number is
+> RETIRED** — [[gold-is-signal-model-underuses-it]] shows it was **range-restricted to gold 3–6**,
+> and a blind full-range pass (n=106 counted, 109 frames, 30 videos, label hidden) scores
+> **r = +0.7230** with only **2.8 % "cannot tell"**. ⇒ **An untrained eye reads these frames well**,
+> the expected `unadjudicable` rate is LOW, and **the instrument objection is much weaker than
+> first stated.** What survives is first-hand and narrow: *metallic clips*, on these frames, by this
+> adjudicator. The sampling-design objection at the end is untouched — it never used `r`.
+>
+> 🔴 **Dry run, 2026-08-11.** Scoring the 8
 > C1 frames already adjudicated in `local/fuentes/analisis-mascaras-sam2.md` gives **B1 = 0.625**
 > (fails the ≥0.70 point estimate; bootstrap CI [0.250, 0.875] fails the >0.50 clause) and
 > **B2 = 0.800** (passes the point estimate, CI [0.400, 1.000] fails the clause). All **three**
