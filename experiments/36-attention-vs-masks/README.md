@@ -1,17 +1,22 @@
 # Rung 36 — step 7: attention vs SAM masks
 
-> 🟡 **STATUS 2026-08-09: PRE-REGISTERED, NOT BUILT, NOT RUN.**
+> 🟢 **STATUS 2026-08-11: the export has RUN. Nothing is adjudicated and no attention is read yet.**
 >
-> 🔒 **The number 36 is CLAIMED — do not reassign it.** The `24` collision cost a directory rename
+> 🔒 **The number 36 is TAKEN — do not reassign it.** The `24` collision cost a directory rename
 > and a week of prose that still says the wrong rung. If you need a slot, take 37.
 >
-> 🛑 **Do NOT build this yet.** There is no engine, no `_tools/`, no notebook, and that is
-> deliberate. `PLAN.md` is a pre-registration written before any GPU was spent so its thresholds
-> could not be chosen after seeing a number (`RULES` S3, S7). Building ahead of the gate is how a
-> design turns into a sunk cost that argues for itself.
+> **What exists now:** `_tools/export_masks_36.py` and `runs/36_masks_v1/` (on the pod, gitignored) —
+> **45 frames**: the N=40 `G-BOUNDARY` sample, **5 per class across all eight** foreign-object
+> classes, plus the **5 C2 pairs below the 0.90 floor**. The sample manifest is committed **outside
+> `runs/`** as [`SAMPLE_36_masks_v1.json`](SAMPLE_36_masks_v1.json), because a number that moves a
+> decision and lives only in a gitignored dir is the `RESULTS_controls.json` failure, twice over.
 >
-> ⏸️ **One open item before it is buildable:** `G-BOUNDARY`'s formulation is under review by
-> legokna, scheduled for the next session. Nothing else blocks it.
+> ⏸️ **`G-BOUNDARY`'s formulation is still under review by legokna** and the export does not
+> presume its outcome — it is the same 45 frames whichever way the gate is worded. **Do not
+> adjudicate against the thresholds as currently written** until that review lands; a dry run over
+> the 8 already-adjudicated C1 frames scores **B1 = 0.625** and fails both clauses, and all three
+> `covered` failures are metallic clips — the one class the untrained eye is measured at **r = −0.17**
+> on (`CAMPAIGN_LOG` §10). The gate as written can die from the instrument rather than from SAM.
 
 ## What it is
 
@@ -34,7 +39,9 @@ Full design, arms, metrics, gate and pre-registered `NO VERDICT`: **[`PLAN.md`](
 ## Inputs it will reuse
 
 * `experiments/31-attention-probe/_tools/attention_probe.py` — unchanged, one variable: the checkpoint
-* `experiments/29-sam2-temporal/_tools/export_masks.py` — the mask export
+* `experiments/29-sam2-temporal/_tools/export_masks.py` — the machinery `_tools/export_masks_36.py`
+  reuses unchanged (`_corpus`, `_read`, `seed_instances`, `propagate_pair`, `grid=16`, `seed=42`),
+  so only the *sample* differs from the run that produced `RESULTS_controls.json`
 * `docs/viewers/sam2_masks_viewer.html` — the adjudication surface, with per-frame verdicts and
   Markdown export built in
 * `local/fuentes/analisis-mascaras-sam2.md` — the eye pass that killed C1 and supplied this rung's
