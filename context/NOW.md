@@ -2,15 +2,49 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-08-08**.
+> Last updated: **2026-08-11**.
+
+## 🔴 2026-08-11 — the 36 collided, step 7's export RAN, and its gate fails a dry run
+
+1. 🔴 **TWO rungs 36 reached `main`.** Ours (`36-attention-vs-masks`, pushed 2026-08-09, with
+   `NOW.md:11` reading *"do not reassign the number; take 37"*) and Rodrigo's
+   `36-clip-sponge-probes`, pushed 2026-08-10 without seeing that line. **Ours was first; legokna
+   yielded the number** — his carries committed results, ours carried only a design.
+   ⇒ **`experiments/37-attention-vs-masks/`.** The announce step never ran; that is the whole cause.
+2. 🟢 **Step 7's export RAN** — `runs/37_masks_v1/`, 45 frames: the N=40 `G-BOUNDARY` sample,
+   **5 per class across all eight** foreign-object classes (Clip, Sponge, External drain,
+   Specimen, Specimen bag, Silicone loop, Needle, Gallstone — the whole vocabulary, not the Clip
+   third C1 used), plus the **5 C2 pairs below the 0.90 floor**. Manifest committed **outside
+   `runs/`** as `SAMPLE_37_masks_v1.json`. Nothing adjudicated, no attention read.
+   🔑 The five pairs reproduce their persistences **exactly** (0.611, 0.571, 0.615, 0.769, 0.367),
+   which re-derives `RESULTS_controls.json` a third time.
+3. 🔴 **`G-BOUNDARY` fails a dry run on data we already had, and fails for the wrong reason.**
+   Scoring the 8 C1 frames already adjudicated in `local/fuentes/analisis-mascaras-sam2.md`:
+   **B1 = 0.625** (fails the ≥0.70 point estimate; CI [0.250, 0.875] fails the >0.50 clause) and
+   **B2 = 0.800** (CI [0.400, 1.000] fails it). **All three `covered` failures are metallic clips**
+   — the class a non-clinical eye is measured at **r = −0.17** on (§10), and the adjudicator's own
+   note on one reads *"no sé si es mi sesgo"*. Restricted to what that eye resolves (white clips,
+   gauze, instruments) `covered` is **5/5**.
+   ⚠️ That sample is clip-heavy by construction and does **not** predict the stratified N=40.
+   🔑 **What it does show: the gate's verdict tracks the metallic-clip share of its sample — a
+   sampling choice, not SAM's quality.** The gate is NOT amended; the export presumes no outcome.
+4. 🟢 **SurgΣ-DB: the repo's "the images are NOT in the package" is FALSE.** Verified against the
+   HF API and by streaming `dense_prediction.tar.gz` (3.09 GB, 165,582 files): `desmoke/` holds
+   **55,194 real RGB surgical frames** (854×480, smoke-degraded), pixel-aligned by filename with
+   **55,194 binary instrument masks** in `seg/`, all CholecT50, 46 videos. `raw_data/` in the
+   README is a layout **you must assemble**, not a manifest — it has 0 files in the repo.
+   ⇒ **A 55k-pair objective benchmark for SAM exists without CAMMA**, replacing an eye-adjudicated
+   gate with IoU against real ground truth. ⚠️ Instruments only, binary, and not our frames.
+5. ⚠️ **`/workspace/repo_rodri/.git/config` carries a plaintext GitHub PAT** on a pod shared by
+   four checkouts. Rotate it and move the remote to SSH.
 
 ## 🟡 2026-08-09 — step 7 is pre-registered as rung 36, and C1 dies to an eye
 
 **Zero GPU, zero pod.** Everything below ran locally or over the S3 gateway.
 
-1. 🔒 **Rung 36 is CLAIMED — `experiments/36-attention-vs-masks/`. PRE-REGISTERED, NOT BUILT.**
-   Do not reassign the number; take 37. Do not build it — there is no engine and that is
-   deliberate. ⏸️ `G-BOUNDARY`'s formulation is under review by legokna, next session.
+1. 🔒 **Claimed as rung 36 — 🔻 RENUMBERED TO 37 on 2026-08-11, see below.
+   `experiments/37-attention-vs-masks/`.** ⏸️ `G-BOUNDARY`'s formulation is under review by
+   legokna. *(Written 2026-08-09 as "PRE-REGISTERED, NOT BUILT"; the export ran 2026-08-11.)*
 2. 🔴 **C1 is dead as a clip-count control, and not because it failed.** It passed (separation
    6.475 vs 0.5; the recovered raw data gives bootstrap **CI [+1.05, +11.83]**, Cohen **d 0.52**,
    P(superiority) **0.627** — a medium effect with near-total range overlap, against a threshold

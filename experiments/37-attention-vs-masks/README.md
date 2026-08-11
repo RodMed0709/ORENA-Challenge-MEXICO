@@ -1,14 +1,14 @@
-# Rung 36 — step 7: attention vs SAM masks
+# Rung 37 — step 7: attention vs SAM masks
 
 > 🟢 **STATUS 2026-08-11: the export has RUN. Nothing is adjudicated and no attention is read yet.**
 >
-> 🔒 **The number 36 is TAKEN — do not reassign it.** The `24` collision cost a directory rename
-> and a week of prose that still says the wrong rung. If you need a slot, take 37.
+> 🔒 **The number 37 is TAKEN — do not reassign it.** Renumbered from 36 on 2026-08-11 after a
+> collision with `experiments/36-clip-sponge-probes/` (see `PLAN.md`). If you need a slot, take 38.
 >
-> **What exists now:** `_tools/export_masks_36.py` and `runs/36_masks_v1/` (on the pod, gitignored) —
+> **What exists now:** `_tools/export_masks_37.py` and `runs/37_masks_v1/` (on the pod, gitignored) —
 > **45 frames**: the N=40 `G-BOUNDARY` sample, **5 per class across all eight** foreign-object
 > classes, plus the **5 C2 pairs below the 0.90 floor**. The sample manifest is committed **outside
-> `runs/`** as [`SAMPLE_36_masks_v1.json`](SAMPLE_36_masks_v1.json), because a number that moves a
+> `runs/`** as [`SAMPLE_37_masks_v1.json`](SAMPLE_37_masks_v1.json), because a number that moves a
 > decision and lives only in a gitignored dir is the `RESULTS_controls.json` failure, twice over.
 >
 > ⏸️ **`G-BOUNDARY`'s formulation is still under review by legokna** and the export does not
@@ -34,12 +34,12 @@ Full design, arms, metrics, gate and pre-registered `NO VERDICT`: **[`PLAN.md`](
 | **C1 as a clip-count control** | DEAD — it passed its threshold and did not license its interpretation. A human eye pass found SAM masks none of the visible clips in the `gold == 1` frames. |
 | **C2** | Passes as pre-registered; margin thin (CI [0.8557, 0.9670] spans the 0.90 floor). |
 | **rung 31** (`31-attention-probe/`) | The instrument, already validated on a different target: letterbox attention `base` 1.75× chance → `a2` at chance. |
-| **rung 36** | ← this one. |
+| **rung 37** | ← this one (pre-registered as rung 36). |
 
 ## Inputs it will reuse
 
 * `experiments/31-attention-probe/_tools/attention_probe.py` — unchanged, one variable: the checkpoint
-* `experiments/29-sam2-temporal/_tools/export_masks.py` — the machinery `_tools/export_masks_36.py`
+* `experiments/29-sam2-temporal/_tools/export_masks.py` — the machinery `_tools/export_masks_37.py`
   reuses unchanged (`_corpus`, `_read`, `seed_instances`, `propagate_pair`, `grid=16`, `seed=42`),
   so only the *sample* differs from the run that produced `RESULTS_controls.json`
 * `docs/viewers/sam2_masks_viewer.html` — the adjudication surface, with per-frame verdicts and

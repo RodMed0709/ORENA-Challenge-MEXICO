@@ -1,4 +1,4 @@
-"""Rung 36 — export the frames G-BOUNDARY adjudicates, plus the five C2 pairs that failed.
+"""Rung 37 — export the frames G-BOUNDARY adjudicates, plus the five C2 pairs that failed.
 
 Folder-private glue. Importable; a notebook cell calls ``export(Config(...))``.
 
@@ -60,7 +60,7 @@ class Config:
     sam2: Path = Path("/workspace/models/sam2/sam2.1-hiera-large")
     #: the run OWNS its artifacts (CLAUDE.md, storage layout, BINDING) — this is the primary
     #: artifact of step 1, not a scratch export like rung 29's viewer slice
-    dest: Path = Path("/workspace/repo_leo/experiments/36-attention-vs-masks/runs/36_masks_v1")
+    dest: Path = Path("/workspace/repo_leo/experiments/37-attention-vs-masks/runs/37_masks_v1")
     #: 5 x 8 classes = the N=40 of PLAN.md §G-BOUNDARY
     per_class: int = 5
     #: replayed to recover the five failures; must stay at the value rung 29 ran
