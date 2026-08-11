@@ -1,9 +1,14 @@
-# Rung 36 — step 7: do the model's eyes land where the foreign objects are?
+# Rung 37 — step 7: do the model's eyes land where the foreign objects are?
 
 > 🔴 **PRE-REGISTRATION. Nothing here has run.** Written 2026-08-09, before any export and before
 > any GPU is spent, so the thresholds cannot be chosen after seeing a number (`RULES` S3, S7).
 >
-> 📛 **Rung 36 is TAKEN and now announced in `main`** — 35 is Rodrigo's. `runs/36_masks_v1/` exists.
+> 📛 **RENUMBERED 36 → 37 on 2026-08-11.** This was pre-registered as rung 36 on 2026-08-09 and
+> `NOW.md:11` said so — *"do not reassign the number; take 37"*. On 2026-08-10 Rodrigo pushed
+> `experiments/36-clip-sponge-probes/` as a second rung 36 without seeing that line. **Ours was
+> first; legokna chose to yield the number** because Rodrigo's already carries committed results
+> and ours carried only a design. The collision is exactly the one `24` caused, and it happened
+> because the announce step never ran. `runs/37_masks_v1/` exists.
 >
 > ⏸️ **`G-BOUNDARY` is under review by legokna**, and the 2026-08-11 export deliberately does not
 > presume its outcome: the same 45 frames serve any wording of the gate. **The thresholds below are

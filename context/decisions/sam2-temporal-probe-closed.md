@@ -136,7 +136,7 @@ That is the same instrument at lower resolution, and it returned a real result �
 strongest argument that the masked version is worth building.
 
 🔴 **Step 7 is OPEN.** This note reopens it; it does not design it.
-📌 **Pre-registered 2026-08-09 as rung 36** — `experiments/36-attention-vs-masks/PLAN.md`, still
+📌 **Pre-registered 2026-08-09 as rung 36** — `experiments/37-attention-vs-masks/PLAN.md`, still
 unrun. It is deliberately **not** "C1/C2 v2": C1-as-clip-count is dead (a human eye pass found SAM
 masks none of the visible clips in the `gold == 1` frames, so its 6.475 separation is scene
 complexity), and the primary cell moved from `aggregation` to `object_recognition`, which is half
