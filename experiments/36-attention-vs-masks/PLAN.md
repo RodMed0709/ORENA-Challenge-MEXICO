@@ -3,11 +3,24 @@
 > 🔴 **PRE-REGISTRATION. Nothing here has run.** Written 2026-08-09, before any export and before
 > any GPU is spent, so the thresholds cannot be chosen after seeing a number (`RULES` S3, S7).
 >
-> 📛 **Rung number 36 is claimed but not yet announced** — 35 is Rodrigo's, running. Announce
-> before creating any run directory; the `24` collision cost a rename.
+> 📛 **Rung 36 is TAKEN and now announced in `main`** — 35 is Rodrigo's. `runs/36_masks_v1/` exists.
 >
-> ⏸️ **`G-BOUNDARY` is under review by legokna**, scheduled for the next session. The rest of the
-> design stands as written. Do not build against the gate until that review lands.
+> ⏸️ **`G-BOUNDARY` is under review by legokna**, and the 2026-08-11 export deliberately does not
+> presume its outcome: the same 45 frames serve any wording of the gate. **The thresholds below are
+> as pre-registered and have NOT been amended.** What is now known against them:
+>
+> 🔴 **Dry run, 2026-08-11 — the gate can die from the instrument, not from SAM.** Scoring the 8
+> C1 frames already adjudicated in `local/fuentes/analisis-mascaras-sam2.md` gives **B1 = 0.625**
+> (fails the ≥0.70 point estimate; bootstrap CI [0.250, 0.875] fails the >0.50 clause) and
+> **B2 = 0.800** (passes the point estimate, CI [0.400, 1.000] fails the clause). All **three**
+> `covered` failures are **metallic clips**, and the adjudicator's own note on one of them reads
+> *"no sé si es mi sesgo"*. Restricted to the classes an untrained eye resolves — white clips,
+> gauze, instruments — `covered` is **5/5**.
+> ⚠️ That sample is clip-heavy by construction (it came from C1, a clip-counting control), so it
+> does **not** predict the stratified N=40. It does show the failure mode. 🔴 **And it exposes a
+> deeper problem: the verdict is decided by the metallic-clip share of the sample, i.e. by a
+> sampling choice, not by SAM's quality.** A gate whose outcome tracks its own sampling design is
+> not measuring what it claims to.
 
 ## What this replaces
 
