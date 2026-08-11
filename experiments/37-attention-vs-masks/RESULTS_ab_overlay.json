@@ -1,0 +1,19 @@
+{
+  "n": 40,
+  "identical_rate": 0.4,
+  "reference_rung12c_composite_vs_control": 0.838,
+  "reference_two_different_models": 0.795,
+  "alpha": 0.45,
+  "model_path": "/workspace/repo/experiments/21-recipe-sweep/runs/21_lr_2e4_v1/merged/checkpoint-2703",
+  "by_class": {
+    "clip": 0.6,
+    "external_drain": 0.6,
+    "gallstone": 0.0,
+    "needle": 0.0,
+    "silicone_loop": 0.6,
+    "specimen": 0.4,
+    "specimen_bag": 0.2,
+    "sponge": 0.8
+  },
+  "note": "agreement only -- NOT a score. Canonical correctness runs through the SDK judge; n=40 cannot resolve an effect. See the module docstring."
+}
