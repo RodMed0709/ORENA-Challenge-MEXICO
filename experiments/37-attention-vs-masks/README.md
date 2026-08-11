@@ -15,8 +15,13 @@
 > presume its outcome — it is the same 45 frames whichever way the gate is worded. **Do not
 > adjudicate against the thresholds as currently written** until that review lands; a dry run over
 > the 8 already-adjudicated C1 frames scores **B1 = 0.625** and fails both clauses, and all three
-> `covered` failures are metallic clips — the one class the untrained eye is measured at **r = −0.17**
-> on (`CAMPAIGN_LOG` §10). The gate as written can die from the instrument rather than from SAM.
+> `covered` failures are metallic clips, and on two of them the adjudicator's own note hedges on
+> whether the object is visible at all (*"no sé si es mi sesgo"*, *"si es que los hay"*).
+> 🔻 **CORRECTED 2026-08-11:** the first writing of this cited **r = −0.17** for the untrained eye.
+> That number is **RETIRED** ([[gold-is-signal-model-underuses-it]]) — it was range-restricted to
+> gold 3–6, and a blind full-range pass (n=106, 109 frames, 30 videos) scores **r = +0.7230** with
+> only **2.8 % "cannot tell"**. The eye reads these frames *well*. What survives is narrower and
+> first-hand: **metallic clips specifically**, on these frames, by this adjudicator.
 
 ## What it is
 

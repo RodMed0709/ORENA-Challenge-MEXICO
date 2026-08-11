@@ -21,10 +21,18 @@
 3. 🔴 **`G-BOUNDARY` fails a dry run on data we already had, and fails for the wrong reason.**
    Scoring the 8 C1 frames already adjudicated in `local/fuentes/analisis-mascaras-sam2.md`:
    **B1 = 0.625** (fails the ≥0.70 point estimate; CI [0.250, 0.875] fails the >0.50 clause) and
-   **B2 = 0.800** (CI [0.400, 1.000] fails it). **All three `covered` failures are metallic clips**
-   — the class a non-clinical eye is measured at **r = −0.17** on (§10), and the adjudicator's own
-   note on one reads *"no sé si es mi sesgo"*. Restricted to what that eye resolves (white clips,
-   gauze, instruments) `covered` is **5/5**.
+   **B2 = 0.800** (CI [0.400, 1.000] fails it). **All three `covered` failures are metallic clips**,
+   and the adjudicator's own note on two of them hedges on whether the object is visible at all
+   (*"no sé si es mi sesgo"*, *"si es que los hay"*). Restricted to what that eye resolves (white
+   clips, gauze, instruments) `covered` is **5/5**.
+   🔻 **CORRECTED same day, before this was acted on:** the argument was first written citing
+   **r = −0.17** for the untrained eye, i.e. *"the gate dies from the instrument"*. **That number is
+   RETIRED** ([[gold-is-signal-model-underuses-it]]) — range-restricted to gold 3–6, superseded by a
+   blind full-range pass scoring **r = +0.7230** with only **2.8 % "cannot tell"**. **The eye reads
+   these frames well**, so the expected `unadjudicable` rate is LOW and the gate is in better shape
+   than that first reading claimed. The surviving concern is narrow, first-hand and about
+   **metallic clips only**. 📌 Textbook [[inference-still-load-bearing]]: a retired number was
+   re-cited from `CAMPAIGN_LOG` §10 without checking whether it still stood.
    ⚠️ That sample is clip-heavy by construction and does **not** predict the stratified N=40.
    🔑 **What it does show: the gate's verdict tracks the metallic-clip share of its sample — a
    sampling choice, not SAM's quality.** The gate is NOT amended; the export presumes no outcome.
