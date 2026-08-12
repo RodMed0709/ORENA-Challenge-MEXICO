@@ -2,7 +2,45 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-08-11**.
+> Last updated: **2026-08-12**.
+
+## 🔴 2026-08-12 — G-BOUNDARY was adjudicated and FAILED. Rung 37 is dead, the SAM block is closed, and our lane is empty
+
+1. 🔴 **The gate FAILS. Step 7 dies with only the export spent, exactly as pre-registered.**
+   **B1 = 0.9714** (CI [0.914, 1.000]) **passes**; **B2 = 0.3529** (CI [0.206, **0.529**]) **fails
+   with its whole interval under the 0.70 threshold**. Robust to how `unadjudicable` (5/40 = 12.5 %)
+   is handled — a mark added to the viewer after pre-registration, so its treatment was never
+   fixed; both readings are recorded and neither is load-bearing.
+   ⇒ **SAM finds the foreign objects and does not delimit them.** Numbers + the raw per-frame marks:
+   `experiments/37-attention-vs-masks/RESULTS_gboundary.json` (committed **outside `runs/`**, which
+   is gitignored). Verdict: [[g-boundary-fails-on-precision-not-coverage]].
+2. 🔑 **It failed where nobody was looking, and that is the lesson.** **Metallic clips scored
+   `covered` 4/4.** The objection that consumed 2026-08-11 — first as the retired `r = −0.17`, then
+   as the correction that replaced it — **decided nothing in either form**. 📌 A retired number and
+   its replacement can *both* be beside the point. What died instead is this rung's own enabling
+   fact, *"SAM does not merge tissue with foreign objects"*; B2 = 0.3529 refutes it directly.
+   Worst class `silicone_loop` (clean 0/5), best `specimen_bag` (3/4).
+3. 🔑 **The gate never measured PRECISION** — legokna, on reading the adjudicated frames. B1 asks
+   whether a mask exists over the object, B2 whether it is sharp; **neither asks how many OTHER
+   masks are present**, and SAM emits **13–50 instances per frame** over the whole scene. ⇒ a VLM
+   handed these masks gets **references without identity**, which is exactly the overlay's measured
+   failure (identity substitution, not blindness). ⚠️ A limitation of the **pre-registration**, not
+   of the adjudication: **any future masks-as-input gate needs a precision clause.**
+4. ⏸️ **The SAM block is CLOSED, on TIME rather than on merit.** legokna re-derived the whole route
+   independently and reached the standing verdict: *"not blocked because SAM has no bearing on the
+   model — blocked because doing it properly needs more time than the challenge leaves. It is a
+   full CoVT for this problem, worth doing after Sep 8."* Amended into
+   [[sam-adaptation-has-no-route-to-points]], including the correction that **leaving ms-swift is
+   not required and probably neither is LoRA** (rung 35 shipped a custom-loss adapter with both) —
+   the real blockers are latency and gradient share, not the harness. **Do not re-open before
+   Sep 8.**
+5. 🔴 **CONSEQUENCE NOBODY HAS ACTED ON: our lane is now empty.** Week 2 (8–14 Aug) held step 7 —
+   dead. Week 3 (15–21 Aug) is Rodrigo's GPU for step 9 (GRPO + the paired control), and our
+   parallel slot reads *"VCD evals"*, but VCD died in step 4 and step 8 was cancelled 06-Aug.
+   🔑 And `experiments/27-vit-lr-decouple/` has `PLAN.md`, `_models/` and `_tools/` **and no
+   `RESULTS.csv` — pre-registered and never run**, on the ViT, the one perceptual lever with
+   measured traction (rung 06 held the campaign's best 17 days; `fo_class` +17.8 pts recall on
+   `needle`). **Unevaluated against what we know today.** Not scheduled, not decided.
 
 ## 🔴 2026-08-11 — the 36 collided, step 7's export RAN, and its gate fails a dry run
 

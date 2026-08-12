@@ -1,7 +1,7 @@
 ---
 question: Should we domain-adapt SAM on surgical data (SurgΣ-DB, CholecInstanceSeg) so it segments our footage properly, and then use it?
 verdict: DEFERRED — not on cost, not on licence, and not on SAM's quality. The blocker is the LAST link: there is no known way to turn "better masks" into "better score" before Sep 8. The only mechanism that attaches segmentation knowledge to the VLM without shipping an expert is CoVT, which is already NO-GO; and the cheap alternative — feeding the model the segmented image — was measured on 2026-08-11 and moves the model AWAY from the gold
-status: SETTLED (deferred, revisit after Sep 8)
+status: SETTLED (deferred, revisit after Sep 8) — RE-AFFIRMED 2026-08-12, and the reason is sharpened to TIME
 date: 2026-08-11
 measured_in: experiments/37-attention-vs-masks/RESULTS_ab_overlay.json (n=40) · HF API listing of SurgSigma/SurgSigma-DB · local/fuentes/barrido-datasets-licencias.md
 ---
@@ -68,6 +68,48 @@ smoke-degraded) that are **pixel-aligned by filename** with **55,194 binary inst
 training.** That is the honest replacement for an eye-adjudicated `G-BOUNDARY`: IoU against real
 ground truth instead of one non-blind adjudicator. ⚠️ Instruments only, binary, smoke-degraded,
 and not our frames — it bounds the instrument, it does not certify it on `heico`/`lapchole`.
+
+## 🔻 Amendment 2026-08-12 — re-affirmed, and it closes on TIME, not on merit
+
+legokna re-derived this route from scratch and arrived at the same verdict, independently of the
+note. **Recorded because the framing is better than the one above, and because it is the call of
+the person whose call it is:**
+
+> SAM is not blocked because it has no bearing on the model. It is blocked because implementing it
+> *properly* needs more time than the challenge leaves. **It is a full-blown CoVT for this problem
+> — worth doing after Sep 8, without the pressure. For now it stops here.**
+
+**The two scenarios, enumerated and costed:**
+
+1. **Embedded in training (CoVT-shaped).** ⚠️ **One leg of legokna's own cost estimate is too
+   high and is corrected here:** leaving ms-swift is *not* required, and LoRA probably need not go
+   either — rung 35 already shipped a custom-loss adapter inside ms-swift, with LoRA. The real
+   blockers are measured and are not about the harness: **+136 %** inference time against a hard
+   5.0 s cap plus CoVT's own latent-filler tie ([[covt-reduced-sam-route]]), and
+   `plan-accion.md:177` — 8 segmentation tokens drop `number`'s share of the gradient from
+   **20.8 % → 8.2 %**. 📌 Getting the reason right matters: a wrong reason can be refuted and put
+   the route back on the table.
+2. **As a visual RL signal.** Depends on SAM masking *the objects we want seen*, not zones and
+   tissue — i.e. it depends on the precision that [[g-boundary-fails-on-precision-not-coverage]]
+   shows was never measured and that the same gate shows SAM does not have. Closing that needs
+   retraining SAM, and the man-hours land on **pseudo-auto-labelling + human rectification**, which
+   is already NO-GO on measured grounds: `plan-accion.md:179` — 585-frame universe, the human sees
+   **2.4** where the gold says **7.7**, validation set **88.9 % tautological**.
+
+**The by-exclusion idea, and why the obvious corpus cannot carry it.** legokna proposed teaching
+SAM the *environment* (instruments + anatomy) so foreign objects fall out as the **residual** — a
+novelty-detection framing that answers the identity problem without needing a single foreign-object
+label, and that fits our measured failure (over-enumeration, `Clip` a constant magnet, 212 of 327
+FPs; and FOCUS *defines* graspers/scissors/trocars/staplers/cameras as **not** foreign objects, so
+the environment is literally the task's negative class).
+🔴 **SurgΣ-DB cannot support it.** Its `seg/` masks are binary **instrument vs. everything else**
+(0/255, 7.97 % foreground) — tissue is not a class, it is background, **and foreign objects fall
+into that same background class as the liver.** Training on it teaches SAM that a clip and the
+abdominal wall belong together, the exact inverse of what exclusion needs. Positive anatomy classes
+would have to come from **CholecSeg8k** (semantic, 8,080 frames, `CC BY-NC-SA`, same Cholec origin).
+⚠️ And the residual is not "foreign objects" — it is *everything the model does not know*: blood,
+smoke, specular highlights, out-of-distribution anatomy. The precision problem moves, it does not
+vanish.
 
 ## The shape of the argument, because it generalises
 
