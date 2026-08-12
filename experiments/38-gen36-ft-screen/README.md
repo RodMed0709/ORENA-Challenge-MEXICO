@@ -50,14 +50,35 @@ frames, **zero challenge data**:
 
 ⇒ [[unsloth-is-the-route-to-gen35]] and [[the-merger-is-unreachable-by-default]].
 
+## ✅ The eval path is CLEARED — and it cost two bugs to find out
+
+`RESULTS_eval_path.json`, replicating `screen_engine.py:48-115` line for line against the smoke's
+Unsloth merge:
+
+```
+AutoProcessor            → Qwen3VLProcessor                        ✅
+AutoModelForImageTextToText(dtype="auto")
+                         → Qwen3_5ForConditionalGeneration, 2.21B, bf16   ✅
+apply_chat_template(enable_thinking=False) + generate
+                         → prompt_tokens=443, answer '0', no CoT   ✅
+VERDICT: PASS
+```
+
+Two defects found, both of which would have surfaced mid-pod-session:
+
+1. 🔴 **`screen_engine.py:69` was broken for `transformers` 5.x** — it passed the system message as
+   a bare string, and 5.x's `apply_chat_template` indexes every message's `content` for
+   `content["type"]`, so a string raises `TypeError: string indices must be integers`. **Fixed** in
+   place with typed parts, which both template generations accept, so rung 23's scored numbers are
+   unaffected.
+2. 🟡 **Unsloth's merge writes `processor_config.json`, not `preprocessor_config.json`.**
+   `AutoProcessor` coped here; the shipping container may not. Check at packaging time.
+
+📌 **443 prompt tokens** for one image at `max_pixels` 1280×720 — the figure to budget latency with.
+
 ## What is NOT done, in the order that can kill the rung
 
-1. 🔴 **The eval path.** `frame.run.run_baseline` builds `QwenFrameEngine`, which hard-imports
-   `Qwen3VLForConditionalGeneration`. Rung 23 already wrote `_tools/screen_engine.py` for
-   `Qwen3_5ForConditionalGeneration` and wires it via `cfg.engine_factory` — **but it has never
-   been pointed at an Unsloth-merged checkpoint.** Without this there is no verdict however well
-   training goes.
-2. 🔴 **The FP8 delivery path.** A 27B only fits the eval GPU quantised, and we have never
+1. 🔴 **The FP8 delivery path.** A 27B only fits the eval GPU quantised, and we have never
    quantised a merged checkpoint. New work on the shipping route, three weeks from the deadline.
    UNAM is sm_89 like the L40S, so it can be tested there — the old dev card (sm_120) could not
    even build the kernels.

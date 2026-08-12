@@ -65,8 +65,16 @@ class GenericVLMEngine:
         logger.info("Model ready: %s, %.1fB params", type(self.model).__name__, n / 1e9)
 
     def _messages(self, image: Image.Image, question: str) -> list[dict]:
+        # ⚠️ The system message MUST carry typed parts, not a bare string. Under
+        # `transformers` 5.x `apply_chat_template` iterates every message's `content`
+        # looking for `content["type"]`, so a plain string is indexed character by
+        # character and raises `TypeError: string indices must be integers`. Measured
+        # 2026-08-12 against transformers 5.5.0 while verifying this engine can read an
+        # Unsloth-merged checkpoint (experiments/38-gen36-ft-screen/RESULTS_eval_path.json).
+        # The typed form is accepted by both the old and the new template code, so this
+        # does not change what rung 23 already scored.
         return [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT}]},
             {
                 "role": "user",
                 "content": [
