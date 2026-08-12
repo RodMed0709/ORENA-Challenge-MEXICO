@@ -1,0 +1,19 @@
+{
+  "src": "smoke_out/merged",
+  "dst": "smoke_out/merged_fp8",
+  "steps": {
+    "capability_ok": true,
+    "quant_api": {
+      "FineGrainedFP8Config": true,
+      "FbgemmFp8Config": true,
+      "QuantoConfig": true,
+      "TorchAoConfig": true
+    }
+  },
+  "capability": [
+    8,
+    9
+  ],
+  "error": "Traceback (most recent call last):\n  File \"/data/uaq_user/smoke/fp8_probe.py\", line 55, in <module>\n    qmodel = AutoModelForImageTextToText.from_pretrained(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/uaq_user/storage/envs/orena-unsloth/lib/python3.11/site-packages/transformers/models/auto/auto_factory.py\", line 387, in from_pretrained\n    return model_class.from_pretrained(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/uaq_user/storage/envs/orena-unsloth/lib/python3.11/site-packages/transformers/modeling_utils.py\", line 4133, in from_pretrained\n    loading_info = cls._finalize_model_loading(model, load_config, loading_info)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/uaq_user/storage/envs/orena-unsloth/lib/python3.11/site-packages/transformers/modeling_utils.py\", line 4295, in _finalize_model_loading\n    log_state_dict_report(\n  File \"/home/uaq_user/storage/envs/orena-unsloth/lib/python3.11/site-packages/transformers/utils/loading_report.py\", line 273, in log_state_dict_report\n    raise RuntimeError(\nRuntimeError: We encountered some issues during automatic conversion of the weights. For details look at the `CONVERSION` entries of the above report!\n",
+  "verdict": "FAIL:excepcion"
+}

@@ -104,3 +104,59 @@ Two defects found, both of which would have surfaced mid-pod-session:
 - The smallest gen-3.6 is 27B ⇒ generation and size move together. **Qwen3.5-9B would be nearly
   size-matched to our 8B and serves in bf16 with no FP8 step**, and the one competitor known to
   beat us runs a gen-3.5 **4B**. Recorded as the cheaper alternative arm; not chosen.
+
+## 🟡 FP8: the route is SCOPED, not validated
+
+`RESULTS_fp8_probe.json` — `FAIL:excepcion` on Ada (capability 8.9), and the reason is
+architectural, not ours:
+
+```
+ValueError: Matrix dimensions (16, 2048) must be divisible by block sizes (128, 128)
+for model.language_model.layers.22.linear_attn.in_proj_a.weight
+```
+
+`linear_attn` is Qwen3.5's Gated DeltaNet (the 3:1 hybrid attention stack). Its `in_proj_a/b`
+are **16×2048**, and `FineGrainedFP8Config` quantises in 128×128 blocks. The same merged
+checkpoint loads and generates fine in bf16, so **the merge is sound — the scheme was wrong.**
+
+**Qwen's own `Qwen3.6-27B-FP8` config settles it:**
+
+```json
+{"quant_method": "fp8", "fmt": "e4m3", "activation_scheme": "dynamic",
+ "modules_to_not_convert": [ …871 modules… ]}
+```
+
+| excluded category | count |
+|---|---|
+| **`linear_attn` (DeltaNet)** | **336** — including the exact `in_proj_a/b` that failed |
+| `visual` (tower **and merger**) | 246 — **the vision path is not quantised at all** |
+| other (`embed_tokens`, layernorms) | 289 |
+
+⇒ two known routes, both already named in `CONSTITUTION.md`: `vllm serve --quantization fp8`
+(weight-only, at load) or reproducing that exclusion list with compressed-tensors. **Neither has
+been run end-to-end**, so this stays the rung's open delivery risk.
+
+📌 **And it is a risk the 27B creates on its own.** A `Qwen3.5-9B` is ~18 GB in bf16 and needs no
+FP8 step at all.
+
+## The real arm
+
+`_models/unsloth_sft.py` — runs **on the pod**, where the challenge data legitimately lives. Every
+piece of its pipeline was validated on UNAM with zero challenge data.
+
+Recipe **transferred, not re-derived**: `lr 2e-4`, rank 8 / alpha 32, cosine, `warmup 0.03`,
+effective batch 16 (1×16), seed 42, 1 epoch, `finetune_vision_layers=True`.
+
+Guards, because a 10-hour run should not fail on something checkable in a second:
+
+- `assert_dataset_is_the_controls` — sha256 of rung 18's `train.jsonl`; a different dataset would
+  make the arm two variables.
+- `assert_gpu_is_free` — no scheduler anywhere, so never launch onto someone else's job.
+- `HEARTBEAT.json` + `save_strategy="epoch"` — recoverable, and legible without opening a
+  10-hour `train.log`.
+- The LoRA module census is **recorded every run**, never assumed.
+- `max_pixels` is set explicitly — **Unsloth defaults to 512** and our recipe is 1280×720, so the
+  visual token count would silently change.
+
+Known and accepted: **it does not reach the merger** ([[the-merger-is-unreachable-by-default]]) —
+a limitation shared with ms-swift, not a regression.
