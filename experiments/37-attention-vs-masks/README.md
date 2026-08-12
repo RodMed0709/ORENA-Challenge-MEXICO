@@ -1,5 +1,18 @@
 # Rung 37 — step 7: attention vs SAM masks
 
+> 🔴 **STATUS 2026-08-12: DEAD. `G-BOUNDARY` was adjudicated and FAILED — no attention was ever
+> read, exactly as the pre-registration said would happen.** **B1 = 0.9714** passes,
+> **B2 = 0.3529** fails with its whole CI [0.206, 0.529] below the 0.70 threshold. Numbers and the
+> raw per-frame marks: [`RESULTS_gboundary.json`](RESULTS_gboundary.json). Verdict:
+> [[g-boundary-fails-on-precision-not-coverage]].
+> 🔑 **SAM finds the objects and does not delimit them** — the refutation of this rung's own
+> enabling fact, listed below in the ladder. **Metallic clips scored `covered` 4/4**, so the
+> objection this README spent three paragraphs on decided nothing. 🔑 **And the gate never measured
+> PRECISION**: SAM emits 13–50 instances per frame, so the model gets references without identity.
+> ⇒ **Do not propose a masks-as-input gate without a precision clause.**
+>
+> <details><summary>Status before adjudication (2026-08-11), kept as history</summary>
+>
 > 🟢 **STATUS 2026-08-11: the export has RUN. Nothing is adjudicated and no attention is read yet.**
 >
 > 🔒 **The number 37 is TAKEN — do not reassign it.** Renumbered from 36 on 2026-08-11 after a
@@ -22,6 +35,8 @@
 > gold 3–6, and a blind full-range pass (n=106, 109 frames, 30 videos) scores **r = +0.7230** with
 > only **2.8 % "cannot tell"**. The eye reads these frames *well*. What survives is narrower and
 > first-hand: **metallic clips specifically**, on these frames, by this adjudicator.
+>
+> </details>
 
 ## What it is
 
@@ -50,4 +65,5 @@ Full design, arms, metrics, gate and pre-registered `NO VERDICT`: **[`PLAN.md`](
 * `docs/viewers/sam2_masks_viewer.html` — the adjudication surface, with per-frame verdicts and
   Markdown export built in
 * `local/fuentes/analisis-mascaras-sam2.md` — the eye pass that killed C1 and supplied this rung's
-  enabling fact (masks do not merge tissue with foreign objects)
+  enabling fact (masks do not merge tissue with foreign objects) — 🔴 **that enabling fact is
+  REFUTED**: it rested on 8 frames, and `B2 = 0.3529` over 34 adjudicated ones says the opposite

@@ -1,0 +1,439 @@
+{
+  "gate": "G-BOUNDARY",
+  "rung": "37-attention-vs-masks",
+  "step": 7,
+  "adjudicated": "2026-08-12",
+  "adjudicator": "legokna (single, not blind to the hypothesis -- PLAN.md limitation, recorded not fixed)",
+  "source_export": "runs/37_masks_v1/ (45 frames), viewer runs/gboundary_viewer.html",
+  "sample": "SAMPLE_37_masks_v1.json -- N=40 stratified 5x8 classes, random_state=42, plus 5 C2 pairs below the 0.90 floor",
+  "thresholds_preregistered": {
+    "source": "PLAN.md:88, written 2026-08-09 before any export; NOT amended",
+    "rule": "point estimate >= 0.70 AND bootstrap CI lower bound > 0.50, for BOTH B1 and B2",
+    "bootstrap": "20000 resamples, percentile CI, seed 42"
+  },
+  "verdict": "FAIL",
+  "verdict_driver": "B2 (clean | covered). B1 passes decisively under either handling of `unadjudicable`.",
+  "B1_covered": {
+    "unadjudicable_excluded": {
+      "k": 34,
+      "n": 35,
+      "point": 0.9714,
+      "ci95": [
+        0.9143,
+        1.0
+      ],
+      "passes": true
+    },
+    "unadjudicable_as_not_covered": {
+      "k": 34,
+      "n": 40,
+      "point": 0.85,
+      "ci95": [
+        0.725,
+        0.95
+      ],
+      "passes": true
+    },
+    "note": "`unadjudicable` was added to the viewer after pre-registration and its handling was NOT pre-registered. Both readings are reported; the gate verdict is identical under each, so the choice is not load-bearing."
+  },
+  "B2_clean_given_covered": {
+    "k": 12,
+    "n": 34,
+    "point": 0.3529,
+    "ci95": [
+      0.2059,
+      0.5294
+    ],
+    "passes": false
+  },
+  "unadjudicable_rate": {
+    "value": 0.125,
+    "k_n": "5/40",
+    "tags": [
+      "gb_clip_2",
+      "gb_sponge_3",
+      "gb_needle_2",
+      "gb_gallstone_2",
+      "gb_gallstone_4"
+    ],
+    "note": "Higher than the 2.8% 'cannot tell' of the blind full-range counting pass that the 2026-08-11 correction cited, but it does not touch the verdict: B2 fails on the frames the adjudicator DID resolve."
+  },
+  "per_class": {
+    "clip": {
+      "covered": "4/4",
+      "clean_given_covered": "1/4",
+      "unadjudicable": "1/5"
+    },
+    "external_drain": {
+      "covered": "5/5",
+      "clean_given_covered": "2/5",
+      "unadjudicable": "0/5"
+    },
+    "gallstone": {
+      "covered": "3/3",
+      "clean_given_covered": "2/3",
+      "unadjudicable": "2/5"
+    },
+    "needle": {
+      "covered": "4/4",
+      "clean_given_covered": "1/4",
+      "unadjudicable": "1/5"
+    },
+    "silicone_loop": {
+      "covered": "5/5",
+      "clean_given_covered": "0/5",
+      "unadjudicable": "0/5"
+    },
+    "specimen": {
+      "covered": "5/5",
+      "clean_given_covered": "1/5",
+      "unadjudicable": "0/5"
+    },
+    "specimen_bag": {
+      "covered": "4/5",
+      "clean_given_covered": "3/4",
+      "unadjudicable": "0/5"
+    },
+    "sponge": {
+      "covered": "4/4",
+      "clean_given_covered": "2/4",
+      "unadjudicable": "1/5"
+    }
+  },
+  "c2_failure_slice": {
+    "in_gate": false,
+    "covered": "4/4",
+    "clean_given_covered": "1/4",
+    "unadjudicable": "1/5",
+    "note": "Carried by the same export for the C2 sub-floor pairs; not part of B1/B2."
+  },
+  "what_this_kills": [
+    "The rung. PLAN.md: 'If G-BOUNDARY fails, the rung dies here, with only the export spent.'",
+    "The enabling fact. PLAN.md's settled-going-in row read: SAM 'does not merge tissue regions with foreign objects even where it over-segments tissue'. B2 = 0.3529 with CI upper bound 0.5294 is the direct refutation -- the whole interval sits below the 0.70 threshold."
+  ],
+  "what_the_gate_never_measured": {
+    "finding": "PRECISION. B1 asks whether a mask exists over a foreign object (recall) and B2 whether that mask is sharp. Neither asks how many OTHER masks are present.",
+    "raised_by": "legokna, 2026-08-12, on reading the adjudicated frames",
+    "quantity": "SAM emits 13-50 instances per frame (RESULTS_ab_overlay.json) and masks the whole scene -- tissue, anatomy, instruments -- not only the foreign objects.",
+    "consequence": "A VLM handed these masks receives references without identity: it can see that regions were marked, not which one is the foreign object. Consistent with the overlay's measured failure mode, which was identity substitution ('External drain' -> 'Needle', 'Needle' -> 'Clip'), not blindness.",
+    "status": "A limitation of the PRE-REGISTRATION, not of the adjudication. A future gate on masks-as-input must carry a precision clause; B1/B2 alone cannot license the route even at 1.00."
+  },
+  "what_this_does_NOT_show": [
+    "That SAM cannot FIND the objects. It does: B1 = 0.9714 on adjudicable frames, across all eight classes.",
+    "That the metallic-clip objection decided anything. Clips scored covered 4/4. The concern that consumed 2026-08-11 -- in both its original (r = -0.17, RETIRED) and corrected forms -- turned out not to be the failure mode.",
+    "That masks are useless as input generally. One mask source, one rendering; see context/decisions/input-side-access-was-never-the-bottleneck.md."
+  ],
+  "observations": [
+    {
+      "tag": "gb_clip_0",
+      "slice": "g_boundary",
+      "cls": "clip",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_clip_1",
+      "slice": "g_boundary",
+      "cls": "clip",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_clip_2",
+      "slice": "g_boundary",
+      "cls": "clip",
+      "unadjudicable": 1
+    },
+    {
+      "tag": "gb_clip_3",
+      "slice": "g_boundary",
+      "cls": "clip",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_clip_4",
+      "slice": "g_boundary",
+      "cls": "clip",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_sponge_0",
+      "slice": "g_boundary",
+      "cls": "sponge",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_sponge_1",
+      "slice": "g_boundary",
+      "cls": "sponge",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_sponge_2",
+      "slice": "g_boundary",
+      "cls": "sponge",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_sponge_3",
+      "slice": "g_boundary",
+      "cls": "sponge",
+      "unadjudicable": 1,
+      "covered": 0
+    },
+    {
+      "tag": "gb_sponge_4",
+      "slice": "g_boundary",
+      "cls": "sponge",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_external_drain_0",
+      "slice": "g_boundary",
+      "cls": "external_drain",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_external_drain_1",
+      "slice": "g_boundary",
+      "cls": "external_drain",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_external_drain_2",
+      "slice": "g_boundary",
+      "cls": "external_drain",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_external_drain_3",
+      "slice": "g_boundary",
+      "cls": "external_drain",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_external_drain_4",
+      "slice": "g_boundary",
+      "cls": "external_drain",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_specimen_0",
+      "slice": "g_boundary",
+      "cls": "specimen",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_specimen_1",
+      "slice": "g_boundary",
+      "cls": "specimen",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_specimen_2",
+      "slice": "g_boundary",
+      "cls": "specimen",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_specimen_3",
+      "slice": "g_boundary",
+      "cls": "specimen",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_specimen_4",
+      "slice": "g_boundary",
+      "cls": "specimen",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_specimen_bag_0",
+      "slice": "g_boundary",
+      "cls": "specimen_bag",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_specimen_bag_1",
+      "slice": "g_boundary",
+      "cls": "specimen_bag",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_specimen_bag_2",
+      "slice": "g_boundary",
+      "cls": "specimen_bag",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_specimen_bag_3",
+      "slice": "g_boundary",
+      "cls": "specimen_bag",
+      "covered": 0
+    },
+    {
+      "tag": "gb_specimen_bag_4",
+      "slice": "g_boundary",
+      "cls": "specimen_bag",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_silicone_loop_0",
+      "slice": "g_boundary",
+      "cls": "silicone_loop",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_silicone_loop_1",
+      "slice": "g_boundary",
+      "cls": "silicone_loop",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_silicone_loop_2",
+      "slice": "g_boundary",
+      "cls": "silicone_loop",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_silicone_loop_3",
+      "slice": "g_boundary",
+      "cls": "silicone_loop",
+      "covered": 1,
+      "clean": 0,
+      "unadjudicable": 0
+    },
+    {
+      "tag": "gb_silicone_loop_4",
+      "slice": "g_boundary",
+      "cls": "silicone_loop",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_needle_0",
+      "slice": "g_boundary",
+      "cls": "needle",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_needle_1",
+      "slice": "g_boundary",
+      "cls": "needle",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_needle_2",
+      "slice": "g_boundary",
+      "cls": "needle",
+      "unadjudicable": 1
+    },
+    {
+      "tag": "gb_needle_3",
+      "slice": "g_boundary",
+      "cls": "needle",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_needle_4",
+      "slice": "g_boundary",
+      "cls": "needle",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_gallstone_0",
+      "slice": "g_boundary",
+      "cls": "gallstone",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "gb_gallstone_1",
+      "slice": "g_boundary",
+      "cls": "gallstone",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_gallstone_2",
+      "slice": "g_boundary",
+      "cls": "gallstone",
+      "unadjudicable": 1
+    },
+    {
+      "tag": "gb_gallstone_3",
+      "slice": "g_boundary",
+      "cls": "gallstone",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "gb_gallstone_4",
+      "slice": "g_boundary",
+      "cls": "gallstone",
+      "unadjudicable": 1
+    },
+    {
+      "tag": "c2fail_6",
+      "slice": "c2_failure",
+      "cls": "",
+      "covered": 1,
+      "clean": 1
+    },
+    {
+      "tag": "c2fail_10",
+      "slice": "c2_failure",
+      "cls": "",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "c2fail_14",
+      "slice": "c2_failure",
+      "cls": "",
+      "unadjudicable": 1
+    },
+    {
+      "tag": "c2fail_20",
+      "slice": "c2_failure",
+      "cls": "",
+      "covered": 1,
+      "clean": 0
+    },
+    {
+      "tag": "c2fail_25",
+      "slice": "c2_failure",
+      "cls": "",
+      "covered": 1,
+      "clean": 0
+    }
+  ],
+  "observations_note": "Raw per-frame marks are embedded here because runs/ is gitignored (.gitignore:34) -- this file is the durable record of the adjudication."
+}
