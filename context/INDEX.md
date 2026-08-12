@@ -13,7 +13,7 @@
 ## NOW — what's happening
 - **`context/NOW.md`** — the living current-state: fronts, real numbers, findings, what's in progress. **Read it first.** (`HANDOFF.md` is the older baseline-run handoff, kept as history.)
 - Live fronts:
-  - **Leo (legokna)** → rung 06 **ViT-LoRA** — scored, verdict **PARTIAL** ([[vit-lora-partial]]); next is a lower `vit_lr`. See [[NOW]].
+  - **Leo (legokna)** → 🆕 **the lane is re-railed on FINE-TUNING** (2026-08-12 pm, after rung 37 died and the SAM block closed). First rung is **38 — the fine-tuned gen-3.6 screen**, gated by a ~1 h zero-GPU `G-VIABILITY`; behind it a **recipe queue shared between backbones** (connector → epochs → `vit_lr` 5e-4 → rank), because **the A2 recipe is not known-good on another backbone**. Plus `context/FINE_TUNING.md`. See [[NOW]]. ⚠️ Supersedes *"next is a lower `vit_lr`"*: `A3` measured that **cooling** the tower hurts, so only the **hot** arm survives — and rung 27's `PLAN.md` is stale on its base rate.
   - **Rodrigo** → MLOps consistency system + **R1 CoA-format SFT** — see [[next-move-rodrigo-coa-format]].
 
 ## STRATEGY — the north star

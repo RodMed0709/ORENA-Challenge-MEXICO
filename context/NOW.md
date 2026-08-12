@@ -4,6 +4,86 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-12**.
 
+## 🟢 2026-08-12 (pm) — the lane is RE-RAILED: the axis is fine-tuning, the first rung is 38, and the recipe queue is shared between backbones
+
+> Answers the 🔴 consequence logged below (*"our lane is now empty"*). This is a **plan**, not a
+> verdict: nothing here is measured yet. Owner: legokna. Local twin:
+> `local/tasks/re-encarrilamiento-agosto.md`.
+
+1. 🔑 **The axis is fine-tuning, and the record supports it.** Every input-side / external-module
+   lever we have paid for came back marginal or negative — 12 (−0.026…−0.056), 14 (NULL, CI
+   [−0.0038, +0.0195]), 18 (−0.0003), 24 (CI includes 0), 10 (k=16 **harms** OOD −0.043), 16c
+   (collapses to 1 point), 30 GRPO (−0.0094), 35 NTL (own veto fired), 37 overlay (breaks 13, fixes
+   1). **The largest move of the campaign was a training flag**: lr 2e-5 → 1e-4, proxy **+0.0480**,
+   21 of 30 paired cells significant and all pro-arm. We have swept hyper-parameters; we have never
+   worked the training surface deliberately.
+2. 🔴 **The ViT↔LLM connection has NEVER been trained — not once, in 30+ rungs, and not by
+   decision.** `--freeze_aligner false` was measured in rung 32 and is a **no-op**: the merger's 8
+   `Linear` layers (`model.visual.merger.linear_fc{1,2}` + `deepstack_merger_list.{0,1,2}.linear_fc{1,2}`)
+   are unreachable through `--target_modules all-linear`, which is **hardcoded** at
+   `experiments/06-vit-lora/_models/vit_lora_train.py:103` and has never changed.
+   `RESULTS_reachability.csv` measures it: **720 tensors = 504 LLM + 216 ViT + 0 aligner**, both
+   legs. In Qwen3-VL the merger is not an ordinary projector — DeepStack wires it into the **first
+   3 LLM layers** ([[viT-swap-nogo]]) — so it *is* the connection.
+   ⚠️ Honest counter-weight: for `number`, rung 34 points at the **projection into tokens**, not the
+   encoder (a linear probe at layer 24 scores 0.5264 against the model's own 0.4680).
+3. 🟢 **Rung 38 = the fine-tuned gen-3.6 screen, in two stages.** Not a re-proposal:
+   [[backbone-generation-is-not-the-lever]] was **amended 2026-08-09 at Rodrigo's instruction** —
+   the NO-GO is **zero-shot only** and stands **OPEN**, with the reopening test named and costed
+   there. **Stage 0 = `G-VIABILITY`** (~1 h, blocking, near-zero GPU): which gen-3.6 multimodal
+   models exist and which is smallest; does ms-swift register the class; which venv (rung 23a
+   measured that the class **cannot load under `transformers` 4.57** — `AutoConfig` →
+   `KeyError: 'qwen3_5'`); does LoRA fit (bf16 27B = 55.6 GB, **FP8 has no sm_120 build**);
+   `enable_thinking=False` applied (the 23a default template scored **0.0000**). Fail ⇒ stage 1
+   never runs and the rung closes as *no route to training* — a publishable result for ~1 h.
+   **Stage 1** = one epoch of the A2 recipe, single variable = the backbone, against the free
+   already-scored control **`21_lr_2e4_v1/checkpoint-901`**: proxy **0.4986**, `bucket_mean`
+   **0.5592**, `margin_ID` **+0.1781**, `margin_OOD` **+0.1643**, `fo_class` macro-F1 ID **0.6112**.
+4. 🔑 **THE ARGUMENT THAT REORDERS THIS: the A2 recipe is not known-good on another backbone.**
+   `lr 2e-4` is the optimum found *for the 8B over these 14,415 rows*, and the harness's own
+   documented failure mode is that **the LR optimum moves with the model and with dataset size**.
+   ⇒ the screen at A2-verbatim measures a **floor** of the gen-3.6, not its ceiling. Two
+   consequences, written **before** the number exists so they cannot be retrofitted: a **narrow
+   NO-GO does not close the axis** (it says *"not for free"*), and a **GO is collected by running
+   the queue below on the new backbone**, not by adopting it as-is.
+5. 🟢 **The recipe queue is therefore obligatory in BOTH branches — the verdict picks the subject,
+   not the list.** NO-GO ⇒ it runs on the 8B; GO ⇒ it runs on the gen-3.6. Ranked by evidence, not
+   appetite:
+
+   | # | lever | GPU | what holds it up |
+   |---|---|---|---|
+   | **1** | **connector**: `--target_modules` reaches the merger, `--freeze_aligner false` | ~10.6 h, **preceded by a zero-GPU gate** | never trained; 720 = 504+216+**0** measured; DeepStack → first 3 LLM layers |
+   | **2** | **epochs 3 → 6**, **fresh** cosine | ~17.4 h (5,405 steps) | never swept; `C_epochs` built and **killed mid-run**, never scored; every arm still rising at ep3 |
+   | **3** | **`vit_lr` 5e-4** (rung 27's `B_high`) | ~10.6 h | `A3` measured that **cooling** the tower hurts (−0.0278, 4/30 cells, all pro-control); heating it is the one direction A3 does not refute |
+   | **4** | **rank 8 → 32** (`B_rank`) | ~11 h | *"PASSES the pre-registration, fails the CI"* — 0/30 cells exclude 0; the README retracts *"rank is dead"* |
+   | **5** | **lr above 2e-4** | ~10.6 h | 🔴 **not recommended**: 2e-5→1e-4 bought +0.0480, 1e-4→2e-4 only +0.0203 **and macro-F1 ID fell 0.6906 → 0.5474**. Diminishing returns *with class damage* |
+
+   Default recommendation when the choice comes due (**at rung 38's verdict, not before**): **#1,
+   the connector** — the only completely untouched lever, and its `G-REACH` gate is **zero GPU**
+   (adapt `experiments/32-aligner-unfreeze/_tools/reachability_smoke.py`, which already
+   parameterises `target_modules` and `freeze_aligner` — the engine chain does not — and require
+   `n_aligner > 0`, `n_orphans == 0`).
+6. ⚠️ **Mechanics for #2 that have sunk controls before:** 3→6 epochs is **not a `resume`**. A2's
+   cosine anneals to **lr 0.0** at step 2703; restoring `scheduler.pt` learns nothing and hands you
+   a null control that flatters whatever it is compared against. It must be a **fresh** cosine over
+   6 epochs — the same trap `local/tasks/plan-accion.md` already flags in red for Rodrigo's step-9
+   paired control.
+7. ⚠️ **Reviving rung 27 is a change of FACTS, not a re-litigation.**
+   [[august-plan-closes-the-ladder]] closed it UNRUN and installed *"a rung is revived because the
+   plan asks for it, never because it exists."* It is revived here because step 7 died, step 8 was
+   cancelled, VCD died in step 4 and the lane went empty on 2026-08-12. Recorded so the rule is not
+   quoted against this. 📌 And rung 27's `PLAN.md` is **stale**: it is written against `lr 1e-4`
+   while the operative base is 2e-4 — it needs an amendment **before** a verdict, not after.
+8. 🟡 **Also being written, zero GPU: `context/FINE_TUNING.md`** — what each flag actually touches
+   on *our* model (ViT SigLIP2 → merger ×4 DeepStack → LLM), where LoRA is injected and why
+   `all-linear` misses the merger, the training loop, **the operative A2 recipe and its measured
+   drift** (`lr 2e-4` is declared **only in prose**; six dataclasses contradict each other and
+   **rung 24 trained at 1e-4 against a baseline declared at 2e-4**,
+   `experiments/24-geometric-aug/_models/horizontal_flip.py:168`), and the table of what has never
+   been trained. Documented, **not** fixed — pinning the recipe in code is a separate change.
+9. 🔴 **What does not fit.** ~20 days to pre-eval, week 3 (15–21 Aug) is Rodrigo's GPU for step 9,
+   and each full arm is 10–17 h. **The screen plus ONE or TWO of the queue.** Not five.
+
 ## 🔴 2026-08-12 — G-BOUNDARY was adjudicated and FAILED. Rung 37 is dead, the SAM block is closed, and our lane is empty
 
 1. 🔴 **The gate FAILS. Step 7 dies with only the export spent, exactly as pre-registered.**
