@@ -1,0 +1,57 @@
+{
+  "model": "Qwen/Qwen3.5-2B",
+  "stages": {
+    "1_cargar_modelo": {
+      "ok": true,
+      "secs": 93.4
+    },
+    "2_aplicar_lora": {
+      "ok": true,
+      "secs": 2.9
+    },
+    "3_auditar_modulos": {
+      "ok": true,
+      "secs": 0.0
+    },
+    "4_dos_pasos": {
+      "ok": true,
+      "secs": 104.1
+    },
+    "5_guardar_adapter": {
+      "ok": true,
+      "secs": 1.2
+    },
+    "6_merge_16bit": {
+      "ok": true,
+      "secs": 25.2
+    }
+  },
+  "model_class": "Qwen3_5ForConditionalGeneration",
+  "vram_gib": {
+    "tras_cargar": {
+      "current": 4.13,
+      "peak": 4.13
+    },
+    "tras_lora": {
+      "current": 4.18,
+      "peak": 4.18
+    },
+    "tras_entrenar": {
+      "current": 4.21,
+      "peak": 4.51
+    }
+  },
+  "n_lora_modules": 282,
+  "lora_by_part": {
+    "visual": 96,
+    "merger": 0,
+    "deepstack": 0,
+    "language_model": 186,
+    "vision": 0
+  },
+  "trainable": 11555328,
+  "total_params": 2224796992,
+  "train_loss": 2.358836531639099,
+  "adapter_mib": 63.2,
+  "merged_gib": 4.25
+}

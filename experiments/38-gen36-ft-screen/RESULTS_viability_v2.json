@@ -1,0 +1,48 @@
+{
+  "checks": {
+    "autoconfig::Qwen/Qwen3.5-4B": {
+      "ok": true,
+      "model_type": "qwen3_5",
+      "architectures": [
+        "Qwen3_5ForConditionalGeneration"
+      ],
+      "has_vision_config": true
+    },
+    "autoconfig::Qwen/Qwen3-VL-8B-Instruct": {
+      "ok": true,
+      "model_type": "qwen3_vl",
+      "architectures": [
+        "Qwen3VLForConditionalGeneration"
+      ],
+      "has_vision_config": true
+    },
+    "arch_mapping_size": 73,
+    "control_qwen3_vl": {
+      "language_model": [
+        "model.language_model",
+        "lm_head"
+      ],
+      "aligner": [
+        "model.visual.merger",
+        "model.visual.deepstack_merger_list"
+      ],
+      "vision_tower": [
+        "model.visual"
+      ]
+    },
+    "qwen3_5_keys_present": [],
+    "model_mapping_error": "ModuleNotFoundError: No module named 'swift.llm'"
+  },
+  "verdict": "FAIL:qwen3_5_no_registrado",
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.12.1",
+    "ms_swift": "4.4.1",
+    "cuda": "12.8",
+    "gpus": 2,
+    "capability": [
+      8,
+      9
+    ]
+  }
+}
