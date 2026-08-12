@@ -90,7 +90,13 @@ shared-account attribution problem: nothing is authored here.
 | env | contents | for |
 |---|---|---|
 | `orena-gen36` | torch 2.11.0+cu128 · transformers 5.12.1 · ms-swift 4.4.1 | framework probes ([[ms-swift-cannot-train-gen35]]) |
-| `orena-unsloth` | torch 2.11.0+cu128 · torchvision 0.26.0+cu128 · transformers 5.5.0 · unsloth 2026.8.15 · peft 0.20.0 · trl 0.24.0 | gen-3.5/3.6 training ([[unsloth-is-the-route-to-gen35]]) |
+| `orena-unsloth` | torch 2.11.0+cu128 · torchvision 0.26.0+cu128 · **transformers 5.5.0 (pinned)** · unsloth 2026.8.15 · peft 0.20.0 · trl 0.24.0 | gen-3.5/3.6 training ([[unsloth-is-the-route-to-gen35]]) |
+| `orena-quant` | torch 2.11.0+cu128 · transformers 5.14.1 · llmcompressor 0.13.0 | FP8 quantisation — **must be separate**, see below |
+
+🔴 **`llmcompressor` and Unsloth CANNOT share an environment.** llmcompressor requires
+`transformers>=5.9.0`; Unsloth caps at `<=5.5.0`. Installing llmcompressor into the training env
+silently upgraded transformers and broke the cap — measured 2026-08-12. Quantisation is a separate
+step after training, so a separate env costs nothing.
 
 **Install by stages, verifying torch between each.** Rung 23 measured the trap: installing
 `accelerate` pulled torch over the pinned build and desynced torchvision, and the symptom
