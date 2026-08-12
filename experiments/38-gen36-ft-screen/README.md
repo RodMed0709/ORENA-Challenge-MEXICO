@@ -2,13 +2,19 @@
 
 **Ladder:** rung 37 (dead, `G-BOUNDARY` failed) → **38** → 39 connector (queued).
 
-**Status 2026-08-12: `G-VIABILITY` PARTIALLY RUN. Stage 1 NOT started.** No training arm exists.
-Everything below cost **zero training GPU** — one env build, one probe, one 2-step smoke on a 2B.
+**Status 2026-08-12: `G-VIABILITY` done except the arm. Pipeline, eval path and arm all BUILT and
+validated; the arm has not been run.** Everything below cost **zero training GPU** — one env build,
+two probes, and a 2-step smoke on a 2B. The arm runs on the pod, not here.
 
 ## 🔑 The strongest reason, and it was already in the repo
 
-**Rank 1 on the leaderboard is an entry named `Qwen3.6 Finetuned`, scoring 0.5653**
-([[local-eval-vs-judge-calibration]] table). We are rank 11 at 0.5288 — **+0.0365 away.**
+**Rank 1 on the leaderboard is an entry named `Qwen3.6 Finetuned` (user `wxyi088`), scoring
+0.6235** — it moved up from 0.5653 on 2026-08-09. We are rank 11 at 0.5288, **+0.0947 behind**.
+🔑 **It beats us in all four buckets and the OOD gaps are 2–4× the ID gaps** (agg_OOD +0.1223,
+obj_OOD +0.1387 vs agg_ID +0.0362, obj_ID +0.0816) — the shape a stronger backbone produces, landing
+hardest on `object_recognition_OOD`, our worst bucket. 🔑 **And latency bounds nobody**: 42.1 s per
+20-question batch against a 220 s allowance = **19 % of budget**. Full payload in
+[[local-eval-vs-judge-calibration]].
 
 [[backbone-generation-is-not-the-lever]]'s amendment named exactly two things that would reopen the
 question, the first being *"verified confirmation that a leading entry **fine-tunes** a gen-3.6
@@ -32,7 +38,7 @@ gated by a viability stage so the 3 GPU-h and 56 GB download are only spent if t
 | **V2** | does ms-swift resolve the architecture? | 🔴 **FAIL** — `RESULTS_viability_v2.json`. See [[ms-swift-cannot-train-gen35]] |
 | **V3** | which transformers version? | ✅ 5.5–5.12.x — inside ms-swift's `<5.13.0` cap **and** shipping `qwen3_5` |
 | **V4** | does LoRA fit? | ✅ 4B 10 GB · 9B 22 GB · 27B 56 GB · 35B-A3B 74 GB (Unsloth's table). **Serving FP8 27B = 30.9 GB ⇒ fits the 48 GB eval GPU** |
-| **V5** | `enable_thinking=False` | ⬜ not yet run |
+| **V5** | `enable_thinking=False` | ✅ **cleared** as a by-product of the eval verification — no CoT, non-empty answer. This is what scored rung 23 a 0.0000 |
 
 ## What replaced the dead route
 
@@ -76,13 +82,13 @@ Two defects found, both of which would have surfaced mid-pod-session:
 
 📌 **443 prompt tokens** for one image at `max_pixels` 1280×720 — the figure to budget latency with.
 
-## What is NOT done, in the order that can kill the rung
+## What is NOT done
 
-1. 🔴 **The FP8 delivery path.** A 27B only fits the eval GPU quantised, and we have never
-   quantised a merged checkpoint. New work on the shipping route, three weeks from the deadline.
-   UNAM is sm_89 like the L40S, so it can be tested there — the old dev card (sm_120) could not
-   even build the kernels.
-3. ⬜ V5, and the real arm.
+1. 🔴 **The FP8 delivery path** — scoped but not validated end-to-end; see below. **The rung's only
+   remaining technical risk**, and one the 27B creates on its own.
+2. ⬜ **The arm has not been run.** It needs the challenge data, so it runs on the pod.
+3. ⬜ **The subject is not finally settled** — 27B (chosen) vs 9B (cheaper, no FP8). One line apart
+   in `_models/unsloth_sft.py`.
 
 ## Files
 
