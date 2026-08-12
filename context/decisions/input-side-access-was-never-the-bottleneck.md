@@ -64,6 +64,14 @@ evidence that separates a clip from a sponge. The result is consistent with *"oc
 signal"*. **Contours-only**, and **painting only the adjudicated foreign-object masks** (2–3
 regions rather than 40), are untested and are the surviving forms.
 
+🔻 **PARKED 2026-08-12 — and not because they were refuted.** legokna closed the whole SAM block on
+**time** ([[sam-adaptation-has-no-route-to-points]], amendment). Independently, `G-BOUNDARY` removed
+the input the second form needs: it presumes **adjudicated** foreign-object masks, and
+[[g-boundary-fails-on-precision-not-coverage]] measures that SAM does **not** delimit them
+(B2 = 0.3529) and marks 13–50 regions per frame with no way to say which is which. ⇒ **These forms
+survive on paper only. Do not read them as a live lead before Sep 8** — reviving one means paying
+for the adjudication first.
+
 ⚠️ **n=40, one checkpoint, one alpha.** This is a pilot and it licenses building the scored
 version, nothing more. Any verdict on the lever needs the SDK judge — which does not co-reside
 with the 8B on a 32 GB card (`run.py:225`).
