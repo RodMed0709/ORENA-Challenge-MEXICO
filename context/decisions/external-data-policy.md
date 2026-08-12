@@ -12,11 +12,11 @@ measured_in: ORena-FOCUS-challenge-design-FRAME-track.pdf §"Training data polic
 ## Why this note exists
 
 Two sessions argued licences from summaries. The 2026-07-31 sweep
-(`local/fuentes/barrido-datasets-licencias.md`) reached the right verdict — `CC BY-NC-SA` is not a
+(legokna's licence sweep) reached the right verdict — `CC BY-NC-SA` is not a
 disqualifier — but rested it on a reading of the `lapchole` DUA that the organizers themselves would
 not confirm. Meanwhile the four sections of the challenge design that actually govern the question
 had been sitting extracted in the repo, unread, cited only by an archived summary
-(`local/archivo/Bloque-A-Modelo.md`) that had already planted one falsified premise.
+(an archived vault note) that had already planted one falsified premise.
 
 **Cite the PDF, not a paraphrase.** `ORena-FOCUS-challenge-design-FRAME-track.pdf` is tracked at the
 repo root; page numbers below are its own.
@@ -109,7 +109,7 @@ We are three. The Core Value's ceiling and our headcount match exactly.
 ## What this settles about datasets on the table
 
 - **`CC BY-NC-SA` is not a disqualifier.** Confirmed by the organizers directly, not inferred.
-  Supersedes the reasoning (not the verdict) of `local/fuentes/barrido-datasets-licencias.md`.
+  Supersedes the reasoning (not the verdict) of legokna's licence sweep.
 - **SurgΣ-DB passes the date gate.** Its HF update note is dated **2026-04** and its 3.09 GB payload
   last changed ~4 months before 2026-08-03 — i.e. public roughly three months before the 2026-07-15
   cutoff. ⚠️ A commit timestamp shows when a file changed, not when the repo became public; if the

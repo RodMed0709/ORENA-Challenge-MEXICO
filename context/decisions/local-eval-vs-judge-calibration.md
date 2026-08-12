@@ -3,7 +3,7 @@ question: Does our local eval predict the challenge judge, and by how much? Whic
 verdict: Direction transfers in 8 of 8 bucket comparisons; magnitude and absolute level do not. Local `bucket_mean` overstates the judge's score by +0.12, almost all of it in `object_recognition OOD` (+0.367), which is our BEST bucket locally and our WORST on the judge — the ordering is inverted at both extremes. Use the sign, deflate the magnitude, never quote the local OOD level.
 status: SETTLED
 date: 2026-08-05
-basis: zero GPU — the two submissions' official per-bucket scores (local/fuentes/metrics.json) against the same two checkpoints' local stratified.json (rung 06 ep2, rung 21 A2 ep3 pulled from the volume over S3)
+basis: zero GPU — the two submissions' official per-bucket scores (the platform's returned payload) against the same two checkpoints' local stratified.json (rung 06 ep2, rung 21 A2 ep3 pulled from the volume over S3)
 ---
 
 # The local instrument is calibrated on ID and inverted on OOD

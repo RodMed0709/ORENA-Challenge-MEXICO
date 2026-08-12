@@ -11,7 +11,7 @@ basis: the local-vs-judge calibration over the two scored submissions ([[local-e
 
 ## Why this replaces the draft
 
-The 2026-08-01 draft (`local/specs/regla-significancia/PROPUESTA.md`, never signed) set an
+The 2026-08-01 draft (legokna's private draft, never signed) set an
 effect floor of **ε = 0.05** *"for coherence with the phase-0.4 equivalence test"*. Against
 the leaderboard that number is absurd: **rank 1 to rank 11 spans 0.0365**, and adjacent ranks
 near the top are separated by **0.002–0.009**. A 0.05 floor would call every move capable of

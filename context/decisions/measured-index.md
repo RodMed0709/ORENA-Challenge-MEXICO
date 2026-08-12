@@ -22,7 +22,7 @@ Four things were rediscovered in a single session, all of them already written a
 | 1 | "the failure is per-CLASS, not per-count" | `context/decisions/class-imbalance-not-counting.md` |
 | 2 | "`number` barely uses the image" | `experiments/05-bottleneck-audit/README.md` §5 |
 | 3 | the `by_bucket_format` cross | a field inside committed `runs/*/stratified.json` |
-| 4 | the counting probe, **with its run closed** | `local/specs/number-probe/` + `RESULTS_number_probe.csv` |
+| 4 | the counting probe, **with its run closed** | legokna's private spec + `RESULTS_number_probe.csv` |
 
 **None was lost to poor documentation.** Rung 05's own log had already named the pattern:
 *"the fix is NOT to document better — rung 00 documented it well and it was lost anyway."*
@@ -70,5 +70,5 @@ verdicts without marking the amended ones reproduces the error it exists to prev
 ## Sources
 
 - `src/frame/measured.py` · generated output `context/MEASURED.md`
-- Spec: `local/specs/measured-index/` (private vault)
+- Spec: legokna's private spec
 - Related: [[eval-canonical]] (the same "one module, gates raise" contract)

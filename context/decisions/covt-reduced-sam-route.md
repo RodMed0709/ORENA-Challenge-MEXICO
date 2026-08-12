@@ -4,7 +4,7 @@ verdict: CoVT AS PUBLISHED = NO-GO (774.6k-row corpus, 17K steps, outside any re
 status: SETTLED
 scope: paper read end-to-end incl. supplementary; the bespoke SAM 2 route stays OPEN
 date: 2026-07-26
-measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought.pdf (ficha §v46) · local/fuentes/analisis-articulos-legokna.md
+measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought.pdf (ficha §v46) · legokna's paper-reading pass
 ---
 # Decision: CoVT as published is NO-GO — but it re-aims the perceptual branch
 
@@ -22,7 +22,7 @@ measured_in: literature/vlm-techniques/pdfs/v46_qin_2025_chain-of-visual-thought
 
 - **Status:** SETTLED for the method · **OPEN** for the route it unlocks · 2026-07-26 · zero GPU
 - **Source:** arXiv 2511.19418v2, read end-to-end including the supplementary (pp. 13–16).
-  Human reading pass + notes: `local/fuentes/analisis-articulos-legokna.md` §3.
+  Human reading pass + notes: legokna's paper-reading pass §3.
 - 🆕 **Catalogued 2026-07-29** as **`literature/vlm-techniques/` #46** (ficha §v46, PDF at
   `pdfs/v46_qin_2025_chain-of-visual-thought.pdf`). It was new material for the corpus when this
   note was written; the ficha now carries the per-expert ablation and the reduced-design reading.
@@ -209,7 +209,7 @@ never the same thing as absence.
 - arXiv 2511.19418v2: Tab. 2 (per-expert ablation), Tab. 3 (the LLaVA/Aurora headline), Tab. 4 +
   Fig. 12 (token count, interior optimum, time cost), Tab. 6 (hyperparameters, steps, experts),
   Tab. 7 (stage ablation), A.1 (projection), A.2 (automatic mask GT), A.5 (dataset composition).
-- `local/fuentes/analisis-articulos-legokna.md` §3 — the human reading pass that flagged the
+- legokna's paper-reading pass §3 — the human reading pass that flagged the
   headline/ablation mismatch first.
 - SAM 2 abstract (Meta, `facebookresearch/sam2`) — promptable visual segmentation, video with
   streaming memory, model-in-the-loop data engine. Apache-2.0.

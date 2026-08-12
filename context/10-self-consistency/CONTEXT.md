@@ -1,7 +1,7 @@
 # context — 10-self-consistency
 
 > Curated context for rung 10. The artifact lives in `experiments/10-self-consistency/`;
-> the private spec in `local/specs/self-consistency/`. **Nothing has run yet.**
+> legokna's private spec. **Nothing has run yet.**
 
 ## State
 

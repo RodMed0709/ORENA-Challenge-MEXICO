@@ -11,7 +11,7 @@ measured_in: literature/vlm-techniques/FICHAS.md §v01 (CholecT50, our exact bac
 - **Status:** SETTLED · 2026-07-29 · zero GPU (a reporting rule, not a measurement).
 - **Applies when:** publishing ANY result whose eval set contains `fo_class` questions —
   every rung we have run, and every phase of the roadmap.
-- **Roadmap:** phase 0.3 of `local/tasks/roadmap-coa-cot-covt.md`.
+- **Roadmap:** phase 0.3 of legokna's private roadmap copy.
 
 ## The failure this closes
 
