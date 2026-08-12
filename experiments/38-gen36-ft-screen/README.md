@@ -84,10 +84,8 @@ Two defects found, both of which would have surfaced mid-pod-session:
 
 ## What is NOT done
 
-1. 🔴 **The FP8 delivery path** — scoped but not validated end-to-end; see below. **The rung's only
-   remaining technical risk**, and one the 27B creates on its own.
-2. ⬜ **The arm has not been run.** It needs the challenge data, so it runs on the pod.
-3. ⬜ **The subject is not finally settled** — 27B (chosen) vs 9B (cheaper, no FP8). One line apart
+1. ⬜ **The arm has not been run.** It needs the challenge data, so it runs on the pod.
+2. ⬜ **The subject is not finally settled** — 27B (chosen) vs 9B (cheaper, no FP8). One line apart
    in `_models/unsloth_sft.py`.
 
 ## Files
@@ -111,10 +109,43 @@ Two defects found, both of which would have surfaced mid-pod-session:
   size-matched to our 8B and serves in bf16 with no FP8 step**, and the one competitor known to
   beat us runs a gen-3.5 **4B**. Recorded as the cheaper alternative arm; not chosen.
 
-## 🟡 FP8: the route is SCOPED, not validated
+## ✅ FP8: the route is VALIDATED end-to-end
 
-`RESULTS_fp8_probe.json` — `FAIL:excepcion` on Ada (capability 8.9), and the reason is
-architectural, not ours:
+`RESULTS_fp8_llmcompressor.json` — the **official** recipe, not transformers':
+
+```python
+IGNORE_LAYERS = ["re:.*lm_head", "re:.*embed_tokens$", "re:.*visual.*",
+                 "re:.*model.visual.*", "re:.*linear_attn.*"]
+oneshot(model, recipe=QuantizationModifier(targets="Linear", scheme="FP8_DYNAMIC",
+                                           ignore=IGNORE_LAYERS))
+model.save_pretrained(dst, save_compressed=True)
+```
+
+| | |
+|---|---|
+| pipeline | `DataFreePipeline` — **no calibration data**, so this step touches no challenge data and can run anywhere |
+| quantise | 2.0 s (2B) |
+| size | 4.25 → **3.22 GiB** (76 %) |
+| reload + generate | VRAM 3.2 GiB, answer `'0'`, 0.704 s |
+| **verdict** | **PASS** |
+
+The 76 % is not a defect: the vision tower and `linear_attn` stay in bf16 and weigh heavily in a 2B.
+Qwen's own 27B ratio is the one that matters — **51.8 GiB bf16 → 28.8 GiB FP8 (56 %)**, comfortably
+under the 48 GB eval GPU.
+
+⚠️ **Two envs, and the reason is measured.** `llmcompressor` requires `transformers>=5.9.0` while
+Unsloth caps at `<=5.5.0`. Installing it into the training env silently upgraded transformers and
+broke the cap. Split:
+
+| env | transformers | for |
+|---|---|---|
+| `orena-unsloth` | **5.5.0** (pinned) | training |
+| `orena-quant` | 5.14.1 + llmcompressor | quantisation |
+
+### What failed first, and why it is worth remembering
+
+`RESULTS_fp8_probe.json` — transformers' `FineGrainedFP8Config` **fails** on Ada, for an
+architectural reason rather than ours:
 
 ```
 ValueError: Matrix dimensions (16, 2048) must be divisible by block sizes (128, 128)
@@ -138,12 +169,11 @@ checkpoint loads and generates fine in bf16, so **the merge is sound — the sch
 | `visual` (tower **and merger**) | 246 — **the vision path is not quantised at all** |
 | other (`embed_tokens`, layernorms) | 289 |
 
-⇒ two known routes, both already named in `CONSTITUTION.md`: `vllm serve --quantization fp8`
-(weight-only, at load) or reproducing that exclusion list with compressed-tensors. **Neither has
-been run end-to-end**, so this stays the rung's open delivery risk.
+📌 **The lesson is about tool choice, not capability**: the wrong quantiser produced a hard error
+that looked like a dead end. `llm-compressor` is the tool vLLM itself ships for this.
 
-📌 **And it is a risk the 27B creates on its own.** A `Qwen3.5-9B` is ~18 GB in bf16 and needs no
-FP8 step at all.
+📌 A `Qwen3.5-9B` would still need **no** FP8 step at all (~18 GB bf16) — the FP8 work exists only
+because the subject is a 27B.
 
 ## The real arm
 

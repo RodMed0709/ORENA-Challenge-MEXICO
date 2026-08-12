@@ -1,0 +1,25 @@
+{
+  "src": "smoke_out/merged",
+  "dst": "smoke_out/merged_fp8",
+  "ignore": [
+    "re:.*lm_head",
+    "re:.*embed_tokens$",
+    "re:.*visual.*",
+    "re:.*model.visual.*",
+    "re:.*linear_attn.*"
+  ],
+  "steps": {
+    "quantize_secs": 2.0,
+    "size_bf16_gib": 4.25,
+    "size_fp8_gib": 3.22,
+    "size_ratio": 0.756,
+    "vram_loaded_gib": 3.2,
+    "latency_s": 0.704,
+    "answer": "0"
+  },
+  "capability": [
+    8,
+    9
+  ],
+  "verdict": "PASS"
+}
