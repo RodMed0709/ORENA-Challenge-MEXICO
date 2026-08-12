@@ -4,6 +4,67 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-12**.
 
+## 🔴 2026-08-12 (night) — ms-swift CANNOT train gen-3.6, Unsloth can, and the connector is unreachable in BOTH. Plus a second machine.
+
+> All of it measured with **zero training GPU**. Details: [[ms-swift-cannot-train-gen35]],
+> [[unsloth-is-the-route-to-gen35]], [[the-merger-is-unreachable-by-default]],
+> `context/UNAM_SERVER.md`, `experiments/38-gen36-ft-screen/`.
+
+1. 🔴 **`G-VIABILITY` V2 FAILS: ms-swift 4.4.1/4.4.2 have no `MODEL_ARCH_MAPPING` entry for
+   `qwen3_5`.** Control `qwen3_vl` returns its three prefixes; the subject returns **no keys at
+   all**. Since rung 06 our recipe *is* `--freeze_vit false`, which works by adding `vision_tower`
+   to the LoRA targets — from that table. ⇒ **ms-swift cannot express our recipe on gen-3.5/3.6.**
+   Not transformers' fault (5.5–5.15 all ship `qwen3_5`), not the version cap (5.9–5.12 satisfies
+   both), not size — **every** gen-3.5/3.6 config carries `model_type=qwen3_5`, so the gap is
+   generation-wide. 📌 The gate did its job: ~1 h of env build instead of ~3 GPU-h and a 56 GB
+   download to hit the same wall.
+2. 🟢 **Unsloth can, and the NO-GO is AMENDED — legokna was right, and had proposed it three
+   times.** `CONSTITUTION.md`'s first reason (*"lagging Qwen3-VL multimodal support"*) is **false**:
+   Unsloth documents SFT and vision RL for Qwen3-VL up to 32B/235B, and is the only known trainer
+   for gen-3.5/3.6 with the vision tower. Single-GPU is mitigated. 🔑 **The third reason stands and
+   is now the binding one:** rungs 02–35 are ms-swift artifacts, so an Unsloth arm confounds
+   framework with everything else. **That binds on ATTRIBUTION, not on a candidate search** — for
+   the leaderboard a confounded win is still a win, so it is a reason to *label* the result, not to
+   refuse the run.
+3. 🟢 **The pipeline is measured, not assumed.** Six-stage smoke on `Qwen3.5-2B` (same class ⇒ same
+   code path as the 27B), public CholecT50 frames, zero challenge data: load → LoRA (0.519 %
+   trainable) → 2 steps (loss 2.441 → 2.276, peak 4.51 GiB) → adapter 63.2 MB → merge 4.25 GiB.
+   **All six passed.**
+4. 🔑 **THE FINDING WORTH KEEPING: the ViT→LLM connector is unreachable BY DEFAULT in BOTH
+   trainers.** ms-swift: 720 = 504 + 216 + **0 aligner**. Unsloth with everything switched on:
+   visual **96**, language **186**, **merger 0**, deepstack **0**. ⚠️ And the "maybe it is named
+   differently" objection was checked *before* the claim: a module census of Qwen3.5-2B shows
+   `model.visual.merger.linear_fc{1,2}` present under the same name. **The cause is structural** —
+   the connector's path carries no `attn`/`mlp` token, and every generic matcher requires one, so
+   `all-linear` is literal in neither framework. Unsloth's own docs confirm *"no documented way"*
+   to target it. ⇒ **rung 32's null now has a mechanism, switching framework does not unlock the
+   connector, and rung 39 must pre-register an explicit `target_modules` plus a blocking
+   reachability gate.**
+5. 🟢 **Second machine online: `hpclab-RTXA6000` (UNAM).** 2× RTX 6000 Ada 48 GB, 96 cores, 502 GB
+   RAM, 17 TB. 🔑 **Compute capability 8.9 — the same architecture as the eval L40S**, so the two
+   things the Blackwell dev pod could not do become possible: **FP8 kernels build**, and there is
+   finally a **p99 proxy** for the item `THE_MAP.md:252` calls *"the only item BOTH documents
+   demand"*. Faithful proxy, not identical silicon. 🔴 **No challenge data goes there** until a
+[redacted]
+   Encryption-at-rest does not fix it (the data is decrypted for the whole run). 📌 And RunPod is
+   not a gold standard either — no DPA, their admins hold root; the gap is paperwork.
+6. ⬜ **What can still kill rung 38, in order:** (a) **the eval path** — `screen_engine.py` has
+   never been pointed at an Unsloth-merged checkpoint, and without it there is no verdict however
+   well training goes; (b) **the FP8 delivery path** — a 27B only fits the eval GPU quantised and
+   we have never quantised a merge; (c) the arm itself.
+7. 🔑 **AND THE REASON THAT OUTRANKS ALL OF THE ABOVE, which was already in the repo and went
+   unquoted all session: rank 1 is `Qwen3.6 Finetuned`, 0.5653** ([[local-eval-vs-judge-calibration]]
+   table). We are rank 11 at 0.5288, **+0.0365 behind**. [[backbone-generation-is-not-the-lever]]'s
+   amendment named as its first reopening condition *"verified confirmation that a leading entry
+   **fine-tunes** a gen-3.6 model"* — **a leaderboard row named after the model, at rank 1, is that
+   confirmation.** ⇒ rung 38 is not a speculative screen; it follows the leader's demonstrated
+   route. ⚠️ The row does not disclose size, recipe, or whether the vision tower was trained.
+8. 🟡 **Recorded, not chosen: Qwen3.5-9B may be the better first arm.** The smallest gen-3.6 is the
+   27B, so generation and size move together and delivery needs FP8. A 9B is **nearly size-matched
+   to our 8B**, trains on one card (22 GB) and **serves in bf16** — no new delivery path at all.
+   And the only competitor known to beat us runs a gen-3.5 **4B** (410 vs 343 on `aggregation`,
+   same 2,000 questions). legokna's call: **stay on 3.6 for now, 3.5 is the fallback.**
+
 ## 🟢 2026-08-12 (pm) — the lane is RE-RAILED: the axis is fine-tuning, the first rung is 38, and the recipe queue is shared between backbones
 
 > Answers the 🔴 consequence logged below (*"our lane is now empty"*). This is a **plan**, not a
