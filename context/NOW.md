@@ -4,6 +4,28 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-12**.
 
+## 🟢 2026-08-12 (close) — rung 38 is BUILT AND READY TO LAUNCH. Nothing technical is unresolved; it needs a pod and someone to press go.
+
+> **Handoff.** legokna had to step away before launching. `experiments/38-gen36-ft-screen/01_gen36_screen.ipynb`
+> is the runbook: environment, path check, smoke, arm, FP8, eval. Anyone on the team can run it.
+
+| link in the chain | state |
+|---|---|
+| trainer (ms-swift → Unsloth) | ✅ forced and resolved — [[ms-swift-cannot-train-gen35]] |
+| pipeline load→LoRA→train→merge | ✅ 6/6 stages, `RESULTS_smoke_unsloth.json` |
+| eval reads an Unsloth merge | ✅ PASS, `RESULTS_eval_path.json` (2 bugs fixed) |
+| **FP8 delivery** | ✅ **PASS**, `RESULTS_fp8_llmcompressor.json` |
+| the arm | ⬜ **built, never run** — needs the pod |
+
+🔴 **The one unknown left is the 27B's `s/it`.** Our 8B ran 11.56 s/it; at 30–40 an epoch is
+7.5–10 h. Cell 3 of the notebook measures it, and the decision to launch cell 4 should be taken
+against that number, not against an estimate.
+
+🟡 **The subject is still open and it is one line.** `Qwen3.6-27B` (chosen — needs the FP8 step,
+now validated) vs `Qwen3.5-9B` (~18 GB bf16, **no FP8 step at all**, nearly size-matched to our 8B
+so a cleaner read). The evidence pulls both ways: rank 1 is a fine-tuned **3.6**, but its advantage
+is concentrated **OOD**, which is what the generation buys and a 9B buys too.
+
 ## 🔴 2026-08-12 (night) — ms-swift CANNOT train gen-3.6, Unsloth can, and the connector is unreachable in BOTH. Plus a second machine.
 
 > All of it measured with **zero training GPU**. Details: [[ms-swift-cannot-train-gen35]],
