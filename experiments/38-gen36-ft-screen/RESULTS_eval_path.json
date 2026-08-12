@@ -1,0 +1,27 @@
+{
+  "merged": "smoke_out/merged",
+  "checks": {
+    "files": [
+      ".cache",
+      "chat_template.jinja",
+      "config.json",
+      "generation_config.json",
+      "model.safetensors-00001-of-00001.safetensors",
+      "model.safetensors.index.json",
+      "processor_config.json",
+      "tokenizer.json",
+      "tokenizer_config.json"
+    ],
+    "missing_expected": [
+      "preprocessor_config.json"
+    ],
+    "processor": "Qwen3VLProcessor",
+    "model_class": "Qwen3_5ForConditionalGeneration",
+    "params_b": 2.21,
+    "prompt_tokens": 443,
+    "raw_answer": "0",
+    "looks_like_cot": false,
+    "answer_empty": false
+  },
+  "verdict": "PASS"
+}

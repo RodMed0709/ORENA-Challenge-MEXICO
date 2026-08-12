@@ -37,6 +37,36 @@ one question there is worth **4×** one in `obj_ID`.
 | ours — submission 01 | 23 | 0.4767 |
 | **OFFICIAL Proprietary Baseline** | **30** | **0.3883** |
 
+### ⚠️ AMENDED 2026-08-12 — rank 1 has MOVED, and its full payload is now known
+
+The table above is the snapshot the note was written against. `Qwen3.6 Finetuned` (user `wxyi088`,
+submitted 2026-08-09) now scores **0.6235**, not 0.5653. **Our gap widens from +0.0365 to
++0.0947.** Both official baselines remain beaten, so the co-authorship condition still holds.
+
+| bucket | rank 1 | ours (sub 02) | Δ |
+|---|---|---|---|
+| `aggregation_ID` | 0.5606 | 0.5244 | +0.0362 |
+| `aggregation_OOD` | **0.6489** | 0.5266 | **+0.1223** |
+| `object_recognition_ID` | **0.7416** | 0.6600 | +0.0816 |
+| `object_recognition_OOD` | **0.5430** | 0.4043 | **+0.1387** |
+| `pre_evaluation_score` | **0.6235** | 0.5288 | **+0.0947** |
+
+🔑 **They beat us in all four buckets, and the OOD gaps are ~2–4× the ID gaps.** That is the shape
+a stronger backbone would produce — generalisation to unseen centres — and it lands hardest on
+`object_recognition_OOD`, which is **our worst bucket and their second-largest margin**. Reading
+our own weakness off the local eval would have pointed elsewhere: `obj_OOD` is our BEST bucket
+locally and our worst on the judge (the inversion this note documents).
+
+🔑 **Latency is not their constraint either.** `mean_batch_duration_s` **42.10** for a 20-question
+batch against an allowance of `120 + 20×5 = 220 s` — **19 % of budget**, `questions_forfeited: 0`,
+`questions_unanswered: 0`, and `mean_latency_per_question_s` reported as **0.0** because the whole
+job fit inside the setup allowance. (Ours is faster still at 16.87 s/batch.) ⇒ **the 5 s cap does
+not bound model size for anybody**, which removes the last hardware argument against a larger
+backbone. Compare [[latency-budget-is-pooled]].
+
+⚠️ The row discloses the model family and that it is fine-tuned. It does **not** disclose the size,
+the recipe, whether the vision tower was trained, or what precision it serves in.
+
 🟢 **Both official baselines are beaten** — the campaign's core value, nominally reached.
 🔴 **The margin over the fine-tuned baseline is +0.0099**, and we cannot test it: the
 significance test that adjudicates it needs the baseline's per-question answers, which only
