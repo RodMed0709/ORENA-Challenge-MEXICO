@@ -70,7 +70,7 @@ it is half the score.
 
 ## What it decides, and what it does NOT
 
-⇒ 🔴 **Step 8 does not exist.** It is removed from week 2 of `local/tasks/plan-accion.md`, which
+⇒ 🔴 **Step 8 does not exist.** It is removed from week 2 of the team's August plan, which
 keeps step 7 only. Nothing else in the plan moves either way — this gate was scoped to decide
 one thing and it decided it.
 
@@ -92,5 +92,5 @@ multiplicity problem in a lab coat.
 
 - `experiments/28-vcd-gate/` — notebook, `_models/vcd.py`, README with the pre-registration
 - `RESULTS_step4_verdict.json`, `RESULTS_step4_per_question.csv` (228 rows)
-- Spec: `local/tasks/roadmap-percepcion-rl.md` B.3; step 4 of `local/tasks/plan-accion.md`
+- Spec: legokna's perception/RL roadmap B.3; step 4 of the team's August plan
 - Not a rung — the ladder is closed ([[august-plan-closes-the-ladder]])

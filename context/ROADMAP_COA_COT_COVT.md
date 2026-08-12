@@ -7,7 +7,7 @@
 > Status: **phase 0 COMPLETE · phase 1 RUN → STOP · phase 3 CLOSED unrun · the perceptual branch
 > is the only live one, and it now has TWO entries — 4b (SurgVLM-DB domain adaptation, screen
 > pending, no blockers) and 4 (CoVT-lite, which still owes an answer to v05).**
-> Last updated 2026-07-31. Personal working copy: `local/tasks/roadmap-coa-cot-covt.md` (Spanish).
+> Last updated 2026-07-31. Personal working copy: legokna's private roadmap copy (Spanish).
 
 ## Why one document for three routes
 
@@ -189,7 +189,7 @@ did not have.
 **The screen — one question, zero GPU, and it can kill this for free:** *what fraction of
 `SurgVLM-DB` is laparoscopic cholecystectomy, and how many boxes cover the classes we confuse
 (clips, needles, sponges, specimen bags)?* Answered by reading the released part. Card:
-`local/tasks/surgvlm-db-domain-adapt.md`.
+legokna's vault card for it.
 
 ⚠️ **Not a free win.** It is extra training on a model that already works (A2); it may move nothing
 or hurt. Precedent exists (LLaVA-Med's curriculum recipe, ficha #5) but precedent is not a guarantee.

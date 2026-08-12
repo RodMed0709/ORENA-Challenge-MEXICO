@@ -7,8 +7,9 @@
 ## 🟢 2026-08-12 (pm) — the lane is RE-RAILED: the axis is fine-tuning, the first rung is 38, and the recipe queue is shared between backbones
 
 > Answers the 🔴 consequence logged below (*"our lane is now empty"*). This is a **plan**, not a
-> verdict: nothing here is measured yet. Owner: legokna. Local twin:
-> `local/tasks/re-encarrilamiento-agosto.md`.
+> verdict: nothing here is measured yet. Owner: legokna.
+> 📌 **The plan lives in `context/NEXT_STEPS.md`** — the full version with the gates, the control
+> numbers and the execution order. This entry is the summary; that file is the source.
 
 1. 🔑 **The axis is fine-tuning, and the record supports it.** Every input-side / external-module
    lever we have paid for came back marginal or negative — 12 (−0.026…−0.056), 14 (NULL, CI
@@ -66,8 +67,8 @@
 6. ⚠️ **Mechanics for #2 that have sunk controls before:** 3→6 epochs is **not a `resume`**. A2's
    cosine anneals to **lr 0.0** at step 2703; restoring `scheduler.pt` learns nothing and hands you
    a null control that flatters whatever it is compared against. It must be a **fresh** cosine over
-   6 epochs — the same trap `local/tasks/plan-accion.md` already flags in red for Rodrigo's step-9
-   paired control.
+   6 epochs — the same trap the team's August plan already flags in red for the paired control of
+   Rodrigo's step 9.
 7. ⚠️ **Reviving rung 27 is a change of FACTS, not a re-litigation.**
    [[august-plan-closes-the-ladder]] closed it UNRUN and installed *"a rung is revived because the
    plan asks for it, never because it exists."* It is revived here because step 7 died, step 8 was
@@ -137,7 +138,7 @@
    🔑 The five pairs reproduce their persistences **exactly** (0.611, 0.571, 0.615, 0.769, 0.367),
    which re-derives `RESULTS_controls.json` a third time.
 3. 🔴 **`G-BOUNDARY` fails a dry run on data we already had, and fails for the wrong reason.**
-   Scoring the 8 C1 frames already adjudicated in `local/fuentes/analisis-mascaras-sam2.md`:
+   Scoring the 8 C1 frames already adjudicated in legokna's mask-reading pass:
    **B1 = 0.625** (fails the ≥0.70 point estimate; CI [0.250, 0.875] fails the >0.50 clause) and
    **B2 = 0.800** (CI [0.400, 1.000] fails it). **All three `covered` failures are metallic clips**,
    and the adjudicator's own note on two of them hedges on whether the object is visible at all
@@ -178,7 +179,7 @@
    exported frames killed the interpretation**: in **all three `gold == 1` frames where a clip was
    visible, SAM masked none of them**, and the clips it does catch are the white/plastic ones ⇒
    **the separation is scene complexity, not clip count**
-   (`local/fuentes/analisis-mascaras-sam2.md`).
+   (legokna's mask-reading pass).
 3. 🟢 **And the same eye pass supplies rung 36's enabling fact:** SAM segments instruments, gauze
    and plastic clips well, and **does not merge tissue regions with foreign objects even where it
    over-segments tissue**. That is what makes the masks a usable localization target.
@@ -366,7 +367,7 @@ Five rungs in three days. Everything below is measured; the GPU is off and nothi
 1. 🟢 **Rung 31 — where the model looks, measured across four checkpoints.** 12 questions
    (6 ID / 6 OOD) paired over `base`, `rung02`, `rung06` and `a2`, 231 image tokens on a
    21×11 grid, read at the last prompt token. 🔑 **The headline is legokna's eye observation,
-   quantified** (`local/fuentes/analisis mascaras de atencion rung 31.md`): **every arm
+   quantified** (legokna's eye pass): **every arm
    attends the black letterbox**, which is **21.5% of the frame** — and fine-tuning
    progressively removes the bias. `base` **37.7%** (1.75× chance) → `rung02` 33.1% →
    `rung06` 25.2% → **`a2` 20.7%, i.e. at chance.** Correcting for it, content-only visual
@@ -515,8 +516,8 @@ the pre-registered cell may grant a win, any cell may veto one) is **not yet wri
    🔴 **n=11 cannot carry the pre-registered 0.10 difference in persistence**, and widening the
    gap is **not** a free parameter change — the entire argument is that at ≤1 s a track is the
    same physical instance **by construction**. At 30 s that claim is gone. **Not widened without
-   a decision.** Three options, none taken: run at ≤3 s (n=24, the wording `plan-accion.md`
-   itself uses) and accept the weaker claim; find the finer-grained source someone computed the
+   a decision.** Three options, none taken: run at ≤3 s (n=24, the wording the team's August plan
+   itself used) and accept the weaker claim; find the finer-grained source someone computed the
    1,257 from; or close the probe — which also closes step 7, which needs its masks.
 
 🟢 **The code is sound and runnable**, and needs **no new dependency**: SAM 2 ships inside our
@@ -542,7 +543,7 @@ not pre-registered, because reading it after the fact would be moving the goalpo
 ## 🔴 2026-08-06 — week 1's two gates are CLOSED: VCD dies, phase C replicates on `number`
 
 **One pod session, 1× RTX 5090, ~1 h 40 of GPU, zero training.** Both remaining week-1 gates of
-`local/tasks/plan-accion.md` ran to a verdict.
+the team's August plan ran to a verdict.
 
 1. 🔴 **Step 4 ran and VCD is dead — [[vcd-has-nothing-to-subtract]].** On all **228** frames
    where `Clip` is a false positive, degrading the image makes the model **less** confident in
@@ -645,7 +646,7 @@ recovered over S3 with no pod. Artifacts written to `/tmp` would not have been.
 ## 🟢 2026-08-05 — submission 02 is scored, BOTH baselines are beaten, and the local eval is inverted on OOD
 
 **Zero GPU, zero pod.** The whole session ran off two files: the official per-bucket scores
-(`local/fuentes/metrics.json`) and 15 `stratified.json` pulled off the volume over S3.
+(the platform's returned payload) and 15 `stratified.json` pulled off the volume over S3.
 
 1. 🟢 **Submission 02 scored 0.5288 — rank 11 — and it clears BOTH official baselines.**
    Fine-tuned baseline is rank **13** (0.5189), proprietary rank **30** (0.3883). Submission 01
@@ -807,7 +808,7 @@ blocker in front of it).
    NEGATIVE** vs A2 (ALL −0.0293, ID −0.0271, OOD −0.0353, all excluding zero) ⇒ slowing the tower
    HURTS ⇒ it is **not saturated** ⇒ the roadmap fork resolves toward the perceptual branch (on ONE arm — do not write it as settled). Arm C (6 epochs) died at 9%.
    ⚠️ Rung 24's `A_low` was effectively answered by `A3_vitlr` rebased on 2e-4; **`B_high` never ran
-   and is parked** (`local/tasks/vit-lr-decouple.md`). If resumed it goes as **rung 27** — Yingyu
+   and is parked** (legokna's vault card for it). If resumed it goes as **rung 27** — Yingyu
    took 24 for `24-geometric-aug` in `repo_yyy`.
 
 🔴 **Operational lesson, paid for twice today.** `/workspace` carries **three checkouts** and
@@ -840,7 +841,7 @@ under load — papermill works, bare `python -c` hangs.
    them**. 🔑 And it inverts the SAM 2 relation favourably — SAM 2 is **box-promptable**, so public
    boxes + frozen SAM 2 = **surgical masks at scale**, no annotation, no expert training. Screen
    before building: *what fraction is lap-chole, and how many boxes cover the classes we confuse?*
-   Zero GPU. Card: `local/tasks/surgvlm-db-domain-adapt.md`.
+   Zero GPU. Card: legokna's vault card for it.
 
 🟢 **~51 GB freed** (rungs 06 and 18 `merged/`, both regenerable, adapters verified intact) with
 rungs 20/21 untouched. ⚠️ `df -h /workspace` reports the whole MooseFS cluster, not our quota — it

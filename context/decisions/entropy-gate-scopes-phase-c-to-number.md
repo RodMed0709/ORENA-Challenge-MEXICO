@@ -95,4 +95,4 @@ normal profile, and the frame cache not growing is not a symptom of anything.
 - `experiments/10-self-consistency/` — `10b_entropy_gate.ipynb`
 - `RESULTS_step5_gate.csv` / `RESULTS_step5_verdict.json` / `RESULTS_step5_per_question.csv` (seed 42)
 - `RESULTS_step5_gate_seed43.csv` / `RESULTS_step5_verdict_seed43.json` / `RESULTS_step5_per_question_seed43.csv`
-- Step 5 of `local/tasks/plan-accion.md`; not a rung ([[august-plan-closes-the-ladder]])
+- Step 5 of the team's August plan; not a rung ([[august-plan-closes-the-ladder]])

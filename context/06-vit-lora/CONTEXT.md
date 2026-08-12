@@ -39,7 +39,7 @@ capacity branch (bigger model, higher resolution) is the wrong place to spend.
   falsified.** v1 demanded *"`number` acc@2 rises ≥ +0.05"* while the measured per-cell
   noise was ±0.06–0.13 — the threshold sat inside the noise, so any outcome would have
   "passed" or "failed" by chance. v1's target was also the pooled 8-template ID+OOD
-  number that `08-data-card` §3/§4b invalidated. See `local/specs/vit-lora/spec.md`.
+  number that `08-data-card` §3/§4b invalidated. See legokna's private spec.
 - **`dice@k`, not accuracy.** `acc_number` is not interpretable (8 templates, floors
   0.24–1.00, four degenerate). Only the 3 non-degenerate templates count, selected by
   criterion (`answer.nunique() >= 4`), never by a hand-written list.

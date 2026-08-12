@@ -3,14 +3,14 @@ question: Which pre-registered-but-unrun rungs survive the August plan, and whic
 verdict: Rungs 24 and 25 and the number-probe card are CLOSED-UNRUN — built, pre-registered, never launched, and not called for by any of the plan's ten steps. Rung 22 (loss-mass) is the only unrun rung that survives, and only as the pre-decided Plan B if step 5's entropy gate fails. A rung is revived because the plan asks for it, never because it exists.
 status: SETTLED
 date: 2026-08-03
-basis: zero GPU — sweep of every branch, experiment dir and vault card against local/tasks/plan-accion.md
+basis: zero GPU — sweep of every branch, experiment dir and vault card against the team's August plan
 ---
 
 # The August plan closes the ladder: what was built and will never run
 
 ## Why this note exists
 
-The plan agreed on 2026-08-01 (`local/tasks/plan-accion.md`, ten steps to 2026-08-31) was written
+The plan agreed on 2026-08-01 (the team's August plan, ten steps to 2026-08-31) was written
 to **kill what no longer serves**, not to add to a queue. But three rungs and several cards were
 sitting in the repo marked `todo` / `parked` / *"built, not launched"*, and a sweep two days later
 read them back as **pending work**. They are not pending. They are finished — as designs that the

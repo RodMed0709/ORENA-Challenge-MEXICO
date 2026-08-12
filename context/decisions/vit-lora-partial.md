@@ -68,7 +68,7 @@ the ViT"**. This was pre-registered as the expected ambiguity, not discovered af
 
 ## Sources
 - Pre-registered rule (v2, rewritten 2026-07-16 because v1 could not be falsified —
-  its ±0.05 threshold sat inside the measured ±0.06–0.13 noise): `local/specs/vit-lora/spec.md`.
+  its ±0.05 threshold sat inside the measured ±0.06–0.13 noise): legokna's private spec.
 - Run + gates + tensions: `experiments/06-vit-lora/README.md`.
 - Design decisions and reading preconditions: `context/06-vit-lora/CONTEXT.md`.
 - Verdict cells: `experiments/06-vit-lora/runs/06_vit_lora_v1/paired_delta.csv`.

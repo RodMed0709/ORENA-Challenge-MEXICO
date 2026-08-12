@@ -3,7 +3,7 @@ question: Should we domain-adapt SAM on surgical data (SurgΣ-DB, CholecInstance
 verdict: DEFERRED — not on cost, not on licence, and not on SAM's quality. The blocker is the LAST link: there is no known way to turn "better masks" into "better score" before Sep 8. The only mechanism that attaches segmentation knowledge to the VLM without shipping an expert is CoVT, which is already NO-GO; and the cheap alternative — feeding the model the segmented image — was measured on 2026-08-11 and moves the model AWAY from the gold
 status: SETTLED (deferred, revisit after Sep 8) — RE-AFFIRMED 2026-08-12, and the reason is sharpened to TIME
 date: 2026-08-11
-measured_in: experiments/37-attention-vs-masks/RESULTS_ab_overlay.json (n=40) · HF API listing of SurgSigma/SurgSigma-DB · local/fuentes/barrido-datasets-licencias.md
+measured_in: experiments/37-attention-vs-masks/RESULTS_ab_overlay.json (n=40) · HF API listing of SurgSigma/SurgSigma-DB · legokna's licence sweep
 ---
 
 # Decision: adapting SAM is not blocked by SAM — it is blocked by the last link
@@ -55,7 +55,7 @@ improves SAM where the 2026-08-11 dry run already scores it **5/5**.
 
 ## 🟢 What this decision does NOT block, and one repo fact it corrects
 
-**The data is real and it is ours to use.** 🔻 **`surgvlm-db-domain-adapt.md:113` says the images
+**The data is real and it is ours to use.** 🔻 **legokna's SurgVLM-DB vault card says the images
 are not in the package. That is FALSE and is corrected here.** Verified by listing the HF repo
 (5 files, `raw_data/` = **0 entries**) and by streaming `dense_prediction.tar.gz` (3.09 GB,
 **165,582 files**): `desmoke/` holds **55,194 real RGB surgical frames** (854×480, synthetically
@@ -86,14 +86,14 @@ the person whose call it is:**
    either — rung 35 already shipped a custom-loss adapter inside ms-swift, with LoRA. The real
    blockers are measured and are not about the harness: **+136 %** inference time against a hard
    5.0 s cap plus CoVT's own latent-filler tie ([[covt-reduced-sam-route]]), and
-   `plan-accion.md:177` — 8 segmentation tokens drop `number`'s share of the gradient from
+   **8 segmentation tokens** drop `number`'s share of the gradient from
    **20.8 % → 8.2 %**. 📌 Getting the reason right matters: a wrong reason can be refuted and put
    the route back on the table.
 2. **As a visual RL signal.** Depends on SAM masking *the objects we want seen*, not zones and
    tissue — i.e. it depends on the precision that [[g-boundary-fails-on-precision-not-coverage]]
    shows was never measured and that the same gate shows SAM does not have. Closing that needs
    retraining SAM, and the man-hours land on **pseudo-auto-labelling + human rectification**, which
-   is already NO-GO on measured grounds: `plan-accion.md:179` — 585-frame universe, the human sees
+   is already NO-GO on measured grounds: 585-frame universe, the human sees
    **2.4** where the gold says **7.7**, validation set **88.9 % tautological**.
 
 **The by-exclusion idea, and why the obvious corpus cannot carry it.** legokna proposed teaching

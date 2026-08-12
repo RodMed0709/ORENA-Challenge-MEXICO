@@ -30,7 +30,7 @@ lands on those masks. Step 7 was never built. 🔴 **This paragraph used to end 
 6's masks and closes with it" — that inference is withdrawn.** Depending on the masks is not
 depending on the verdict, and the masks exist.
 
-`plan-accion.md` calls step 6 *"el denominador de todo"*. That is exactly right, and it is why the
+The team's August plan calls step 6 *"el denominador de todo"*. That is exactly right, and it is why the
 closure matters rather than being bookkeeping.
 
 ## Why they close — four reasons, in order of weight
