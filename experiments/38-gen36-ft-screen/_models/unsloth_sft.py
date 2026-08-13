@@ -35,6 +35,12 @@ class Config:
     exp_dir: Path = Path(__file__).resolve().parents[1]
 
     # ── datos: el MISMO fichero de rung 18, con su sha256 aserido ─────────────
+    # ⚠️ APUNTA A `/workspace/repo`, NO al checkout donde vive este codigo. No es
+    #    un error: `experiments/*/runs/` esta GITIGNOREADO, asi que el train.jsonl
+    #    no viaja con el repo -- existe solo en el checkout que corrio el rung 18,
+    #    que es el compartido. Verificado 2026-08-13: 14.415 filas, 51 MB, y ni
+    #    repo_leo ni repo_rodri lo tienen. Para nosotros es de SOLO LECTURA.
+    #    Los frames que referencia viven en /workspace/frames_cache (15.213 ficheros).
     train_jsonl: Path = Path(
         "/workspace/repo/experiments/18-count-aug/runs/18_count_aug_v1/train.jsonl")
     train_sha256: str = "180e28f0325674197d52706beeabd846851bdd2875264b5c3505e0debfbd8e8b"
