@@ -1,0 +1,24 @@
+  27B gen-3.6 ep1 (901 pasos)  vs  A2 ep1 (checkpoint-901)
+==================================================================
+              metrica  A2_ep1  arm_27b   delta
+    proxy_leaderboard  0.4986   0.4643 -0.0344
+       aggregation_ID  0.3885   0.3707 -0.0178
+object_recognition_ID  0.6088   0.5579 -0.0509
+          bucket_mean  0.5592   0.5302 -0.0290
+           margin_OOD  0.1642   0.1388 -0.0255
+               acc_ID  0.5151   0.4787 -0.0364
+              acc_OOD  0.6240   0.5985 -0.0255
+
+control recalculado : proxy 0.4986 · bucket_mean 0.5592
+RESULTS_A2_lr.csv   : proxy 0.4986 · bucket_mean 0.5592
+
+LECTURA PRE-REGISTRADA (vs A2 época 1)
+   el proxy sube      : False  (-0.0344)
+   margin_OOD no cae  : False  (-0.0255)
+   -> NO ES UNA VICTORIA
+
+⚠️  Es un SUELO, no un techo: la receta A2 (lr 2e-4) es el óptimo hallado para el 8B,
+    no está portada a este backbone (README :129-130). Y el bucket_mean local
+    sobreestima +0.121 con obj_OOD invertido — usa el signo, no la magnitud.
+⚠️  Sin estimación de varianza por semilla: ninguna semilla se ha repetido nunca.
+EXIT=0
