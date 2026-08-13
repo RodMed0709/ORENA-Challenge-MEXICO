@@ -2,9 +2,21 @@
 
 **Ladder:** rung 37 (dead, `G-BOUNDARY` failed) → **38** → 39 connector (queued).
 
-**Status 2026-08-12: `G-VIABILITY` done except the arm. Pipeline, eval path and arm all BUILT and
-validated; the arm has not been run.** Everything below cost **zero training GPU** — one env build,
-two probes, and a 2-step smoke on a 2B. The arm runs on the pod, not here.
+**Status 2026-08-13: RUN, EVALUATED and CLOSED — 🔴 NO-GO at A2-verbatim.**
+Paired `ALL` **−0.0334** [−0.0642, −0.0027]; the pre-registered read fails on BOTH conditions
+(proxy −0.0344, `margin_OOD` −0.0255). Verdict, full analysis and the two WRONG deployability
+claims made while reading it: [[gen36-fails-the-8b-recipe-not-the-backbone-test]].
+Numbers in `RESULTS.csv`, `RESULTS_paired_ci_27b_vs_A2_ep1.csv`,
+`RESULTS_side_by_side_27b_vs_A2_ep1.csv`.
+
+🔑 **This closes the RECIPE TRANSPLANT, not the backbone.** The ID cell does not exclude zero, all
+the damage is in `object_recognition` while counting ties, and `lr 2e-4` is the **8B's** optimum —
+never ported (see §"A screen at A2-verbatim measures a floor", `:129-130`). **The live axis is the
+RECIPE.** 🔴 Do NOT scale this recipe to 3 epochs: no resume is possible (cosine already at lr 0 by
+step 901) so it costs ~9.5 h from scratch to scale a recipe already shown to sit wrong here.
+
+The `G-VIABILITY` work below cost **zero training GPU** — one env build, two probes, and a 2-step
+smoke on a 2B. The arm itself ran on the pod: 901 steps = 1 epoch, 3.17 h at 12.8 s/it.
 
 ## 🔑 The strongest reason, and it was already in the repo
 
