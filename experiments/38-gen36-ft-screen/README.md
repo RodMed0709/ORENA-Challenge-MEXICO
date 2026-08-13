@@ -9,6 +9,13 @@ claims made while reading it: [[gen36-fails-the-8b-recipe-not-the-backbone-test]
 Numbers in `RESULTS.csv`, `RESULTS_paired_ci_27b_vs_A2_ep1.csv`,
 `RESULTS_side_by_side_27b_vs_A2_ep1.csv`.
 
+⚠️ **`evidence_ep1/` and the `RESULTS_eval_27b_ep1_*` files are ONE run, not two.**
+`evidence_ep1/{results.csv,VERDICT.txt,eval_27b_ep1_full.log}` was captured from the pod log by a
+teammate; `RESULTS_eval_27b_ep1_{report.json,summary.csv,predictions.json,inspect.csv}` was pulled
+off the S3 volume from the same run directory. `results.csv` was byte-identical in both, so the
+duplicate copy was dropped — **`evidence_ep1/results.csv` is the per-question file.** There is no
+independent replication of this arm, and no seed has ever been repeated.
+
 🔑 **This closes the RECIPE TRANSPLANT, not the backbone.** The ID cell does not exclude zero, all
 the damage is in `object_recognition` while counting ties, and `lr 2e-4` is the **8B's** optimum —
 never ported (see §"A screen at A2-verbatim measures a floor", `:129-130`). **The live axis is the
