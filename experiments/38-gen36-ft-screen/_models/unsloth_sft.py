@@ -16,7 +16,7 @@ USO (celda de notebook, según CONSTITUTION §VIII):
 import unsloth  # noqa: F401  ← primero, a propósito
 from unsloth import FastVisionModel
 
-import json, os, subprocess, sys, time
+import json, os, shutil, subprocess, sys, time
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
@@ -66,6 +66,12 @@ class Config:
     save_steps: int = 100
     save_total_limit: int = 2       # ~400 MB cada uno (adapter + estado adamw_8bit)
     resume: bool = True             # reanuda solo si ya hay un checkpoint en ckpt/
+
+    # ── cuota del volumen (ver disk_free_gib) ─────────────────────────────────
+    volume_root: Path = Path("/workspace")
+    volume_quota_gib: float = 640.0   # el tope de RunPod; `df` NO lo ve. None = no comprobar
+    du_timeout_s: int = 300           # `du` sobre MooseFS no es gratis
+    merge_need_gib: float = 60.0      # el merge escribe ~1x el modelo (27B bf16 ≈ 52 GB)
 
     # ── superficie que LoRA toca ──────────────────────────────────────────────
     finetune_vision_layers: bool = True       # equivalente a --freeze_vit false
@@ -122,13 +128,52 @@ def assert_gpu_is_free(cfg: Config) -> dict:
     return {"per_gpu_used_mib": state, "compute_apps": q}
 
 
+def disk_free_gib(cfg: "Config", need_gib: float, when: str) -> dict:
+    """Espacio libre REAL en el volumen, que no es el que reporta el sistema.
+
+    🔴 `shutil.disk_usage` es `statvfs`, o sea la MISMA mentira que `df`: en RunPod
+       reporta el cluster MooseFS (~320 TB libres) y no la cuota del volumen
+       (~640 GB), que es invisible para el kernel. Medido 2026-08-13: la guarda
+       imprimio "319807.2 GiB libres" en un volumen con ~126 GB de margen.
+       `mfsgetquota` no esta instalado, asi que no hay forma de preguntar por la
+       cuota: la unica medida honesta es sumar lo ocupado y restarlo del tope.
+
+    `du` sobre un volumen de red no es gratis, por eso va con timeout y por eso
+    degrada a un aviso en vez de tumbar el run: preferimos entrenar con la duda a
+    no entrenar por una comprobacion.
+    """
+    out = {"statvfs_free_gib_NO_FIABLE":
+           round(shutil.disk_usage(cfg.run_dir).free / 2**30, 1)}
+    if not cfg.volume_quota_gib:
+        return out
+    try:
+        r = subprocess.run(["du", "-sx", "--block-size=1", str(cfg.volume_root)],
+                           capture_output=True, text=True, timeout=cfg.du_timeout_s)
+        used = int(r.stdout.split()[0]) / 2**30
+    except Exception as e:                       # timeout, permisos, du ausente
+        out["quota_check"] = f"NO CONCLUYENTE ({type(e).__name__}) — sigo sin garantia"
+        print(f"⚠️  {when}: no pude medir la cuota ({type(e).__name__}); sigo a ciegas")
+        return out
+    free = cfg.volume_quota_gib - used
+    out |= {"quota_used_gib": round(used, 1), "quota_free_gib": round(free, 1),
+            "need_gib": need_gib}
+    print(f"    {when}: {free:.1f} GiB libres de cuota (necesito ~{need_gib:.0f})")
+    if free < need_gib:
+        raise AssertionError(
+            f"{when}: quedan {free:.1f} GiB de la cuota de {cfg.volume_quota_gib:.0f} "
+            f"y hacen falta ~{need_gib:.0f}. Poda antes de seguir; morir a mitad "
+            "deja basura que hay que barrer a mano. (volume_quota_gib=None lo salta.)"
+        )
+    return out
+
+
 def _heartbeat(run_dir: Path, **kw) -> None:
     """Para saber dónde iba un run de horas sin abrir un train.log gigante."""
     (run_dir / "HEARTBEAT.json").write_text(
         json.dumps({"ts": time.strftime("%Y-%m-%d %H:%M:%S"), **kw}, indent=2))
 
 
-def _progress_callback(run_dir: Path, t0: float):
+def _progress_callback(run_dir: Path, t0: float, start_step: int = 0):
     """Latido POR PASO + `train.log` en disco.
 
     Antes el heartbeat solo marcaba train_start/merging/done: durante ~6 h de
@@ -140,18 +185,20 @@ def _progress_callback(run_dir: Path, t0: float):
     class _P(TrainerCallback):
         # En un run reanudado `global_step` arranca alto pero el reloj arranca en
         # cero: dividir uno por otro daria un s/it inventado. El ritmo se mide
-        # sobre los pasos de ESTA sesion.
-        step0 = None
-
+        # sobre los pasos de ESTA sesion, y el origen es el checkpoint del que se
+        # reanudo (0 si el run es limpio).
+        #
+        # 🔴 Antes esto tomaba como origen el PRIMER on_log, y `logging_steps=10`
+        #    hace que el primero sea el paso 10: en un run limpio salia un s/it
+        #    inflado ~2x (tiempo de compilacion + 20 pasos dividido entre 10) y un
+        #    ETA que mentia hacia arriba. Visto en vivo 2026-08-13, paso 10.
         def on_log(self, args, state, control, logs=None, **kw):
             if not logs:
                 return
             done, total = state.global_step, state.max_steps
-            if self.step0 is None:
-                self.step0 = done
             elapsed = time.time() - t0
-            this_session = done - self.step0
-            s_it = elapsed / this_session if this_session else 0.0
+            this_session = done - start_step
+            s_it = elapsed / this_session if this_session > 0 else 0.0
             _heartbeat(
                 run_dir, stage="training", step=done, max_steps=total,
                 pct=round(100 * done / total, 1) if total else None,
@@ -256,13 +303,15 @@ def main(cfg: Config) -> dict:
 
     # El disco tambien se comprueba ANTES de entrenar, no solo antes del merge:
     # quedarse sin cuota a mitad de la epoca tira el run igual que tiro el merge.
-    import shutil
-    R["free_gib_before_train"] = round(shutil.disk_usage(cfg.run_dir).free / 2**30, 1)
-    print(f"    libre antes de entrenar: {R['free_gib_before_train']} GiB")
+    # Aqui hace falta poco (2 checkpoints x ~0,4 GB), pero si ya estamos al limite
+    # antes de empezar, mejor saberlo ahora que en la hora 5.
+    R["disk_before_train"] = disk_free_gib(cfg, need_gib=5.0, when="antes de entrenar")
 
     _heartbeat(cfg.run_dir, stage="train_start", rows=len(ds), resumed_from=last)
     t0 = time.time()
-    tr.add_callback(_progress_callback(cfg.run_dir, t0))
+    # el origen del ritmo: el paso del checkpoint reanudado, 0 si el run es limpio
+    start_step = int(Path(last).name.split("-")[-1]) if last else 0
+    tr.add_callback(_progress_callback(cfg.run_dir, t0, start_step))
     stats = tr.train(resume_from_checkpoint=last)
     R["train_secs"] = round(time.time() - t0, 1)
     R["train_loss"] = float(stats.training_loss)
@@ -280,9 +329,8 @@ def main(cfg: Config) -> dict:
 
     # El merge necesita ~1x el tamano del modelo en disco. Comprobarlo antes de
     # empezar a copiar 15 shards: fallar a mitad deja basura que hay que barrer.
-    free_gib = shutil.disk_usage(cfg.run_dir).free / 2**30
-    R["free_gib_before_merge"] = round(free_gib, 1)
-    print(f"    libre antes del merge: {free_gib:.1f} GiB")
+    R["disk_before_merge"] = disk_free_gib(
+        cfg, need_gib=cfg.merge_need_gib, when="antes del merge")
 
     _heartbeat(cfg.run_dir, stage="merging")
     model.save_pretrained_merged(str(cfg.run_dir / "merged"), tok)
