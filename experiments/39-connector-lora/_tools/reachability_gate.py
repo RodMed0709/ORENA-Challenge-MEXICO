@@ -72,6 +72,7 @@ from __future__ import annotations
 import itertools
 import json
 import os
+import re
 import shlex
 import subprocess
 from dataclasses import dataclass, field, replace
@@ -294,15 +295,28 @@ def _adapter_config_names(ckpt_dir: Path) -> dict:
     independent readings, because one instrument agreeing with itself is not evidence.
 
     ms-swift may serialise ``target_modules`` as a list OR as a single expanded regex string
-    (``get_multimodal_target_regex``), so the check is a substring search over the serialised text
-    rather than set membership — a shape assumption here would turn a real pass into a false alarm.
+    (``get_multimodal_target_regex``), so the shape is resolved before matching — a shape
+    assumption here would turn a real pass into a false alarm.
+
+    🔻 **Corrected 2026-08-13, AFTER the first run and WITHOUT touching the criterion.** The
+    original mitigation anticipated the regex shape but searched it as a substring, which cannot
+    hit: ms-swift emits an *escaped* pattern, so the literal ``model.visual.merger.linear_fc1``
+    does not occur inside ``model\\.visual\\.merger(?=\\.).*\\.(linear_fc2|linear_fc1)``. The
+    first run therefore reported 0 of 8 named while the adapter demonstrably carried all 16
+    merger tensors — a false negative in the cross-check, not a scientific failure.
+    Matching the pattern against each name is the correct reading and a STRICTER one than the
+    substring test it replaces: a coincidental substring can pass, ``re.fullmatch`` cannot.
+    The criterion is unchanged — ms-swift's own config must cover all 8 merger layers.
     """
     path = Path(ckpt_dir) / "adapter_config.json"
     if not path.exists():
         return {"adapter_config": None, "found": [], "missing": list(MERGER_TARGETS)}
     raw = json.loads(path.read_text(encoding="utf-8")).get("target_modules")
-    blob = json.dumps(raw)
-    found = [name for name in MERGER_TARGETS if name in blob]
+    if isinstance(raw, str):
+        found = [name for name in MERGER_TARGETS if re.fullmatch(raw, name)]
+    else:
+        blob = json.dumps(raw)
+        found = [name for name in MERGER_TARGETS if name in blob]
     return {
         "adapter_config": str(path),
         "target_modules_raw": raw,
