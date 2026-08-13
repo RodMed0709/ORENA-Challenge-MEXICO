@@ -58,6 +58,15 @@ class Config:
     seed: int = 42
     max_seq_length: int = 2048
 
+    # ── supervivencia de un run de ~6 h ───────────────────────────────────────
+    # 🔴 `save_strategy="epoch"` con 1 epoca guarda UNA sola vez, al final: morir
+    #    en la hora 5 de 5,9 costaba las 5 horas enteras. 900,9 pasos / 100 => un
+    #    checkpoint cada ~39 min. Ninguna de estas opciones toca la matematica del
+    #    entrenamiento (misma receta, mismo seed): el brazo sigue siendo el mismo.
+    save_steps: int = 100
+    save_total_limit: int = 2       # ~400 MB cada uno (adapter + estado adamw_8bit)
+    resume: bool = True             # reanuda solo si ya hay un checkpoint en ckpt/
+
     # ── superficie que LoRA toca ──────────────────────────────────────────────
     finetune_vision_layers: bool = True       # equivalente a --freeze_vit false
     finetune_language_layers: bool = True
@@ -119,6 +128,46 @@ def _heartbeat(run_dir: Path, **kw) -> None:
         json.dumps({"ts": time.strftime("%Y-%m-%d %H:%M:%S"), **kw}, indent=2))
 
 
+def _progress_callback(run_dir: Path, t0: float):
+    """Latido POR PASO + `train.log` en disco.
+
+    Antes el heartbeat solo marcaba train_start/merging/done: durante ~6 h de
+    entrenamiento no decia nada, asi que no habia forma de saber por donde iba un
+    run sin mirar el scrollback de tmux (que no es un fichero y se pierde).
+    """
+    from transformers import TrainerCallback
+
+    class _P(TrainerCallback):
+        # En un run reanudado `global_step` arranca alto pero el reloj arranca en
+        # cero: dividir uno por otro daria un s/it inventado. El ritmo se mide
+        # sobre los pasos de ESTA sesion.
+        step0 = None
+
+        def on_log(self, args, state, control, logs=None, **kw):
+            if not logs:
+                return
+            done, total = state.global_step, state.max_steps
+            if self.step0 is None:
+                self.step0 = done
+            elapsed = time.time() - t0
+            this_session = done - self.step0
+            s_it = elapsed / this_session if this_session else 0.0
+            _heartbeat(
+                run_dir, stage="training", step=done, max_steps=total,
+                pct=round(100 * done / total, 1) if total else None,
+                loss=logs.get("loss"),
+                # `None` y no 0 en el primer latido tras reanudar: todavia no hay
+                # ningun paso de esta sesion, y un ETA de 0,0 h es una mentira.
+                s_per_step=round(s_it, 2) if s_it else None,
+                eta_h=round((total - done) * s_it / 3600, 2) if (total and s_it) else None,
+            )
+            with (run_dir / "train.log").open("a") as f:
+                f.write(f"{time.strftime('%H:%M:%S')} step {done}/{total} "
+                        f"{json.dumps(logs)}\n")
+
+    return _P()
+
+
 # ── el brazo ─────────────────────────────────────────────────────────────────
 
 def main(cfg: Config) -> dict:
@@ -176,7 +225,12 @@ def main(cfg: Config) -> dict:
         optim="adamw_8bit",
         bf16=True,
         logging_steps=10,
-        save_strategy="epoch",          # recuperable si muere a media noche
+        # El smoke son 2 pasos: guardar solo ensucia runs/ sin comprar nada.
+        **({"save_strategy": "no"} if cfg.smoke else {
+            "save_strategy": "steps",
+            "save_steps": cfg.save_steps,
+            "save_total_limit": cfg.save_total_limit,
+        }),
         output_dir=str(cfg.run_dir / "ckpt"),
         report_to="none",
         remove_unused_columns=False,
@@ -188,9 +242,28 @@ def main(cfg: Config) -> dict:
     tr = SFTTrainer(model=model, train_dataset=ds,
                     data_collator=UnslothVisionDataCollator(model, tok), args=args)
 
-    _heartbeat(cfg.run_dir, stage="train_start", rows=len(ds))
+    # ¿Hay un run muerto que continuar? Si lo hay se reanuda desde su paso; si no,
+    # `get_last_checkpoint` devuelve None y esto es un arranque limpio. Se registra
+    # SIEMPRE en los resultados: un numero que sale de un run reanudado tiene que
+    # poder identificarse como tal.
+    from transformers.trainer_utils import get_last_checkpoint
+    ckpt_dir = cfg.run_dir / "ckpt"
+    last = get_last_checkpoint(str(ckpt_dir)) if (
+        cfg.resume and not cfg.smoke and ckpt_dir.is_dir()) else None
+    R["resumed_from"] = last
+    if last:
+        print(f"⏩ reanudando desde {last}")
+
+    # El disco tambien se comprueba ANTES de entrenar, no solo antes del merge:
+    # quedarse sin cuota a mitad de la epoca tira el run igual que tiro el merge.
+    import shutil
+    R["free_gib_before_train"] = round(shutil.disk_usage(cfg.run_dir).free / 2**30, 1)
+    print(f"    libre antes de entrenar: {R['free_gib_before_train']} GiB")
+
+    _heartbeat(cfg.run_dir, stage="train_start", rows=len(ds), resumed_from=last)
     t0 = time.time()
-    stats = tr.train()
+    tr.add_callback(_progress_callback(cfg.run_dir, t0))
+    stats = tr.train(resume_from_checkpoint=last)
     R["train_secs"] = round(time.time() - t0, 1)
     R["train_loss"] = float(stats.training_loss)
     R["peak_vram_gib"] = round(torch.cuda.max_memory_allocated() / 2**30, 2)
@@ -207,7 +280,6 @@ def main(cfg: Config) -> dict:
 
     # El merge necesita ~1x el tamano del modelo en disco. Comprobarlo antes de
     # empezar a copiar 15 shards: fallar a mitad deja basura que hay que barrer.
-    import shutil
     free_gib = shutil.disk_usage(cfg.run_dir).free / 2**30
     R["free_gib_before_merge"] = round(free_gib, 1)
     print(f"    libre antes del merge: {free_gib:.1f} GiB")
