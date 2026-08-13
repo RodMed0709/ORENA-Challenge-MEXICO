@@ -19,13 +19,60 @@
 
 ## 🔴 Read this before anything else: there is no label-matched data
 
-Three independent dataset sweeps agree: **no public dataset annotates applied surgical clips.**
-Clip *appliers* (the "Clipper" tool) are annotated everywhere; the clips themselves nowhere. Same
-for gauze in real human laparoscopy and for needles in the abdomen. And **83% of our per-class
-counting questions are `Clip`**.
+> 🔻 **AMENDED 2026-08-13 — the original claim below was FALSE and it changed this rung's
+> conclusion.** It read: *"Three independent dataset sweeps agree: **no public dataset annotates
+> applied surgical clips.**"* It is kept here struck through rather than deleted, because it was
+> cited as settled for three weeks and anyone who read it killed the external-data idea before
+> reaching a gate.
 
-⇒ Every option here is a **transfer bet on a generic enumeration prior**, not supervision on our
-label. That is stated up front so a faithful negative reads as an answer, not a failure.
+~~Three independent dataset sweeps agree: **no public dataset annotates applied surgical
+clips.**~~ **HeiSurF does.** HeiChole Surgical Workflow Analysis and Full Scene Segmentation
+(EndoVis 2021, Synapse `syn25101790`, public since 2021 ⇒ clears the 2026-07-15 external-data
+gate) annotates laparoscopic cholecystectomy at pixel level across 21 classes, and among them are
+**clips**, **specimen bags** and **drains** — three of our own foreign-object labels, not a
+transfer proxy. Its 720×576 matches our `frames_cache` exactly. CC BY-NC-SA, which
+[[external-data-policy]] already settled as permitted, and the challenge design confirms our 170
+cholecystectomies are Wellcome Leap SAVE and **not public**, so there is zero overlap by
+construction.
+
+What the original claim got right and still holds: clip *appliers* (the "Clipper" tool) are
+annotated far more widely than clips; and there is still nothing label-matched for gauze in real
+human laparoscopy or for needles in the abdomen. And **83% of our per-class counting questions are
+`Clip`** — true of *per-class* questions, which are 39.3% of the `number` format; over all 6,356
+counting questions, 60.7% name no class at all.
+
+⇒ The gauze and needle options here remain a **transfer bet on a generic enumeration prior**. The
+`Clip` option is not — it is a candidate for supervision on our own label, and it is what
+[[fo-class-is-the-new-front]] rests on.
+
+### The gate — `_tools/heisurf_gate.py`, stage 0 MEASURED 2026-08-13
+
+🔴 **Measured with metadata alone, no download, and it is nearly disqualifying:**
+
+| | |
+|---|---|
+| annotated frames, main segmentation | 466 across 24 videos |
+| annotated frames, dedicated `Clipping` set | 115 (23 subfolders × exactly 5) |
+| **ceiling on clip-bearing frames** | **581 — the whole release** |
+| pre-registered kill line | `n_clip_frames < 300` |
+| ⇒ fraction of *every* annotated frame that must show a clip to pass | **52 %** |
+
+Clipping is one phase of a cholecystectomy, and the release's own dedicated `Clipping` set is
+**below the line on its own**. The volume question is therefore mostly settled *against* us before
+a mask is opened — which is the gate doing its job for the price of a metadata call.
+`RESULTS_heisurf_gate.json`.
+
+🔴 **Stage 1 is BLOCKED on access, and it is not a DUA.** `canDownload=False` on `syn25101790`
+for the `RodMed0709` account, while the **same token downloads ROBUST-MIS (`syn21870038`) fine**,
+and the entity carries **zero access requirements**. It is the project ACL — HeiSurF grants
+download on challenge registration. **Fix: register at https://www.synapse.org/heisurf with that
+account.** Until then measures 1–4 cannot be taken and no workaround is attempted.
+
+⚠️ **And measure 4 is the one that decides it, not the volume:** whether HeiSurF's clip masks
+cover clips **still inside the applier jaws**, which the ORENA definition explicitly excludes.
+That is target-side noise, priced at ~21 % damage by [[target-noise-is-the-harmful-kind]]. No
+script settles it — `stage1` exports a sample for a human pass, the move that killed rung 29's C1
+interpretation *after* it had already passed its numeric threshold.
 
 ## The two phases, and why the probe comes first
 
