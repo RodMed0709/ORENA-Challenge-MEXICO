@@ -82,6 +82,31 @@ Two defects found, both of which would have surfaced mid-pod-session:
 
 📌 **443 prompt tokens** for one image at `max_pixels` 1280×720 — the figure to budget latency with.
 
+## ✅ Measured on the pod with REAL data (2026-08-13) — `RESULTS_smoke_pod_27b.json`
+
+First time the pipeline touched challenge data. A100 80GB, `Qwen3.6-27B`, 2 steps, 32 rows.
+
+| | |
+|---|---|
+| guards (sha256 + free GPU) | ✅ both passed |
+| LoRA | `visual` **108** · `language_model` **496** · **`merger` 0** — confirmed on the real 27B, not just the 2B |
+| trainable | 62,213,888 |
+| **peak VRAM** | **52.64 GiB** |
+| **sustained s/it** | **~23.5 s** (step 1 was 230.6 s — compile + warm-up) |
+| **⇒ one epoch** | **~5.9 h**, not the ~9.8 h extrapolated from scaling the 8B |
+
+🔴 **52.64 GiB does not fit a 48 GB card.** The arm needs ≥80 GB (A100) or the 96 GB PRO 6000.
+
+🔴 **The run died at the merge: `Disk quota exceeded`.** RunPod network volumes carry a **quota**
+(~640 GB here) that `df` does not show — `df` reports the MooseFS cluster's free space (314 TB) and
+is actively misleading. Fixed by deleting the partial merge (47 G) and pruning `qwen3-vl-32b`
+(63 G, the rung-09 generator, NO-GO per [[generator-32b-is-not-a-teacher]]) plus the substitute
+judge `Qwen3-4B` (7.6 G). Volume 631 → 514 GB, leaving ~126 GB against a 52 GiB merge.
+
+📌 **Engine fixed as a result:** `RESULTS_train.json` is now written **before** the merge, and free
+disk is checked and recorded first. A fragile expensive step must not be able to erase the evidence
+of one that already succeeded.
+
 ## What is NOT done
 
 1. ⬜ **The arm has not been run.** It needs the challenge data, so it runs on the pod.

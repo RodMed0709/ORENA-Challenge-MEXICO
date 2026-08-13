@@ -4,6 +4,35 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-12**.
 
+## 🟢 2026-08-13 — the arm is STAGED on the pod, and the real numbers are better than the estimate
+
+> Everything below is measured on the pod with **real challenge data** — the first time this
+> pipeline has touched it. `experiments/38-gen36-ft-screen/RESULTS_smoke_pod_27b.json`.
+
+1. 🟢 **One epoch is ~5.9 h, not ~9.8.** Sustained **23.5 s/it** (step 1 was 230.6 s: compile and
+   warm-up), × 900.9 steps. The extrapolation from scaling the 8B was wrong **by excess**, which
+   widens the window rather than closing it. ⚠️ One sustained-step measurement; treat as indicative.
+2. 🔴 **Peak VRAM 52.64 GiB — the arm does NOT fit a 48 GB card.** It needs ≥80 GB. Measured, not
+   estimated, and it decides which GPU to rent.
+3. 🟢 **`merger: 0` holds on the real 27B**, not just the 2B — `visual` 108, `language_model` 496,
+   62.2 M trainable. [[the-merger-is-unreachable-by-default]] is confirmed at scale.
+4. 🔴 **`df` LIES about RunPod volumes.** It reports the MooseFS cluster (314 TB free); the volume
+   carries a **quota** (~640 GB) invisible to it. The run died mid-merge on `Disk quota exceeded`
+   after I had told legokna there was no space problem — **his instinct to prune was right and I
+   talked him out of it.** Fixed: partial merge deleted (47 G) and `qwen3-vl-32b` pruned (63 G,
+   NO-GO generator) plus the substitute judge (7.6 G). **631 → 514 GB, ~126 GB free.**
+5. 🟡 **Unsloth's own documented install produced a CPU-only torch** here
+   (`--torch-backend=auto` → `torch 2.11.0+cpu`, `torchvision 0.2.0`) on a machine with an A100.
+   Fixed with an explicit `--torch-backend=cu128`. 📌 Neither install route is reliable on its own —
+   what caught it both times was **asserting `torch.cuda.is_available()` and the capability after
+   installing**, which is what cell 1 does.
+6. 🟢 **Staged and ready:** branch `task/rung38-gen36-screen` in `/workspace/repo_leo`, the 27B
+   cached (52 G), data verified (14,415 rows + 15,213 frames), env functional. ⚠️ The env was built
+   against an A100 (sm_80); cu128 wheels cover sm_120 too, but that is untested.
+7. 📌 **`/workspace/repo` was touched and restored.** It is the *shared* checkout, on
+   `task/r3-rung16`; I moved it to main before noticing, then put it back at `6202909` with its
+   untracked file returned. Work happens in `repo_leo`, on a branch.
+
 ## 🟢 2026-08-12 (close) — rung 38 is BUILT AND READY TO LAUNCH. Nothing technical is unresolved; it needs a pod and someone to press go.
 
 > **Handoff.** legokna had to step away before launching. `experiments/38-gen36-ft-screen/01_gen36_screen.ipynb`

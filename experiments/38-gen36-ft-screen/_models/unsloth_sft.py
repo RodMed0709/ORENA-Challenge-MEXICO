@@ -196,8 +196,22 @@ def main(cfg: Config) -> dict:
     R["peak_vram_gib"] = round(torch.cuda.max_memory_allocated() / 2**30, 2)
     print(f"loss {R['train_loss']:.4f} · {R['train_secs']}s · pico {R['peak_vram_gib']} GiB")
 
+    # 🔴 Escribir los resultados ANTES del merge. Medido 2026-08-13: el merge
+    #    murio por cuota de disco y se llevo por delante todos los numeros de
+    #    entrenamiento, que ya estaban calculados. Un paso caro y fragil no debe
+    #    poder borrar la evidencia de uno que ya salio bien.
+    (cfg.run_dir / "RESULTS_train.json").write_text(json.dumps(R, indent=2))
+
     model.save_pretrained(str(cfg.run_dir / "adapter"))
     tok.save_pretrained(str(cfg.run_dir / "adapter"))
+
+    # El merge necesita ~1x el tamano del modelo en disco. Comprobarlo antes de
+    # empezar a copiar 15 shards: fallar a mitad deja basura que hay que barrer.
+    import shutil
+    free_gib = shutil.disk_usage(cfg.run_dir).free / 2**30
+    R["free_gib_before_merge"] = round(free_gib, 1)
+    print(f"    libre antes del merge: {free_gib:.1f} GiB")
+
     _heartbeat(cfg.run_dir, stage="merging")
     model.save_pretrained_merged(str(cfg.run_dir / "merged"), tok)
 

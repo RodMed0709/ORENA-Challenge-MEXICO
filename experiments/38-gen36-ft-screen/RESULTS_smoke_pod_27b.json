@@ -1,0 +1,53 @@
+{
+  "_note": "Transcrito del log del run: el proceso murio en el merge por cuota de disco, ANTES de escribir RESULTS_train.json. El engine ya se corrigio para escribirlo antes del merge.",
+  "date": "2026-08-13",
+  "where": "RunPod, NVIDIA A100 80GB PCIe (Ampere sm_80)",
+  "model": "Qwen/Qwen3.6-27B",
+  "run_name": "38_smoke",
+  "smoke": true,
+  "smoke_steps": 2,
+  "smoke_rows": 32,
+  "gradient_accumulation_steps": 16,
+
+  "guards": {
+    "dataset_sha256_ok": true,
+    "gpu_free_ok": true,
+    "rows_converted": 32,
+    "note": "primera vez que el conversor toca datos del challenge, no frames publicos"
+  },
+
+  "lora_by_part": {
+    "visual": 108,
+    "merger": 0,
+    "deepstack": 0,
+    "language_model": 496
+  },
+  "trainable": 62213888,
+
+  "peak_vram_gib": 52.64,
+  "train_loss": 5.7862,
+  "train_runtime_s": 254,
+
+  "s_per_it": {
+    "step_1": 230.56,
+    "step_2_sustained": 23.5,
+    "note": "el paso 1 incluye compilacion y calentamiento. El sostenido es el paso 2, y es UNA sola medicion.",
+    "epoch_projection_h": 5.9,
+    "projection_basis": "23.5 s/it x 900.9 pasos (14415 filas / batch efectivo 16)"
+  },
+
+  "failure": {
+    "stage": "save_pretrained_merged",
+    "error": "OSError [Errno 122] Disk quota exceeded",
+    "at_file": "model-00013-of-00015.safetensors",
+    "cause": "cuota del volumen de RunPod (~640 GB), NO espacio del filesystem. `df` muestra el espacio del cluster MooseFS (314 TB) y es enganoso.",
+    "resolved": "borrado el merge parcial (47 G) + podados qwen3-vl-32b (63 G, generador NO-GO del rung 09) y el judge sustituto Qwen3-4B (7.6 G). Volumen 631 -> 514 GB."
+  },
+
+  "consequences": [
+    "El s/it real es ~23.5, no los ~39 que se extrapolaron de escalar el 8B. Una epoca son ~5.9 h, no ~9.8.",
+    "🔴 El pico de 52.64 GiB NO CABE en una tarjeta de 48 GB. Hace falta >=80 GB (A100) o la PRO 6000 de 96.",
+    "`merger: 0` se confirma tambien sobre el 27B real, no solo sobre el 2B del smoke de UNAM.",
+    "El merge necesita ~52 GiB libres y tarda ~14 s por shard x 15 shards."
+  ]
+}
