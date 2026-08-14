@@ -7,6 +7,7 @@
 | `01_lr_group_gate.ipynb` | 40-G4 | connector LR applies? | 🟢 **PASS** — ratio 6.31 (esperado ~5) |
 | `02_alpha_arm.ipynb` | 40-A | `proxy_leaderboard` | 🟡 **smoke OK** — arm pending a pod |
 | `03_connector_arm.ipynb` | 40-B | `proxy_leaderboard` | 🟡 **smoke OK** — arm pending a pod |
+| `04_eval.ipynb` | 40-eval | `proxy_leaderboard` vs rung 38 | 🟡 **written + verdict logic tested** — needs the pod |
 
 **Status: gate RAN (2026-08-13, UNAM, RTX 6000 Ada). Arms NOT RUN.**
 

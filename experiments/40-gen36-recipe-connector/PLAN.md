@@ -257,6 +257,14 @@ next negative is not blamed on the alpha change by default.
 > 🔴 Rung 38 shipped three undeclared deviations. **Anything not on this list is a defect, not a
 > detail.**
 
+## 5b. 🧹 Cleanup owed (CONSTITUTION §IX)
+
+`/data/uaq_user/tmp/leo_gate40`, `leo_gate40_lr`, `leo_arm40` on UNAM — **14.8 GB**, kept
+deliberately until the arms have run on a pod, because a pod failure reproduces cheaply there and
+rebuilding the environment costs more than the disk. The executed notebooks are already preserved in
+`runs/unam-2026-08-13/`. Also installed there, with permission: `papermill` + `ipykernel` in
+`orena-unsloth`.
+
 ## 6. Order of operations
 
 1. Merge gate (§2) on a small GPU. **Blocking.**
