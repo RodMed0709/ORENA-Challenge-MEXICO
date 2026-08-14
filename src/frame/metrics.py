@@ -1497,3 +1497,17 @@ def leaderboard_proxy(report: dict) -> dict:
         out[key] = float(idc.loc[group, "accuracy"]) if group in idc.index else float("nan")
     out["proxy"] = (out["aggregation_ID"] + out["object_recognition_ID"]) / 2
     return out
+
+
+def dist_from_qid(qid) -> str:
+    """Public name for the canonical ID/OOD derivation. Delegates, never duplicates.
+
+    Exposed on 2026-08-14 because rung 40's paired CI re-derived it by hand as
+    ``qID.split("_")[0].upper()`` and fell back to ``"ID"`` when that did not match —
+    which is ALWAYS, since the prefix is the dataset (``heico``/``lapchole``) and the
+    separator is a double underscore. Every OOD question was silently scored as ID: the
+    paired CI reported n=6252 for ID and n=0 for OOD against a control whose own report
+    says acc_OOD=0.5985. A private helper that callers cannot reach is an invitation to
+    reimplement it badly, so it has a public name now.
+    """
+    return _dist_from_qid(qid)

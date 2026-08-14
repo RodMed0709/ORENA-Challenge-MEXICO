@@ -260,9 +260,15 @@ def paired_vs_control(arm_results_csv: str, cfg: EvalConfig, seed: int = 0) -> d
         )
 
     merged = ctl.merge(arm, on=key, suffixes=("_a", "_b"))
-    # ID/OOD from the qID PREFIX (RULES §3), never from a results column.
-    merged["_dist"] = merged[key].astype(str).str.split("_").str[0].str.upper()
-    merged["_dist"] = merged["_dist"].where(merged["_dist"].isin(["ID", "OOD"]), "ID")
+    # ID/OOD from the qID PREFIX (RULES §3), never from a results column — and via the
+    # canonical helper, never re-derived here.
+    # 🔴 This used to read `qID.split("_")[0].upper()` with a `.where(..., "ID")`
+    # fallback. The prefix is the DATASET (heico=OOD, lapchole=ID) and the separator is
+    # a DOUBLE underscore, so the test never matched and the fallback labelled every
+    # single question "ID" — silently. Measured 2026-08-14: ID n=6252, OOD n=0, against
+    # a control whose own report says acc_OOD=0.5985.
+    metrics.assert_ood_from_qid(merged)
+    merged["_dist"] = merged[key].map(metrics.dist_from_qid)
 
     if "video" not in merged.columns:
         for cand in ("video_a", "video_b"):
@@ -270,9 +276,24 @@ def paired_vs_control(arm_results_csv: str, cfg: EvalConfig, seed: int = 0) -> d
                 merged["video"] = merged[cand]
                 break
 
-    out = {"ALL": metrics.paired_delta_ci(merged, seed=seed)}
+    # 🔴 `paired_delta_ci` defaults to columns named `correct_a`/`correct_b`; our
+    # results.csv calls the column `correctness`, so after the merge it is
+    # `correctness_a`/`correctness_b` and the defaults match NOTHING. Leaving them
+    # unset raised `KeyError: ['correct_a', 'correct_b'] not in index` — measured
+    # 2026-08-14 by pairing the control against itself. This path only runs outside
+    # smoke, so it would have fired at the very END of the 16 h run, after both arms.
+    col = "correctness"
+    for name, frame_ in (("control", ctl), ("arm", arm)):
+        if col not in frame_.columns:
+            raise EvalFailure(
+                f"the {name} results table has no {col!r} column (has: "
+                f"{sorted(frame_.columns)}) — the paired CI cannot be formed."
+            )
+    ci = dict(correct_a=f"{col}_a", correct_b=f"{col}_b", seed=seed)
+
+    out = {"ALL": metrics.paired_delta_ci(merged, **ci)}
     for dist in ("ID", "OOD"):
-        out[dist] = metrics.paired_delta_ci(merged[merged["_dist"] == dist], seed=seed)
+        out[dist] = metrics.paired_delta_ci(merged[merged["_dist"] == dist], **ci)
     return out
 
 
