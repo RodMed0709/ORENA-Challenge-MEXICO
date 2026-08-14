@@ -191,7 +191,11 @@ class _Pulse(threading.Thread):
         super().__init__(daemon=True, name="arm-pulse")
         self.every = max(1, int(every))
         self.phase = "starting"
-        self._stop = threading.Event()
+        # 🔴 NOT `self._stop`: `threading.Thread._stop` is a METHOD, and shadowing it
+        # with an Event makes CPython's `_after_fork` raise `'Event' object is not
+        # callable` on every fork. Caught by the 2026-08-14 rehearsal — it printed
+        # four tracebacks into the very log this thread exists to keep readable.
+        self._stop_evt = threading.Event()
         self._t0 = time.perf_counter()
 
     def elapsed_min(self) -> float:
@@ -210,11 +214,11 @@ class _Pulse(threading.Thread):
             pass
 
     def run(self) -> None:
-        while not self._stop.wait(self.every):
+        while not self._stop_evt.wait(self.every):
             self._emit()
 
     def stop(self) -> None:
-        self._stop.set()
+        self._stop_evt.set()
 
 
 def _progress_callback(pulse: _Pulse):
