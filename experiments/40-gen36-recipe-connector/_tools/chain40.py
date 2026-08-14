@@ -304,12 +304,30 @@ def render_watchdog(cfg: ChainConfig) -> str:
     """
     if not cfg.pod_id:
         raise AssertionError("pod_id is empty — a watchdog that cannot stop the pod is decoration")
+    # The stale limb is the one that misfired on 2026-08-14 and killed a healthy 27B.
+    # It is kept, not deleted: for a genuinely unattended overnight run it is the only
+    # thing that catches a hang, and with `_Pulse` feeding the log it is now trustworthy.
+    # But when a human is watching the log themselves, they ARE the stale detector, and
+    # two of them is one too many — so `stale_seconds=0` removes the limb outright
+    # rather than setting a threshold so high it silently never fires.
+    stale_limb = (
+        f'  if [ -f "{cfg.log_path}" ]; then\n'
+        f'    AGE=$(( $(date +%s) - $(stat -c %Y "{cfg.log_path}") ))\n'
+        f'    if [ "$AGE" -gt {cfg.stale_seconds} ]; then\n'
+        f'      stop_now "log silent for ${{AGE}}s (the pulse writes every 60s)"\n'
+        f'    fi\n'
+        f'  fi'
+        if cfg.stale_seconds > 0 else
+        '  : # stale detection DISABLED by config (stale_seconds=0) — a human is watching'
+    )
+    stale_banner = (f"stale>{cfg.stale_seconds}s" if cfg.stale_seconds > 0
+                    else "stale detection OFF (a human is watching)")
     return f"""#!/usr/bin/env bash
 # RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
 CHAIN_PID="${{1:-0}}"
 START=$(date +%s)
 K=$(cat {cfg.key_file})
-echo "watchdog up — chain pid $CHAIN_PID, stale>{cfg.stale_seconds}s, wall>{cfg.max_seconds}s"
+echo "watchdog up — chain pid $CHAIN_PID, {stale_banner}, wall>{cfg.max_seconds}s"
 
 stop_now() {{
   echo "WATCHDOG STOPPING POD: $1 — $(date -u)"
@@ -339,13 +357,8 @@ while true; do
     stop_now "chain pid $CHAIN_PID is gone and the pod is still up"
   fi
 
-  # 2) the log went stale => hung
-  if [ -f "{cfg.log_path}" ]; then
-    AGE=$(( $(date +%s) - $(stat -c %Y "{cfg.log_path}") ))
-    if [ "$AGE" -gt {cfg.stale_seconds} ]; then
-      stop_now "log silent for ${{AGE}}s (a live 27B writes every ~24s)"
-    fi
-  fi
+  # 2) the log went stale => hung.  Skipped entirely when stale_seconds == 0.
+{stale_limb}
 
   # 3) wall clock
   if [ $(( $(date +%s) - START )) -gt {cfg.max_seconds} ]; then
