@@ -260,56 +260,130 @@ def assert_g2_trained(model, before: dict, cfg: MergeGateConfig) -> dict:
     return {"sum_abs_delta_trained": total, "per_tensor": deltas}
 
 
-def assert_g3_merge_preserved(cfg: MergeGateConfig, before: dict) -> dict:
-    """G3 — 🎯 THE QUESTION. Did the MERGED checkpoint keep the movement? RAISES.
+def resolve_base_dir(cfg: MergeGateConfig) -> str:
+    """Locate the base model's snapshot dir inside the HF cache.
 
-    Reads the merged checkpoint off disk, not the in-memory model: the failure we
-    are hunting lives in the SERIALISER, so anything still in memory would answer
-    a different question.
+    Resolved by looking rather than by hardcoding: this project has already been
+    bitten twice by two caches with different contents, and a hardcoded path that
+    silently points at the wrong one turns G3 into nonsense.
     """
+    import glob
+
+    org, name = cfg.base_model.split("/", 1)
+    pat = str(Path(cfg.hf_home) / "hub" / f"models--{org}--{name}" / "snapshots" / "*")
+    hits = sorted(glob.glob(pat))
+    if not hits:
+        raise GateFailure(
+            f"cannot locate the base snapshot for {cfg.base_model!r} under "
+            f"{cfg.hf_home}. G3 has nothing to compare against; fix HF_HOME."
+        )
+    return hits[-1]
+
+
+def canonical_name(peft_name: str) -> str:
+    """`base_model.model.model.visual.merger.linear_fc1.modules_to_save.default.weight`
+    -> `model.visual.merger.linear_fc1.weight`
+
+    🔻 The first version of G3 skipped this and compared PEFT's wrapped parameter
+    names against the merged checkpoint's raw names. Nothing matched, the delta
+    dict came out EMPTY, the total was 0, and the gate reported
+    "THE MERGE ATE THE CONNECTOR" when the merge had in fact carried it.
+    A false FAIL is as expensive as a false PASS: it would have sent the rung down
+    path B for no reason. Caught only by comparing merged-vs-base by hand.
+    """
+    n = peft_name
+    for junk in (".modules_to_save.default", ".original_module"):
+        n = n.replace(junk, "")
+    while n.startswith("base_model.model."):
+        n = n[len("base_model.model."):]
+    return n
+
+
+def _read_merger_tensors(path_glob: Path) -> dict:
     from safetensors import safe_open
 
-    merged = Path(cfg.merged_dir)
-    shards = sorted(merged.glob("*.safetensors"))
-    if not shards:
-        raise GateFailure(
-            f"G3 FAIL — no .safetensors under {merged}. The merge produced no "
-            "weights at all, which is a harder failure than the one being tested."
-        )
-
-    found, deltas = {}, {}
-    for shard in shards:
+    out = {}
+    for shard in sorted(path_glob.glob("*.safetensors")):
         with safe_open(str(shard), framework="pt") as f:
             for k in f.keys():
                 if k.startswith(MERGER_TENSOR_PREFIX):
-                    found[k] = f.get_tensor(k).float().cpu()
+                    out[k] = f.get_tensor(k).float().cpu()
+    return out
 
-    if not found:
+
+def assert_g3_merge_preserved(cfg: MergeGateConfig, base_dir: Path, trained: dict) -> dict:
+    """G3 — 🎯 THE QUESTION. Did the MERGED checkpoint keep the movement? RAISES.
+
+    Compares the merged checkpoint against the BASE CHECKPOINT ON DISK, both read
+    with the same reader and the same names. The failure being hunted lives in the
+    serialiser, so an in-memory reference would answer a different question — and
+    PEFT's wrapped names do not line up with the merged file's, which is what broke
+    the first version (see `canonical_name`).
+
+    🔑 **Per-tensor, never on the total.** `trained` is G2's per-tensor movement,
+    canonicalised. Every tensor that moved in training must move in the merge. A
+    summed criterion would let one large term satisfy the gate while another is
+    silently dropped — which is exactly what happens here for biases, and is the
+    same failure shape rung 39's coverage criterion exists to prevent.
+    """
+    merged_dir = Path(cfg.merged_dir)
+    merged = _read_merger_tensors(merged_dir)
+    if not merged:
         raise GateFailure(
-            f"G3 FAIL — the merged checkpoint contains NO tensor under "
-            f"{MERGER_TENSOR_PREFIX!r}. The merge dropped the connector entirely."
+            f"G3 FAIL — the merged checkpoint under {merged_dir} contains NO tensor "
+            f"under {MERGER_TENSOR_PREFIX!r}. The merge dropped the connector entirely."
+        )
+    base = _read_merger_tensors(base_dir)
+    if not base:
+        raise GateFailure(
+            f"G3 FAIL — could not read base connector tensors from {base_dir}. "
+            "Without a base there is nothing to compare against; fix the path."
         )
 
-    for k, t in found.items():
-        base = next((v for kb, v in before.items() if kb.endswith(k.split(".", 1)[-1])), None)
-        if base is None:
-            base = before.get(k)
-        if base is not None and base.shape == t.shape:
-            deltas[k] = float((t - base).abs().sum())
-
-    total = sum(deltas.values())
-    if total <= cfg.min_abs_delta:
+    deltas = {
+        k: float((merged[k] - base[k]).abs().sum())
+        for k in sorted(set(merged) & set(base))
+        if merged[k].shape == base[k].shape
+    }
+    if not deltas:
         raise GateFailure(
-            f"G3 FAIL — 🎯 THE MERGE ATE THE CONNECTOR. The merged checkpoint's "
-            f"{MERGER_TENSOR_PREFIX}* are byte-identical to base "
-            f"(sum|delta| = {total:.6g} <= {cfg.min_abs_delta}) even though G2 proved "
-            "they trained. `modules_to_save` is trained and then dropped at save "
-            "time.\n\n=> Take PATH B (explicit suffix list, no modules_to_save). "
-            "This is a publishable result, not an obstacle."
+            f"G3 FAIL — no tensor name is shared between base and merged. "
+            f"base={sorted(base)[:3]} merged={sorted(merged)[:3]}. This is a name "
+            "mismatch in the gate, NOT a finding about the merge — fix it before reading."
         )
 
-    log.info("G3 PASS — merged connector differs from base, sum|delta| = %.6g", total)
-    return {"sum_abs_delta_merged": total, "n_tensors": len(found), "per_tensor": deltas}
+    # Every tensor that trained must have carried. Per tensor, not on the sum.
+    expected = {canonical_name(k): v for k, v in trained.items() if v > cfg.min_abs_delta}
+    dropped = {k: expected[k] for k in expected if deltas.get(k, 0.0) <= cfg.min_abs_delta}
+
+    payload = {
+        "sum_abs_delta_merged": sum(deltas.values()),
+        "n_tensors": len(deltas),
+        "per_tensor": deltas,
+        "trained_canonical": expected,
+        "dropped_by_merge": dropped,
+    }
+
+    if len(dropped) == len(expected):
+        raise GateFailure(
+            "G3 FAIL — 🎯 THE MERGE ATE THE CONNECTOR. Every connector tensor that "
+            f"trained is byte-identical to base in the merged checkpoint: {list(dropped)}."
+            "\n\n=> Take PATH B (explicit suffix list, no modules_to_save). "
+            "A publishable result, not an obstacle."
+        )
+    if dropped:
+        raise GateFailure(
+            "G3 FAIL (PARTIAL CARRY) — 🔴 the merge kept some trained connector "
+            f"tensors and silently DROPPED others: {dropped}.\n"
+            f"Carried: { {k: v for k, v in deltas.items() if v > cfg.min_abs_delta} }\n\n"
+            "The merged model is NOT the model that was trained. This would never "
+            "show up in a score. A summed criterion would have PASSED this, which is "
+            "why the criterion is per-tensor.\n\n=> Decide explicitly: accept the loss "
+            "with the number stated, or take PATH B."
+        )
+
+    log.info("G3 PASS — every trained connector tensor carried into the merge")
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -457,7 +531,12 @@ def run_gate(cfg: MergeGateConfig) -> dict:
         result["merged_files"] = sorted(p.name for p in Path(cfg.merged_dir).iterdir())
 
         # --- G3 -------------------------------------------------------------
-        result["G3"] = assert_g3_merge_preserved(cfg, before)
+        # Compared against the BASE CHECKPOINT ON DISK, read with the same reader
+        # and the same names as the merged one. PEFT's in-memory names do not line
+        # up with the file's -- that mismatch produced a false FAIL once already.
+        base_dir = Path(resolve_base_dir(cfg))
+        result["base_dir"] = str(base_dir)
+        result["G3"] = assert_g3_merge_preserved(cfg, base_dir, result["G2"]["per_tensor"])
 
         result["verdict"] = "PASS — path A is live (modules_to_save survives the merge)"
         result["path"] = "A"
