@@ -5,7 +5,8 @@
 | — (control, rung 38 `38_qwen36_27b_v1` ep1) | rung 38 | `proxy_leaderboard` 0.4643 | baseline |
 | `00_merge_gate.ipynb` | 40-gate | G3: merged `visual.merger.*` ≠ base | 🔴 **PARTIAL CARRY** — weight kept, bias dropped |
 | `01_lr_group_gate.ipynb` | 40-G4 | connector LR applies? | 🟢 **PASS** — ratio 6.31 (esperado ~5) |
-| `02_alpha_arm.ipynb` | 40 | `proxy_leaderboard` | **pending** |
+| `02_alpha_arm.ipynb` | 40-A | `proxy_leaderboard` | 🟡 **smoke OK** — arm pending a pod |
+| `03_connector_arm.ipynb` | 40-B | `proxy_leaderboard` | 🟡 **smoke OK** — arm pending a pod |
 
 **Status: gate RAN (2026-08-13, UNAM, RTX 6000 Ada). Arms NOT RUN.**
 
