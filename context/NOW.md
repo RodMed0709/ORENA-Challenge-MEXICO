@@ -82,9 +82,15 @@ finished**. It carries two decision notes and a section added to `context/39-con
 hypothesis and change what the connector work looks like on this backbone. Proposing from `main`
 alone will re-derive things that are already settled there.
 
-**Open, and it is what the next session starts with:** a merge-path gate — does Unsloth's
-`save_pretrained_merged` carry `modules_to_save`? It needs **no challenge data and no dedicated
-pod**. Details on the branch.
+**As of 2026-08-13 (close) that branch carries a complete rung 40**: pre-registered, **two gates
+already RUN** on UNAM with no challenge data and no rented GPU, **both arms smoke-passing**, and
+**the eval written before the arms run** — the gap that cost rung 38 a night. What it needs is a
+**≥80 GB GPU**, and nothing else.
+
+Two measured facts on that branch bind anyone touching Unsloth here, not just gen-3.6:
+**`save_pretrained_merged` keeps a `modules_to_save` weight and silently drops its bias**, and
+**`optimizers=` no longer exists in trl 0.24** — `SFTTrainer` swallows it in `**kwargs` with no
+error and builds HuggingFace's own optimiser at 5e-5 instead.
 
 ---
 ## 🟢 2026-08-13 — the arm is STAGED on the pod, and the real numbers are better than the estimate
