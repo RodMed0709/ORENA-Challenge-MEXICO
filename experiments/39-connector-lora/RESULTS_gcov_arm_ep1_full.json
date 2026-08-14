@@ -1,0 +1,38 @@
+{
+  "train": {
+    "supervised": true,
+    "fired": true,
+    "clean_exit": false,
+    "stop_at_step": 901,
+    "checkpoint": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_connector_v1/ckpt/v0-20260814-001219/checkpoint-901",
+    "reused": true,
+    "note": "trained 2026-08-14 00:12-03:30 UTC; this run evaluates that checkpoint"
+  },
+  "learned": {
+    "log": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_connector_v1/ckpt/v0-20260814-001219/logging.jsonl",
+    "logged_steps": 306,
+    "nonzero_grad_steps": 306,
+    "nonzero_grad_frac": 1.0,
+    "loss_mean": 0.3644537598039216
+  },
+  "reached": {
+    "adapter": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_connector_v1/ckpt/v0-20260814-001219/checkpoint-901/adapter_model.safetensors",
+    "log_target_modules": "'^(model\\\\.language_model(?=\\\\.).*\\\\.(q_proj|gate_proj|o_proj|k_proj|up_proj|v_proj|down_proj)|(?!(model.visual.merger|model.visual.deepstack_merger_list))model\\\\.visual(?=\\\\.).*\\\\.(attn.proj|linear_fc1|qkv|linear_fc2)|model\\\\.visual\\\\.merger(?=\\\\.).*\\\\.(linear_fc1|linear_fc2)|model\\\\.visual\\\\.deepstack_merger_list(?=\\\\.).*\\\\.(linear_fc1|linear_fc2))$', exclude_modules=None",
+    "log_mentions_merger": true,
+    "log_named_merger_layers": 0,
+    "n_llm": 504,
+    "n_vit": 216,
+    "n_aligner": 16,
+    "n_orphans": 0,
+    "n_trainable": 736
+  },
+  "single_variable": {
+    "arm": "E_connector",
+    "branch": "UNFREEZE",
+    "declared_flags": "['--freeze_aligner', '--target_modules']",
+    "diff": "{'--freeze_aligner': (('true',), ('false',)), '--target_modules': (('all-linear',), ('all-linear', 'model.visual.merger.linear_fc1', 'model.visual.merger.linear_fc2', 'model.visual.deepstack_merger_list.0.linear_fc1', 'model.visual.deepstack_merger_list.0.linear_fc2', 'model.visual.deepstack_merger_list.1.linear_fc1', 'model.visual.deepstack_merger_list.1.linear_fc2', 'model.visual.deepstack_merger_list.2.linear_fc1', 'model.visual.deepstack_merger_list.2.linear_fc2'))}",
+    "alpha_over_rank": "4.0",
+    "effective_batch": "16",
+    "control": "{'run': '21_lr_2e4_v1', 'arm': 'A2_lr', 'checkpoint': 'checkpoint-901'}"
+  }
+}
