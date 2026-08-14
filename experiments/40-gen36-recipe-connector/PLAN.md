@@ -182,6 +182,59 @@ over-corrected"*. **Declared ladder: 32 → 16 → 8**, stepping down while ther
 
 ---
 
+## 3d. The connector arm — DECIDED after the gate ran: **path A′**
+
+The gate returned **PARTIAL CARRY** (§2, `RESULTS_merge_gate.json`): `save_pretrained_merged` keeps
+the trained **weight** of a `modules_to_save` module and silently drops its trained **bias**.
+Measured twice, independently.
+
+**Decision (2026-08-13, project owner): run A′ first; B is the declared fallback if A′ fails or if
+the plumbing proves too costly.**
+
+| | what it trains | added trainable | status |
+|---|---|---|---|
+| **A** full weight, same LR | whole connector | ~25 M (**+40 %** over rung 38's 62.2 M) | rejected — too much capacity on 14,415 rows for a model already over-fitting |
+| **A′** full weight, **reduced LR** | whole connector, slower | ~25 M with an explicit brake | ✅ **CHOSEN** |
+| **B** LoRA on the connector | low-rank | ~10⁵ | 🔁 declared fallback |
+
+### Why A′, and where the number comes from
+
+- **Unsloth documents nothing** about `modules_to_save` for a connector — its docs show the
+  parameter only with `lm_head`/`embed_tokens`. `NO DOCUMENTADO`.
+- **Third-party practice is closer to A than to B**: connector at full parameters with the LLM on
+  LoRA is an established hybrid, not an oddity of ours.
+- 🔑 **The capacity objection is answered in the literature by lowering the connector's LR, not by
+  dropping to LoRA.** `literature/vlm-techniques/FICHAS.md:361` — Qwen2.5-VL-7B with
+  **LoRA lr 5e-5 and projection-layer lr 1e-5**, i.e. the projector runs at **1/5**.
+- On our `learning_rate 2e-4` that gives a **connector LR of 4e-5**.
+
+⚠️ **Counter-evidence, recorded:** one source argues that for the Qwen-VL family the vision
+projection *"is already pretrained to produce useful inputs to the language model"* and can stay
+frozen. That is an argument against the connector arm existing at all, not against A′ specifically —
+and it is precisely what the arm measures.
+
+### 🔴 The implementation risk, and the gate it requires
+
+A per-group learning rate is **not a flag**. It needs an optimiser built with `param_groups` and
+handed to the `Trainer`. That is our own plumbing, and this repo has been bitten by exactly this
+shape before:
+
+> `--vit_lr` is a **silent no-op without `--optimizer multimodal`** — [[recipe-axis-is-the-learning-rate]]
+
+An arm whose declared variable silently fails to apply is worse than no arm: it produces a null that
+looks like evidence. **Binding: before the arm trains, assert that the connector's parameters are in
+their own param group AND that the group's `lr` is 4e-5**, read back from the optimiser object, not
+from the config that was passed in.
+
+### The bias loss, carried into this arm as a declared deviation
+
+A′ ships `(trained weight, base bias)`. The bias moved 4.3 % / 3.6 % relative in training and is
+discarded at merge. **It does not corrupt the comparison** — arm and control merge identically — but
+it does mean part of the training effort is thrown away.
+📌 **Path B does not fix this**: LoRA never adapts biases either, so B also ships the base bias. The
+bias is therefore **not** a reason to prefer B over A′; only capacity is.
+⚠️ If the connector arm comes back null, "the dropped bias" is a declared candidate explanation.
+
 ## 4. 🔴 Known hazard, unmeasured, that both paths carry
 
 PEFT declares `out_proj` and `conv1d` **incompatible with Mamba-type models**
