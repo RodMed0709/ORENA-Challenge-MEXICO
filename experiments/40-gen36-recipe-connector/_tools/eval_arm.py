@@ -118,6 +118,31 @@ def ensure_paths(repo_root: str = "/workspace/repo_leo") -> None:
             sys.path.insert(0, p)
 
 
+def arm_results_csv(cfg: EvalConfig) -> str:
+    """Where `run_baseline` ACTUALLY writes the per-question results. RAISES if absent.
+
+    🔴 MEASURED 2026-08-14 on the real 27B run: `04_eval.ipynb` computed this inline as
+    `Path(cfg.out_dir) / "results.csv"`, but run_baseline writes into
+    `out_dir/run_name/`, so the paired CI died on FileNotFoundError — AFTER 3.3 h of
+    training and a 2 h eval that had already produced its scores. The cell is inside
+    `if not SMOKE`, so no rehearsal could ever have reached it.
+
+    Derived here rather than in the notebook so it is importable, testable, and stated
+    once. A path that a notebook rebuilds by hand is a path nothing can check.
+    """
+    p = Path(cfg.out_dir) / cfg.run_name / "results.csv"
+    if p.exists():
+        return str(p)
+    legacy = Path(cfg.out_dir) / "results.csv"
+    if legacy.exists():          # tolerated, but say so — the layout is not what we expect
+        log.warning("results.csv found at %s, not %s — using it", legacy, p)
+        return str(legacy)
+    raise EvalFailure(
+        f"no results.csv for this arm. Looked in {p} and {legacy}. The eval produced no "
+        "per-question table, so the paired CI cannot be formed."
+    )
+
+
 def build_baseline_config(cfg: EvalConfig, merged: "Path | None" = None):
     """Build the `BaselineConfig` the eval will actually run. Importable ON PURPOSE.
 
