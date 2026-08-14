@@ -1,0 +1,144 @@
+{
+  "config": {
+    "base_model": "Qwen/Qwen3.5-2B",
+    "hf_home": "/data/uaq_user/hf_cache",
+    "work_dir": "/data/uaq_user/tmp/leo_gate40_lr",
+    "target_modules": "all-linear",
+    "modules_to_save": [
+      "model.visual.merger.linear_fc1",
+      "model.visual.merger.linear_fc2"
+    ],
+    "lora_rank": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.0,
+    "max_seq_length": 1024,
+    "max_pixels": 65536,
+    "n_rows": 32,
+    "n_steps": 20,
+    "learning_rate": 0.0002,
+    "per_device_train_batch_size": 1,
+    "gradient_accumulation_steps": 2,
+    "seed": 42,
+    "min_abs_delta": 0.001,
+    "out_json": "RESULTS_lr_group_gate.json",
+    "lora_lr": 0.0002,
+    "connector_lr": 4e-05,
+    "control_lr": 0.0002,
+    "expected_ratio": 5.0,
+    "ratio_tolerance": 0.35
+  },
+  "versions": {
+    "host": "hpclab-RTXA6000",
+    "python": "3.11.15",
+    "unsloth": "2026.8.15",
+    "unsloth_zoo": "2026.8.10",
+    "peft": "0.20.0",
+    "transformers": "5.5.0",
+    "torch": "2.11.0+cu128",
+    "trl": "0.24.0",
+    "accelerate": "1.14.0",
+    "cuda": "12.8",
+    "capability": [
+      8,
+      9
+    ],
+    "gpu": "NVIDIA RTX 6000 Ada Generation"
+  },
+  "verdict": "PASS \u2014 the connector's reduced LR applies; path A\u2032 is implementable",
+  "legs": [
+    {
+      "leg": "low",
+      "connector_lr": 4e-05,
+      "sum_abs_delta": 3403.9924457371235,
+      "train_loss": 0.39688939452171323,
+      "groups_at_build": [
+        {
+          "name": "connector",
+          "lr": 4e-05,
+          "n_params": 4
+        },
+        {
+          "name": "lora",
+          "lr": 0.0002,
+          "n_params": 564
+        }
+      ],
+      "groups_after_train": [
+        {
+          "name": "connector",
+          "lr": 4e-05,
+          "n_params": 4
+        },
+        {
+          "name": "lora",
+          "lr": 0.0002,
+          "n_params": 564
+        }
+      ]
+    },
+    {
+      "leg": "high",
+      "connector_lr": 0.0002,
+      "sum_abs_delta": 21494.19210600853,
+      "train_loss": 0.6348495442420244,
+      "groups_at_build": [
+        {
+          "name": "connector",
+          "lr": 0.0002,
+          "n_params": 4
+        },
+        {
+          "name": "lora",
+          "lr": 0.0002,
+          "n_params": 564
+        }
+      ],
+      "groups_after_train": [
+        {
+          "name": "connector",
+          "lr": 0.0002,
+          "n_params": 4
+        },
+        {
+          "name": "lora",
+          "lr": 0.0002,
+          "n_params": 564
+        }
+      ]
+    }
+  ],
+  "G4a": {
+    "low": [
+      {
+        "name": "connector",
+        "lr": 4e-05,
+        "n_params": 4
+      },
+      {
+        "name": "lora",
+        "lr": 0.0002,
+        "n_params": 564
+      }
+    ],
+    "high": [
+      {
+        "name": "connector",
+        "lr": 0.0002,
+        "n_params": 4
+      },
+      {
+        "name": "lora",
+        "lr": 0.0002,
+        "n_params": 564
+      }
+    ]
+  },
+  "G4b": {
+    "sum_abs_delta_at_connector_lr": 3403.9924457371235,
+    "sum_abs_delta_at_control_lr": 21494.19210600853,
+    "measured_ratio": 6.314406523706028,
+    "expected_ratio": 5.0,
+    "relative_error": 0.2628813047412055
+  },
+  "elapsed_s": 93.74936169013381
+}
