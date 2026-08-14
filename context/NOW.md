@@ -2,8 +2,91 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-08-12**.
+> Last updated: **2026-08-13** (rung 38 closed).
 
+## 🔴 2026-08-13 (close) — rung 38 is CLOSED: the A2 recipe transplanted to gen-3.6 LOSES. The live axis is the RECIPE.
+
+> ⬆️ **This supersedes the "arm is STAGED" section below.** The arm ran, was evaluated on all 6252
+> questions, and was analysed with paired video-clustered CIs. Everything is committed on `main`
+> (`d03836f`, `002f01a`, `b06de28`). Full verdict:
+> `context/decisions/gen36-fails-the-8b-recipe-not-the-backbone-test.md`.
+
+**Measured, epoch- AND step-matched** against A2 ep1 `checkpoint-901` (proxy 0.4986 / `bucket_mean`
+0.5592) — our arm ran 901 steps. Numbers from `experiments/38-gen36-ft-screen/RESULTS.csv`:
+
+| cell | n | Δ (27B − A2 ep1) | 95 % CI | excludes 0 |
+|---|---|---|---|---|
+| **ALL** | 6252 | **−0.0334** | [−0.0642, −0.0027] | **YES** |
+| ID | 2252 | −0.0362 | [−0.0800, +0.0021] | no |
+| `proxy_leaderboard` | — | −0.0344 | — | pre-registered read FAILS |
+| `margin_OOD` | — | −0.0255 | — | pre-registered read FAILS |
+
+🔑 **The loss is narrower than the headline.** The **ID cell — the one the proxy is made of — does
+NOT exclude zero.** All the damage sits in `object_recognition`; `aggregation` is flat and `number`
+is a **dead tie**. The arm wins 717 questions A2 gets wrong. **It did not get worse at counting; it
+got worse at naming objects.**
+
+🔑 **The finding worth more than the verdict:** given the identical SFT, the 27B **fixes the
+frequency prior** (L1 to gold **14.8** vs the 8B's **27.4**; the 8B answers "1" 55.1 % of the time
+when gold is 35.2 %) **and gains nothing for it** ⇒ the `number` bottleneck is **perceptual, not
+distributional**. Amends [[counting-has-two-failure-modes]].
+
+🔻 **Two deployability claims made while reading this were WRONG** and nearly closed gen-3.6 on
+smoke: the **52.72 GiB is the TRAINING peak**, not the serving footprint (FP8 is `PASS`-validated at
+capability [8,9] = the L40S exactly, ~41 GB — **it fits**); and the **4.81 s was `max`**, an outlier
+among 6252 — **p99 is 1.599 s, `timed_out = 0`**. ⇒ **deployability is not an argument.** Rank 1 on
+the leaderboard is a `Qwen3.6 Finetuned` at 0.6235 — somebody serves this inside the budget.
+
+⇒ **This closes the RECIPE TRANSPLANT, not the backbone.** `lr 2e-4` is the **8B's** optimum and was
+never ported. 🔴 **Do NOT scale this recipe to 3 epochs** — no resume is possible (cosine is already
+at lr 0 by step 901), so it costs ~9.5 h from scratch to scale a recipe already shown to sit wrong.
+
+### State of the ladder right now
+
+| | state |
+|---|---|
+| **rung 38** (gen-3.6 backbone screen) | ✅ **CLOSED — NO-GO at A2-verbatim.** Trained, evaluated, analysed, committed. |
+| **rung 39** (connector LoRA) | 🟢 **GATE RAN AND PASSED on an A100** (`3f932db`, 2026-08-13 17:46). Arm not run yet. |
+| **gen-3.6 recipe design** | 🔵 **IN PROGRESS on a branch, not merged** — see below. |
+
+### 🟢 The rung-39 gate PASSED — the connector IS reachable in ms-swift, measured
+
+`3f932db`. Two legs, five real optimiser steps each:
+
+| leg | `freeze_aligner` | total | `n_llm` | `n_vit` | `n_aligner` | orphans |
+|---|---|---|---|---|---|---|
+| subject | false | **736** | 504 | 216 | **16** | 0 |
+| control | true | 720 | 504 | 216 | **0** | 0 |
+
+736 = A2's own 504 + 216 **plus 16 connector tensors** (`merger.linear_fc{1,2}` and
+`deepstack_merger_list.{0,1,2}.linear_fc{1,2}`, each with `lora_A` + `lora_B`). Coverage extended,
+never replaced. The control returning 0 proves the 16 come from the change, not from the classifier.
+`grad_norm` 139 → 14 and loss 2.41 → 0.28 ⇒ **real gradient, not an `rc=0` silent no-op.**
+
+🔑 **This answers the open question in [[the-merger-is-unreachable-by-default]] §4: an explicit
+target DOES survive ms-swift's intersection.** ⚠️ **Unsloth remains unmeasured** — which is the gen-3.6
+lane, not this one.
+
+⚠️ **`evidence_ep1/` and the rescued `RESULTS_eval_27b_ep1_*` are ONE run, not two** (`results.csv`
+byte-identical; the duplicate was removed). **There is no independent replica of this arm, and no
+seed has ever been repeated in the campaign.**
+
+### 🔵 Live work that is NOT on `main` — read the branch before reasoning about gen-3.6
+
+Desk research on **what recipe to use for the gen-3.6 ladder** (zero GPU) is in progress on branch
+**`task/gen36-recipe-and-connector`**, pushed but **deliberately not merged — the task is not
+finished**. It carries two decision notes and a section added to `context/39-connector-lora/CONTEXT.md`.
+
+🔴 **If you are about to propose a gen-3.6 recipe, a connector experiment, or a learning-rate change,
+`git checkout task/gen36-recipe-and-connector` first.** Those notes retire the `lr 2e-4`-is-too-high
+hypothesis and change what the connector work looks like on this backbone. Proposing from `main`
+alone will re-derive things that are already settled there.
+
+**Open, and it is what the next session starts with:** a merge-path gate — does Unsloth's
+`save_pretrained_merged` carry `modules_to_save`? It needs **no challenge data and no dedicated
+pod**. Details on the branch.
+
+---
 ## 🟢 2026-08-13 — the arm is STAGED on the pod, and the real numbers are better than the estimate
 
 > Everything below is measured on the pod with **real challenge data** — the first time this
