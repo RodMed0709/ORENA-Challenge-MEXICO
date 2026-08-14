@@ -16,11 +16,19 @@ has already cost this project something:
   not the ~670 GB quota). A run already died `Disk quota exceeded` MID-MERGE, after
   training. So: rung 38's merge is deleted BEFORE anything starts, and arm A's is
   deleted before arm B begins.
-* **losing 14 h of work to a late failure.** Commit and push after EACH eval, never
-  once at the end.
-* **the detached HEAD.** `git push origin <branch>` on the pod pushes the stale
-  local ref — that cost rung 30 its push. Always `HEAD:<branch>`, with fetch+rebase
-  retries because the volume is shared.
+* **losing 14 h of work to a late failure.** Commit after EACH eval, never once at
+  the end. 📌 **Commit only, no push** (legokna's call): the network volume outlives
+  the pod, so the results are recoverable from S3 without starting anything. That
+  removes git auth as a failure mode entirely — a push that fails at 3 a.m. leaves
+  the results trapped, and there is nothing a retry can do about a bad credential.
+* **a HUNG run.** The `trap` fires on exit; a training that stalls never exits, so
+  nothing fires and the pod bills all night. This is the most likely expensive
+  failure — likelier than SIGKILL. The watchdog watches the log's **mtime**: the
+  27B logs a line every ~24 s, so 45 minutes of silence is unambiguous.
+
+The watchdog is rendered as a SEPARATE script and launched with `setsid nohup`, so
+it is not a child of the chain. A child would die with a process-group kill, which
+is exactly the case it exists to cover.
 """
 
 from __future__ import annotations
@@ -49,9 +57,17 @@ class ChainConfig:
         "/workspace/repo_leo/experiments/38-gen36-ft-screen/runs/38_qwen36_27b_v1/merged"
     )
 
+    watchdog_path: str = "/workspace/tmp/leo_watchdog40.sh"
+    watchdog_log: str = "/workspace/tmp/leo_watchdog40.log"
+
     run_arm_b: bool = True                # False = stop after arm A and its eval
     expect_unsloth: str = "2026.8.15"
     expect_unsloth_zoo: str = "2026.8.10"
+
+    # A stalled 27B is silent; a live one writes a line every ~24 s.
+    stale_seconds: int = 2700             # 45 min without log output => hung
+    max_seconds: int = 16 * 3600          # hard wall clock, last resort
+    stop_retries: int = 5                 # the stop call itself can fail on a flaky link
 
 
 def render(cfg: ChainConfig) -> str:
@@ -75,12 +91,31 @@ echo "===== chain40 start $(date -u) ====="
 K=$(cat {cfg.key_file})
 stop_pod() {{
   echo "===== stopping pod {cfg.pod_id} — $(date -u) ====="
-  curl -s -o /dev/null -w "stop -> HTTP %{{http_code}}\\n" \\
-    -X POST -H "Authorization: Bearer $K" \\
-    https://rest.runpod.io/v1/pods/{cfg.pod_id}/stop
+  # Retried: the stop call itself can fail on a flaky link, and a single 000 would
+  # leave the pod billing all night. Verified by reading the status back, because a
+  # 200 alone proves nothing (measured 2026-08-13 on the test pod).
+  for i in $(seq 1 {cfg.stop_retries}); do
+    C=$(curl -s -o /dev/null -w "%{{http_code}}" -X POST \\
+        -H "Authorization: Bearer $K" \\
+        https://rest.runpod.io/v1/pods/{cfg.pod_id}/stop)
+    echo "stop attempt $i -> HTTP $C"
+    sleep 5
+    S=$(curl -s -H "Authorization: Bearer $K" \\
+        https://rest.runpod.io/v1/pods/{cfg.pod_id} | grep -o '"desiredStatus":"[A-Z]*"')
+    echo "  status now: $S"
+    case "$S" in *EXITED*) echo "pod confirmed stopped"; break;; esac
+    sleep 20
+  done
   rm -f {cfg.key_file}
 }}
 trap stop_pod EXIT
+
+# --- 0b. the watchdog: covers what the trap CANNOT ---------------------------------
+# `trap` never fires on SIGKILL, and it never fires on a HUNG run because nothing
+# exits. The watchdog is detached with setsid so a process-group kill cannot take it
+# with the chain.
+setsid nohup bash {cfg.watchdog_path} $$ > {cfg.watchdog_log} 2>&1 &
+echo "watchdog detached (pid guard on $$) -> {cfg.watchdog_log}"
 
 cd {exp} || exit 1
 
@@ -107,18 +142,14 @@ fi
 echo "--- volume after ---";  du -sx /workspace 2>/dev/null | tail -1
 
 # --- helpers ---------------------------------------------------------------------
-# HEAD:{BRANCH} — the pod checkout is DETACHED, and a plain `git push origin
-# <branch>` pushes the stale local ref. That cost rung 30 its push. Three tries with
-# fetch+rebase because the volume is shared and teammates push in parallel.
-push_results() {{
+# COMMIT ONLY, no push — legokna's call, and it is the right one. The network volume
+# outlives the pod, so results are recoverable from S3 without starting anything.
+# Pushing would add git auth as a failure mode at 3 a.m., and a retry cannot fix a
+# bad credential. Nothing is lost: the commit and the artifacts are both on the volume.
+commit_results() {{
   cd {cfg.repo_root} || return 1
   git add -A {cfg.exp_dir} 2>/dev/null
   git commit -q -m "$1" 2>/dev/null || echo "nothing to commit"
-  for i in 1 2 3; do
-    git fetch -q origin && git rebase -q origin/{BRANCH} \\
-      && git push -q origin HEAD:{BRANCH} && break
-    echo "push retry $i"; sleep 30
-  done
   git log --oneline -1
   cd {exp} || return 1
 }}
@@ -138,12 +169,12 @@ run_nb 02_alpha_arm.ipynb arm_a
 RC_A=$?
 if [ $RC_A -ne 0 ]; then
   echo "ARM A FAILED (rc=$RC_A) — committing whatever it produced and stopping."
-  push_results "eval(40): arm A FAILED rc=$RC_A — committing the evidence"
+  commit_results "eval(40): arm A FAILED rc=$RC_A — committing the evidence"
   exit $RC_A
 fi
 
 run_nb 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/40_A_alpha_v1/merged" -p RUN_NAME 40_A_alpha_v1
-push_results "eval(40): arm A — lora_alpha 32->16, scored against rung 38 ep1"
+commit_results "eval(40): arm A — lora_alpha 32->16, scored against rung 38 ep1"
 {arm_b_block}
 echo "===== chain40 end $(date -u) ====="
 """
@@ -167,12 +198,83 @@ run_nb 03_connector_arm.ipynb arm_b
 RC_B=$?
 if [ $RC_B -ne 0 ]; then
   echo "ARM B FAILED (rc=$RC_B) — committing the evidence."
-  push_results "eval(40): arm B FAILED rc=$RC_B — committing the evidence"
+  commit_results "eval(40): arm B FAILED rc=$RC_B — committing the evidence"
   exit $RC_B
 fi
 
 run_nb 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/40_B_connector_v1/merged" -p RUN_NAME 40_B_connector_v1
-push_results "eval(40): arm B — the connector trains at 4e-5, scored against rung 38 ep1"
+commit_results "eval(40): arm B — the connector trains at 4e-5, scored against rung 38 ep1"
+"""
+
+
+def render_watchdog(cfg: ChainConfig) -> str:
+    """The watchdog. Detached from the chain, and it covers what the trap cannot.
+
+    Three conditions, any of which stops the pod:
+
+    * **the chain is gone** — `kill -0` on its PID fails. `trap ... EXIT` does NOT
+      fire on SIGKILL, and the OOM killer uses SIGKILL. With a 27B that is not
+      hypothetical.
+    * **the log went stale** — a live run writes a line every ~24 s, so 45 minutes of
+      silence means hung. The trap cannot help here: a hung process never exits, so
+      nothing fires and the pod bills until morning. This is the likeliest expensive
+      failure, and it is the reason this file exists.
+    * **the wall clock** — last resort, if even the log hangs in some way we did not
+      foresee.
+
+    It stops the pod itself rather than signalling the chain: if the chain is hung or
+    already dead, there is nobody left to ask.
+    """
+    if not cfg.pod_id:
+        raise AssertionError("pod_id is empty — a watchdog that cannot stop the pod is decoration")
+    return f"""#!/usr/bin/env bash
+# RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
+CHAIN_PID="${{1:-0}}"
+START=$(date +%s)
+K=$(cat {cfg.key_file})
+echo "watchdog up — chain pid $CHAIN_PID, stale>{cfg.stale_seconds}s, wall>{cfg.max_seconds}s"
+
+stop_now() {{
+  echo "WATCHDOG STOPPING POD: $1 — $(date -u)"
+  for i in $(seq 1 {cfg.stop_retries}); do
+    C=$(curl -s -o /dev/null -w "%{{http_code}}" -X POST \\
+        -H "Authorization: Bearer $K" \\
+        https://rest.runpod.io/v1/pods/{cfg.pod_id}/stop)
+    echo "  stop attempt $i -> HTTP $C"
+    sleep 5
+    S=$(curl -s -H "Authorization: Bearer $K" \\
+        https://rest.runpod.io/v1/pods/{cfg.pod_id} | grep -o '"desiredStatus":"[A-Z]*"')
+    case "$S" in *EXITED*) echo "  confirmed stopped"; exit 0;; esac
+    sleep 20
+  done
+  exit 0
+}}
+
+while true; do
+  sleep 300
+
+  # 1) the chain vanished without stopping the pod => SIGKILL / OOM
+  if [ "$CHAIN_PID" != "0" ] && ! kill -0 "$CHAIN_PID" 2>/dev/null; then
+    sleep 60   # grace: let a normal exit's own trap win the race
+    S=$(curl -s -H "Authorization: Bearer $K" \\
+        https://rest.runpod.io/v1/pods/{cfg.pod_id} | grep -o '"desiredStatus":"[A-Z]*"')
+    case "$S" in *EXITED*) echo "chain ended and the pod is already stopping — done"; exit 0;; esac
+    stop_now "chain pid $CHAIN_PID is gone and the pod is still up"
+  fi
+
+  # 2) the log went stale => hung
+  if [ -f "{cfg.log_path}" ]; then
+    AGE=$(( $(date +%s) - $(stat -c %Y "{cfg.log_path}") ))
+    if [ "$AGE" -gt {cfg.stale_seconds} ]; then
+      stop_now "log silent for ${{AGE}}s (a live 27B writes every ~24s)"
+    fi
+  fi
+
+  # 3) wall clock
+  if [ $(( $(date +%s) - START )) -gt {cfg.max_seconds} ]; then
+    stop_now "wall clock exceeded"
+  fi
+done
 """
 
 
@@ -188,10 +290,15 @@ def write(cfg: ChainConfig, path: str | Path | None = None) -> str:
         raise AssertionError(
             f"refusing to write the chain to {posix} — it is inside a repo checkout."
         )
-    body = render(cfg)
     Path(posix).parent.mkdir(parents=True, exist_ok=True)
-    Path(posix).write_text(body)
+    Path(posix).write_text(render(cfg))
     Path(posix).chmod(0o755)
+    # The watchdog goes beside it: a chain rendered without its watchdog would run
+    # perfectly and leave the pod up on the two failures the trap cannot catch.
+    wd = Path(cfg.watchdog_path)
+    wd.parent.mkdir(parents=True, exist_ok=True)
+    wd.write_text(render_watchdog(cfg))
+    wd.chmod(0o755)
     return posix
 
 
@@ -200,6 +307,7 @@ def launch_line(cfg: ChainConfig) -> str:
     return (
         f"# 1) put the RunPod API key in {cfg.key_file} (the chain deletes it)\n"
         f"# 2) verify SSH works FIRST — it did not come up on a test pod on 2026-08-13\n"
+        f"#    the chain launches {cfg.watchdog_path} itself; do not start it by hand\n"
         f"nohup bash {cfg.script_path} > {cfg.log_path} 2>&1 &\n"
         f"tail -f {cfg.log_path}"
     )
