@@ -337,9 +337,12 @@ echo "judge OK — {cfg.judge_cache_dir} present in {cfg.eval_hf_home}"
 {cfg.eval_python} - <<'PY' || exit 1
 import sys
 from pathlib import Path
-sys.path.insert(0, "{cfg.repo_root}/src")
 sys.path.insert(0, "{cfg.repo_root}/{cfg.exp_dir}/_tools")
-from eval_arm import EvalConfig, build_baseline_config
+from eval_arm import EvalConfig, build_baseline_config, ensure_paths
+# 🔴 BEFORE importing anything from frame/: `frame.data` pulls in `focus`, which is
+# vendored and only reachable once these paths are set. Gate 1b was updated to call
+# this and gate 1d was not, so 1d died on the very import 1b had just proved works.
+ensure_paths("{cfg.repo_root}")
 c = EvalConfig()
 if not Path(c.control_results_csv).exists():
     print(f"EVAL DATA GATE FAILED: control_results_csv {{c.control_results_csv}} missing")
