@@ -100,6 +100,16 @@ class ChainConfig:
     watchdog_log: str = "/workspace/tmp/leo_watchdog40.log"
 
     run_arm_b: bool = True                # False = stop after arm A and its eval
+
+    # Turn the pod off when the chain exits (trap) and run the watchdog at all.
+    # False is for REHEARSALS ONLY, and legokna asked for it for a concrete reason:
+    # while debugging, every failed attempt stopped the pod and had to be restarted by
+    # hand, which is friction with no information — the trap is already proved, twice,
+    # including down the failure branch. 🔴 With this off NOTHING stops the pod: not the
+    # trap, not the watchdog. It bills until a human says otherwise. `render` refuses to
+    # emit a non-smoke chain with it off, so the debugging setting cannot ride along
+    # into the 16 h run — which is exactly the shape of mistake it would be worst in.
+    stop_pod_on_exit: bool = True
     expect_unsloth: str = "2026.8.15"
     expect_unsloth_zoo: str = "2026.8.10"
 
@@ -151,37 +161,17 @@ def _arm_params(cfg: ChainConfig, exp: str) -> str:
     )
 
 
-def render(cfg: ChainConfig) -> str:
-    if not cfg.pod_id:
-        raise AssertionError(
-            "pod_id is empty — the chain would run and then fail to stop the pod, "
-            "which is the one failure this whole design exists to prevent."
+def _shutdown_block(cfg: ChainConfig) -> str:
+    """The trap + watchdog, or an explicit note that neither is armed."""
+    if not cfg.stop_pod_on_exit:
+        # Loud on purpose. The one thing worse than a pod that stops when you did not
+        # want it to is a pod that does not stop when you assumed it would.
+        return (
+            '# --- 0. NOTHING STOPS THIS POD ---------------------------------------------\n'
+            'echo "🔴 stop_pod_on_exit=False — no trap, no watchdog. This pod bills until"\n'
+            'echo "   a human stops it. Rehearsal setting; render() forbids it when smoke=False."'
         )
-    exp = f"{cfg.repo_root}/{cfg.exp_dir}"
-    arm_b_block = _arm_b(cfg, exp) if cfg.run_arm_b else (
-        '\necho "=== arm B skipped by config (run_arm_b=False) ==="\n'
-    )
-    # The cache gate must check the model that will ACTUALLY be loaded — in rehearsal
-    # that is the smoke model, not the 27B. Fatal in BOTH modes: the rehearsal model
-    # was chosen *because* it is already cached (legokna's call, 2026-08-14), so a
-    # missing one means the model choice changed, and the right answer to that is to
-    # stop and say so, not to quietly spend a download on it.
-    arm_params = _arm_params(cfg, exp)
-    wanted_model = cfg.smoke_model_cache_dir if cfg.smoke else cfg.model_cache_dir
-    why = ("a rehearsal runs on an ALREADY CACHED model — do not download one"
-           if cfg.smoke else
-           "training would re-download 52 GB and blow the disk plan")
-    model_missing = (
-        f'  echo "FATAL: {wanted_model} is not in {cfg.hf_home}/hub."\n'
-        f'  echo "{why}. Fix HF_HOME or the model choice before relaunching."\n'
-        f'  exit 1'
-    )
-    return f"""#!/usr/bin/env bash
-# RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
-set -uo pipefail          # NOT -e: a failing arm must still reach its handler and the trap
-echo "===== chain40 start $(date -u) ====="
-
-# --- 0. the pod stops on ANY exit ------------------------------------------------
+    return f"""# --- 0. the pod stops on ANY exit ------------------------------------------------
 # Registered FIRST, before anything can fail. Reads the key at fire time and deletes
 # the file, so the credential never outlives the run.
 K=$(cat {cfg.key_file})
@@ -211,7 +201,48 @@ trap stop_pod EXIT
 # exits. The watchdog is detached with setsid so a process-group kill cannot take it
 # with the chain.
 setsid nohup bash {cfg.watchdog_path} $$ > {cfg.watchdog_log} 2>&1 &
-echo "watchdog detached (pid guard on $$) -> {cfg.watchdog_log}"
+echo "watchdog detached (pid guard on $$) -> {cfg.watchdog_log}\""""
+
+
+def render(cfg: ChainConfig) -> str:
+    if cfg.stop_pod_on_exit and not cfg.pod_id:
+        raise AssertionError(
+            "pod_id is empty — the chain would run and then fail to stop the pod, "
+            "which is the one failure this whole design exists to prevent."
+        )
+    if not cfg.stop_pod_on_exit and not cfg.smoke:
+        raise AssertionError(
+            "stop_pod_on_exit=False is a REHEARSAL setting and this is not a rehearsal "
+            "(smoke=False). The real chain runs ~16 h and ends while everyone is asleep; "
+            "without the trap the pod bills until someone notices in the morning. If you "
+            "genuinely mean it, set smoke=True or change this assertion deliberately."
+        )
+    exp = f"{cfg.repo_root}/{cfg.exp_dir}"
+    arm_b_block = _arm_b(cfg, exp) if cfg.run_arm_b else (
+        '\necho "=== arm B skipped by config (run_arm_b=False) ==="\n'
+    )
+    # The cache gate must check the model that will ACTUALLY be loaded — in rehearsal
+    # that is the smoke model, not the 27B. Fatal in BOTH modes: the rehearsal model
+    # was chosen *because* it is already cached (legokna's call, 2026-08-14), so a
+    # missing one means the model choice changed, and the right answer to that is to
+    # stop and say so, not to quietly spend a download on it.
+    shutdown_block = _shutdown_block(cfg)
+    arm_params = _arm_params(cfg, exp)
+    wanted_model = cfg.smoke_model_cache_dir if cfg.smoke else cfg.model_cache_dir
+    why = ("a rehearsal runs on an ALREADY CACHED model — do not download one"
+           if cfg.smoke else
+           "training would re-download 52 GB and blow the disk plan")
+    model_missing = (
+        f'  echo "FATAL: {wanted_model} is not in {cfg.hf_home}/hub."\n'
+        f'  echo "{why}. Fix HF_HOME or the model choice before relaunching."\n'
+        f'  exit 1'
+    )
+    return f"""#!/usr/bin/env bash
+# RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
+set -uo pipefail          # NOT -e: a failing arm must still reach its handler and the trap
+echo "===== chain40 start $(date -u) ====="
+
+{shutdown_block}
 
 cd {exp} || exit 1
 
