@@ -72,10 +72,52 @@ class ChainConfig:
     expect_unsloth: str = "2026.8.15"
     expect_unsloth_zoo: str = "2026.8.10"
 
-    # A stalled 27B is silent; a live one writes a line every ~24 s.
+    # Rehearsal mode. The arms run on Qwen3.5-2B against synthetic data
+    # (`ArmConfig.smoke`), so the WHOLE chain — papermill, the pulse, the watchdog,
+    # the eval, the commit and the self-stop — is exercisable end to end on a cheap
+    # small GPU before the 27B gets a morning. The rung-40 arm A loss on 2026-08-14
+    # was a plumbing failure, not a science failure, and plumbing is testable at
+    # 1/8th the price. Must be in EU-RO-1: the volume does not leave its region.
+    smoke: bool = False
+    smoke_model_cache_dir: str = "models--Qwen--Qwen3.5-2B"
+    # Long enough that training outlasts several watchdog checks — a rehearsal that
+    # ends before the watchdog looks twice proves nothing about the watchdog.
+    smoke_steps: int = 40
+
+    # 🔴 The old premise here — "a stalled 27B is silent; a live one writes a line
+    # every ~24 s" — was FALSE, and it cost the 2026-08-14 run. Under
+    # `papermill --log-output` a live trainer writes NOTHING: its progress bar is a
+    # `display_data` object and papermill only forwards streams. Liveness is now
+    # produced deliberately by `_Pulse` in the arm engine (every 60 s, all phases,
+    # merge included) instead of being assumed from a side effect.
     stale_seconds: int = 2700             # 45 min without log output => hung
     max_seconds: int = 16 * 3600          # hard wall clock, last resort
     stop_retries: int = 5                 # the stop call itself can fail on a flaky link
+
+    # Run names, kept in ONE place because the arm engine appends `_smoke` itself
+    # (`ArmConfig.run_dir`) and the eval must be pointed at the directory the arm
+    # actually wrote. Hardcoding them twice is how a rehearsal evaluates an empty dir.
+    @property
+    def suffix(self) -> str:
+        return "_smoke" if self.smoke else ""
+
+    @property
+    def run_a(self) -> str:
+        return f"40_A_alpha_v1{self.suffix}"
+
+    @property
+    def run_b(self) -> str:
+        return f"40_B_connector_v1{self.suffix}"
+
+
+def _arm_params(cfg: ChainConfig, exp: str) -> str:
+    """The papermill params both arms take. The notebooks' own defaults are UNAM's;
+    the chain always names the machine explicitly so a rehearsal on the pod cannot
+    inherit a path from the wrong box."""
+    return (
+        f'-p WORK_DIR "{exp}/runs" -p HF_HOME "{cfg.hf_home}" '
+        f'-p SMOKE_STEPS {cfg.smoke_steps}'
+    )
 
 
 def render(cfg: ChainConfig) -> str:
@@ -87,6 +129,18 @@ def render(cfg: ChainConfig) -> str:
     exp = f"{cfg.repo_root}/{cfg.exp_dir}"
     arm_b_block = _arm_b(cfg, exp) if cfg.run_arm_b else (
         '\necho "=== arm B skipped by config (run_arm_b=False) ==="\n'
+    )
+    # The cache gate must check the model that will ACTUALLY be loaded. In rehearsal
+    # that is the 2B, and a missing 2B is a ~4 GB download, not a blown disk plan —
+    # so it warns instead of aborting. For the real 27B it stays fatal.
+    arm_params = _arm_params(cfg, exp)
+    wanted_model = cfg.smoke_model_cache_dir if cfg.smoke else cfg.model_cache_dir
+    model_missing = (
+        f'  echo "WARN: {wanted_model} not cached — the rehearsal will download it (~4 GB)."'
+        if cfg.smoke else
+        f'  echo "FATAL: {wanted_model} is not in {cfg.hf_home}/hub — training would"\n'
+        f'  echo "re-download 52 GB and blow the disk plan. Fix HF_HOME before relaunching."\n'
+        f'  exit 1'
     )
     return f"""#!/usr/bin/env bash
 # RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
@@ -132,12 +186,10 @@ cd {exp} || exit 1
 # failure mode is silent and expensive: an unset HF_HOME does not error, it
 # re-downloads 52 GB.
 export HF_HOME={cfg.hf_home}
-if [ ! -d "{cfg.hf_home}/hub/{cfg.model_cache_dir}" ]; then
-  echo "FATAL: {cfg.model_cache_dir} is not in {cfg.hf_home}/hub — training would"
-  echo "re-download 52 GB and blow the disk plan. Fix HF_HOME before relaunching."
-  exit 1
+if [ ! -d "{cfg.hf_home}/hub/{wanted_model}" ]; then
+{model_missing}
 fi
-echo "HF_HOME={cfg.hf_home} — model present"
+echo "HF_HOME={cfg.hf_home} — {wanted_model} present"
 
 # --- 1. the versions the gates were measured against -----------------------------
 # A mismatch means the merge gate and G4 do not transfer, so nothing below is
@@ -178,14 +230,14 @@ run_nb() {{  # run_nb <notebook> <output-tag> [extra papermill args...]
   local nb="$1"; local tag="$2"; shift 2
   echo "===== $nb start $(date -u) ====="
   {cfg.env_python} -m papermill "$nb" "/workspace/tmp/leo_out_${{tag}}.ipynb" \\
-    -p SMOKE False "$@" --log-output
+    -p SMOKE {cfg.smoke} "$@" --log-output
   local rc=$?
   echo "===== $nb end rc=$rc $(date -u) ====="
   return $rc
 }}
 
 # --- 3. ARM A: lora_alpha 32 -> 16 -----------------------------------------------
-run_nb 02_alpha_arm.ipynb arm_a
+run_nb 02_alpha_arm.ipynb arm_a {arm_params}
 RC_A=$?
 if [ $RC_A -ne 0 ]; then
   echo "ARM A FAILED (rc=$RC_A) — committing whatever it produced and stopping."
@@ -193,7 +245,7 @@ if [ $RC_A -ne 0 ]; then
   exit $RC_A
 fi
 
-run_nb 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/40_A_alpha_v1/merged" -p RUN_NAME 40_A_alpha_v1
+run_nb 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" -p RUN_NAME {cfg.run_a}
 commit_results "eval(40): arm A — lora_alpha 32->16, scored against rung 38 ep1"
 {arm_b_block}
 echo "===== chain40 end $(date -u) ====="
@@ -206,7 +258,7 @@ def _arm_b(cfg: ChainConfig, exp: str) -> str:
 # Two 27B merges are ~104 GB and the volume has ~136 GB free. Sequential with a
 # delete in between keeps the peak at ONE merge. Arm A is already scored and pushed
 # at this point, so its merge is regenerable and expendable.
-A_MERGED="{cfg.repo_root}/{cfg.exp_dir}/runs/40_A_alpha_v1/merged"
+A_MERGED="{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged"
 if [ -d "$A_MERGED" ]; then
   echo "removing arm A's merge (already scored and pushed)"
   rm -rf "$A_MERGED"
@@ -214,7 +266,7 @@ fi
 du -sx /workspace 2>/dev/null | tail -1
 
 # --- 5. ARM B: the connector trains, at 4e-5 -------------------------------------
-run_nb 03_connector_arm.ipynb arm_b
+run_nb 03_connector_arm.ipynb arm_b {_arm_params(cfg, exp)}
 RC_B=$?
 if [ $RC_B -ne 0 ]; then
   echo "ARM B FAILED (rc=$RC_B) — committing the evidence."
@@ -222,7 +274,7 @@ if [ $RC_B -ne 0 ]; then
   exit $RC_B
 fi
 
-run_nb 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/40_B_connector_v1/merged" -p RUN_NAME 40_B_connector_v1
+run_nb 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_b}/merged" -p RUN_NAME {cfg.run_b}
 commit_results "eval(40): arm B — the connector trains at 4e-5, scored against rung 38 ep1"
 """
 

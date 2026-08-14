@@ -34,6 +34,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import sys
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -129,6 +131,10 @@ class ArmConfig:
     smoke_steps: int = 5
     smoke_rows: int = 32
 
+    # Seconds between `[pulse]` lines. This is the watchdog's liveness signal, so
+    # it must stay well under the chain's `stale_seconds` (2700). See `_Pulse`.
+    pulse_seconds: int = 60
+
     @property
     def run_dir(self) -> str:
         name = self.run_name or f"40_{self.arm}_v1{'_smoke' if self.smoke else ''}"
@@ -145,6 +151,90 @@ class ArmConfig:
 
 class ArmFailure(AssertionError):
     """A guard that fires is a FINDING (RULES §7). Raised so papermill exits non-zero."""
+
+
+# ---------------------------------------------------------------------------
+# liveness — the only thing that reaches the chain log
+# ---------------------------------------------------------------------------
+# 🔴 MEASURED 2026-08-14, rung 40 arm A. The chain runs these notebooks under
+# `papermill --log-output`, which forwards *stream* outputs and silently drops
+# `display_data`. HF's Trainer installs a notebook progress bar — a `display_data`
+# HTML object updated in place — so from the instant `.train()` begins, papermill
+# emits nothing at all. `leo_chain40.log` went silent at 06:52:46; the watchdog
+# read 2912 s of that silence as a hang and stopped the pod on a perfectly healthy
+# 27B ~48 min in. No checkpoint, no RESULTS_arm.json, both arms lost, ~$2.20.
+#
+# The premise in ChainConfig ("a live 27B writes a line every ~24 s") was false
+# from the first training step onward — the one phase where the watchdog matters.
+#
+# Two layers, because one night was enough:
+#   * `_Pulse` — a daemon thread printing for the WHOLE of main(). It covers the
+#     phases no trainer callback can see, and the longest of those is
+#     `save_pretrained_merged`: ~52 GB of merged 27B onto a network volume,
+#     silent start to finish. That was the SECOND latent kill, still unfired.
+#   * `_progress_callback` — real step/loss/ETA, so the log is worth reading and
+#     not merely non-empty.
+#
+# Neither may raise. A liveness signal that kills the run it exists to protect is
+# strictly worse than no signal, so both swallow their own errors.
+class _Pulse(threading.Thread):
+    """Prints `[pulse] <phase> | N min` every `every` seconds until stopped."""
+
+    def __init__(self, every: int = 60) -> None:
+        super().__init__(daemon=True, name="arm-pulse")
+        self.every = max(1, int(every))
+        self.phase = "starting"
+        self._stop = threading.Event()
+        self._t0 = time.perf_counter()
+
+    def elapsed_min(self) -> float:
+        return (time.perf_counter() - self._t0) / 60
+
+    def mark(self, phase: str) -> None:
+        """Name the current phase AND emit a line immediately, so every phase
+        boundary is visible in the log even if it is over in under `every` s."""
+        self.phase = phase
+        self._emit()
+
+    def _emit(self) -> None:
+        try:
+            print(f"[pulse] {self.phase} | {self.elapsed_min():6.1f} min elapsed", flush=True)
+        except Exception:  # noqa: BLE001 -- never kill a run over a log line
+            pass
+
+    def run(self) -> None:
+        while not self._stop.wait(self.every):
+            self._emit()
+
+    def stop(self) -> None:
+        self._stop.set()
+
+
+def _progress_callback(pulse: _Pulse):
+    """Built lazily on purpose: a module-scope `from transformers import ...` would
+    land before `import unsloth` in main() and blow up unsloth_zoo."""
+    from transformers import TrainerCallback
+
+    class _Progress(TrainerCallback):
+        def on_log(self, args, state, control, logs=None, **kw):
+            try:
+                logs = logs or {}
+                step, total = state.global_step, (state.max_steps or 0)
+                bits = [f"step {step}/{total}" if total else f"step {step}"]
+                for key, fmt in (("loss", "{:.4f}"), ("grad_norm", "{:.3f}"),
+                                 ("learning_rate", "{:.2e}")):
+                    val = logs.get(key)
+                    if isinstance(val, (int, float)):
+                        bits.append(f"{key} {fmt.format(val)}")
+                mins = pulse.elapsed_min()
+                bits.append(f"{mins:.1f} min")
+                if total and step:
+                    bits.append(f"eta {mins * (total - step) / step:.1f} min")
+                print("[step] " + " | ".join(bits), flush=True)
+            except Exception:  # noqa: BLE001 -- see above
+                pass
+
+    return _Progress()
 
 
 # ---------------------------------------------------------------------------
@@ -387,6 +477,10 @@ def main(cfg: ArmConfig) -> dict:
 
     Path(cfg.run_dir).mkdir(parents=True, exist_ok=True)
     t0 = time.perf_counter()
+    # Started BEFORE the guards: model loading and the merge are both long and
+    # silent, and the watchdog cannot tell "still working" from "hung" without this.
+    pulse = _Pulse(cfg.pulse_seconds)
+    pulse.start()
     result: dict = {
         "config": asdict(cfg), "versions": versions(), "control_run": CONTROL_RUN,
         "control_scores": CONTROL_SCORES, "verdict": "INCOMPLETE",
@@ -394,10 +488,12 @@ def main(cfg: ArmConfig) -> dict:
 
     try:
         # --- guards that cost nothing and must pass before a GPU is touched ---
+        pulse.mark("guards")
         result["diff_vs_rung38"] = assert_single_variable(cfg)
         result["dataset"] = assert_dataset(cfg)
 
         # --- data -------------------------------------------------------------
+        pulse.mark("data")
         if cfg.smoke:
             from merge_gate import MergeGateConfig
             jsonl = build_synthetic_data(
@@ -408,6 +504,7 @@ def main(cfg: ArmConfig) -> dict:
         rows = [_to_messages(json.loads(l)) for l in open(jsonl) if l.strip()]
 
         # --- build ------------------------------------------------------------
+        pulse.mark("loading base weights")
         model, tok = FastVisionModel.from_pretrained(
             cfg.effective_model, load_in_4bit=False, load_in_16bit=True,
             full_finetuning=False, max_seq_length=cfg.max_seq_length,
@@ -455,6 +552,7 @@ def main(cfg: ArmConfig) -> dict:
         tr = SFTTrainer(
             model=model, train_dataset=rows,
             data_collator=UnslothVisionDataCollator(model, tok), args=args,
+            callbacks=[_progress_callback(pulse)],
         )
 
         groups = build_param_groups(model, cfg)
@@ -465,6 +563,7 @@ def main(cfg: ArmConfig) -> dict:
             tr.optimizer = _t.optim.AdamW(groups, lr=cfg.learning_rate)
             result["param_groups_pre"] = assert_param_groups(tr.optimizer, cfg, "pre-train")
 
+        pulse.mark("train")
         st = tr.train()
         result["train_loss"] = float(st.training_loss)
         result["grad_norms"] = [h["grad_norm"] for h in tr.state.log_history if "grad_norm" in h]
@@ -481,6 +580,10 @@ def main(cfg: ArmConfig) -> dict:
         result["connector_trained"] = trained
 
         # --- merge ------------------------------------------------------------
+        # ~52 GB of merged 27B onto a network volume, and `save_pretrained_merged`
+        # says nothing while it works. Without the pulse this alone can outlast
+        # `stale_seconds` and get a finished, successful arm killed at the wire.
+        pulse.mark("merging + writing ~52 GB")
         model.save_pretrained_merged(cfg.merged_dir, tok)
         result["merged_files"] = sorted(p.name for p in Path(cfg.merged_dir).iterdir())
         if cfg.modules_to_save:
@@ -492,6 +595,11 @@ def main(cfg: ArmConfig) -> dict:
         result["elapsed_s"] = time.perf_counter() - t0
         _write(cfg, result)
         raise
+    finally:
+        # Stopped on EVERY exit. A pulse still beating after main() returns would
+        # tell the watchdog a dead chain is alive — the exact inverse of this bug.
+        pulse.mark("done")
+        pulse.stop()
 
     result["elapsed_s"] = time.perf_counter() - t0
     _write(cfg, result)
