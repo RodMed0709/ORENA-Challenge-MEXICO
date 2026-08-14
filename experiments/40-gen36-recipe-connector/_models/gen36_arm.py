@@ -256,8 +256,18 @@ def assert_param_groups(optimizer, cfg: ArmConfig, when: str) -> dict:
     between construction and step 1. Measured on 2026-08-13 (G4): the build-time
     check PASSED and only the post-train check caught it.
     """
+    # 🔴 `lr` is the LIVE value, which the scheduler has moved. Under `cosine` it is
+    # 0.0 by the end of training BY DESIGN, so asserting `lr` post-train fires on every
+    # completed run -- measured 2026-08-13 on the first B_connector smoke. What we mean
+    # is the value the group STARTED at, and PyTorch stores that as `initial_lr` the
+    # moment a scheduler is attached. G4 missed this because it used `constant`.
     groups = [
-        {"name": g.get("name", f"g{i}"), "lr": g["lr"], "n_params": len(g["params"])}
+        {
+            "name": g.get("name", f"g{i}"),
+            "lr": g["lr"],
+            "initial_lr": g.get("initial_lr"),
+            "n_params": len(g["params"]),
+        }
         for i, g in enumerate(optimizer.param_groups)
     ]
     if not cfg.connector_lr:
@@ -269,9 +279,12 @@ def assert_param_groups(optimizer, cfg: ArmConfig, when: str) -> dict:
             f"[{when}] no 'connector' param group in the optimiser. Groups: {groups}. "
             "The trainer discarded ours — the silent no-op this guard exists for."
         )
-    if abs(conn[0]["lr"] - cfg.connector_lr) > 1e-12:
+    declared = conn[0]["initial_lr"] if conn[0]["initial_lr"] is not None else conn[0]["lr"]
+    if abs(declared - cfg.connector_lr) > 1e-12:
         raise ArmFailure(
-            f"[{when}] connector lr is {conn[0]['lr']}, declared {cfg.connector_lr}."
+            f"[{when}] the connector group started at {declared}, declared "
+            f"{cfg.connector_lr}. (live lr is {conn[0]['lr']}; under cosine that is "
+            "expected to be 0 at the end and is NOT what this asserts.)"
         )
     log.info("param groups OK [%s] — %s", when, groups)
     return {"when": when, "groups": groups}
