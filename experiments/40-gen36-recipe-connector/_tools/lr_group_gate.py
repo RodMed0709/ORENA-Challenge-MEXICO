@@ -227,10 +227,6 @@ def run_leg(cfg: LRGroupGateConfig, connector_lr: float, jsonl: str, leg: str) -
     tr = SFTTrainer(
         model=model, train_dataset=rows,
         data_collator=UnslothVisionDataCollator(model, tok),
-        # 🔴 The optimiser is handed in, NOT described in the config. A `learning_rate`
-        # in SFTConfig would make the Trainer build its own and drop ours -- the exact
-        # silent no-op this gate exists to catch.
-        optimizers=(optimizer, None),
         args=SFTConfig(
             per_device_train_batch_size=cfg.per_device_train_batch_size,
             gradient_accumulation_steps=cfg.gradient_accumulation_steps,
@@ -241,6 +237,16 @@ def run_leg(cfg: LRGroupGateConfig, connector_lr: float, jsonl: str, leg: str) -
             dataset_kwargs={"skip_prepare_dataset": True}, max_length=cfg.max_seq_length,
         ),
     )
+    # 🔴 `optimizers=(opt, sched)` is GONE in trl 0.24 -- SFTTrainer.__init__ takes
+    # `optimizer_cls_and_kwargs` instead and carries **kwargs, so passing `optimizers`
+    # is swallowed with NO error and the Trainer silently builds HF's own optimiser at
+    # its default 5e-5. G4 measured exactly that on 2026-08-13 before this fix.
+    # `create_optimizer` guards on `if self.optimizer is None`, so assigning the
+    # instance here is what makes it survive -- and `optimizer_cls_and_kwargs` cannot
+    # express per-group LRs anyway, since it is a class plus kwargs applied to HF's
+    # own parameter grouping.
+    tr.optimizer = optimizer
+
     st = tr.train()
 
     # Re-assert AFTER training: the Trainer may rebuild the optimiser on .train(),
