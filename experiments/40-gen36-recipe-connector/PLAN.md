@@ -38,18 +38,23 @@ It is a question about a **code path**, not about an architecture and not about 
 
 | | value |
 |---|---|
-| model | **`Qwen/Qwen3.5-4B`** — already in the S3 cache, no 52 GB download |
-| data | **synthetic**: noise images + invented Q/A pairs |
-| GPU | any ≥24 GB. **UNAM is eligible** |
+| model | **`Qwen/Qwen3.5-2B`** — already complete on UNAM (4.3 GB), **nothing to download** |
+| data | **synthetic**: generated noise images + invented Q/A pairs, ours, written fresh |
+| host | **UNAM** `hpclab-RTXA6000` — 2× RTX 6000 Ada 48 GB, both idle; env `orena-unsloth` |
 | steps | 20 |
 
-**Why the 4B is a valid proxy** — verified 2026-08-13 against its own `model.safetensors.index.json`:
+**Why the 2B is a valid proxy** — verified 2026-08-13 by reading the model on UNAM:
 
-| | 3.5-4B | 3.6-27B |
+| | 3.5-2B (UNAM) | 3.6-27B |
 |---|---|---|
 | class / `model_type` | `Qwen3_5ForConditionalGeneration` / `qwen3_5` | **identical** |
 | connector | `model.visual.merger.linear_fc{1,2}` | **same names** |
 | `deepstack_merger_list` | none | **none** |
+| `vision_config` | present | present |
+
+📌 **The 4B was the first choice and was dropped**: on UNAM it is 28 KB — `config.json` only, weights
+never fetched (same for the 8B). The 2B is the one that is actually there, and rung 38's own smoke
+used a 2B. No download, no wait.
 
 **Why synthetic data is legitimate — and required.** The gate measures whether the merge *preserves*
 weights, not whether the model *learns*. All it needs is for those two layers to move away from base;
@@ -65,6 +70,17 @@ touching the 27B.
 
 A gate run against a different version measures a different code path. **Record the versions in the
 result file**, or the PASS is not transferable.
+
+✅ **Checked on UNAM 2026-08-13, env `orena-unsloth`:** `unsloth 2026.8.15` — the version rung 38's
+census reports — plus `unsloth_zoo 2026.8.10`, `peft 0.20.0`, `transformers 5.5.0`,
+`torch 2.11.0+cu128`, CUDA available, capability **(8, 9)**.
+⚠️ **Still to confirm at arm time:** that the pod env the 27B arm runs in carries the *same*
+`unsloth` and `unsloth_zoo` versions. If it does not, this gate does not transfer and must rerun.
+
+📌 **The three PEFT matchers were re-verified against the INSTALLED `peft 0.20.0`**, not against
+GitHub `main`, and all three hold: `_maybe_include_all_linear_layers` accepts only a bare `str`;
+`_set_trainable` matches with `key.endswith(target_key)`; `check_target_module_exists` excludes
+`modules_to_save` with `re.match(rf"(^|.*\.){m}($|\..*)", key)`.
 
 ### 2d. PASS / FAIL
 

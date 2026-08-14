@@ -24,9 +24,11 @@ against the documented 1–2. → [[the-recipe-lever-is-alpha-over-rank]]
 carries those weights.** If it does not, we train ~5.9 h and ship the base model in exactly the two
 layers the work is about.
 
-The gate answers it for minutes: **`Qwen3.5-4B`** (same class, same connector names, no `deepstack`,
-already in the S3 cache), **synthetic data**, **20 steps**, **any ≥24 GB GPU — UNAM is eligible**,
-because it uses **no challenge frames** and therefore does not engage the DUA.
+The gate answers it for minutes: **`Qwen3.5-2B`** (same class `Qwen3_5ForConditionalGeneration`, same
+connector names, no `deepstack`, **already complete on UNAM — nothing to download**), **synthetic
+data we generate**, **20 steps**, on **UNAM's 2× RTX 6000 Ada 48 GB** — it uses **no challenge
+frames**, so the DUA is not engaged. Env `orena-unsloth` already carries `unsloth 2026.8.15`, the
+version rung 38's census reports.
 
 Three assertions, each raising: **G1** coverage (a non-matching target fails *silently* in PEFT),
 **G2** the connector actually trained (`sum|Δ| > 0` — `rc=0` is not evidence), **G3** the merge
