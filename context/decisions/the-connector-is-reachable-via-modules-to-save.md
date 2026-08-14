@@ -82,10 +82,19 @@ connector by suffix with no `modules_to_save` at all.
 ```
 
 ⇒ a **list** `["all-linear", "<name>"]` expands **nothing**, and `"all-linear"` then falls to
-`key.endswith(".all-linear")`, which matches no module in any model. Path A is unaffected — it
-passes the bare string. ⚠️ Flagged for **rung 39**, whose plan passes nine argv values; the ms-swift
-half (does it expand before PEFT sees it?) remains unverified and is noted in
-`context/39-connector-lora/CONTEXT.md`.
+`key.endswith(".all-linear")`, which matches no module in any model. **Path A is unaffected — it
+passes the bare string, and it must keep doing so.**
+
+✅ **The ms-swift half is now answered, and it does not apply there.** Rung 39's gate ran on
+2026-08-13 (`3f932db`) and its subject leg returned `736 = 504 LLM + 216 ViT + 16 aligner`, orphans
+0, control leg 0 aligner, `grad_norm` 139 → 14. Coverage intact ⇒ **ms-swift resolves `all-linear`
+itself before PEFT sees it, and an explicit target survives its intersection.** So the PEFT rule
+binds **only where ms-swift is not in the path — which is exactly our lane: Unsloth.**
+
+🔑 **And rung 39 does not cover us.** Its result is ms-swift · 8B · with `deepstack` (16 tensors =
+8 layers × 2). Ours is **Unsloth · 27B · no `deepstack` · 2 layers**. Rodrigo's own commit message
+says it: *"Unsloth remains unmeasured."* His gate proves the lever exists; it does not measure our
+route.
 
 ### 3a. Path A in detail, and why it is safe
 
