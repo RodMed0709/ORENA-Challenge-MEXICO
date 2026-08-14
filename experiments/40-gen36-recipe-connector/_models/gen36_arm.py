@@ -25,8 +25,10 @@ Everything this file guards against has already happened in this repo:
 * `save_pretrained_merged` keeps a `modules_to_save` weight and **drops its bias**
   (measured 2026-08-13, G3) => `assert_merge_carried`, per tensor.
 
-SMOKE mode swaps the 27B for `Qwen3.5-2B` and the real data for generated noise, so
-the whole chain is exercisable on UNAM — where the challenge data may not go.
+SMOKE mode swaps the 27B for `Qwen3.5-4B` and the real data for generated noise, so
+the whole chain is exercisable on UNAM — where the challenge data may not go — and on
+a cheap pod. (The gates in 00/01 used the 2B on UNAM and stay as recorded; the pod's
+cache has the 4B, and the 4B is the same `Qwen3_5ForConditionalGeneration` class.)
 """
 
 from __future__ import annotations
@@ -127,7 +129,12 @@ class ArmConfig:
     optim: str = "adamw_8bit"
 
     smoke: bool = False
-    smoke_model: str = "Qwen/Qwen3.5-2B"
+    # Qwen3.5-4B, not the 2B: it is already in /workspace/hf_cache (the 2B is not, and
+    # a rehearsal that starts with a 4 GB download is a worse rehearsal), and it is
+    # `Qwen3_5ForConditionalGeneration` with a `vision_config` — the SAME architecture
+    # family as the 27B. So arm B's `model.visual.merger.*` paths actually resolve here
+    # instead of passing vacuously against a model shaped differently from the target.
+    smoke_model: str = "Qwen/Qwen3.5-4B"
     smoke_steps: int = 5
     smoke_rows: int = 32
 
