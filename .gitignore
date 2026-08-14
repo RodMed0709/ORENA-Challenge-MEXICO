@@ -32,10 +32,13 @@ external_data/
 # patterns exclude the run CONTENTS and re-include the directories to descend through.
 runs/**
 experiments/*/runs/**
+experiments_segment/*/runs/**
 !runs/**/
 !experiments/*/runs/**/
+!experiments_segment/*/runs/**/
 !runs/**/stratified.json
 !experiments/*/runs/**/stratified.json
+!experiments_segment/*/runs/**/stratified.json
 wandb/
 .ipynb_checkpoints/
 
