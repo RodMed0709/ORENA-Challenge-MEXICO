@@ -57,6 +57,14 @@ class ChainConfig:
         "/workspace/repo_leo/experiments/38-gen36-ft-screen/runs/38_qwen36_27b_v1/merged"
     )
 
+    # 🔴 HF_HOME is EMPTY on the pod and there are TWO caches with different
+    # contents: the 27B is in /workspace/hf_cache (61 G) and NOT in
+    # /workspace/.cache/huggingface (7.6 G, the judge). Unset, `from_pretrained`
+    # re-downloads 52 GB — hours lost and the disk plan broken. Resolved by
+    # LOOKING, per [[pod-hf-home-is-not-set]], not by hardcoding a guess.
+    hf_home: str = "/workspace/hf_cache"
+    model_cache_dir: str = "models--Qwen--Qwen3.6-27B"
+
     watchdog_path: str = "/workspace/tmp/leo_watchdog40.sh"
     watchdog_log: str = "/workspace/tmp/leo_watchdog40.log"
 
@@ -118,6 +126,18 @@ setsid nohup bash {cfg.watchdog_path} $$ > {cfg.watchdog_log} 2>&1 &
 echo "watchdog detached (pid guard on $$) -> {cfg.watchdog_log}"
 
 cd {exp} || exit 1
+
+# --- 0c. HF_HOME, and PROOF the model is really in it ------------------------------
+# Exported before anything imports transformers. The assert exists because the
+# failure mode is silent and expensive: an unset HF_HOME does not error, it
+# re-downloads 52 GB.
+export HF_HOME={cfg.hf_home}
+if [ ! -d "{cfg.hf_home}/hub/{cfg.model_cache_dir}" ]; then
+  echo "FATAL: {cfg.model_cache_dir} is not in {cfg.hf_home}/hub — training would"
+  echo "re-download 52 GB and blow the disk plan. Fix HF_HOME before relaunching."
+  exit 1
+fi
+echo "HF_HOME={cfg.hf_home} — model present"
 
 # --- 1. the versions the gates were measured against -----------------------------
 # A mismatch means the merge gate and G4 do not transfer, so nothing below is
