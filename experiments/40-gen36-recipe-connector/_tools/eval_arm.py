@@ -59,7 +59,11 @@ class EvalConfig:
     merged_dir: str = ""
     out_dir: str = ""
     run_name: str = "40_eval"
-    data_root: str = "/workspace/data"
+    # 🔴 MEASURED on the pod 2026-08-14: this said "/workspace/data", which exists and
+    # is EMPTY. The challenge data is in /workspace/orena-data — the path rung 38's
+    # notebook uses. An empty data_root does not announce itself; it produces a run
+    # with no items, after the arm has trained.
+    data_root: str = "/workspace/orena-data"
 
     # 🔴 Identical to the eval that scored rung 38 AND A2. The inference path is not
     # allowed to be a second variable: if it moves, the delta stops being the arm.
@@ -67,9 +71,18 @@ class EvalConfig:
     seed: int = 42
     n_eval: int | None = None      # None = the full 6252
 
-    # the control's archived per-question answers, for the paired CI
+    # The control's archived per-question answers, for the paired CI.
+    # 🔴 MEASURED on the pod 2026-08-14: this pointed at `38-gen36-ft-screen/evidence_ep1/`,
+    # which does not exist on the volume. The real archive is rung 38's own arm at
+    # epoch 1 — 6252 rows, with the qID/video/correctness columns the paired CI needs.
+    # 🔴 Do NOT "fix" this by pointing at rung 21's `21_lr_2e4_v1/ep1_full/results.csv`,
+    # which does exist and is the tempting nearby file: that is A2, a DIFFERENT
+    # BACKBONE. Reading these arms against it is the exact error PLAN.md forbids.
+    # Only bites outside smoke (`paired_vs_control` is skipped at n=40), so it would
+    # have surfaced first on the real 16 h run.
     control_results_csv: str = (
-        "/workspace/repo_leo/experiments/38-gen36-ft-screen/evidence_ep1/results.csv"
+        "/workspace/repo_leo/experiments/38-gen36-ft-screen/runs/38_qwen36_27b_v1"
+        "/ep1_full/results.csv"
     )
 
     smoke: bool = False

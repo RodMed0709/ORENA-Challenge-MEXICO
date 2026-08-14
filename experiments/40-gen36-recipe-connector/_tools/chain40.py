@@ -273,6 +273,32 @@ if [ ! -d "{cfg.eval_hf_home}/hub/{cfg.judge_cache_dir}" ]; then
 fi
 echo "judge OK — {cfg.judge_cache_dir} present in {cfg.eval_hf_home}"
 
+# --- 1d. the eval's DATA and its CONTROL -----------------------------------------
+# Both read from `EvalConfig`, so this gate asks the config itself rather than
+# repeating its paths here — a gate that hardcodes what it checks stops checking the
+# moment the config moves. The control only matters outside smoke (`paired_vs_control`
+# is skipped at n=40), so without this gate a broken control path would surface for
+# the first time on the real 16 h run, at the very last step.
+{cfg.eval_python} - <<'PY' || exit 1
+import sys
+from pathlib import Path
+sys.path.insert(0, "{cfg.repo_root}/{cfg.exp_dir}/_tools")
+from eval_arm import EvalConfig
+c = EvalConfig()
+bad = []
+if not any(Path(c.data_root).glob("*/data/frame/test.parquet")):
+    bad.append(f"data_root {{c.data_root}} has no */data/frame/test.parquet")
+if not Path(c.control_results_csv).exists():
+    bad.append(f"control_results_csv {{c.control_results_csv}} does not exist")
+if bad:
+    print("EVAL DATA GATE FAILED:")
+    for b in bad:
+        print("  -", b)
+    sys.exit(1)
+n = sum(1 for _ in open(c.control_results_csv)) - 1
+print(f"eval data OK — {{c.data_root}}, control has {{n}} rows")
+PY
+
 # --- 2. reclaim the quota BEFORE training ----------------------------------------
 # `df` reports the MooseFS cluster and not the quota, so measure with du.
 echo "--- volume before ---"; du -sx /workspace 2>/dev/null | tail -1
