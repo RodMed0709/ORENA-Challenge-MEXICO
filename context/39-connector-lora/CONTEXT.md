@@ -65,44 +65,28 @@ never received a gradient, and the cause is a regex rather than a decision
 
 **pending — pre-registered 2026-08-13.** The gate has not been run and the arm has not been run.
 
-## ⚠️ Open question raised from outside this rung — 2026-08-13, before the gate ran
+## ✅ A question raised from outside this rung, and CLOSED BY THE GATE — 2026-08-13
 
-**PEFT does NOT expand `all-linear` when it arrives inside a LIST. Verified first-hand in source.**
+**Raised (before the gate ran):** in **PEFT**, `all-linear` is not expanded when it arrives inside a
+**list** — `_maybe_include_all_linear_layers` (`tuners_utils.py:2353`) early-returns unless
+`target_modules` is a `str` equal to the shorthand, and `"all-linear"` then falls to
+`key.endswith(".all-linear")`, which matches nothing. This rung passes exactly that shape: nine argv
+values. The open half was whether **ms-swift** expands it itself first.
 
-`peft/tuners/tuners_utils.py:2353`, `_maybe_include_all_linear_layers`, read from `main` on
-2026-08-13:
+**Answered by measurement, not by argument.** The gate ran (`3f932db`) and the subject leg returned
+**736 = 504 LLM + 216 ViT + 16 aligner**, orphans 0, with the control leg at 0 aligner and
+`grad_norm` 139 → 14. An unexpanded `all-linear` would have collapsed coverage to the eight merger
+names alone; 504 and 216 are intact. ⇒ **ms-swift does resolve `all-linear` before PEFT sees it, and
+an explicit target survives its intersection.** Nothing to fix here.
 
-```python
-    # if `target_modules` is a string, convert to lower case and check if it matches "all-linear"
-    if not (
-        isinstance(peft_config.target_modules, str)
-        and peft_config.target_modules.lower() == INCLUDE_LINEAR_LAYERS_SHORTHAND
-    ):
-        return peft_config
-```
+📌 **Kept rather than deleted, for two reasons.** It records that the rung's own coverage criteria
+(`n_llm == 504`, `n_vit == 216`) are what made this failure mode detectable — they earned their
+place. And the PEFT-level fact still binds **anywhere ms-swift is not in the path**: under Unsloth,
+or in plain PEFT, `all-linear` must travel **alone, as a string**. That is the gen-3.6 lane, where
+[[the-connector-is-reachable-via-modules-to-save]] carries it.
 
-with `INCLUDE_LINEAR_LAYERS_SHORTHAND = "all-linear"` (`peft/utils/constants.py:403`).
-
-⇒ A **list** `["all-linear", "<name1>", …]` returns early and expands **nothing**. `"all-linear"`
-then falls through to the list branch of `check_target_module_exists`, which tests
-`key.endswith(".all-linear")` — matching **no module in any model**. This rung's §2 passes exactly
-that shape: `all-linear` plus the eight merger names as nine argv values.
-
-🔑 **This may still be a non-issue here, and the open part is ms-swift, not PEFT.** ms-swift may
-expand `all-linear` into a concrete list of its own *before* a `LoraConfig` is ever built, in which
-case the string never reaches this branch. **That half is UNVERIFIED** — ms-swift is not vendored in
-this repo, so we could not read it. Rung 06's engine comment
-(`vit_lora_train.py:23-26`) says `--target_modules all-linear` parses into the LIST `['all-linear']`,
-which is what makes `tuner.py:93`'s early return not fire — that is about ms-swift's own handling and
-is consistent with ms-swift expanding it itself.
-
-⚠️ **What this changes for the gate:** §4a's criteria (`n_llm == 504`, `n_vit == 216`) **would**
-catch the failure — an unexpanded `all-linear` collapses coverage to the eight merger names alone,
-which is precisely what those two numbers exist to detect. So the rung is protected. The gate simply
-does not *name* this failure mode, and reading it would be quicker if it did.
-
-📌 Flagged, not fixed. This is a pre-registered rung and its author decides; only this CONTEXT file
-was touched, never `PLAN.md`. Raised from legokna's gen-3.6 line of work.
+Only this CONTEXT file was ever touched from outside; `PLAN.md` was not, and its `Results`/`Next`
+sections belong to the rung's author.
 
 ## Next
 
