@@ -82,6 +82,24 @@ GitHub `main`, and all three hold: `_maybe_include_all_linear_layers` accepts on
 `_set_trainable` matches with `key.endswith(target_key)`; `check_target_module_exists` excludes
 `modules_to_save` with `re.match(rf"(^|.*\.){m}($|\..*)", key)`.
 
+### 2c-bis. What reading the installed Unsloth already told us
+
+✅ **The config path works.** `FastBaseModel.get_peft_model` (what
+`FastVisionModel.get_peft_model` dispatches to) takes `modules_to_save`, default `None`, and passes
+it to `LoraConfig` through an `allowed_parameters` filter. Read on UNAM, `unsloth 2026.8.15`.
+📌 Checking the dispatcher instead of the real function briefly suggested the opposite; recorded so
+the same wrong turn is not repeated.
+
+🔴 **And a TODO in Unsloth's own source strengthens the case for G3:**
+
+```python
+ensure_weight_tying = False,  # [TODO] Add `ensure_weight_tying` for `modules_to_save` for vision models
+```
+
+The authors flag `modules_to_save` **on vision models specifically** as unfinished. That is our exact
+combination. It does not prove the merge drops them — it says the path is not settled, which is why
+this gate exists rather than an assumption.
+
 ### 2d. PASS / FAIL
 
 Three assertions, in order. **Each RAISES** (RULES §7 — a gate that fires is a finding).
