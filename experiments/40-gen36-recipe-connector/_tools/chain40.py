@@ -54,12 +54,20 @@ class ChainConfig:
     repo_root: str = "/workspace/repo_leo"
     exp_dir: str = "experiments/40-gen36-recipe-connector"
     env_python: str = "/workspace/envs/unsloth/bin/python"
-    # 🔴 A SECOND interpreter, because training and eval do not share an environment.
-    # `unsloth` is in envs/unsloth and the `focus` SDK is NOT; focus lives in envs/infer
-    # and envs/judge35 (measured 2026-08-14). Running the eval under the training python
-    # dies on `ModuleNotFoundError: No module named 'focus'` — after the arm has already
-    # trained. Verified before a GPU is touched by the eval-env gate in `render`.
-    eval_python: str = "/workspace/envs/infer/bin/python"
+    # The eval runs in the SAME env as training, and the seam is kept only because the
+    # eval genuinely differs in its HF_HOME (see eval_hf_home).
+    #
+    # 🔴 The 2026-08-14 detour, recorded so it is not repeated: the eval first died on
+    # `ModuleNotFoundError: No module named 'focus'` here, and the obvious fix — point
+    # it at envs/infer, which HAS focus installed — was wrong. envs/infer pins
+    # transformers 4.57.6, which cannot load `Qwen3_5ForConditionalGeneration` at all
+    # (`AutoConfig: KeyError 'qwen3_5'`), so it traded a missing import for a model that
+    # will not load, and cost a second rehearsal to find out. envs/judge35 has
+    # transformers 5.14.1 but no papermill and no decord. The training env has
+    # transformers 5.5.0, papermill, decord and pandas — and `focus` is VENDORED in the
+    # repo, which is how rung 38's eval gets it. `eval_arm.ensure_paths()` is the whole
+    # fix. Gate 1b now checks the CLASS LOADS, not merely that imports resolve.
+    eval_python: str = "/workspace/envs/unsloth/bin/python"
     key_file: str = "/workspace/tmp/leo_runpod_key"
     script_path: str = "/workspace/tmp/leo_chain40.sh"
     log_path: str = "/workspace/tmp/leo_chain40.log"
@@ -241,24 +249,40 @@ if [ ! -x "{cfg.eval_python}" ]; then
   exit 1
 fi
 {cfg.eval_python} - <<'PY' || exit 1
-import sys
-sys.path.insert(0, "{cfg.repo_root}/src")
-# rung 23's tools, where GenericVLMEngine actually lives — the SAME two paths
-# `eval_arm.score()` inserts, so this gate tests the real import, not a lookalike.
-sys.path.insert(0, "{cfg.repo_root}/experiments/23-backbone-screen/_tools")
+import glob, json, sys
+sys.path.insert(0, "{cfg.repo_root}/{cfg.exp_dir}/_tools")
 try:
+    # The SAME sys.path setup score() uses — not a re-creation of it.
+    from eval_arm import ensure_paths
+    ensure_paths("{cfg.repo_root}")
     from focus.enums import Track            # the import that failed on 2026-08-14
     from frame.run import run_baseline       # what eval_arm.score() actually calls
-    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin,
-    # so this engine is REQUIRED, not preferred. Both the 27B and the 4B smoke model
-    # are that class. Gated here because the old code imported it from the wrong
-    # module and quietly fell back to an engine that cannot load either of them.
     from screen_engine import GenericVLMEngine   # noqa: F401
 except Exception as e:
     print(f"EVAL ENV BROKEN: {{type(e).__name__}}: {{e}}")
     print("The arms would train for hours and produce no score. Fix the env first.")
     sys.exit(1)
-print("eval env OK — focus + frame.run + GenericVLMEngine import under {cfg.eval_python}")
+
+# 🔴 Imports resolving is NOT enough, and believing it was cost a whole rehearsal.
+# Under envs/infer every import above succeeded and the eval still died inside
+# `GenericVLMEngine.load()` with `AutoConfig: KeyError 'qwen3_5'` — this transformers
+# simply has no entry for the architecture. So ask the question that actually matters:
+# can THIS interpreter map the model type the merged checkpoint will carry? The merge
+# does not exist yet, but it inherits `model_type` from the base, which is right here.
+cfgs = sorted(glob.glob("{cfg.hf_home}/hub/{wanted_model}/snapshots/*/config.json"))
+if not cfgs:
+    print("EVAL ENV GATE: cannot read a config.json for {wanted_model} — cannot verify")
+    sys.exit(1)
+mt = json.load(open(cfgs[0])).get("model_type")
+from transformers.models.auto.configuration_auto import CONFIG_MAPPING
+import transformers
+if mt not in CONFIG_MAPPING:
+    print(f"EVAL ENV BROKEN: transformers {{transformers.__version__}} does not know "
+          f"model_type {{mt!r}} — AutoConfig will raise KeyError inside the engine,")
+    print("after the arm has trained. Use an interpreter whose transformers has it.")
+    sys.exit(1)
+print(f"eval env OK — imports resolve AND transformers {{transformers.__version__}} "
+      f"maps model_type {{mt!r}}, under {cfg.eval_python}")
 PY
 
 # --- 1c. the JUDGE, in the OTHER cache -------------------------------------------

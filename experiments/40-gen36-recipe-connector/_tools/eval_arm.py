@@ -93,6 +93,31 @@ class EvalFailure(AssertionError):
     """A guard that fires is a FINDING (RULES §7)."""
 
 
+def ensure_paths(repo_root: str = "/workspace/repo_leo") -> None:
+    """Put the three source trees the eval needs on sys.path. Importable ON PURPOSE.
+
+    🔴 `focus` is NOT installed in the training env — it is VENDORED in the repo, and
+    rung 38's eval gets it exactly this way. On 2026-08-14 the chain hit
+    `ModuleNotFoundError: No module named 'focus'` and the first fix was to run the
+    eval under `envs/infer`, which does have focus installed. That was treating the
+    symptom: envs/infer pins transformers 4.57.6, which cannot load
+    `Qwen3_5ForConditionalGeneration` at all — `AutoConfig` raises `KeyError: 'qwen3_5'`
+    before a weight is read. The training env's transformers 5.5.0 can, and it also has
+    papermill, decord and pandas. So the eval runs in the SAME env as training, and the
+    missing piece was never the environment: it was these three sys.path entries.
+
+    `qwen_vl_utils` is absent from that env and is NOT needed: `frame/engine.py` imports
+    it inside a QwenFrameEngine method (line 153), and we use GenericVLMEngine.
+    """
+    import sys
+
+    for p in (f"{repo_root}/src",
+              f"{repo_root}/vendor/orena-focus/src",          # the vendored SDK
+              f"{repo_root}/experiments/23-backbone-screen/_tools"):  # GenericVLMEngine
+        if p not in sys.path:
+            sys.path.insert(0, p)
+
+
 def build_baseline_config(cfg: EvalConfig, merged: "Path | None" = None):
     """Build the `BaselineConfig` the eval will actually run. Importable ON PURPOSE.
 
@@ -108,9 +133,7 @@ def build_baseline_config(cfg: EvalConfig, merged: "Path | None" = None):
     Rung 38's notebook passed Paths, which is why it worked and this did not. Measured
     on the pod 2026-08-14, at the eval's very first data access, after training.
     """
-    import sys
-
-    sys.path.insert(0, "/workspace/repo_leo/src")
+    ensure_paths()
     from frame.config import BaselineConfig
 
     return BaselineConfig(
@@ -148,14 +171,7 @@ def score(cfg: EvalConfig) -> dict:
     and `max_new_tokens` truncates mid-reasoning — that is what scored rung 23 a
     0.0000.
     """
-    import sys
-
-    sys.path.insert(0, "/workspace/repo_leo/src")
-    # 🔴 GenericVLMEngine is NOT in `frame.engine` — it lives in rung 23's tools, and
-    # that is how rung 38 imports it (`from screen_engine import GenericVLMEngine`).
-    # This path is required, not optional; see the engine block below.
-    sys.path.insert(0, "/workspace/repo_leo/experiments/23-backbone-screen/_tools")
-    from frame.config import BaselineConfig
+    ensure_paths()
     from frame.run import run_baseline
 
     merged = Path(cfg.merged_dir)
@@ -197,11 +213,9 @@ def paired_vs_control(arm_results_csv: str, cfg: EvalConfig, seed: int = 0) -> d
     mismatch is a hard failure rather than an inner join that quietly drops rows —
     a silently shrunk denominator is how a comparison stops meaning what it says.
     """
-    import sys
-
     import pandas as pd
 
-    sys.path.insert(0, "/workspace/repo_leo/src")
+    ensure_paths()
     from frame import metrics
 
     arm = pd.read_csv(arm_results_csv)
