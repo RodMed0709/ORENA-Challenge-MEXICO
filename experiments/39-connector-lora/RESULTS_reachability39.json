@@ -1,0 +1,135 @@
+{
+  "passed": true,
+  "branch": "UNFREEZE",
+  "arm_freeze_aligner": false,
+  "sharp_expectation_met": true,
+  "coverage_preserved": true,
+  "failures": [],
+  "expected_n_aligner": 16,
+  "a2_census": {
+    "n_llm": 504,
+    "n_vit": 216,
+    "n_aligner": 0
+  },
+  "target_modules": [
+    "all-linear",
+    "model.visual.merger.linear_fc1",
+    "model.visual.merger.linear_fc2",
+    "model.visual.deepstack_merger_list.0.linear_fc1",
+    "model.visual.deepstack_merger_list.0.linear_fc2",
+    "model.visual.deepstack_merger_list.1.linear_fc1",
+    "model.visual.deepstack_merger_list.1.linear_fc2",
+    "model.visual.deepstack_merger_list.2.linear_fc1",
+    "model.visual.deepstack_merger_list.2.linear_fc2"
+  ],
+  "legs": {
+    "subject": {
+      "leg": "subject_unfrozen",
+      "freeze_aligner": false,
+      "returncode": 0,
+      "run_dir": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_subject_unfrozen",
+      "log": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_subject_unfrozen/train.log",
+      "n_target_modules": 9,
+      "adapter": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_subject_unfrozen/ckpt/v1-20260813-235521/checkpoint-5/adapter_model.safetensors",
+      "gcov": {
+        "adapter": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_subject_unfrozen/ckpt/v1-20260813-235521/checkpoint-5/adapter_model.safetensors",
+        "prefixes": {
+          "language_model": [
+            "model.language_model",
+            "lm_head"
+          ],
+          "aligner": [
+            "model.visual.merger",
+            "model.visual.deepstack_merger_list"
+          ],
+          "vision_tower": [
+            "model.visual"
+          ]
+        },
+        "n_trainable": 736,
+        "n_vit": 216,
+        "n_aligner": 16,
+        "n_llm": 504,
+        "orphans": [],
+        "n_orphans": 0,
+        "covered": 736,
+        "aligner_expected_empty": true
+      },
+      "total_tensors": 736,
+      "n_llm": 504,
+      "n_vit": 216,
+      "n_aligner": 16,
+      "n_orphans": 0,
+      "adapter_config": {
+        "adapter_config": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_subject_unfrozen/ckpt/v1-20260813-235521/checkpoint-5/adapter_config.json",
+        "target_modules_raw": "^(model\\.language_model(?=\\.).*\\.(o_proj|k_proj|v_proj|down_proj|q_proj|gate_proj|up_proj)|(?!(model.visual.merger|model.visual.deepstack_merger_list))model\\.visual(?=\\.).*\\.(attn.proj|qkv|linear_fc1|linear_fc2)|model\\.visual\\.merger(?=\\.).*\\.(linear_fc2|linear_fc1)|model\\.visual\\.deepstack_merger_list(?=\\.).*\\.(linear_fc2|linear_fc1))$",
+        "found": [
+          "model.visual.merger.linear_fc1",
+          "model.visual.merger.linear_fc2",
+          "model.visual.deepstack_merger_list.0.linear_fc1",
+          "model.visual.deepstack_merger_list.0.linear_fc2",
+          "model.visual.deepstack_merger_list.1.linear_fc1",
+          "model.visual.deepstack_merger_list.1.linear_fc2",
+          "model.visual.deepstack_merger_list.2.linear_fc1",
+          "model.visual.deepstack_merger_list.2.linear_fc2"
+        ],
+        "missing": []
+      },
+      "ok": true
+    },
+    "control": {
+      "leg": "control_frozen",
+      "freeze_aligner": true,
+      "returncode": 0,
+      "run_dir": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_control_frozen",
+      "log": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_control_frozen/train.log",
+      "n_target_modules": 9,
+      "adapter": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_control_frozen/ckpt/v1-20260814-000319/checkpoint-5/adapter_model.safetensors",
+      "gcov": {
+        "adapter": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_control_frozen/ckpt/v1-20260814-000319/checkpoint-5/adapter_model.safetensors",
+        "prefixes": {
+          "language_model": [
+            "model.language_model",
+            "lm_head"
+          ],
+          "aligner": [
+            "model.visual.merger",
+            "model.visual.deepstack_merger_list"
+          ],
+          "vision_tower": [
+            "model.visual"
+          ]
+        },
+        "n_trainable": 720,
+        "n_vit": 216,
+        "n_aligner": 0,
+        "n_llm": 504,
+        "orphans": [],
+        "n_orphans": 0,
+        "covered": 720,
+        "aligner_expected_empty": true
+      },
+      "total_tensors": 720,
+      "n_llm": 504,
+      "n_vit": 216,
+      "n_aligner": 0,
+      "n_orphans": 0,
+      "adapter_config": {
+        "adapter_config": "/workspace/repo_rodri/experiments/39-connector-lora/runs/39_reach_control_frozen/ckpt/v1-20260814-000319/checkpoint-5/adapter_config.json",
+        "target_modules_raw": "^(model\\.language_model(?=\\.).*\\.(k_proj|up_proj|down_proj|v_proj|o_proj|gate_proj|q_proj)|(?!(model.visual.merger|model.visual.deepstack_merger_list))model\\.visual(?=\\.).*\\.(attn.proj|qkv|linear_fc1|linear_fc2))$",
+        "found": [],
+        "missing": [
+          "model.visual.merger.linear_fc1",
+          "model.visual.merger.linear_fc2",
+          "model.visual.deepstack_merger_list.0.linear_fc1",
+          "model.visual.deepstack_merger_list.0.linear_fc2",
+          "model.visual.deepstack_merger_list.1.linear_fc1",
+          "model.visual.deepstack_merger_list.1.linear_fc2",
+          "model.visual.deepstack_merger_list.2.linear_fc1",
+          "model.visual.deepstack_merger_list.2.linear_fc2"
+        ]
+      },
+      "ok": true
+    }
+  }
+}
