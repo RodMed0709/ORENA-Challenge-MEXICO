@@ -101,6 +101,23 @@ the **default** scaling only.
 the first arm exists to isolate one. Recorded as an open option for later, and as a reason not to
 treat `alpha/r` as the only possible knob on update scale.
 
+### 7. 🔴 The tension this arm has to own
+
+By rung 21's own gate, moving `alpha` while holding `r` **is a learning-rate change wearing a
+capacity costume** — that is exactly why the gate forbids moving the ratio inside a rung
+(`recipe_sweep_train.py`: *"the LoRA update is scaled by that ratio, so this arm is a learning-rate
+change wearing a capacity costume"*).
+
+So this arm is, mechanically, an **LR reduction**. And the strongest established result of the
+campaign is that **raising** the LR won: 2e-5 → 1e-4 → 2e-4 improved at every step
+([[recipe-axis-is-the-learning-rate]], [[undertrained-was-real]]).
+
+⇒ **We are proposing to go against the campaign's best-supported trend.** That is defensible — the
+trend was established on the **8B**, and our evidence for reversing it is the 27B's own loss (0.068
+vs a documented 0.2 overfitting threshold, after one epoch). But it must be stated, not glossed: if
+this arm fails, the first hypothesis is that the 8B's direction held after all and the loss reading
+was over-interpreted.
+
 ## Verdict
 
 **The LR hypothesis is retired.** Two independent lines — the docs (no size-scaling rule) and the
@@ -118,7 +135,45 @@ separate question, and we may already be able to answer it without GPU —
 📌 **Corroborated independently.** Of two research passes on the same brief, one recommended raising
 `r` to 16, the other keeping it at 8, reading the *same* documented rule — *"rank should be bigger
 for smaller models / more complex datasets"* — as an argument **against** scaling rank up for a 27B.
-The doc does not settle it. Our loss measurement does, and it points at holding `r = 8`.
+The doc does not settle it. Our own rung-21 data does. See §6.
+
+### 6. Rank, read against BOTH the doc and our own data — and they disagree
+
+**What Unsloth's guide says:** *"Choose 16 or 32"*; *"rank should be bigger for smaller models / more
+complex datasets, typically between 4 and 64"*; and separately *"alpha/rank = 1 or 2"*.
+
+**What rung 21 measured** (`RESULTS_A_lr.csv`, `RESULTS_B_rank.csv`, `RESULTS_A2_lr.csv`):
+
+| arm | r / α | ep1 proxy | ep2 | ep3 |
+|---|---|---|---|---|
+| `A_lr` (B's control) | 8 / 32 | **0.5028** | 0.5679 | 0.5901 |
+| `B_rank` | **32 / 128** | **0.4866** | 0.5766 | **0.6095** |
+| `A2_lr` | 8 / 32 | 0.4986 | 0.5751 | 0.6104 |
+
+🔑 **There is a crossover, and the epoch we read decides it.** Rank 32 is **worse at epoch 1**
+(−0.0162 vs its own control) and only overtakes from epoch 2. **Our gen-3.6 arms are read at
+epoch 1** — ~5.9 h each — so in the regime we actually measure in, rank 32 loses.
+
+🔑 **Second support, from the corpus already cited in [[recipe-axis-is-the-learning-rate]]:** Biderman
+(arXiv:2405.09673) — *higher rank learns more **and forgets more***. Our diagnosed damage on the 27B
+**is** forgetting (loses object naming, holds counting). Raising rank pushes on the failing axis.
+
+⚠️ **But rank is NOT closed, and the note says so:** *"Rank is OPEN — and by the pre-registration it
+is a WIN, not a null."* `B_rank` passed the pre-registered win condition at ep2 and ep3 (proxy
++0.0193, `margin_OOD` +0.0155) and was demoted by a CI gate `PLAN.md` defines as the *noise
+instrument*, applied asymmetrically. At ep3 B and A2 are a coin-flip apart (0.6095 vs 0.6104), and
+**they were never compared to each other** — both ran against `A_lr` in parallel.
+
+🔑 **And the doc's actual recommendation has NEVER been run here.** Every rung-21 arm holds
+**α/r = 4**: A2 is r8/α32 and `B_rank` is r32/**α128**. So `B_rank` is not "Unsloth's rank
+recommendation tested" — it is a capacity change at an off-guide scaling. The configuration the doc
+would endorse (r16–32 **with α = r**, ratio 1) has never existed in this campaign.
+
+**Decision: hold `r = 8`, move `alpha` alone.** Our two supports are specific to our setup (the
+epoch-1 regime, and forgetting as the diagnosed damage); the doc's rank advice is generic and does
+not know either. And single-variable discipline settles the rest: `alpha` alone is one variable,
+`alpha` + `r` is two. If the alpha arm pays, `r16/α16` is the natural follow-up and would be the
+first fully in-guide config we have ever run.
 
 **Binding on any future arm:** record `max_grad_norm`, `weight_decay` and `optim` in the run
 artifact. Three fields were unrecoverable here, and one of them plausibly matters.
