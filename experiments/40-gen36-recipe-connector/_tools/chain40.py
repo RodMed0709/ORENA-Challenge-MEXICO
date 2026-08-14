@@ -16,15 +16,22 @@ has already cost this project something:
   not the ~670 GB quota). A run already died `Disk quota exceeded` MID-MERGE, after
   training. So: rung 38's merge is deleted BEFORE anything starts, and arm A's is
   deleted before arm B begins.
-* **losing 14 h of work to a late failure.** Commit after EACH eval, never once at
-  the end. 📌 **Commit only, no push** (legokna's call): the network volume outlives
-  the pod, so the results are recoverable from S3 without starting anything. That
-  removes git auth as a failure mode entirely — a push that fails at 3 a.m. leaves
-  the results trapped, and there is nothing a retry can do about a bad credential.
+* **losing 14 h of work to a late failure.** The volume IS the record: it outlives the
+  pod and every artifact is readable from S3 with nothing running. 📌 There is no
+  commit step — there used to be one, and the 2026-08-14 rehearsal showed it had never
+  saved anything, because `.gitignore:34` ignores `experiments/*/runs/**`. It printed
+  "committing the evidence" and then `nothing to commit`, twice. Removed: a step that
+  prints reassurance and preserves nothing is worse than no step at all.
+* **an arm that trains and cannot be scored.** Training and eval live in DIFFERENT
+  envs (`unsloth` vs the `focus` SDK in `envs/infer`), and the eval's rc used to be
+  ignored outright. Now the eval env is proved before a GPU is touched, and
+  `check_eval` stops the chain on a failed score instead of walking past it.
 * **a HUNG run.** The `trap` fires on exit; a training that stalls never exits, so
   nothing fires and the pod bills all night. This is the most likely expensive
-  failure — likelier than SIGKILL. The watchdog watches the log's **mtime**: the
-  27B logs a line every ~24 s, so 45 minutes of silence is unambiguous.
+  failure — likelier than SIGKILL. The watchdog watches the log's **mtime**, which is
+  only meaningful because `_Pulse` deliberately writes every 60 s. 🔴 It used to rest
+  on "the 27B logs a line every ~24 s", which was FALSE under `papermill --log-output`
+  and cost a healthy arm on 2026-08-14. Set `stale_seconds=0` when a human is watching.
 
 The watchdog is rendered as a SEPARATE script and launched with `setsid nohup`, so
 it is not a child of the chain. A child would die with a process-group kill, which
@@ -47,6 +54,12 @@ class ChainConfig:
     repo_root: str = "/workspace/repo_leo"
     exp_dir: str = "experiments/40-gen36-recipe-connector"
     env_python: str = "/workspace/envs/unsloth/bin/python"
+    # 🔴 A SECOND interpreter, because training and eval do not share an environment.
+    # `unsloth` is in envs/unsloth and the `focus` SDK is NOT; focus lives in envs/infer
+    # and envs/judge35 (measured 2026-08-14). Running the eval under the training python
+    # dies on `ModuleNotFoundError: No module named 'focus'` — after the arm has already
+    # trained. Verified before a GPU is touched by the eval-env gate in `render`.
+    eval_python: str = "/workspace/envs/infer/bin/python"
     key_file: str = "/workspace/tmp/leo_runpod_key"
     script_path: str = "/workspace/tmp/leo_chain40.sh"
     log_path: str = "/workspace/tmp/leo_chain40.log"
@@ -74,7 +87,7 @@ class ChainConfig:
 
     # Rehearsal mode. The arms run on Qwen3.5-4B against synthetic data
     # (`ArmConfig.smoke`), so the WHOLE chain — papermill, the pulse, the watchdog,
-    # the eval, the commit and the self-stop — is exercisable end to end on a cheap
+    # the eval and the self-stop — is exercisable end to end on a cheap
     # small GPU before the 27B gets a morning. The rung-40 arm A loss on 2026-08-14
     # was a plumbing failure, not a science failure, and plumbing is testable at
     # 1/8th the price. Must be in EU-RO-1: the volume does not leave its region.
@@ -147,7 +160,7 @@ def render(cfg: ChainConfig) -> str:
     )
     return f"""#!/usr/bin/env bash
 # RENDERED by _tools/chain40.py — do not edit here, and do not commit this file.
-set -uo pipefail          # NOT -e: a failing arm must still reach its commit and the trap
+set -uo pipefail          # NOT -e: a failing arm must still reach its handler and the trap
 echo "===== chain40 start $(date -u) ====="
 
 # --- 0. the pod stops on ANY exit ------------------------------------------------
@@ -207,6 +220,29 @@ if bad:
 print("versions OK:", want)
 PY
 
+# --- 1b. the EVAL environment, proved before a GPU is touched ---------------------
+# 🔴 The 2026-08-14 rehearsal trained an arm to completion and only THEN discovered
+# the eval could not import `focus`. Cost at rehearsal scale: 15 minutes. Cost at 27B
+# scale: 16 hours of training and zero scores. The eval's imports are checkable in two
+# seconds, so they are checked first — a gate that runs after the expensive part is
+# not a gate, it is a postmortem.
+if [ ! -x "{cfg.eval_python}" ]; then
+  echo "FATAL: eval python {cfg.eval_python} is missing or not executable."
+  exit 1
+fi
+{cfg.eval_python} - <<'PY' || exit 1
+import sys
+sys.path.insert(0, "{cfg.repo_root}/src")
+try:
+    from focus.enums import Track            # the import that failed on 2026-08-14
+    from frame.run import run_baseline       # what eval_arm.score() actually calls
+except Exception as e:
+    print(f"EVAL ENV BROKEN: {{type(e).__name__}}: {{e}}")
+    print("The arms would train for hours and produce no score. Fix the env first.")
+    sys.exit(1)
+print("eval env OK — focus + frame.run import under {cfg.eval_python}")
+PY
+
 # --- 2. reclaim the quota BEFORE training ----------------------------------------
 # `df` reports the MooseFS cluster and not the quota, so measure with du.
 echo "--- volume before ---"; du -sx /workspace 2>/dev/null | tail -1
@@ -219,39 +255,51 @@ fi
 echo "--- volume after ---";  du -sx /workspace 2>/dev/null | tail -1
 
 # --- helpers ---------------------------------------------------------------------
-# COMMIT ONLY, no push — legokna's call, and it is the right one. The network volume
-# outlives the pod, so results are recoverable from S3 without starting anything.
-# Pushing would add git auth as a failure mode at 3 a.m., and a retry cannot fix a
-# bad credential. Nothing is lost: the commit and the artifacts are both on the volume.
-commit_results() {{
-  cd {cfg.repo_root} || return 1
-  git add -A {cfg.exp_dir} 2>/dev/null
-  git commit -q -m "$1" 2>/dev/null || echo "nothing to commit"
-  git log --oneline -1
-  cd {exp} || return 1
-}}
+# There is NO commit step. It was removed on 2026-08-14 after the rehearsal showed it
+# had never done anything: `.gitignore:34` is `experiments/*/runs/**`, so every
+# "committing the evidence" line was followed by `nothing to commit`. The volume is
+# the record — it outlives the pod and the artifacts are readable from S3 with the
+# pod off. A step that prints reassurance and preserves nothing is worse than no step,
+# because it is read as a guarantee at 3 a.m.
 
-run_nb() {{  # run_nb <notebook> <output-tag> [extra papermill args...]
-  local nb="$1"; local tag="$2"; shift 2
+# run_nb <python> <notebook> <output-tag> [extra papermill args...]
+# 🔴 The interpreter is an ARGUMENT because training and eval need DIFFERENT envs:
+# unsloth is in {cfg.env_python}, and the `focus` SDK the eval imports is NOT — it
+# lives in {cfg.eval_python}. The 2026-08-14 rehearsal ran the eval under the training
+# python and died on `ModuleNotFoundError: No module named 'focus'`. At 27B scale that
+# is 16 h of training and zero scores.
+run_nb() {{
+  local py="$1"; local nb="$2"; local tag="$3"; shift 3
   echo "===== $nb start $(date -u) ====="
-  {cfg.env_python} -m papermill "$nb" "/workspace/tmp/leo_out_${{tag}}.ipynb" \\
+  "$py" -m papermill "$nb" "/workspace/tmp/leo_out_${{tag}}.ipynb" \\
     -p SMOKE {cfg.smoke} "$@" --log-output
   local rc=$?
   echo "===== $nb end rc=$rc $(date -u) ====="
   return $rc
 }}
 
+# An eval that fails is not a footnote. The old chain ignored the eval's rc entirely,
+# sailed on to the next arm, and that is precisely how a broken eval would have gone
+# unnoticed for a whole night. Loud, and it stops the chain.
+check_eval() {{  # check_eval <rc> <which>
+  if [ "$1" -ne 0 ]; then
+    echo "🔴 EVAL $2 FAILED (rc=$1) — the arm trained but produced NO score."
+    echo "   Nothing below this point is interpretable. Stopping."
+    return 1
+  fi
+  echo "eval $2 OK"
+}}
+
 # --- 3. ARM A: lora_alpha 32 -> 16 -----------------------------------------------
-run_nb 02_alpha_arm.ipynb arm_a {arm_params}
+run_nb {cfg.env_python} 02_alpha_arm.ipynb arm_a {arm_params}
 RC_A=$?
 if [ $RC_A -ne 0 ]; then
-  echo "ARM A FAILED (rc=$RC_A) — committing whatever it produced and stopping."
-  commit_results "eval(40): arm A FAILED rc=$RC_A — committing the evidence"
+  echo "ARM A FAILED (rc=$RC_A) — its RESULTS_arm.json holds the evidence. Stopping."
   exit $RC_A
 fi
 
-run_nb 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" -p RUN_NAME {cfg.run_a}
-commit_results "eval(40): arm A — lora_alpha 32->16, scored against rung 38 ep1"
+run_nb {cfg.eval_python} 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" -p RUN_NAME {cfg.run_a}
+check_eval $? A || exit 1
 {arm_b_block}
 echo "===== chain40 end $(date -u) ====="
 """
@@ -261,26 +309,26 @@ def _arm_b(cfg: ChainConfig, exp: str) -> str:
     return f"""
 # --- 4. reclaim arm A's merge before arm B ---------------------------------------
 # Two 27B merges are ~104 GB and the volume has ~136 GB free. Sequential with a
-# delete in between keeps the peak at ONE merge. Arm A is already scored and pushed
-# at this point, so its merge is regenerable and expendable.
+# delete in between keeps the peak at ONE merge. Arm A is SCORED by this point —
+# `check_eval` above guarantees it, or we never got here — so its merge is
+# regenerable from its adapter and expendable.
 A_MERGED="{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged"
 if [ -d "$A_MERGED" ]; then
-  echo "removing arm A's merge (already scored and pushed)"
+  echo "removing arm A's merge (already scored — check_eval passed)"
   rm -rf "$A_MERGED"
 fi
 du -sx /workspace 2>/dev/null | tail -1
 
 # --- 5. ARM B: the connector trains, at 4e-5 -------------------------------------
-run_nb 03_connector_arm.ipynb arm_b {_arm_params(cfg, exp)}
+run_nb {cfg.env_python} 03_connector_arm.ipynb arm_b {_arm_params(cfg, exp)}
 RC_B=$?
 if [ $RC_B -ne 0 ]; then
-  echo "ARM B FAILED (rc=$RC_B) — committing the evidence."
-  commit_results "eval(40): arm B FAILED rc=$RC_B — committing the evidence"
+  echo "ARM B FAILED (rc=$RC_B) — its RESULTS_arm.json holds the evidence. Stopping."
   exit $RC_B
 fi
 
-run_nb 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_b}/merged" -p RUN_NAME {cfg.run_b}
-commit_results "eval(40): arm B — the connector trains at 4e-5, scored against rung 38 ep1"
+run_nb {cfg.eval_python} 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_b}/merged" -p RUN_NAME {cfg.run_b}
+check_eval $? B || exit 1
 """
 
 
