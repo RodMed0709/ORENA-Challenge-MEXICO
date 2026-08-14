@@ -124,8 +124,31 @@ was over-interpreted.
 loss gap (over-fitting, not under-fitting) — point at the **update scale**, and the documented
 lever for that is `alpha/rank`, not `learning_rate`.
 
-**Proposed first arm (single variable): `lora_alpha 32 → 8`, holding `r = 8`.** Ratio 4 → 1, inside
-guidance, effective update cut ~4×, capacity unchanged, `learning_rate` untouched at `2e-4`.
+**Proposed first arm (single variable): `lora_alpha 32 → 16`, holding `r = 8`.** Ratio 4 → **2**,
+inside guidance, effective update cut ~2×, capacity unchanged, `learning_rate` untouched at `2e-4`.
+
+**Why 16 and not 8, when both ratios are in-guide.** Ratio 1 was the first proposal; it is the more
+aggressive cut and it was reconsidered for a reason documented in this campaign, not a generic one.
+
+[[undertrained-was-real]] establishes that our long plateau **was under-training** — lifting the LR
+from 2e-5 to 1e-4 moved `bucket_mean` 0.5721 → 0.6305. Under-shooting is a failure mode that has
+already happened here and already cost weeks of wrong diagnosis. If we jump straight to ratio 1 and
+the arm comes back negative, two explanations fit and nothing separates them: *the over-fitting
+hypothesis was wrong*, or *it was right and we over-corrected into under-training*. That is ~5.9 h
+for an unreadable result.
+
+Ratio 2 halves that ambiguity, stays inside the documented range, and departs less from the
+configuration that actually beat both baselines. **What already works deserves to be left by small
+steps.**
+
+⚠️ **The cost of the caution, stated:** if the over-fit is as strong as the loss suggests (0.068
+against a 0.2 threshold — 3× past), a 2× cut may land under |Δ| = 0.01, which by RULES §S4 is
+**unreadable**. That is the risk we are accepting.
+
+**Declared follow-up: `alpha 16 → 8` (ratio 1) if the first arm is null or under-powered.** The
+ladder is 32 → 16 → 8, stepping down while there is signal. If two arms can ever run in parallel
+against the same control, 16 and 8 together answer the whole question at once and remove the
+"too little or too much?" ambiguity entirely.
 
 🔴 **Deliberately NOT raising the rank.** Generic guidance says *"choose 16 or 32"*, but our own
 measurement says this model is over-fitting; adding capacity fights the diagnosis. Rank is a
