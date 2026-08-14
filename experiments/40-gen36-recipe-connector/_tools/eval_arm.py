@@ -109,6 +109,10 @@ def score(cfg: EvalConfig) -> dict:
     import sys
 
     sys.path.insert(0, "/workspace/repo_leo/src")
+    # 🔴 GenericVLMEngine is NOT in `frame.engine` — it lives in rung 23's tools, and
+    # that is how rung 38 imports it (`from screen_engine import GenericVLMEngine`).
+    # This path is required, not optional; see the engine block below.
+    sys.path.insert(0, "/workspace/repo_leo/experiments/23-backbone-screen/_tools")
     from frame.config import BaselineConfig
     from frame.run import run_baseline
 
@@ -124,15 +128,24 @@ def score(cfg: EvalConfig) -> dict:
     assert_inference_path_unmoved(cfg_eval)
 
     # 🔴 The ONE deviation rung 38 had to make, and it is forced, not chosen:
-    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin,
-    # so GenericVLMEngine is used. It keeps the SYSTEM_PROMPT (imported, never
-    # copied), the message shape, greedy decoding, max_new_tokens and
-    # answer_char_cap identical — and suppresses the CoT.
-    try:
-        from frame.engine import GenericVLMEngine
-        cfg_eval.engine_factory = GenericVLMEngine
-    except ImportError:  # pragma: no cover — the pod has it; a laptop may not
-        log.warning("GenericVLMEngine unavailable; falling back to the default engine")
+    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin
+    # (AutoConfig raises KeyError: 'qwen3_5'), so GenericVLMEngine is used. It keeps
+    # the SYSTEM_PROMPT (imported, never copied), the message shape, greedy decoding,
+    # max_new_tokens and answer_char_cap identical — and suppresses the CoT.
+    #
+    # 🔴 MEASURED 2026-08-14 on the pod: this used to read
+    # `from frame.engine import GenericVLMEngine` inside a try/except ImportError that
+    # fell back to the default engine with a warning. There is no GenericVLMEngine in
+    # `frame.engine` and there never was — the class is rung 23's `screen_engine`. So
+    # the import ALWAYS failed, the fallback ALWAYS fired, and the fallback is
+    # QwenFrameEngine, which cannot load this model class at all. The eval could not
+    # have worked, and the warning would have scrolled past in a 16 h log.
+    #
+    # It raises now. A forced deviation that silently un-forces itself is not a
+    # fallback, it is a way to score nothing and call it a result.
+    from screen_engine import GenericVLMEngine
+
+    cfg_eval.engine_factory = GenericVLMEngine
 
     report = run_baseline(cfg_eval)
     log.info("eval done — %s", {k: report.get(k) for k in ("proxy_leaderboard", "bucket_mean")})

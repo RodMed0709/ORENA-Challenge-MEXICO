@@ -243,15 +243,17 @@ fi
 {cfg.eval_python} - <<'PY' || exit 1
 import sys
 sys.path.insert(0, "{cfg.repo_root}/src")
+# rung 23's tools, where GenericVLMEngine actually lives — the SAME two paths
+# `eval_arm.score()` inserts, so this gate tests the real import, not a lookalike.
+sys.path.insert(0, "{cfg.repo_root}/experiments/23-backbone-screen/_tools")
 try:
     from focus.enums import Track            # the import that failed on 2026-08-14
     from frame.run import run_baseline       # what eval_arm.score() actually calls
-    # Gated HARD even though `score()` catches its ImportError and falls back: the
-    # fallback is the default engine, and rung 38 measured that
-    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin.
-    # Both the 27B and the 4B smoke model are that class, so "fell back quietly" here
-    # means "scored nothing, hours later".
-    from frame.engine import GenericVLMEngine   # noqa: F401
+    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin,
+    # so this engine is REQUIRED, not preferred. Both the 27B and the 4B smoke model
+    # are that class. Gated here because the old code imported it from the wrong
+    # module and quietly fell back to an engine that cannot load either of them.
+    from screen_engine import GenericVLMEngine   # noqa: F401
 except Exception as e:
     print(f"EVAL ENV BROKEN: {{type(e).__name__}}: {{e}}")
     print("The arms would train for hours and produce no score. Fix the env first.")
