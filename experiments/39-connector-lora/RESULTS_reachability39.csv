@@ -1,0 +1,3 @@
+leg,freeze_aligner,returncode,n_target_modules,total_tensors,n_llm,n_vit,n_aligner,n_orphans,adapter_config_named,ok,note
+subject_unfrozen,false,0,9,736,504,216,16,0,8,True,
+control_frozen,true,0,9,720,504,216,0,0,0,True,
