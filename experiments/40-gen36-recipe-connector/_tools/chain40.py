@@ -72,14 +72,14 @@ class ChainConfig:
     expect_unsloth: str = "2026.8.15"
     expect_unsloth_zoo: str = "2026.8.10"
 
-    # Rehearsal mode. The arms run on Qwen3.5-2B against synthetic data
+    # Rehearsal mode. The arms run on Qwen3.5-4B against synthetic data
     # (`ArmConfig.smoke`), so the WHOLE chain — papermill, the pulse, the watchdog,
     # the eval, the commit and the self-stop — is exercisable end to end on a cheap
     # small GPU before the 27B gets a morning. The rung-40 arm A loss on 2026-08-14
     # was a plumbing failure, not a science failure, and plumbing is testable at
     # 1/8th the price. Must be in EU-RO-1: the volume does not leave its region.
     smoke: bool = False
-    smoke_model_cache_dir: str = "models--Qwen--Qwen3.5-2B"
+    smoke_model_cache_dir: str = "models--Qwen--Qwen3.5-4B"
     # Long enough that training outlasts several watchdog checks — a rehearsal that
     # ends before the watchdog looks twice proves nothing about the watchdog.
     smoke_steps: int = 40
@@ -130,16 +130,19 @@ def render(cfg: ChainConfig) -> str:
     arm_b_block = _arm_b(cfg, exp) if cfg.run_arm_b else (
         '\necho "=== arm B skipped by config (run_arm_b=False) ==="\n'
     )
-    # The cache gate must check the model that will ACTUALLY be loaded. In rehearsal
-    # that is the 2B, and a missing 2B is a ~4 GB download, not a blown disk plan —
-    # so it warns instead of aborting. For the real 27B it stays fatal.
+    # The cache gate must check the model that will ACTUALLY be loaded — in rehearsal
+    # that is the smoke model, not the 27B. Fatal in BOTH modes: the rehearsal model
+    # was chosen *because* it is already cached (legokna's call, 2026-08-14), so a
+    # missing one means the model choice changed, and the right answer to that is to
+    # stop and say so, not to quietly spend a download on it.
     arm_params = _arm_params(cfg, exp)
     wanted_model = cfg.smoke_model_cache_dir if cfg.smoke else cfg.model_cache_dir
+    why = ("a rehearsal runs on an ALREADY CACHED model — do not download one"
+           if cfg.smoke else
+           "training would re-download 52 GB and blow the disk plan")
     model_missing = (
-        f'  echo "WARN: {wanted_model} not cached — the rehearsal will download it (~4 GB)."'
-        if cfg.smoke else
-        f'  echo "FATAL: {wanted_model} is not in {cfg.hf_home}/hub — training would"\n'
-        f'  echo "re-download 52 GB and blow the disk plan. Fix HF_HOME before relaunching."\n'
+        f'  echo "FATAL: {wanted_model} is not in {cfg.hf_home}/hub."\n'
+        f'  echo "{why}. Fix HF_HOME or the model choice before relaunching."\n'
         f'  exit 1'
     )
     return f"""#!/usr/bin/env bash
@@ -211,7 +214,7 @@ if [ -d "{cfg.stale_merge}" ] && [ "{cfg.smoke}" != "True" ]; then
   echo "removing rung 38's merged 27B (regenerable from its adapter)"
   rm -rf "{cfg.stale_merge}"
 elif [ "{cfg.smoke}" = "True" ]; then
-  echo "rehearsal: KEEPING rung 38's merged 27B — a 2B smoke needs ~4 GB, not 52"
+  echo "rehearsal: KEEPING rung 38's merged 27B — a 4B smoke merge is ~9 GB, not 52"
 fi
 echo "--- volume after ---";  du -sx /workspace 2>/dev/null | tail -1
 
