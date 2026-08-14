@@ -177,9 +177,25 @@ complex datasets, typically between 4 and 64"*; and separately *"alpha/rank = 1 
 (−0.0162 vs its own control) and only overtakes from epoch 2. **Our gen-3.6 arms are read at
 epoch 1** — ~5.9 h each — so in the regime we actually measure in, rank 32 loses.
 
-🔑 **Second support, from the corpus already cited in [[recipe-axis-is-the-learning-rate]]:** Biderman
-(arXiv:2405.09673) — *higher rank learns more **and forgets more***. Our diagnosed damage on the 27B
-**is** forgetting (loses object naming, holds counting). Raising rank pushes on the failing axis.
+🔻 **The mechanism is NOT extra forgetting — checked, and the first draft of this note had it wrong.**
+Biderman (arXiv:2405.09673, cited in [[recipe-axis-is-the-learning-rate]]) says higher rank *learns
+more and forgets more*, which looked like a second support. The loss curves say otherwise **at the
+epoch we read**:
+
+| arm (both `lr 1e-4`) | ep1 (mean 0.95–1.00) | ep2 | ep3 |
+|---|---|---|---|
+| `A_lr` r8/α32 | **0.2805** | 0.1866 | 0.1821 |
+| `B_rank` r32/α128 | **0.2819** | 0.1979 | **0.1180** |
+
+**At epoch 1 the two are identical.** Higher rank only drives loss lower from epoch 3. So rank 32's
+epoch-1 score deficit is most likely **slower convergence — under-training — not over-fitting**;
+more parameters to settle. Biderman's effect is about the end state, which is not our regime. The
+conclusion (hold `r = 8`) stands on the **measured ep1 score deficit**, not on this mechanism.
+
+🔑 **And a calibration that strengthens the note's main thesis.** The 8B lands at **0.28–0.29 at
+epoch 1 regardless** — rank 8 or 32, lr 1e-4 or 2e-4 (A2 is 0.293). The 27B is at **0.068**. It is
+not at the edge of that band; it is in a different regime entirely. The 27B's over-fitting is
+therefore **not** a rank effect nor an LR effect within the 8B's range.
 
 ⚠️ **But rank is NOT closed, and the note says so:** *"Rank is OPEN — and by the pre-registration it
 is a WIN, not a null."* `B_rank` passed the pre-registered win condition at ep2 and ep3 (proxy
