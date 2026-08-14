@@ -78,6 +78,16 @@ class ChainConfig:
     hf_home: str = "/workspace/hf_cache"
     model_cache_dir: str = "models--Qwen--Qwen3.6-27B"
 
+    # 🔴 The eval needs the OTHER cache. Its judge is `Qwen/Qwen3-4B`
+    # (src/frame/config.py:102) and that model is in /workspace/.cache/huggingface,
+    # NOT in /workspace/hf_cache where the 27B lives. Exporting one HF_HOME for the
+    # whole chain is right for training and wrong for the judge — which is the exact
+    # trap [[pod-hf-home-is-not-set]] records: two caches, different contents, and
+    # hardcoding either one breaks a job. So the eval gets its own, and the judge is
+    # gated up front rather than discovered after an arm has trained.
+    eval_hf_home: str = "/workspace/.cache/huggingface"
+    judge_cache_dir: str = "models--Qwen--Qwen3-4B"
+
     watchdog_path: str = "/workspace/tmp/leo_watchdog40.sh"
     watchdog_log: str = "/workspace/tmp/leo_watchdog40.log"
 
@@ -236,12 +246,30 @@ sys.path.insert(0, "{cfg.repo_root}/src")
 try:
     from focus.enums import Track            # the import that failed on 2026-08-14
     from frame.run import run_baseline       # what eval_arm.score() actually calls
+    # Gated HARD even though `score()` catches its ImportError and falls back: the
+    # fallback is the default engine, and rung 38 measured that
+    # Qwen3_5ForConditionalGeneration does not load under the transformers 4.57 pin.
+    # Both the 27B and the 4B smoke model are that class, so "fell back quietly" here
+    # means "scored nothing, hours later".
+    from frame.engine import GenericVLMEngine   # noqa: F401
 except Exception as e:
     print(f"EVAL ENV BROKEN: {{type(e).__name__}}: {{e}}")
     print("The arms would train for hours and produce no score. Fix the env first.")
     sys.exit(1)
-print("eval env OK — focus + frame.run import under {cfg.eval_python}")
+print("eval env OK — focus + frame.run + GenericVLMEngine import under {cfg.eval_python}")
 PY
+
+# --- 1c. the JUDGE, in the OTHER cache -------------------------------------------
+# `eval_arm.score()` scores through frame.run -> TransformersJudge, whose model is
+# `Qwen/Qwen3-4B` (src/frame/config.py:102). It is in {cfg.eval_hf_home}, NOT in
+# {cfg.hf_home} with the 27B. Without this the eval silently re-downloads ~8 GB, or
+# fails outright if the network is not there — after the arm has already trained.
+if [ ! -d "{cfg.eval_hf_home}/hub/{cfg.judge_cache_dir}" ]; then
+  echo "FATAL: the judge {cfg.judge_cache_dir} is not in {cfg.eval_hf_home}/hub."
+  echo "The arms would train and then fail to be scored. Fix the judge cache first."
+  exit 1
+fi
+echo "judge OK — {cfg.judge_cache_dir} present in {cfg.eval_hf_home}"
 
 # --- 2. reclaim the quota BEFORE training ----------------------------------------
 # `df` reports the MooseFS cluster and not the quota, so measure with du.
@@ -281,6 +309,14 @@ run_nb() {{
 # An eval that fails is not a footnote. The old chain ignored the eval's rc entirely,
 # sailed on to the next arm, and that is precisely how a broken eval would have gone
 # unnoticed for a whole night. Loud, and it stops the chain.
+run_eval() {{  # run_eval <output-tag> <merged-dir> <run-name>
+  # The eval needs BOTH its own interpreter and its own HF_HOME — the judge lives in
+  # a different cache from the 27B. In a subshell so the export cannot leak back and
+  # point the next arm's training at the wrong cache.
+  ( export HF_HOME="{cfg.eval_hf_home}"
+    run_nb {cfg.eval_python} 04_eval.ipynb "$1" -p MERGED_DIR "$2" -p RUN_NAME "$3" )
+}}
+
 check_eval() {{  # check_eval <rc> <which>
   if [ "$1" -ne 0 ]; then
     echo "🔴 EVAL $2 FAILED (rc=$1) — the arm trained but produced NO score."
@@ -298,7 +334,7 @@ if [ $RC_A -ne 0 ]; then
   exit $RC_A
 fi
 
-run_nb {cfg.eval_python} 04_eval.ipynb eval_a -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" -p RUN_NAME {cfg.run_a}
+run_eval eval_a "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" {cfg.run_a}
 check_eval $? A || exit 1
 {arm_b_block}
 echo "===== chain40 end $(date -u) ====="
@@ -327,7 +363,7 @@ if [ $RC_B -ne 0 ]; then
   exit $RC_B
 fi
 
-run_nb {cfg.eval_python} 04_eval.ipynb eval_b -p MERGED_DIR "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_b}/merged" -p RUN_NAME {cfg.run_b}
+run_eval eval_b "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_b}/merged" {cfg.run_b}
 check_eval $? B || exit 1
 """
 
