@@ -207,9 +207,11 @@ PY
 # --- 2. reclaim the quota BEFORE training ----------------------------------------
 # `df` reports the MooseFS cluster and not the quota, so measure with du.
 echo "--- volume before ---"; du -sx /workspace 2>/dev/null | tail -1
-if [ -d "{cfg.stale_merge}" ]; then
+if [ -d "{cfg.stale_merge}" ] && [ "{cfg.smoke}" != "True" ]; then
   echo "removing rung 38's merged 27B (regenerable from its adapter)"
   rm -rf "{cfg.stale_merge}"
+elif [ "{cfg.smoke}" = "True" ]; then
+  echo "rehearsal: KEEPING rung 38's merged 27B — a 2B smoke needs ~4 GB, not 52"
 fi
 echo "--- volume after ---";  du -sx /workspace 2>/dev/null | tail -1
 
