@@ -93,6 +93,35 @@ class EvalFailure(AssertionError):
     """A guard that fires is a FINDING (RULES §7)."""
 
 
+def build_baseline_config(cfg: EvalConfig, merged: "Path | None" = None):
+    """Build the `BaselineConfig` the eval will actually run. Importable ON PURPOSE.
+
+    Split out of `score()` so the chain's pre-flight gate can construct the REAL
+    config seconds before training instead of discovering it hours after. A gate that
+    rebuilds this by hand tests a lookalike, and drifts the moment `score()` changes.
+
+    🔴 Path(), not str(). `BaselineConfig` declares data_root/model_path/out_dir as
+    `Path` and the code RELIES on it: `frame/data.py:107` does
+    `cfg.data_root / ds / "data" / "frame" / ...`, which raises
+    `TypeError: unsupported operand type(s) for /: 'str' and 'str'`. All three used to
+    be passed as strings here — `str(merged)` explicitly converted a Path back to one.
+    Rung 38's notebook passed Paths, which is why it worked and this did not. Measured
+    on the pod 2026-08-14, at the eval's very first data access, after training.
+    """
+    import sys
+
+    sys.path.insert(0, "/workspace/repo_leo/src")
+    from frame.config import BaselineConfig
+
+    return BaselineConfig(
+        data_root=Path(cfg.data_root),
+        model_path=Path(merged if merged is not None else cfg.merged_dir),
+        out_dir=Path(cfg.out_dir),
+        run_name=cfg.run_name, max_pixels=cfg.max_pixels, seed=cfg.seed,
+        n_eval=cfg.smoke_n if cfg.smoke else cfg.n_eval,
+    )
+
+
 def assert_inference_path_unmoved(cfg_eval) -> None:
     """The four asserts rung 38's eval ran, kept verbatim. RAISES.
 
@@ -133,11 +162,7 @@ def score(cfg: EvalConfig) -> dict:
     if not merged.exists():
         raise EvalFailure(f"no merged checkpoint at {merged}")
 
-    cfg_eval = BaselineConfig(
-        data_root=cfg.data_root, model_path=str(merged), out_dir=cfg.out_dir,
-        run_name=cfg.run_name, max_pixels=cfg.max_pixels, seed=cfg.seed,
-        n_eval=cfg.smoke_n if cfg.smoke else cfg.n_eval,
-    )
+    cfg_eval = build_baseline_config(cfg, merged)
     assert_inference_path_unmoved(cfg_eval)
 
     # 🔴 The ONE deviation rung 38 had to make, and it is forced, not chosen:

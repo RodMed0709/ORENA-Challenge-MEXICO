@@ -282,21 +282,28 @@ echo "judge OK — {cfg.judge_cache_dir} present in {cfg.eval_hf_home}"
 {cfg.eval_python} - <<'PY' || exit 1
 import sys
 from pathlib import Path
+sys.path.insert(0, "{cfg.repo_root}/src")
 sys.path.insert(0, "{cfg.repo_root}/{cfg.exp_dir}/_tools")
-from eval_arm import EvalConfig
+from eval_arm import EvalConfig, build_baseline_config
 c = EvalConfig()
-bad = []
-if not any(Path(c.data_root).glob("*/data/frame/test.parquet")):
-    bad.append(f"data_root {{c.data_root}} has no */data/frame/test.parquet")
 if not Path(c.control_results_csv).exists():
-    bad.append(f"control_results_csv {{c.control_results_csv}} does not exist")
-if bad:
-    print("EVAL DATA GATE FAILED:")
-    for b in bad:
-        print("  -", b)
+    print(f"EVAL DATA GATE FAILED: control_results_csv {{c.control_results_csv}} missing")
+    sys.exit(1)
+# Build the REAL config via the same helper score() uses, then actually LOAD the
+# items. This is the two-second version of the eval's first minute: it catches a wrong
+# data_root, a str where BaselineConfig wants a Path, and a missing parquet — all three
+# of which were found the expensive way on 2026-08-14, after an arm had trained.
+try:
+    from frame.data import load_frame_items
+    items = load_frame_items(build_baseline_config(c, Path("/nonexistent-merge-ok-here")))
+except Exception as e:
+    print(f"EVAL DATA GATE FAILED: {{type(e).__name__}}: {{e}}")
+    sys.exit(1)
+if not items:
+    print(f"EVAL DATA GATE FAILED: data_root {{c.data_root}} yielded ZERO items")
     sys.exit(1)
 n = sum(1 for _ in open(c.control_results_csv)) - 1
-print(f"eval data OK — {{c.data_root}}, control has {{n}} rows")
+print(f"eval data OK — {{len(items)}} items from {{c.data_root}}, control has {{n}} rows")
 PY
 
 # --- 2. reclaim the quota BEFORE training ----------------------------------------
