@@ -3,10 +3,22 @@
 | Notebook | Rung | Metric (primary) | Verdict |
 |---|---|---|---|
 | — (control, rung 38 `38_qwen36_27b_v1` ep1) | rung 38 | `proxy_leaderboard` 0.4643 | baseline |
-| `00_merge_gate.ipynb` | 40-gate | G3: merged `visual.merger.*` ≠ base | **pending** |
+| `00_merge_gate.ipynb` | 40-gate | G3: merged `visual.merger.*` ≠ base | 🔴 **PARTIAL CARRY** — weight kept, bias dropped |
 | `01_alpha_arm.ipynb` | 40 | `proxy_leaderboard` | **pending** |
 
-**Status: NOT RUN.** Everything here is the pre-registration. No code yet.
+**Status: gate RAN (2026-08-13, UNAM, RTX 6000 Ada). Arms NOT RUN.**
+
+🔴 **Gate result — PARTIAL CARRY**, reproduced across two independent runs
+(`RESULTS_merge_gate.json`). G1 and G2 pass: the 2 merger layers wrap, 282 LoRA targets survive,
+`sum|Δ| = 14298`, `grad_norm` 57 → 3. **G3 fails**: `save_pretrained_merged` keeps the trained
+**weight** (6.18 % / 7.60 % relative) and silently drops the trained **bias** (4.3 % / 3.6 % of its
+magnitude). The merged model is not the model that trained, and it would never show up in a score.
+
+⇒ **Connector arm decided: path A′** — full-weight connector at a **reduced LR of 4e-5** (1/5 of the
+LoRA LR, following `FICHAS.md:361`). **Path B (LoRA on the connector) is the declared fallback.**
+📌 B does not recover the bias either — LoRA never adapts biases — so the bias is not a reason to
+prefer B. Only capacity is: A would add ~25 M trainable (+40 %) to a model already over-fitting,
+which is why the LR brake exists.
 
 ## The ONE variable
 
