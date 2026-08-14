@@ -202,6 +202,32 @@ def score(cfg: EvalConfig) -> dict:
     cfg_eval.engine_factory = GenericVLMEngine
 
     report = run_baseline(cfg_eval)
+
+    # 🔴 `proxy_leaderboard` is NOT a key `run_baseline` emits — it never was. It was a
+    # notebook-local helper in rung 21, so `report.get(PRIMARY_CELL)` returned None at
+    # EVERY n, and this rung's declared primary read would have come back NULL on both
+    # arms after 16 h. Verified against the control's own report.json on 2026-08-14: the
+    # key is absent from a full 6252-question run too, so this was never a smoke
+    # artefact. Now derived canonically by `frame.metrics.leaderboard_proxy`.
+    import math
+
+    from frame.metrics import leaderboard_proxy
+
+    report.update(leaderboard_proxy(report))
+    report["proxy_leaderboard"] = report.pop("proxy")
+
+    # A missing ID bucket is EXPECTED in smoke — `run.py:204` truncates head-of-list and
+    # the first 40 items are all heico/OOD, so an ID-only metric has nothing to average.
+    # In a full run it means a scored bucket vanished, which makes the headline
+    # unreadable: rung 21 raised there and so do we (RULES §7 — gates raise).
+    if not cfg.smoke and math.isnan(report["proxy_leaderboard"]):
+        raise EvalFailure(
+            f"the leaderboard proxy is NaN on a FULL eval: "
+            f"aggregation_ID={report['aggregation_ID']}, "
+            f"object_recognition_ID={report['object_recognition_ID']}. A scored bucket is "
+            "missing, so the primary read cannot be formed."
+        )
+
     log.info("eval done — %s", {k: report.get(k) for k in ("proxy_leaderboard", "bucket_mean")})
     return report
 
