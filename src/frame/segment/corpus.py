@@ -250,14 +250,14 @@ def load(cfg: ExportConfig) -> pd.DataFrame:
     for ds in cfg.datasets:
         for sp in cfg.splits:
             d = pd.read_parquet(cfg.data_root / ds / "data" / "segment" / f"{sp}.parquet")
-            d["_ds"], d["_split"] = ds, sp
+            d["g_ds"], d["g_split"] = ds, sp
             parts.append(d)
     df = pd.concat(parts, ignore_index=True)
-    df["_st"] = df.timestamp_start.map(ts_to_seconds)
-    df["_en"] = df.timestamp_end.map(ts_to_seconds)
-    df["_dur"] = df._en - df._st
-    df["_routed"] = df.question.map(needs_time_grid)
-    df["_K"] = [frames_for(d, r) for d, r in zip(df._dur, df._routed)]
+    df["g_st"] = df.timestamp_start.map(ts_to_seconds)
+    df["g_en"] = df.timestamp_end.map(ts_to_seconds)
+    df["g_dur"] = df.g_en - df.g_st
+    df["g_routed"] = df.question.map(needs_time_grid)
+    df["g_K"] = [frames_for(d, r) for d, r in zip(df.g_dur, df.g_routed)]
     return df
 
 
@@ -275,14 +275,14 @@ def frame_paths(cfg: ExportConfig, ds: str, video: str, st: float, dur: float, k
 
 
 def build_row(cfg: ExportConfig, r, sysmsg: str) -> dict:
-    k = int(r._K)
-    paths = frame_paths(cfg, r._ds, r.video, r._st, r._dur, k)
-    window = f"Clip [{seconds_to_ts(r._st)} - {seconds_to_ts(r._en)}] of the procedure."
+    k = int(r.g_K)
+    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k)
+    window = f"Clip [{seconds_to_ts(r.g_st)} - {seconds_to_ts(r.g_en)}] of the procedure."
     answer = str(r.answer)
-    meta = {"qid": f"{r._ds}__{r.id}", "ds": r._ds, "video": r.video,
-            "clip_start_s": float(r._st), "dur_s": float(r._dur), "K": k,
+    meta = {"qid": f"{r.g_ds}__{r.id}", "ds": r.g_ds, "video": r.video,
+            "clip_start_s": float(r.g_st), "dur_s": float(r.g_dur), "K": k,
             "answer_format": r.answer_format, "primary": str(r.primary_capability),
-            "split": r._split, "gold_original": answer, "time_kind": None,
+            "split": r.g_split, "gold_original": answer, "time_kind": None,
             "visual_tokens": visual_tokens(k)}
 
     if r.answer_format == "time" and cfg.relative_time:
@@ -290,12 +290,12 @@ def build_row(cfg: ExportConfig, r, sysmsg: str) -> dict:
             meta["time_kind"] = "2b_elapsed"          # NEVER offset an elapsed span
         else:
             parts = [p.strip() for p in answer.split(",") if p.strip()]
-            rel = [seconds_to_ts(ts_to_seconds(p) - r._st) for p in parts]
+            rel = [seconds_to_ts(ts_to_seconds(p) - r.g_st) for p in parts]
             answer = ", ".join(rel)                    # cardinality preserved: compare needs it
             meta["time_kind"] = "2a_relative"
 
     # fps the frames were really sampled at — the per-row channel the probe proved live
-    raw_fps = (k - 1) / r._dur if (r._dur > 0 and k > 1) else 1.0
+    raw_fps = (k - 1) / r.g_dur if (r.g_dur > 0 and k > 1) else 1.0
     rec = {
         "messages": [
             {"role": "system", "content": sysmsg},
@@ -323,16 +323,16 @@ def build(cfg: ExportConfig) -> dict:
     if cfg.smoke:
         # STRATIFIED, never a prefix slice: "heico" < "lapchole" makes a head() 100% OOD,
         # and a proportional draw expects 0.7 questions in the smallest bucket.
-        df["_stratum"] = (df._ds + "|" + df.answer_format + "|"
-                          + df._dur.astype(int).astype(str))
-        per = max(1, cfg.smoke // max(df._stratum.nunique(), 1))
-        df = (df.groupby("_stratum", group_keys=False)
+        df["g_stratum"] = (df.g_ds + "|" + df.answer_format + "|"
+                          + df.g_dur.astype(int).astype(str))
+        per = max(1, cfg.smoke // max(df.g_stratum.nunique(), 1))
+        df = (df.groupby("g_stratum", group_keys=False)
                 .apply(lambda g: g.head(per)).head(cfg.smoke).reset_index(drop=True))
         rep["smoke_rows"] = int(len(df))
-        rep["smoke_strata"] = int(df._stratum.nunique())
-        rep["smoke_datasets"] = sorted(df._ds.unique())
+        rep["smoke_strata"] = int(df.g_stratum.nunique())
+        rep["smoke_datasets"] = sorted(df.g_ds.unique())
         rep["smoke_formats"] = sorted(df.answer_format.unique())
-        rep["smoke_durations"] = sorted(int(x) for x in df._dur.unique())
+        rep["smoke_durations"] = sorted(int(x) for x in df.g_dur.unique())
 
     sysmsg = system_prompt()
     rows = [build_row(cfg, r, sysmsg) for r in df.itertuples(index=False)]
