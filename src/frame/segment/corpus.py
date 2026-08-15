@@ -236,13 +236,21 @@ def assert_frames_exist(rows: list[dict], cache: Path) -> dict:
     import os
 
     have = set(os.listdir(cache))
-    missing = 0
+    missing = []
     for r in rows:
         for p in r["videos"][0]:
             if Path(p).name not in have:
-                missing += 1
+                m = r["_meta"]
+                missing.append(
+                    f"{Path(p).name} (qid={m['qid']} video={m['video']!r} "
+                    f"start={m['clip_start_s']} dur={m['dur_s']} K={m['K']})")
     if missing:
-        raise AssertionError(f"{missing} referenced frames are not in {cache}")
+        # a gate that reports a COUNT and not the evidence costs three debugging
+        # rounds; this one names the rows so the cause is readable at first fire
+        raise AssertionError(
+            f"{len(missing)} referenced frames are not in {cache}:\n  "
+            + "\n  ".join(missing[:10])
+            + (f"\n  ... and {len(missing)-10} more" if len(missing) > 10 else ""))
     return {"frames_referenced": sum(len(r["videos"][0]) for r in rows)}
 
 
