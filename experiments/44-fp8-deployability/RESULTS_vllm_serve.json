@@ -1,0 +1,16 @@
+{
+  "runtime": "vLLM 0.27.1",
+  "one_card": true,
+  "LOADED": true,
+  "load_secs": 226.1,
+  "card_total_gib": 47.4,
+  "gpu_memory_utilization": 0.9,
+  "max_model_len": 2048,
+  "n_warm": 11,
+  "latency_p50_s": 2.84,
+  "latency_p99_s": 2.846,
+  "latency_max_s": 2.846,
+  "max_new_tokens": 64,
+  "frame_budget_s": 5.0,
+  "note": "synthetic image, greedy. Single-request latency, not server throughput."
+}
