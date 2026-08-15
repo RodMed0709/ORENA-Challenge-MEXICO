@@ -75,6 +75,51 @@ every qID is present in all five reference tables, so the comparison is **paired
 dataset-ordered, so the first 625 are 100 % heico/OOD — measured 2026-08-14, when a
 40-question smoke returned `acc_ID = nan` and an ID-only primary of NaN.
 
+## 🔄 AMENDED 2026-08-15, BEFORE the run — the OOD split, on vLLM, both arms
+
+Three changes to the pre-registration, all written before a number exists.
+
+### 1. The subject is the 4000 HeiCo questions, and the primary read becomes OOD
+
+`heico` is **4000 of the 6252** eval questions — measured, not estimated — and the challenge
+design document (p.12) states the **30 HeiCo videos are already publicly released under
+CC BY-NC-SA**. Only the 170 SAVE videos sit under the restrictive data usage agreement. So
+this subset can be evaluated **off the rented pod, on UNAM, at zero cost and with no DUA
+question to resolve**.
+
+🔴 **But HeiCo is 100 % OOD, so `proxy_leaderboard` — this rung's declared primary — is
+ID-only and would return NaN.** That is the exact defect this document already warns about
+("a 40-question smoke returned `acc_ID = nan`"). Running on HeiCo without changing the read
+would reproduce it.
+
+⇒ **Primary read becomes the OOD buckets.** The justification is not convenience: the FINAL
+ranking is Copeland with **equal weight to ID and OOD** (`challenge_design.txt:2001`), and
+the **pre-evaluation cannot see OOD at all**. So this measures half the score that no
+leaderboard submission can show us. What it does NOT do is tell us whether the leaderboard
+proxy moves — that needs the 2252 `lapchole` questions and therefore the pod.
+
+### 2. 🔴 The no-thinking control must be RE-RUN, not taken from the archive
+
+The section below says to subset the archived `results.csv` for the control at "zero GPU".
+**That is now wrong.** Those tables were produced by the **HF sequential** path; the thinking
+arm will run on **vLLM batched**. Reusing them would put the RUNTIME inside the comparison as
+a second variable — measured at 2 % of answers (47/50 agreement), which is the same order as
+the effects this rung could find.
+
+⇒ **Both arms run on vLLM, in the same session, on the same 4000 qIDs.** The archived HF
+numbers stay valid for what they are — the campaign's historical comparison against A2 — and
+are simply not this rung's control.
+
+### 3. Sequenced: `conn4e5` ep1 now, ep2+3 when its chain lands
+
+ep1's merge is already on UNAM (rebuilt from its 343 MB adapter). ep2+3 finishes tonight and
+gets the identical treatment, so the two are comparable to each other as well.
+
+📌 **This is a partial rung and must be reported as one.** A result here answers "does
+thinking change this checkpoint's OOD score". Confirming it on ID needs the pod, and that is
+deliberately the *second* step: if a 4000-question OOD arm shows nothing, spending pod time
+on 2252 ID questions is hard to justify.
+
 ## The read
 
 **Primary: `proxy_leaderboard`**, thinking vs the SAME arm's no-thinking run on the SAME
