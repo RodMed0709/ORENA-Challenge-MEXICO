@@ -136,6 +136,52 @@ the L40S, so these seconds are **indicative, not certifying**.
 not separate from zero here. This probe is powered to see a **large** effect or none; it
 is not powered to certify a small one, and a null must be reported as *"no large effect"*.
 
+## 🔴 The arm needs an ANSWER EXTRACTOR, and both readings are reported
+
+Found 2026-08-15 by reading the engine, before any GPU time. `screen_engine.predict_samples`
+returns `out[: answer_char_cap]` — the raw decoded generation. **Nothing splits on
+`</think>`.** With the block left open, the model emits `…trace…</think>\n\nanswer`, so what
+reaches the judge is the *reasoning*, cut at **300 characters** (`frame/config.py:55`, ~75
+tokens) — thousands of characters before the closing tag.
+
+⇒ **As staged, this rung was guaranteed to report a confident NO-GO for a parser we never
+wrote.** Precedent, in the engine's own docstring: rung 23a's first bf16 smoke scored
+**0/24** exactly this way. Its fix was to suppress thinking; this rung turns it back on.
+
+Two changes, both **constitutive of the arm rather than treatments of it** — same standing
+as `max_new_tokens` 64 → 512, which this document already accepts on that ground:
+
+| change | why it is not a second variable |
+|---|---|
+| split on the last `</think>` (`_tools/think_parse.py`) | without it, `enable_thinking=True` measures whether 300 chars of chain-of-thought collide with the gold string. That is ~0 and is not about reasoning. |
+| `answer_char_cap` 300 → 4000, **thinking arm only** | 300 chars cannot hold a trace, so the tag never reaches the saved string and there is nothing to split. Raising tokens without this just guillotines later. References keep 300 and are not re-run. |
+
+### Both readings are reported, and the unparsed one is the control for this defect
+
+The run saves the **raw** generation to `predictions.json`, so both are derived offline from
+one generation — no second GPU pass, and `eval_arm`'s ban on `answer_postprocess` (right for
+rung 40, where it would be a second variable) is never fought.
+
+| reading | what it is |
+|---|---|
+| **parsed** | the arm. The answer after `</think>`. |
+| **raw** | the artifact. Expected **≈ 0** — and reported anyway. |
+
+🔑 A near-zero raw reading beside a normal parsed one **demonstrates** the extraction is
+load-bearing instead of asserting it. If raw is NOT ≈ 0, that is itself a finding: the trace
+was collapsing into the answer and the whole framing needs re-reading.
+
+### Two gates, because they fail differently
+
+- `assert_tag_survived` **RAISES** if not one generation contains `</think>`. That has two
+  causes needing opposite fixes: every trace overran the budget, **or** the tokenizer treats
+  the tag as SPECIAL and `skip_special_tokens=True` deleted it from the decoded string —
+  ⚠️ **unverified, it needs the real tokenizer**. The 20-question smoke is where this is
+  found, not a full arm.
+- **`n_truncated`** = generations that never reached `</think>`. They are scored as wrong,
+  which they are — nothing was answered — but counted separately so truncation is never
+  read as a claim about reasoning.
+
 ## 🔴 Pre-registered confound
 
 Both checkpoints were trained **901 steps on the no-thinking path and zero on the

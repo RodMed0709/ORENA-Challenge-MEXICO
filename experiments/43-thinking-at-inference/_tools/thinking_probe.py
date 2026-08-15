@@ -89,6 +89,10 @@ class ProbeConfig:
     # archived answers, so the two are not being compared at different budgets by
     # accident — they are compared at the budget each mode needs to function at all.
     max_new_tokens_thinking: int = 512
+    # 512 tokens of trace is ~2000 chars; 4000 leaves room for the trace AND the answer
+    # after it. Only the thinking arm uses this — the references were scored at 300 and
+    # are not re-run, so nothing already measured moves.
+    answer_char_cap_thinking: int = 4000
 
 
 def stratified_qids(cfg: ProbeConfig) -> list[str]:
@@ -174,6 +178,15 @@ def run_thinking_arm(cfg: ProbeConfig, qids: list[str]) -> dict:
     cfg_eval.engine_factory = GenericVLMEngine
     cfg_eval.enable_thinking = True                       # ← THE variable
     cfg_eval.max_new_tokens = cfg.max_new_tokens_thinking  # or the trace has no room
+    # 🔴 The SECOND thing the mode needs to function at all, and it was missing.
+    # `screen_engine.predict_samples` returns `out[: answer_char_cap]` with a default of
+    # **300 characters** (`frame/config.py:55`) — about 75 tokens. A 512-token trace is cut
+    # thousands of characters BEFORE `</think>`, so the closing tag never reaches the saved
+    # string and there is nothing left to split on. Raising the token budget without raising
+    # this one buys nothing: the trace still gets guillotined, just later.
+    # Not a second variable, same reason as the token budget: it is the room the mode needs
+    # to emit an answer at all. The no-thinking references keep 300 and are untouched.
+    cfg_eval.answer_char_cap = cfg.answer_char_cap_thinking
 
     report = run_baseline(cfg_eval, qid_filter=set(qids))
     report.update(leaderboard_proxy(report))
