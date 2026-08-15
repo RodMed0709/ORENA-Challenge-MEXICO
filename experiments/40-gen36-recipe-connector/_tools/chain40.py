@@ -99,6 +99,12 @@ class ChainConfig:
     watchdog_path: str = "/workspace/tmp/leo_watchdog40.sh"
     watchdog_log: str = "/workspace/tmp/leo_watchdog40.log"
 
+    # False = arm A is already trained and scored; resume the serial plan at arm B.
+    # Added 2026-08-14 after the chain stopped at check_eval on defect 13 with arm A
+    # already a WIN. Running arm B through the chain rather than a bare papermill keeps
+    # the trap, the watchdog, the four gates and check_eval — the whole point of the
+    # chain is that nothing runs on this pod without them.
+    run_arm_a: bool = True
     run_arm_b: bool = True                # False = stop after arm A and its eval
 
     # Turn the pod off when the chain exits (trap) and run the watchdog at all.
@@ -228,6 +234,10 @@ def render(cfg: ChainConfig) -> str:
     # stop and say so, not to quietly spend a download on it.
     shutdown_block = _shutdown_block(cfg)
     arm_params = _arm_params(cfg, exp)
+    arm_a_block = _arm_a(cfg, arm_params) if cfg.run_arm_a else (
+        '\necho "=== arm A skipped by config (run_arm_a=False) — it is already trained'
+        ' and scored ==="\n'
+    )
     wanted_model = cfg.smoke_model_cache_dir if cfg.smoke else cfg.model_cache_dir
     why = ("a rehearsal runs on an ALREADY CACHED model — do not download one"
            if cfg.smoke else
@@ -419,6 +429,14 @@ check_eval() {{  # check_eval <rc> <which>
   echo "eval $2 OK"
 }}
 
+{arm_a_block}
+{arm_b_block}
+echo "===== chain40 end $(date -u) ====="
+"""
+
+
+def _arm_a(cfg: ChainConfig, arm_params: str) -> str:
+    return f"""
 # --- 3. ARM A: lora_alpha 32 -> 16 -----------------------------------------------
 run_nb {cfg.env_python} 02_alpha_arm.ipynb arm_a {arm_params}
 RC_A=$?
@@ -428,10 +446,7 @@ if [ $RC_A -ne 0 ]; then
 fi
 
 run_eval eval_a "{cfg.repo_root}/{cfg.exp_dir}/runs/{cfg.run_a}/merged" {cfg.run_a}
-check_eval $? A || exit 1
-{arm_b_block}
-echo "===== chain40 end $(date -u) ====="
-"""
+check_eval $? A || exit 1"""
 
 
 def _arm_b(cfg: ChainConfig, exp: str) -> str:
