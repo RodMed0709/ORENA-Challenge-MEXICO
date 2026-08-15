@@ -209,6 +209,48 @@ was collapsing into the answer and the whole framing needs re-reading.
   which they are — nothing was answered — but counted separately so truncation is never
   read as a claim about reasoning.
 
+## 📏 Measured 2026-08-15 — a Qwen3.5 trace does NOT fit in 512 tokens. 8/8 overran 1024.
+
+Run on UNAM (`~/storage/envs/orena-gen36`, transformers 5.12.1, RTX 6000 Ada), on
+**`Qwen/Qwen3.5-2B` with 8 synthetic FRAME-shaped questions written for the test**. No
+challenge data, no annotations — the DUA is not in play, which is why the trace text could
+be inspected at all.
+
+| | |
+|---|---|
+| generations | 8 |
+| **closed `</think>` within 1024 tokens** | **0** |
+| trace tokens (min / median / max) | 1024 / 1024 / 1024 — all hit the ceiling |
+| max trace chars | **4453** (above our 4000 cap, and not the end) |
+| would fit rung 43's 512 tokens | **0 / 8** |
+
+🔑 **It is not degenerate looping — it is deliberation.** 58 unique sentences out of 60; the
+trace is structured (*"Thinking Process: 1. Analyze the Request…"*), reaches `Result: 2`
+around the middle, and then keeps second-guessing itself instead of closing the block.
+
+⇒ **`max_new_tokens = 512` and `answer_char_cap = 4000` are both too small**, and
+`assert_tag_survived` would have RAISED — the gate works, and it earned its place before
+any pod time was spent.
+
+### 🔴 The implication is bigger than the budget, and it is decision-relevant
+
+A trace of >1024 tokens **cannot** be generated inside FRAME's **5.0 s** cap at any
+plausible decode rate. If our checkpoint behaves like this, thinking is not a tuning
+problem — it is **structurally incompatible with the track's latency budget**, and the
+right answer is to report that, not to keep raising the budget until the accuracy looks
+better. This is exactly the failure the CONFOUNDED-BY-LATENCY rule above was written for.
+
+### ⚠️ What this does NOT establish, and the direction it may be wrong in
+
+`Qwen3.5-2B` is a **2B base model**. Rung 43's subject is a **27B fine-tuned for 901 steps
+on the no-thinking path with 0 % reasoning examples** — an SFT that taught it *"after
+`</think>`, emit the bare answer"*. That training pressure pushes toward closing the block
+**immediately**, which is the opposite failure: near-empty traces rather than runaway ones.
+
+⇒ This measurement bounds the **base** behaviour, not our checkpoint's. It says the budget
+is unsafe, not that truncation is certain. The 20-question smoke on the real checkpoint is
+still what settles it — but it now has a prior, and the gate that catches either outcome.
+
 ## 🔴 Pre-registered confound
 
 Both checkpoints were trained **901 steps on the no-thinking path and zero on the
