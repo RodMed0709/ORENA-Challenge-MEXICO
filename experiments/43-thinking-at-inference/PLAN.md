@@ -137,25 +137,36 @@ saving over keeping them.
 Estimated: 2 × (load ~5 min + 626 questions at 3–5× the no-thinking rate) + one re-merge
 ≈ **1 h 45 – 2 h 30**.
 
-## 🔴 TWO LAUNCH BLOCKERS — check both, in this order, or do not start
+## 🔴 LAUNCH BLOCKERS — one real, one retired, one about whose pod this is
 
-Written 2026-08-15 while rung 40 arm B's continuation was still running. **Neither is a
-preference; the first one this rung's own code enforces, and the second one this rung's
-own code can destroy.**
+Written 2026-08-15 while rung 40 arm B's continuation was still running. Of the three
+things checked, **only §2 actually blocks**; §1 turned out not to, and saying so matters
+because waiting on a phantom costs the same as waiting on a real one.
 
-### 1. Disk — the guard already says no
+### 1. Disk — NOT a launch blocker. The chain is self-clearing by design.
 
-`remerge.py` sets `min_free_gib = 60` and RAISES before touching a GPU. The last measured
-figure is **~43 GiB free** (2026-08-15), so **as written today this chain refuses to
-start**, and correctly.
+🔻 **Corrected 2026-08-15, same day, before any run.** An earlier draft of this section
+said "~43 GiB free < `min_free_gib = 60`, so this chain refuses to start". **That was
+wrong**, and it was wrong in the direction that would have made us wait for nothing.
 
-Free space will get **worse before better**: `40_B_connector_ep23_v1` writes ep2 and ep3
-checkpoints to the same ~670 GB quota while it runs. So the check must happen **after**
-that run finishes, not now.
+The guard lives **inside `merge_arm()`** (`remerge.py:72`), which the chain calls only at
+**step 3**, after step 2 has already deleted 52 GB:
 
-Measure with `remerge.free_gib()` — `du -sx` against the quota. 🔴 **Never `df` or
-`statvfs`**: they report the MooseFS cluster at **1.4 PB** and a chain already died
-`Disk quota exceeded` trusting them.
+| step | writes | passes the guard? |
+|---|---|---|
+| 1. `conn4e5` + thinking | nothing — its merge already exists | never reaches it |
+| 2. `rm -rf {B}/merged` | frees **52 GB** → ~95 GiB | n/a |
+| 3. re-merge `alpha16` | ~52 GB | 95 > 60 ✅ |
+
+That is precisely the serial pattern `remerge.py` was written to encode: peak disk stays
+at ONE merge. The chain needs only **~8 GiB free at launch** for step 3 to clear after the
+delete — we have ~43.
+
+⚠️ Still worth one look before launch, because `40_B_connector_ep23_v1` writes ep2 and ep3
+checkpoints to the same ~670 GB quota while it runs: confirm free space is **> ~10 GiB**,
+not > 60. Measure with `remerge.free_gib()` — `du -sx` against the quota.
+🔴 **Never `df` or `statvfs`**: they report the MooseFS cluster at **1.4 PB** and a chain
+already died `Disk quota exceeded` trusting them.
 
 ### 2. 🔴 The chain deletes an artifact another run may be training FROM
 
@@ -171,6 +182,34 @@ a copy local to its pod.
 `40_B_connector_ep23_v1`'s config and compare it to `{arms_exp_dir}/runs/40_B_connector_v1/merged`.
 If they resolve to the same inode, this rung **waits** — the adapters are 383 MB and
 regenerate either merge in ~10 min, so there is nothing to preserve and nothing to rush.
+
+### 3. Can this rung just be CHAINED onto arm B's pod? — **not unilaterally.** Three traps are armed.
+
+Asked 2026-08-15: rather than wait for `5btpl229y7kuar` to stop and rent a new pod, append
+rung 43 to that pod's existing chain. Checked against
+`experiments_segment/NOW.md` §"THREE POD-STOP LAYERS ARE ARMED":
+
+| layer | lives | fires on |
+|---|---|---|
+| chain `trap … EXIT` | on the pod | the chain ending — **stops the pod** |
+| watchdog | on the pod | 14 h wall |
+| **independent killer** | **on the operator's machine** | **15 h hard deadline, RunPod API only** |
+
+Layers 1 and 2 are Rodrigo's to change. **Layer 3 is not on the pod at all**
+(`scratchpad/killer_b200.py`, his machine) and is *deliberately* dumb — "a hard deadline
+and a stop, no log parsing, no liveness heuristics — so it cannot kill a healthy run for a
+clever reason". ⇒ **it will stop the pod at 15 h whether or not rung 43 is mid-run**, and
+this rung needs **1 h 45 – 2 h 30**.
+
+⇒ Chaining is **possible but not ours to arrange**: it needs all three layers moved, and
+one of them only its owner can reach. 📌 Also recorded: `/workspace/tmp` is a shared
+namespace and **a pod rented for someone else's rung is read-only for us** — appending to
+his chain is a write to his run, not a neighbourly reuse of idle GPU.
+
+📌 And the operational scar that makes this sharper than it looks (`1ab2509`): **`pkill` on
+a chain fires its `EXIT` trap and stops the pod.** SIGTERM triggers bash EXIT traps. Any
+attempt to swap or append a job by killing a process takes the pod down with it. It cost
+one restart already.
 
 ⚠️ Both blockers clear on the same event: **`40_B_connector_ep23_v1` finishing and its pod
 stopping itself.** That is the trigger to re-check, not a clock.
