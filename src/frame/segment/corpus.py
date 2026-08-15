@@ -192,6 +192,8 @@ def assert_duration_router_pure(df: pd.DataFrame) -> dict:
 
 
 def assert_row_wellformed(rec: dict, k: int) -> None:
+    """k is the REALISED frame count (len of the grid after clamping/dedup), not the
+    requested one — see frame_indices()."""
     """ms-swift will NOT do this for us — measured: 0 tags encodes like 1, 2 only warns."""
     user = [m for m in rec["messages"] if m["role"] == "user"][0]["content"]
     n_tags = user.count("<video>")
@@ -270,14 +272,19 @@ def frame_indices(ds: str, st: float, dur: float, k: int, n_frames: int | None =
     not, and the two disagreed on 6 of 257,047 frames. Caught by `assert_frames_exist`.
     """
     bf = BASE_FPS[ds]
-    out, seen = [], set()
+    out: list[int] = []
+    seen: set[int] = set()
     for i in range(k):
         t = st + (dur * i / (k - 1) if k > 1 else 0.0)
         idx = round(t * bf)
         if n_frames is not None:
             idx = min(idx, n_frames - 1)
-        while idx in seen:      # a degenerate or clamped clip can collide; step back
-            idx = idx - 1 if (n_frames is not None and idx >= n_frames - 1) else idx + 1
+        # COLLAPSE duplicates, never step to a neighbour. When a clip runs past the end
+        # of its video several grid points clamp onto the same last frame; the extractor
+        # deduped them through a set, so inventing idx±1 here references a frame nobody
+        # wrote. The row simply gets fewer than k frames, which is the honest outcome.
+        if idx in seen:
+            continue
         seen.add(idx)
         out.append(idx)
     return out
@@ -290,13 +297,15 @@ def frame_paths(cfg: ExportConfig, ds: str, video: str, st: float, dur: float, k
 
 
 def build_row(cfg: ExportConfig, r, sysmsg: str, lengths: dict | None = None) -> dict:
-    k = int(r.g_K)
+    k_req = int(r.g_K)
     nf = (lengths or {}).get(f"{r.g_ds}|{r.video}")
-    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k, nf)
+    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k_req, nf)
+    k = len(paths)                      # realised, after clamp + dedup
     window = f"Clip [{seconds_to_ts(r.g_st)} - {seconds_to_ts(r.g_en)}] of the procedure."
     answer = str(r.answer)
     meta = {"qid": f"{r.g_ds}__{r.id}", "ds": r.g_ds, "video": r.video,
-            "clip_start_s": float(r.g_st), "dur_s": float(r.g_dur), "K": k,
+            "clip_start_s": float(r.g_st), "dur_s": float(r.g_dur),
+            "K": k, "K_requested": k_req,
             "answer_format": r.answer_format, "primary": str(r.primary_capability),
             "split": r.g_split, "gold_original": answer, "time_kind": None,
             "visual_tokens": visual_tokens(k)}
