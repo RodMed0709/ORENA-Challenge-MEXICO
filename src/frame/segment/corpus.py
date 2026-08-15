@@ -214,21 +214,27 @@ def assert_time_roundtrip(rows: list[dict]) -> dict:
     And the checked set must be non-empty: rung 15's smoke exported 16 rows with
     zero `number` rows and its round-trip gate passed on an empty set.
     """
-    n = 0
+    n = n_multi = 0
     for r in rows:
         meta = r["_meta"]
         if meta.get("time_kind") != "2a_relative":
             continue
-        back = seconds_to_ts(ts_to_seconds(r["messages"][-1]["content"]) + meta["clip_start_s"])
+        # 1.84% of time golds carry 2-8 comma-separated stamps, and `Time.compare`
+        # rejects a cardinality mismatch BEFORE comparing values — so the round-trip
+        # must be per-part, exactly like `Time._split`.
+        emitted = [p.strip() for p in r["messages"][-1]["content"].split(",") if p.strip()]
+        back = ", ".join(seconds_to_ts(ts_to_seconds(p) + meta["clip_start_s"]) for p in emitted)
         if back != meta["gold_original"]:
             raise AssertionError(
-                f"round-trip failed: {r['messages'][-1]['content']} + {meta['clip_start_s']} "
-                f"-> {back} != {meta['gold_original']}"
+                f"round-trip failed: {r['messages'][-1]['content']!r} + {meta['clip_start_s']} "
+                f"-> {back!r} != {meta['gold_original']!r}"
             )
+        if len(emitted) > 1:
+            n_multi += 1
         n += 1
     if n == 0:
         raise AssertionError("round-trip gate checked ZERO rows — it proves nothing")
-    return {"roundtrip_checked": n}
+    return {"roundtrip_checked": n, "roundtrip_multi_stamp": n_multi}
 
 
 def assert_frames_exist(rows: list[dict], cache: Path) -> dict:
