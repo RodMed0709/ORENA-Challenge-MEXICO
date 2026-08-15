@@ -29,10 +29,43 @@ on the operator's machine, `killer_b200.py`), to accept a partial ep2 checkpoint
 stop it now and keep the budget. Nobody has been asked yet; it is recorded here because
 the numbers are measured and the clock is real.
 
-⚠️ **The slowdown predates the rung-43 pod** (rented 14:02, stopped 14:15): the 120.9 s/it
-is the average over the preceding 5.4 h. The documented MooseFS contention
-(`context/21-recipe-sweep/CONTEXT.md:204`, 10.7 → 22.6 s/it for two pods on one volume) is
-the likely cause, with three pods on `gf78k60nlt`.
+### 🔑 CAUSE FOUND 15:25 UTC — the GPU is power-capped at 600 MHz. It is the HOST, not us.
+
+🔻 **Retracts this section's first guess** ("MooseFS contention is the likely cause"). Measured on
+the pod, sustained over 36 s of sampling:
+
+```
+clocks.sm            600 MHz   of a 3090 MHz max   → 19 % of rated clock
+SW Power Cap       : Active
+temperature          37 °C                          → not thermal
+utilization.memory   2–5 %                          → not I/O, not offload
+```
+
+**`utilization.memory` at 2–5 % kills BOTH earlier hypotheses at once**: MooseFS contention and
+Unsloth's gradient offload would each saturate the memory/PCIe path, and neither does. The
+`utilization.gpu = 100 %` that looked alarming only means a kernel is always resident — it is
+resident and crawling at a fifth of the clock.
+
+Everything else was checked and **matches ep1 exactly**: `per_device_train_batch_size` 1,
+`gradient_accumulation_steps` 16 (so a "step" is the same unit in both — 14415/901 = 16),
+`max_pixels` 921600, and **both logs print the same `offload gradients` line**. The one real
+difference is the silicon: ep1 ran on a **RTX PRO 6000 Blackwell _Server_ Edition** at
+**13.1 s/it** (901 steps in 3.28 h, from its `RESULTS.csv`); this is a **_Workstation_ Edition**
+throttled to 600 MHz at **120.9 s/it**.
+
+⇒ 🔑 **The run is not too slow to finish — it is on a bad host.** On a healthy GPU the 1802 steps
+are **~6.5 h**, comfortably inside the 14 h watchdog and **~$12**. The fix is a different machine,
+not a different recipe and not fewer pods.
+
+📌 After 6.7 h there is **not one checkpoint on disk** (first lands at step 200, `save_steps=200`),
+so ~$12.7 has bought nothing recoverable yet.
+
+⚠️ Unexplained, recorded rather than smoothed over: `power.draw` reads **800–1148 W against a
+600 W limit**. Possibly chassis-level reporting or a driver bug. The clock pin and the active
+`SW Power Cap` are unambiguous regardless.
+
+⚠️ **The slowdown predates the rung-43 pod** (rented 14:02, stopped 14:15): the 120.9 s/it is the
+average over the preceding 5.4 h.
 
 ## 🟢 2026-08-15 — rung 40 is CLOSED and MERGED: **both arms win, the connector wins bigger.** The live lever is the CONNECTOR, not the recipe.
 
