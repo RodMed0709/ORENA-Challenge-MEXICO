@@ -131,6 +131,7 @@ class ExportConfig:
     relative_time: bool = True     # flag OFF => absolute golds, byte-identical passthrough
     drop_percentage: bool = False
     smoke: int = 0                 # 0 = full; >0 = that many rows, STRATIFIED
+    max_frames: int = 36           # MEASURED CEILING, not a preference -- see below
     report: dict = field(default_factory=dict)
 
 
@@ -263,6 +264,7 @@ def assert_frames_exist(rows: list[dict], cache: Path) -> dict:
 # ── the builder ──────────────────────────────────────────────────────
 
 def load(cfg: ExportConfig) -> pd.DataFrame:
+    cfg_max_frames = getattr(cfg, 'max_frames', 0)
     parts = []
     for ds in cfg.datasets:
         for sp in cfg.splits:
@@ -285,6 +287,17 @@ def load(cfg: ExportConfig) -> pd.DataFrame:
     #     type into the visual input, and the model could route on it without reading a
     #     pixel. Uniform K per clip removes that shortcut by construction.
     df["g_K"] = df.groupby(["g_ds", "video", "g_st", "g_en"]).g_K.transform("max")
+    # MEASURED CEILING (2026-08-15, A100 80GB): K=71 OOMs. At grid_t=36 the trainable
+    # ViT carries 69,120 patches with gradients (64.8 GB resident) and the fp32
+    # cross-entropy then asks for 15.7 GB more against 14.3 GB free. The optimisation
+    # that would fix it -- use_logits_to_keep -- is forced OFF by ms-swift for every
+    # multimodal model under transformers 4.x (trainers/mixin.py:209-210), and
+    # transformers 5.x is barred by CLAUDE.md. So the cap is a hardware fact.
+    # Cost, stated honestly: 119 s clips fall to 3.4 s spacing (threshold 2.32) and
+    # 299 s clips to 8.5 s (threshold 4.32), i.e. coverage-grade rather than
+    # localisation-grade for the two longest duration classes.
+    if cfg_max_frames:
+        df["g_K"] = df.g_K.clip(upper=cfg_max_frames)
     return df
 
 
