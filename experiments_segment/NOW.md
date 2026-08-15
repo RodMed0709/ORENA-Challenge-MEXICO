@@ -1,5 +1,47 @@
 # experiments_segment / NOW — live state of the SEGMENT track
 
+# ⏱ HANDOFF — 2026-08-15 08:23 UTC (02:23 CDMX). Three runs live, none needs a human.
+
+| run | pod | $/h | step | ETA UTC | ETA CDMX |
+|---|---|---|---|---|---|
+| rung 42 | `7ckucfad9ws4ui` | 0.99 | 5,818/6,060 @10.0 s/it | 09:03 | **03:03** |
+| SEGMENT arm A | `ocbm9adl4rc0ep` | 1.39 | 374/860 @63.9 s/it | 17:01 | **11:00** |
+| rung 40 arm B ep3 | `5btpl229y7kuar` | 1.89 | 0/2,703 just started | ~20:15 | **~14:15** |
+
+Burn **$4.27/h**. To finish all three: **~$35** of ~$60 left.
+
+🔴 **SEGMENT slowed 55 → 64 s/it (+16 %) the moment the third pod started.** That is the
+documented MooseFS contention (`context/21-recipe-sweep/CONTEXT.md:204` measures 10.7 → 22.6
+s/it for two pods on one volume). It is not a fault; it is the price of running three. If a
+fourth is ever added, expect worse — and re-read the ETAs, they were computed at 63.9.
+
+**What each run does when it ends: scores its gates, commits, and STOPS ITS OWN POD.**
+The stop machinery has fired four times in real conditions tonight and never missed.
+
+## If the context reset and you are picking this up
+
+- Drive the pods over the **Jupyter terminal websocket** (`scratchpad/podsh.py`); sshd is
+  dead on all of them. The Jupyter password is **per pod** — read it from
+  `GET /v1/pods/<id>` → `env.JUPYTER_PASSWORD`, never hard-code one (that cost 10 minutes).
+- The three chains and their logs live in `/workspace/tmp/`: `seg01.log`, `armB_ep3.log`,
+  `rung42.log`. All three are readable from ANY pod — the volume is shared.
+- An **independent killer** for `5btpl229y7kuar` runs on the operator's machine
+  (`scratchpad/killer_b200.py`, 15 h deadline). It is the only stop layer that does not
+  live on the pod.
+- 🔴 **The first thing to do with the SEGMENT result is NOT to celebrate or mourn
+  `temporal_grounding`** — read the sampling ceiling below first.
+
+## What was decided tonight and why (so it is not re-litigated)
+
+- **B200 rejected on price.** $6.79/h vs $1.89. It would have cost $41–61 of a $60 budget
+  that still has to pay for SEGMENT evaluation and the submission container — the only work
+  that actually blocks the deliverable. It was also never measured on this workload.
+- **Resume-from-ep1 rejected.** Leo's cosine has annealed to lr 0.0 (`param_groups_post`
+  in his `RESULTS_arm.json`), so a resume starts a fresh curve and is not comparable with
+  A2 ep3. His engine also has no resume path. Changing one integer was cheaper and cleaner.
+- **A clean 3-epoch run was chosen over both.**
+
+
 ## 🔴 THREE POD-STOP LAYERS ARE ARMED — read this before touching anything
 
 | pod | what | $/h | how it stops |
