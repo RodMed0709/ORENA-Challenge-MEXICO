@@ -2,6 +2,19 @@
 
 **Written before a single number exists.** Nothing below is adjustable after the run.
 
+## 🔴 PREREQUISITE — merge rung 40 into `main` before opening this rung
+
+This rung reads rung 40's checkpoints and imports rung 40's `chain40`, and rung 40 is a
+**closed, positive result**: `alpha16` is a WIN (`proxy_leaderboard` +0.0329, paired CI
+`[+0.0030, +0.0498]`, no cell harmed), recorded in its `RESULTS.csv` and `CONTEXT.md`.
+Leaving it on an unmerged branch means a rung that depends on it is built on something
+`main` does not know about, and every teammate reading `main` re-derives a question that
+is already answered — the failure [[survey-files-carry-retired-numbers]] records.
+
+Merge first. `conn4e5`'s verdict lands the same night; if it changes the picture it
+changes rung 40's own CONTEXT, which is another reason to close that rung before opening
+this one rather than editing a merged rung later.
+
 ## Why this is its own rung and not a third arm of 40
 
 Rung 40 pre-registered **two** arms, `A_alpha` and `B_connector`, and its own
