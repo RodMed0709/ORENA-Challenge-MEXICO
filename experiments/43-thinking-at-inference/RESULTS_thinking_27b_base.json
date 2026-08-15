@@ -1,0 +1,24 @@
+{
+  "greedy": {
+    "n": 6,
+    "n_closed": 6,
+    "trace_tokens_min": 40,
+    "trace_tokens_median": 177,
+    "trace_tokens_max": 439,
+    "would_fit_512": 6,
+    "n_over_5s": 5,
+    "secs_median": 10.11,
+    "secs_max": 20.77
+  },
+  "sampling": {
+    "n": 6,
+    "n_closed": 6,
+    "trace_tokens_min": 280,
+    "trace_tokens_median": 319,
+    "trace_tokens_max": 1446,
+    "would_fit_512": 5,
+    "n_over_5s": 6,
+    "secs_median": 15.58,
+    "secs_max": 65.72
+  }
+}

@@ -82,6 +82,76 @@ qIDs. Secondary and reported beside it, never quoted as the result: `bucket_mean
 two ID buckets, and `n_timed_out` (a trace that overruns 512 tokens is a truncation, not
 an opinion — it must be counted, not averaged in).
 
+### 🔻🔻 THE 5.0 s PER-QUESTION CEILING IS NOT REAL — this whole section was written against a retired number
+
+**Corrected 2026-08-15, and the error is the same one twice in one day.**
+`context/decisions/latency-budget-is-pooled.md` is **MEASURED and SETTLED since 2026-07-19**:
+
+> **verdict: POOLED — `120 s setup + B × 5 s` per run; the per-question ceiling was never real**
+
+For a typical batch `B = 20` that is **220 s for 20 questions ≈ 11 s of effective budget each**,
+and the forfeit rule is **per BATCH** (exceeding by 20 % forfeits the whole batch), not per
+question. The note also inverts the risk: the thing that can actually bite is **cold start** —
+imports, weight loading and CUDA-graph capture all eat the 120 s setup allowance.
+
+It says two more things that hit this rung directly:
+
+- *"the `latency` field we emit is informational; **never optimise for it or read it as a score
+  input**"*
+- *"the `max_new_tokens ≤ 32` guidance in `CLAUDE.md` is still good practice but is **no longer
+  forced by the budget** — do not cite the cap as the reason"*
+
+⇒ Everything below that treats 5.0 s as a per-question wall is **wrong**, and I wrote it this
+morning without checking `context/decisions/`. Same failure as the retired "does not fit the
+L40S" claim earlier today. Keeping the original text below, struck, rather than deleting it.
+
+### ⚠️ AND OUR LOCAL HARNESS IS STRICTER THAN THE CHALLENGE
+
+`enforce_latency` defaults **True** (`src/frame/config.py:103`) and the SDK gate
+(`evaluator.py:218`) marks **any single response over 5.0 s as INCORRECT**. The real evaluation
+pools. ⇒ **our local eval can manufacture a loss for the thinking arm that the challenge would
+not.** With the measured medians below (10.11 s greedy), `enforce_latency=True` would score
+**most of the thinking arm as wrong on latency alone**, and the arm would post a catastrophic,
+CI-excludes-zero NO-GO that means nothing about reasoning.
+
+🔴 **Pre-registered consequence:** the thinking arm MUST be run and reported **both ways** —
+with `enforce_latency=True` (comparable to the archived references) and with it **False** (what
+the challenge actually scores). Reporting only the first would repeat, in latency, exactly the
+`</think>`-parser defect this rung already had to fix.
+
+### 📏 Measured on the REAL 27B, 2026-08-15 — the 512-token alarm is RETRACTED
+
+`RESULTS_thinking_27b_base.json`. Qwen3.6-27B **base**, FP8, vLLM, one RTX 6000 Ada (CC 8.9),
+6 synthetic FRAME-shaped questions, `max_tokens=2048` to see the natural length:
+
+| | greedy | sampling (vendor's thinking settings) |
+|---|---|---|
+| closed `</think>` | **6 / 6** | 6 / 6 |
+| trace tokens min/median/max | 40 / **177** / 439 | 280 / **319** / 1446 |
+| **would fit 512** | **6 / 6** ✅ | 5 / 6 |
+| latency median | **10.11 s** | 15.58 s |
+| latency max | 20.77 s | 65.72 s |
+
+🔑 **Two of my own findings are retracted by this:**
+
+1. **`max_new_tokens = 512` is adequate.** The earlier "8/8 overran 1024" came from
+   **Qwen3.5-2B**, a 2B base model, and was a size artifact — exactly the direction the caveat
+   written beside it warned about. The real 27B closes the block in a median of 177 tokens.
+2. **Greedy is not off-spec, it is BETTER.** Unsloth's doc prescribes `temperature=1.0` for
+   thinking mode, and I raised the worry that greedy would make us measure "thinking
+   misconfigured". Measured, greedy produces traces **half as long** (177 vs 319 median), closes
+   just as reliably (6/6), and is **35 % faster**. ⇒ **no confound, and the constraint we are
+   under happens to be the better setting.** That open question is closed.
+
+⚠️ **What remains open, and it is now the only latency question that matters:** these are
+**sequential, `max_num_seqs=1`** measurements. The pooled budget assumes the batch goes through
+**vLLM continuous batching**, which the submission template hands us up front. A 10.11 s median
+sequential could amortise to a fraction of that batched — the team's shipped container measured
+**0.79 s/question**. **Batched throughput with thinking on is NOT measured**, and no verdict
+about affordability should be issued from these sequential numbers.
+
+<details><summary>Original section, written against the retired per-question ceiling — kept for the record</summary>
+
 ### 🔴 Latency is a DECLARED read, not a footnote — added 2026-08-15, before any run
 
 `n_timed_out` above counts **truncation at 512 tokens**. It does not count the thing that
@@ -131,6 +201,16 @@ above its no-thinking control, the result is reported as **CONFOUNDED BY LATENCY
 evidence about reasoning**, and the honest follow-up is a shorter token budget, not a
 verdict. A clean read requires `n_timed_out` at or near the control's. The eval pod is not
 the L40S, so these seconds are **indicative, not certifying**.
+
+</details>
+
+📌 **The CONFOUNDED-BY-LATENCY rule above SURVIVES the correction — and matters more, not
+less.** Its reasoning was that a slow arm posts a loss that reads as a claim about reasoning.
+That is now *measured to be likely*: at a 10.11 s sequential median with `enforce_latency=True`,
+most of the arm would score wrong on the clock. What changes is the remedy. It is **not** "cut
+the token budget until the accuracy improves" — 512 tokens is already adequate and cutting it
+would truncate real traces. It is **report both ways** (§ above) and **measure batched
+throughput** before saying anything about affordability.
 
 ⚠️ At n=626 the paired CI is **wider** than the 6252-question one. A |Δ| under ~0.05 will
 not separate from zero here. This probe is powered to see a **large** effect or none; it
