@@ -1,0 +1,7 @@
+{
+  "src_bf16_gib": 51.75,
+  "dst_fp8_gib": 33.46,
+  "size_ratio": 0.6466,
+  "quantize_secs": 31.3,
+  "base_model_ratio_rung44": 0.6466
+}

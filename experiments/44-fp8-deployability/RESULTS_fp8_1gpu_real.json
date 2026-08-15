@@ -1,0 +1,13 @@
+{
+  "n": 50,
+  "identical_hf_vs_vllm": 47,
+  "agreement_rate": 0.94,
+  "exact_match_gold_hf_sequential": 30,
+  "exact_match_gold_vllm_batched": 30,
+  "vllm_setup_secs": 225.6,
+  "vllm_wall_secs": 22.71,
+  "vllm_secs_per_question": 0.454,
+  "hf_sequential_secs_per_question": 1.13,
+  "speedup_vs_hf_sequential": 2.5,
+  "mean_chars_vllm": 6.4
+}
