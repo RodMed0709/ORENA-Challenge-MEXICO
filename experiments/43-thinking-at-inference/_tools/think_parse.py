@@ -113,16 +113,21 @@ def parse_stats(contents: list[str]) -> dict:
 def assert_tag_survived(contents: list[str]) -> None:
     """RAISE if not one generation contains `</think>` (RULES §7: gates raise).
 
-    Two very different failures produce zero closes and they must not be confused:
+    ✅ **The tokenizer worry is CLOSED, measured 2026-08-15** — and it needed no GPU, no
+    pod and no challenge data, only `Qwen/Qwen3.6-27B`'s public `tokenizer_config.json`:
 
-    1. Every trace overran `max_new_tokens` — a budget problem, fix by raising it.
-    2. `</think>` is a SPECIAL token in this tokenizer, so `skip_special_tokens=True`
-       in `screen_engine.predict_samples` deleted it from the decoded string. Then the
-       split point does not exist in the text at all and no budget fixes it — the engine
-       has to decode with `skip_special_tokens=False`, or split on the token ids.
+        id=248068  content='<think>'   special=False
+        id=248069  content='</think>'  special=False
+        additional_special_tokens: nothing containing 'think'
 
-    Unverified as of writing: it needs the real tokenizer, which lives on the pod. This
-    gate is how we find out on 20 smoke questions instead of after a full arm.
+    `decode(skip_special_tokens=True)` filters `all_special_ids`, and a `special=False`
+    added token is not in that set. ⇒ **`</think>` survives the decode.** The failure mode
+    an earlier draft feared — the tag silently deleted, leaving nothing to split on — is
+    ruled out on this backbone.
+
+    So a firing of this gate now has exactly ONE meaning: **every trace overran the
+    budget** before closing. That is a `max_new_tokens` / `answer_char_cap` problem, and
+    the fix is to raise them — not to change how the engine decodes.
     """
     if contents and not any(THINK_CLOSE in c for c in contents):
         raise AssertionError(
