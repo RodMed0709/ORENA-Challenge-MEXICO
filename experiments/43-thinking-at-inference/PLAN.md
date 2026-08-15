@@ -95,20 +95,42 @@ know it.
 Recorded per arm in `RESULTS.csv`, beside the accuracy columns, using the same names
 rung 40 already writes so the two rungs stay comparable:
 
-| column | meaning |
-|---|---|
-| `infer_latency_p99_s` | p99 wall clock per question. **The read** — §IV.7 says measure p99, not mean. |
-| `infer_latency_max_s` | max. Context only: rung 38's 4.81 s `max` was an outlier among 6252 and was briefly misread as the budget. |
-| `timed_out` | count over the 5.0 s cap. Distinct from `n_timed_out` (512-token truncation) — **both are reported, and they are not the same number.** |
-| `mean_new_tokens` | the mechanism, so a latency result is explainable rather than just observed. |
+🔻 **Corrected 2026-08-15, before any run — the first draft of this section had it backwards
+in both directions.** Traced through the code:
 
-🔴 **Pre-registered decision rule, so it is not argued after the numbers land:** a
-thinking arm whose **`timed_out > 0` or `infer_latency_p99_s` ≥ 5.0** is reported as
-**NOT DEPLOYABLE regardless of its accuracy delta**. Such an accuracy win is not void —
-it is evidence the capability exists — but it may not be quoted as a submission
-candidate without a second run that brings the trace inside budget. The eval pod is not
-the L40S, so a p99 measured here is **indicative, not certifying**; the certifying number
-is on the target hardware, and that gap is recorded now rather than discovered later.
+- **`n_timed_out` IS the 5.0 s wall-clock count**, not a truncation count. `frame.run:115`
+  sums `results_df["timed_out"]`, which the focus Evaluator sets from
+  `TRACK_MAX_LATENCY[Track.FRAME] = 5.0` (`vendor/.../focus/config.py:35`), and
+  `enforce_latency` defaults **True** (`src/frame/config.py:103`).
+- **The 512-token truncation is measured by nobody.** It is a separate quantity and needs
+  adding if we want it.
+- `latency_s` (`mean/p50/p95/p99/max`) is **already produced** by `frame.run:116`. Nothing
+  new has to be computed — `thinking_probe.py` only has to stop dropping it.
+
+| column | source | meaning |
+|---|---|---|
+| `infer_latency_p99_s` | `report["latency_s"]["p99"]` | p99 wall clock. **The read** — §IV.7 says p99, not mean. |
+| `infer_latency_max_s` | `report["latency_s"]["max"]` | Context only: rung 38's 4.81 s `max` was an outlier among 6252 and was briefly misread as the budget. |
+| `n_timed_out` | `report["n_timed_out"]` | Questions over the **5.0 s cap**. |
+| `n_truncated` | **to add** | Responses that hit `max_new_tokens=512`. A trace that runs out of room is a truncation, not an opinion. |
+
+### 🔴 The rule this replaces, and why the first one described an impossibility
+
+The first draft said a thinking arm could be a **WIN on accuracy yet NOT DEPLOYABLE** on
+latency. **That cannot happen here:** with `enforce_latency=True` the harness scores a
+response slower than 5.0 s as **incorrect**. The accuracy number already has the latency
+penalty folded into it.
+
+⇒ **The real risk is the mirror image, and it is worse:** a thinking arm that is *slow*
+would post a **loss**, and we would read it as *"reasoning does not help FRAME"* when it
+actually means *"the trace did not fit in 5 s"*. Those are opposite conclusions from the
+same number.
+
+**Pre-registered rule:** if the thinking arm loses **and** `n_timed_out` is materially
+above its no-thinking control, the result is reported as **CONFOUNDED BY LATENCY — not
+evidence about reasoning**, and the honest follow-up is a shorter token budget, not a
+verdict. A clean read requires `n_timed_out` at or near the control's. The eval pod is not
+the L40S, so these seconds are **indicative, not certifying**.
 
 ⚠️ At n=626 the paired CI is **wider** than the 6252-question one. A |Δ| under ~0.05 will
 not separate from zero here. This probe is powered to see a **large** effect or none; it

@@ -39,6 +39,13 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
+# 🔴 Resolved from THIS file, never hardcoded to `/workspace/repo_leo`. Two call sites used
+# that absolute path, so a checkout anywhere else silently imported rung 40's `_tools` from
+# repo_leo — which on 2026-08-15 sat on an OLD branch with a live training job reading it.
+# That failure mode does not raise; it returns numbers from the wrong version of the code.
+# Same resolution `chain_probe.py` already uses.
+_RUNG40_TOOLS = str(Path(__file__).resolve().parents[2] / "40-gen36-recipe-connector" / "_tools")
+
 
 @dataclass
 class ProbeConfig:
@@ -127,7 +134,7 @@ def score_subset(results_csv: str, qids: set[str]) -> dict:
     selects rows, it does not recompute a judgement.
     """
     import sys
-    sys.path.insert(0, "/workspace/repo_leo/experiments/40-gen36-recipe-connector/_tools")
+    sys.path.insert(0, _RUNG40_TOOLS)
     from eval_arm import ensure_paths
     ensure_paths()
     from frame.metrics import leaderboard_proxy, stratified_report
@@ -154,7 +161,7 @@ def run_thinking_arm(cfg: ProbeConfig, qids: list[str]) -> dict:
     not new inference code — which is what keeps it a single variable.
     """
     import sys
-    sys.path.insert(0, "/workspace/repo_leo/experiments/40-gen36-recipe-connector/_tools")
+    sys.path.insert(0, _RUNG40_TOOLS)
     from eval_arm import EvalConfig, build_baseline_config, ensure_paths
     ensure_paths()
     from frame.metrics import leaderboard_proxy, stratified_report
@@ -171,4 +178,18 @@ def run_thinking_arm(cfg: ProbeConfig, qids: list[str]) -> dict:
     report = run_baseline(cfg_eval, qid_filter=set(qids))
     report.update(leaderboard_proxy(report))
     report["proxy_leaderboard"] = report.pop("proxy")
+
+    # Flatten the latency read to the column names rung 40 already writes, so the two rungs
+    # are comparable without a join. `run_baseline` computes these (`frame.run:116`); the
+    # only thing that was missing is carrying them out of the nested dict.
+    #
+    # 🔴 Why this is a DECLARED read and not a footnote: `enforce_latency` defaults True and
+    # `TRACK_MAX_LATENCY[Track.FRAME]` is 5.0 s, so the harness scores anything slower as
+    # INCORRECT. This arm takes `max_new_tokens` 64 → 512. If the traces overrun, the arm
+    # posts a LOSS that reads as "reasoning does not help FRAME" while actually meaning
+    # "the trace did not fit in 5 s". Without these numbers beside the accuracy those two
+    # opposite conclusions are indistinguishable.
+    lat = report.get("latency_s") or {}
+    report["infer_latency_p99_s"] = lat.get("p99")
+    report["infer_latency_max_s"] = lat.get("max")
     return report
