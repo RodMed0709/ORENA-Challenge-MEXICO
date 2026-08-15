@@ -51,18 +51,20 @@ is **not** a loss and must not be quoted as one: those are 2 and 3 epochs agains
 ### ⛓️ Rung 43 is CHAINED to `orena-rung40-armbB-ep3` — do not launch it before that pod stops
 
 Rung 43 is inference-only, so it is **orthogonal to the training** and does not have to wait
-for correctness reasons. It waits for **two blockers that both clear on the same event**: the pod
-`orena-rung40-armbB-ep3` (`5btpl229y7kuar`, run `40_B_connector_ep23_v1`) finishing and stopping
-itself. Full detail in that rung's `PLAN.md` §"TWO LAUNCH BLOCKERS", on branch
-`task/43-thinking-at-inference`.
+for correctness reasons. It waits on the pod `orena-rung40-armbB-ep3` (`5btpl229y7kuar`, run
+`40_B_connector_ep23_v1`) finishing and stopping itself. Full detail in that rung's `PLAN.md`
+§"LAUNCH BLOCKERS", on branch `task/43-thinking-at-inference`.
 
-1. **Disk.** `remerge.py` sets `min_free_gib = 60` and RAISES before touching a GPU; the last
-   measured figure is **~43 GiB free**. ⇒ **the chain refuses to start today, correctly.** Space
-   gets **worse before better** — ep2/ep3 write to the same ~670 GB quota while that pod runs.
-   🔴 Measure with `remerge.free_gib()` (`du -sx`), **never `df`**: it reports the MooseFS cluster
-   at 1.4 PB and a chain already died `Disk quota exceeded` trusting it.
+1. 🔻 **Disk — NOT a blocker. An earlier version of this section said it was, and that was
+   wrong.** The `min_free_gib = 60` guard lives **inside `merge_arm()`** (`remerge.py:72`), which
+   the chain reaches only at **step 3 — after step 2 has deleted 52 GB**. 43 + 52 = ~95 > 60, so it
+   passes. **The chain is self-clearing by design**; that is the serial pattern `remerge.py` exists
+   to encode. It needs **~8 GiB free at launch, not 60.** Still worth one look (ep2/ep3 write to the
+   same ~670 GB quota): confirm **> ~10 GiB** with `remerge.free_gib()` (`du -sx`), 🔴 **never
+   `df`** — it reports the MooseFS cluster at 1.4 PB and a chain already died `Disk quota exceeded`
+   trusting it.
 
-2. 🔴 **`chain_probe.py` step 2 is `rm -rf` on `conn4e5`'s 52 GB merge — which may be the very
+2. 🔴 **THE REAL ONE — `chain_probe.py` step 2 is `rm -rf` on `conn4e5`'s 52 GB merge, which may be the very
    model that pod is training FROM.** Per `1ab2509`, `40_B_connector_ep23_v1` takes **Leo's ep1
    merged model as its `base_model`**, and the volume is shared across pods. **Not confirmed
    either way** — his run may read a pod-local copy. **Verify, do not assume:** resolve his
@@ -71,6 +73,17 @@ itself. Full detail in that rung's `PLAN.md` §"TWO LAUNCH BLOCKERS", on branch
 
 Nothing is lost by waiting: the adapters are **383 MB** each and regenerate either 52 GB merge in
 ~10 min (a 135× saving), so the merges are disposable and only the adapters must survive.
+
+3. **Appending rung 43 to that pod's chain is possible but NOT ours to arrange.** Three stop
+   layers are armed (`experiments_segment/NOW.md`): the chain's `trap … EXIT`, an on-pod watchdog
+   (14 h), and **an independent killer on the operator's machine** (`killer_b200.py`, 15 h hard
+   deadline, RunPod API only). The first two are Rodrigo's to move; **the third is not on the pod
+   at all** and is deliberately dumb — no log parsing, no liveness heuristics — so **it stops the
+   pod at 15 h whether or not rung 43 is mid-run**, and this rung needs 1 h 45 – 2 h 30. 📌 And
+   **`pkill` on a chain fires its `EXIT` trap and stops the pod** (`1ab2509`), so there is no
+   swap-the-job move either. ⇒ chaining needs all three layers moved by their owner; it is a
+   **conversation with Rodrigo, not an action we can take.** A pod rented for someone else's rung
+   is read-only for us.
 
 ⚠️ **Also closed before launch, and already written on the branch:** latency is now a **declared
 read** (`infer_latency_p99_s`, `timed_out` vs the 5.0 s cap). The thinking arm takes
