@@ -33,7 +33,11 @@ the recipe.** Retires the "live axis is the RECIPE" call in the section below.
 🔴 **What did NOT change, and must travel with the number.** Against **A2 at matched epochs** the
 point estimate moved from −0.0083 to **+0.0206**, but the CI `[−0.0063,+0.0475]` **still contains
 zero**. **It is still a tie.** ⇒ *"there is no measured evidence to pick the 27B"* **survives both
-arms** — and the 27B costs 3–4× per epoch and does not fit the L40S's 48 GB. Being behind A2 ep2/ep3
+arms** — and the 27B costs 3–4× per epoch to **train**. ⚠️ **Do NOT add "and it does not fit the
+L40S" to that sentence** (rung 40's `CONTEXT.md:89` does, and it is a retired claim): 52.72 GiB is
+the TRAINING peak; FP8 is `PASS`-validated at `capability [8,9]` = Ada = the L40S exactly, ~41 GB,
+p99 1.599 s, `timed_out = 0`. **Deployability is not an argument** — see
+`decisions/gen36-fails-the-8b-recipe-not-the-backbone-test.md` §1. Being behind A2 ep2/ep3
 is **not** a loss and must not be quoted as one: those are 2 and 3 epochs against our 1.
 
 ### State of the ladder right now
