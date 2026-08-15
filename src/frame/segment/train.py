@@ -76,7 +76,11 @@ def swift_args(cfg: TrainConfig) -> list[str]:
         "--seed", "42",
         "--output_dir", cfg.run_dir + "/ckpt",
         "--logging_steps", "1",
-        "--save_strategy", "epoch",
+        # steps, not epoch: at 58 s/it an epoch is ~14 h, and an OOM at step 800 of 859
+        # with a single end-of-epoch save costs the whole run. A LoRA adapter is ~100 MB.
+        "--save_strategy", "steps",
+        "--save_steps", "200",
+        "--save_total_limit", "6",
         "--check_model", "false",               # offline
         "--load_args", "false",
     ]
