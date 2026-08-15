@@ -114,6 +114,50 @@ and reported beside it.
 3. **One card here is 49 GB; the L40S is 48 GB.** A result that fits with under ~1 GB to
    spare must be reported as **marginal**, not as GO.
 
+## ✅ VERDICT 2026-08-15: **GO** — measured, no longer extrapolated
+
+| | measured | pre-registered bar |
+|---|---|---|
+| loads on **ONE** card | ✅ 47.4 GiB card, vLLM 0.27.1 | required |
+| FP8 size | **33.46 GiB** (ratio **0.6466**) | vs 0.756 extrapolated from a 4.25 GiB toy |
+| p50 latency | **2.840 s** | — |
+| "p99" latency | **2.846 s** | < 5.0 s ✅ |
+| cold load | 226 s | one-time |
+
+⇒ **gen-3.6 in FP8 fits one L40S-generation card and answers with ~43 % of the budget to
+spare.** The deployability claim is now a measurement.
+
+🔻 **Two things I predicted wrong, recorded rather than quietly dropped:**
+1. I argued the real `size_ratio` would be **worse** than 0.756 because the ignore list
+   keeps the vision tower in bf16. It is **better** (0.6466) — the 0.756 came from a toy
+   where embeddings and `lm_head` dominate; at 27B scale the Linear layers do.
+2. After HF transformers OOM'd, I framed native FP8 as the open risk. vLLM loaded the two
+   shards in 4 s and never dequantized; the OOM was **my** `max_model_len=8192` inflating
+   the multimodal profiling pass. At FRAME's real context (2048) it fits.
+
+### ⚠️ What this number is NOT
+
+- **"p99" over 11 warm samples is just the maximum.** It is not a p99 in any statistical
+  sense and must not be quoted as one. It says "the worst of eleven was 2.846 s".
+- **Single request, no concurrency.** Server throughput under load is not measured.
+- **Synthetic image.** Real FRAME frames could carry a different visual-token count.
+- **Base model, not our fine-tune** — immaterial for size and per-token latency (a LoRA
+  merge changes no shapes), meaningless for answer quality.
+- The card is **49 GB, the L40S is 48**. With 33.46 GiB of weights the margin is wide
+  enough that this does not bite, but the gap is real.
+
+### 🔑 Four packaging findings that would have failed in the offline container
+
+Every one of these blocked the run today and would block a Docker build with no network:
+
+1. **`llmcompressor` writes no processor files** — no tokenizer, `preprocessor_config`,
+   vocab, merges or chat template. They must be copied from the source snapshot.
+2. **`ninja` is required by vLLM** and its absence surfaces as an opaque
+   `FileNotFoundError` inside the engine subprocess.
+3. **The venv's `bin/` must be on `PATH`** — calling the venv python directly is not
+   enough; vLLM's `EngineCore` subprocess looks up `ninja` on `PATH`.
+4. **`torchvision` is required** by `Qwen3VLVideoProcessor`.
+
 ## Cost
 
 One 55.6 GB download to `~/storage/hf_cache` (930 GB free), then GPU time on an otherwise
