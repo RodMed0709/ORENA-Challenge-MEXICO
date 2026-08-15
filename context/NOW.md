@@ -1,5 +1,53 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 📋 2026-08-15 morning — FOR RODRIGO: four things that change what `main` says
+
+Everything below is merged and on `main`. Detail in `experiments/43-*/PLAN.md`,
+`experiments/44-*/PLAN.md`, and the rung-40 section further down.
+
+**1. ✅ gen-3.6 IS deployable — measured, not extrapolated (rung 44, CLOSED, GO).**
+The 27B in FP8 fits **one** L40S-generation card and answers in **2.84 s**:
+
+| | measured | what main said before |
+|---|---|---|
+| FP8 size | **33.46 GiB** | ~41 GB (extrapolated) |
+| `size_ratio` | **0.6466** | 0.756 — *from a 4.25 GiB SMOKE model* |
+| loads on 1 card | ✅ vLLM 0.27.1, FP8 native | untested |
+| latency | 2.84 s (worst of 11) | — |
+
+Run on UNAM's RTX 6000 Ada (**CC 8.9 = the L40S exactly**), no challenge data, no rented pod.
+⚠️ NVFP4 is **ruled out** for our submission — it needs Blackwell and the L40S is Ada.
+
+**2. 🔴 The 5.0 s PER-QUESTION latency ceiling is not real, and our local harness is stricter
+than the challenge.** `decisions/latency-budget-is-pooled.md` settled this on **2026-07-19**:
+POOLED, `120 s setup + B × 5 s`, ≈ **11 s effective per question** at `B = 20`, and the forfeit
+is per **batch**. But `enforce_latency` defaults **True** and the SDK gate
+(`evaluator.py:218`) marks **any** response over 5.0 s as **INCORRECT**. ⇒ **our local eval can
+manufacture a loss that the real evaluation would not.** This matters for anything slow —
+thinking, self-consistency, higher resolution.
+
+**3. 🔴 Rung 40 arm B's first continuation was killed — the GPU was capped, not the recipe.**
+Pod `5btpl229y7kuar` ran **120.7 s/it** against the ep1's 13.1, constant from step 26. Cause
+measured: `clocks.sm` **600 MHz of 3090**, `SW Power Cap: Active`, 36 °C,
+`utilization.memory` **4 %**. Not MooseFS, not the recipe, not Unsloth. It reached step 252/1802
+in 8 h 30 (~$26) with **zero checkpoints** — the engine uses `save_strategy="epoch"`, so nothing
+is written before step 901 and it never got there. Relaunched 17:26 UTC on
+`98yh51k6j6pv2h` at a healthy **13.2 s/it**.
+📌 **Accept a pod in its first 10 minutes**: ignore steps 1-3 (kernel compilation — step 1 read
+112 s/it on the *healthy* pod), read deltas between consecutive `[step]` lines and never tqdm's
+`s/it` (a cumulative mean), and under load check **`utilization.memory`** — 32 % healthy vs 4 %
+capped.
+
+**4. ⚠️ Rung 43 was guaranteed to report a false NO-GO, and it is fixed.** Nothing in the
+pipeline split on `</think>`; `screen_engine` returns `out[: answer_char_cap]` at 300 chars, so
+the judge would have scored the **reasoning** and never the answer — the same defect that scored
+rung 23a's smoke **0/24**. Fixed with an extractor, `answer_char_cap` 300→4000 for that arm only,
+`n_truncated`, and a gate. Measured on the real 27B: **512 tokens is adequate** (greedy 6/6
+closed, median trace 177 tok) and **greedy beats the vendor's sampling settings** (half the trace,
+35 % faster). Rung 43 remains **STAGED, NOT RUN**.
+
+---
+
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-15** (rung 40 closed and merged to `main`).
