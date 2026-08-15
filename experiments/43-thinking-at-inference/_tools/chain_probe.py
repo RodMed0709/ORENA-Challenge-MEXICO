@@ -1,4 +1,4 @@
-"""Rung 40 — render the thinking-probe chain. NEVER a committed `.sh`.
+"""Rung 43 — render the thinking-at-inference chain. NEVER a committed `.sh`.
 
 Two GPU arms in SERIES, because the volume cannot hold two 52 GB merges: on 2026-08-15
 it had ~43 GB free with a teammate writing frames to the same quota.
@@ -20,10 +20,21 @@ carry the retries, the status read-back and the setsid detachment.
 
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
-from chain40 import ChainConfig, _shutdown_block, render_watchdog  # noqa: F401
+# Cross-rung import, following the precedent rung 40's own eval sets by importing
+# `screen_engine` from rung 23's `_tools`. The alternative is a second copy of the trap
+# and the watchdog, and a second copy is how the only thing standing between us and a
+# pod billing all night quietly drifts out of sync.
+# Resolved from THIS file, not hardcoded to the pod: the same repo layout exists on a
+# laptop, and a renderer that only imports on the pod cannot be tested before it runs.
+_RUNG40_TOOLS = str(Path(__file__).resolve().parents[2] / "40-gen36-recipe-connector" / "_tools")
+if _RUNG40_TOOLS not in sys.path:
+    sys.path.insert(0, _RUNG40_TOOLS)
+
+from chain40 import ChainConfig, _shutdown_block, render_watchdog  # noqa: E402,F401
 
 
 @dataclass
@@ -34,6 +45,12 @@ class ProbeChainConfig(ChainConfig):
     log_path: str = "/workspace/tmp/leo_chain_probe.log"
     watchdog_path: str = "/workspace/tmp/leo_watchdog_probe.sh"
     watchdog_log: str = "/workspace/tmp/leo_watchdog_probe.log"
+
+    # 🔴 This rung owns the NOTEBOOK; rung 40 owns the CHECKPOINTS it produced. Keeping
+    # them as separate fields is the whole reason this is a different rung: the probe
+    # moves `enable_thinking`, and rung 40's arms are the subject it moves it on.
+    probe_exp_dir: str = "experiments/43-thinking-at-inference"
+    arms_exp_dir: str = "experiments/40-gen36-recipe-connector"
 
     n_subset: int = 625
     max_new_tokens: int = 512
@@ -47,8 +64,8 @@ class ProbeChainConfig(ChainConfig):
 def render(cfg: ProbeChainConfig) -> str:
     if cfg.stop_pod_on_exit and not cfg.pod_id:
         raise AssertionError("pod_id is empty — the chain could not stop the pod")
-    exp = f"{cfg.repo_root}/{cfg.exp_dir}"
-    runs = f"{exp}/runs"
+    exp = f"{cfg.repo_root}/{cfg.probe_exp_dir}"      # where the notebook lives
+    runs = f"{cfg.repo_root}/{cfg.arms_exp_dir}/runs"  # where rung 40's arms live
     B = f"{runs}/40_B_connector_v1"
     A = f"{runs}/40_A_alpha_v1"
 
@@ -64,7 +81,7 @@ export HF_HOME={cfg.hf_home}
 
 run_probe() {{  # run_probe <tag> <merged-dir> <run-name>
   echo "===== probe $3 start $(date -u) ====="
-  {cfg.env_python} -m papermill 05_thinking_probe.ipynb "/workspace/tmp/leo_out_$1.ipynb" \\
+  {cfg.env_python} -m papermill 00_thinking_probe.ipynb "/workspace/tmp/leo_out_$1.ipynb" \\
     -p MERGED_DIR "$2" -p RUN_NAME "$3" -p WORK_DIR "{runs}" -p HF_HOME "{cfg.hf_home}" \\
     -p N_SUBSET {cfg.n_subset} -p SEED {cfg.probe_seed} \\
     -p MAX_NEW_TOKENS {cfg.max_new_tokens} --log-output
