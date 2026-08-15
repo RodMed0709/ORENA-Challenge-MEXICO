@@ -191,6 +191,20 @@ was collapsing into the answer and the whole framing needs re-reading.
   token is not in it. ⇒ **the tag survives the decode.** ⇒ the gate now has exactly ONE
   meaning if it fires: every trace overran the budget. Raise `max_new_tokens` /
   `answer_char_cap`; do not touch how the engine decodes.
+
+  ✅ **Confirmed against a REAL tokenizer**, not just the JSON — `Qwen/Qwen3.5-2B` on the
+  UNAM box (`hpclab-RTXA6000`), which carries **the same `<think>`/`</think>` ids
+  (248068 / 248069) as Qwen3.6-27B**, so it is a faithful proxy for the template and decode
+  path. Read-only, no GPU, nothing written to that shared machine:
+
+  | check | result |
+  |---|---|
+  | `enable_thinking=False` | prompt ends `…assistant\n<think>\n\n</think>\n\n` — block **pre-closed** |
+  | `enable_thinking=True` | prompt ends `…assistant\n<think>\n` — block **left OPEN** |
+  | `decode(skip_special_tokens=True)` | returns `'razonando aqui</think>\n\n2'` — **identical** to `skip_special_tokens=False` |
+
+  ⇒ THE ONE VARIABLE section above is verbatim correct, and the extractor's premise holds
+  on real tokenizer behaviour rather than on a config file read.
 - **`n_truncated`** = generations that never reached `</think>`. They are scored as wrong,
   which they are — nothing was answered — but counted separately so truncation is never
   read as a claim about reasoning.
