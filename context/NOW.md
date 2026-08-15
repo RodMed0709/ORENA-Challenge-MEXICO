@@ -46,7 +46,36 @@ is **not** a loss and must not be quoted as one: those are 2 and 3 epochs agains
 |---|---|
 | **rung 40** (recipe + connector) | ✅ **CLOSED — both arms WIN, `conn4e5` wins bigger.** Merged to `main`. |
 | **rung 40 arm B cont** (`40_B_connector_ep23_v1`) | 🔵 **RUNNING** — epochs 2+3 continued from Leo's ep1 **merged** model, `num_train_epochs=2`. See the caveat below. |
-| **rung 43** (thinking at inference) | 🟡 **STAGED, NOT RUN.** Merged with rung 40 (its `PLAN.md` made that merge its prerequisite). Needs a GPU and someone to press go. |
+| **rung 43** (thinking at inference) | 🟡 **STAGED, NOT RUN — CHAINED to arm B's pod.** Work on `task/43-thinking-at-inference`. 🔴 Launch only when `orena-rung40-armbB-ep3` (`5btpl229y7kuar`) has finished and stopped itself. See below. |
+
+### ⛓️ Rung 43 is CHAINED to `orena-rung40-armbB-ep3` — do not launch it before that pod stops
+
+Rung 43 is inference-only, so it is **orthogonal to the training** and does not have to wait
+for correctness reasons. It waits for **two blockers that both clear on the same event**: the pod
+`orena-rung40-armbB-ep3` (`5btpl229y7kuar`, run `40_B_connector_ep23_v1`) finishing and stopping
+itself. Full detail in that rung's `PLAN.md` §"TWO LAUNCH BLOCKERS", on branch
+`task/43-thinking-at-inference`.
+
+1. **Disk.** `remerge.py` sets `min_free_gib = 60` and RAISES before touching a GPU; the last
+   measured figure is **~43 GiB free**. ⇒ **the chain refuses to start today, correctly.** Space
+   gets **worse before better** — ep2/ep3 write to the same ~670 GB quota while that pod runs.
+   🔴 Measure with `remerge.free_gib()` (`du -sx`), **never `df`**: it reports the MooseFS cluster
+   at 1.4 PB and a chain already died `Disk quota exceeded` trusting it.
+
+2. 🔴 **`chain_probe.py` step 2 is `rm -rf` on `conn4e5`'s 52 GB merge — which may be the very
+   model that pod is training FROM.** Per `1ab2509`, `40_B_connector_ep23_v1` takes **Leo's ep1
+   merged model as its `base_model`**, and the volume is shared across pods. **Not confirmed
+   either way** — his run may read a pod-local copy. **Verify, do not assume:** resolve his
+   `base_model` against `experiments/40-gen36-recipe-connector/runs/40_B_connector_v1/merged`
+   before launching. If they are the same, launching rung 43 **kills an ~11 h training run.**
+
+Nothing is lost by waiting: the adapters are **383 MB** each and regenerate either 52 GB merge in
+~10 min (a 135× saving), so the merges are disposable and only the adapters must survive.
+
+⚠️ **Also closed before launch, and already written on the branch:** latency is now a **declared
+read** (`infer_latency_p99_s`, `timed_out` vs the 5.0 s cap). The thinking arm takes
+`max_new_tokens` **64 → 512** against a rung-40 p99 of 1.5–1.8 s **at 64** — so this rung can
+produce an accuracy WIN that cannot ship, and the rule for calling that is pre-registered.
 | **SEGMENT track** | 🔵 Open — rung 01 viability, `experiments_segment/NOW.md` is its own live state. |
 
 ⚠️ **The arm B continuation is NOT a 3-epoch run, and the difference is load-bearing** (`1ab2509`).
