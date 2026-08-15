@@ -50,10 +50,11 @@ stop_pod() {{
     st=$(curl -s "https://rest.runpod.io/v1/pods/{cfg.pod_id}" \\
          -H "Authorization: Bearer $RP_KEY" | grep -o '"desiredStatus":"[A-Z]*"' | head -1)
     echo "[trap] attempt $i -> $st"
-    case "$st" in *EXITED*) echo "[trap] pod stopped."; break;; esac
+    case "$st" in *EXITED*) echo "[trap] pod stopped."; rm -f {cfg.key_file}; break;; esac
   done
-  # NOTE: the key file is deliberately NOT deleted here. After a failed stop a human
-  # needs it to retry by hand; deleting it removes the only credential that would help.
+  # The key is deleted ONLY after a confirmed stop. On a FAILED stop it is kept: a human
+  # retrying by hand needs it, and deleting it removes the only credential that helps.
+  # (A plaintext token has already been left on this volume once, in a .git/config.)
 }}
 """
 
