@@ -86,8 +86,16 @@ the single-variable result and it is what this rung was built to decide.
 A2 ep1; `alpha16` is at −0.0014 and `conn4e5` at **+0.0206**, `[−0.0063, +0.0475]`. 🔴 **The point
 estimate flipped sign across the two arms; the verdict did not.** The CI still contains zero, so
 *"we only tie the 8B"* survives both arms, and with it the conclusion that **no measured evidence
-yet favours the 27B** over A2 — which costs 3–4× per epoch to train and does not fit the L40S.
+yet favours the 27B** over A2 — which costs 3–4× per epoch to **train**.
 ⚠️ Context, not a result: different backbone, the comparison PLAN.md forbids as a primary read.
+
+🔻 **Corrected 2026-08-15: this line used to end "and does not fit the L40S". That claim was
+already RETIRED** by `decisions/gen36-fails-the-8b-recipe-not-the-backbone-test.md` §1 before this
+rung was written, and it was carried here anyway. 52.72 GiB is the **TRAINING** peak, not the
+serving footprint; FP8 is `PASS`-validated at `capability [8, 9]` = CC 8.9 = Ada = **the L40S
+exactly**, landing near **41 GB** at the measured `size_ratio` 0.756, with p99 1.599 s and
+`timed_out = 0`. **It fits, and deployability is not an argument against the 27B.** The cost
+argument stands on training alone.
 
 **3. Being behind A2 ep2/ep3 is NOT a loss and must not be quoted as one.** Those are 2 and 3
 epochs against our 1. Rungs 14 and 15 both compared their epoch 3 against rung 06's epoch 2, and
