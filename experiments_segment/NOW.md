@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|
 | rung 42 | `7ckucfad9ws4ui` | 0.99 | 5,818/6,060 @10.0 s/it | 09:03 | **03:03** |
 | SEGMENT arm A | `ocbm9adl4rc0ep` | 1.39 | 374/860 @63.9 s/it | 17:01 | **11:00** |
-| rung 40 arm B ep3 | `5btpl229y7kuar` | 1.89 | 0/2,703 just started | ~20:15 | **~14:15** |
+| rung 40 arm B **cont (ep2+ep3)** | `5btpl229y7kuar` | 1.89 | 0/1,802 | ~17:40 | **~11:40** |
 
 Burn **$4.27/h**. To finish all three: **~$35** of ~$60 left.
 
@@ -39,7 +39,23 @@ The stop machinery has fired four times in real conditions tonight and never mis
 - **Resume-from-ep1 rejected.** Leo's cosine has annealed to lr 0.0 (`param_groups_post`
   in his `RESULTS_arm.json`), so a resume starts a fresh curve and is not comparable with
   A2 ep3. His engine also has no resume path. Changing one integer was cheaper and cleaner.
-- **A clean 3-epoch run was chosen over both.**
+- 🔴 **REVERSED, 08:50 UTC.** The lead asked twice for epochs 2 and 3 continued from the
+  finished ep1; I ran a clean 3-epoch instead because I judged it methodologically better.
+  That was not my call to make, and it is now corrected. What runs is the **continuation**:
+  `base_model` = Leo's ep1 **merged** model, `num_train_epochs=2`, run
+  `40_B_connector_ep23_v1`. It is 2.5 h faster than the 3-epoch run as a side effect.
+
+  **What the continuation costs, and it must travel with the number:** Leo's cosine annealed
+  to lr 0.0 by the end of ep1, so this starts a FRESH cosine. A 3-epoch run has ONE schedule
+  over 2,703 steps; this has TWO over 901 + 1,802. They differ from step one and neither
+  contains the other. ⇒ the result is comparable **against Leo's ep1 and against itself**;
+  comparing it to our A2 ep3 (a single 3-epoch cosine) carries this caveat in writing.
+  Second inherited limit: his merge **dropped the trained connector bias** (his own declared
+  deviation, PLAN §3d), so the continuation starts from ep1 weights without it.
+
+  📌 Operational scar: `pkill` on the chain fires its `trap ... EXIT` and **stops the pod**.
+  SIGTERM triggers bash EXIT traps. To swap a job without losing the pod, kill the training
+  process only — never the chain. It cost one restart tonight.
 
 
 ## 🔴 THREE POD-STOP LAYERS ARE ARMED — read this before touching anything
