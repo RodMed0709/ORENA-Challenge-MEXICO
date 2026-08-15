@@ -1,5 +1,53 @@
 # experiments_segment / NOW — live state of the SEGMENT track
 
+## 🔴 THREE POD-STOP LAYERS ARE ARMED — read this before touching anything
+
+| pod | what | $/h | how it stops |
+|---|---|---|---|
+| `ocbm9adl4rc0ep` | SEGMENT arm A, 1 epoch | 1.39 | chain trap + on-pod watchdog (18 h wall) |
+| `lyxe3bqeqeselg` | **rung 40 arm B, 3 epochs (B200)** | **6.79** | chain trap + on-pod watchdog (14 h) + **an INDEPENDENT killer on the operator's machine (15 h)** |
+| `7ckucfad9ws4ui` | rung 42 | 0.99 | its own chain |
+
+The third layer exists because layers 1 and 2 both live ON the pod and share a failure
+domain: if the filesystem wedges or the shell skips its trap, both die together. The
+independent killer talks only to the RunPod API. It is deliberately dumb — a hard
+deadline and a stop, no log parsing, no liveness heuristics — so it cannot kill a
+healthy run for a clever reason. Script: `scratchpad/killer_b200.py`.
+
+⚠️ At $6.79/h the B200 costs **$163/day idle**. If everything else fails, stop it by hand
+in the RunPod console.
+
+## rung 40 arm B at 3 epochs (running on the B200)
+
+Leo's ep1 measured `bucket_mean` **0.5763** and beat its own rung-38 control (+0.054 ALL,
++0.062 ID, +0.031 OOD, all three CIs excluding zero). But it is **1 epoch**, and our best
+FRAME checkpoint (A2 ep3) is **0.6496** at **3 epochs** — so the two are not comparable.
+Epoch-matched at ep1 the 27B leads 0.5763 vs A2's 0.5592, i.e. **+0.0171**.
+
+This run answers the only question that comparison leaves open: what the 27B does at 3
+epochs. Built by importing Leo's own `ArmConfig` and calling his `main()`, with exactly
+two fields changed — `num_train_epochs=3` and `run_name="40_B_connector_ep3_v1"` (so his
+ep1 artifacts cannot be overwritten). A blocking gate diffs the config against his ep1
+and refuses to run on any other difference; it printed **"recipe drift: NONE"**.
+
+🔴 **Declared deviations, both of which weaken the comparison and neither of which is
+optional:**
+1. It runs on a **B200 (sm_100)**; his ep1 ran on an **RTX PRO 6000 (sm_120)**. No PRO 6000
+   capacity existed in EU-RO-1 at launch (both SKUs returned 500).
+   `archived-results-not-bit-reproducible` measures ~0.5 % of answers changing on a GPU
+   swap, so this is **not bit-comparable with his ep1**. It IS comparable against A2 ep3
+   and against its own trajectory.
+2. `gen36-fails-the-8b-recipe-not-the-backbone-test` says **"Do NOT scale this recipe to
+   3 epochs"**, and `lr 2e-4` is the **8B's** optimum, never ported to the 27B. This run is
+   taken against that standing advice, deliberately, to replace an extrapolation with a
+   measurement.
+
+📌 Disk: three rung-21 **epoch-1** merges were deleted to make room (`21_vitlr_v1`,
+`21_clip10_v1`, `21_lr_1e4_v1`, 17 GB each). All are regenerable — their adapters are
+intact (3 each, verified before deleting) — and none was anyone's reported result, which
+is always the ep3 merge. **A2's ep3 merge was verified present after the deletion.**
+
+
 > Updated 2026-08-15 ~02:40 UTC. Read this before touching anything on the SEGMENT side.
 > The FRAME brain (`context/INDEX.md`, `context/RULES.md`, `context/decisions/`) stays the
 > single source of settled verdicts for BOTH tracks — nothing is duplicated there.
