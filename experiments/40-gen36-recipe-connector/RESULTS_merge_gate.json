@@ -1,0 +1,104 @@
+{
+  "config": {
+    "base_model": "Qwen/Qwen3.5-2B",
+    "hf_home": "/data/uaq_user/hf_cache",
+    "work_dir": "/data/uaq_user/tmp/leo_gate40",
+    "target_modules": "all-linear",
+    "modules_to_save": [
+      "model.visual.merger.linear_fc1",
+      "model.visual.merger.linear_fc2"
+    ],
+    "lora_rank": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.0,
+    "max_seq_length": 1024,
+    "max_pixels": 65536,
+    "n_rows": 32,
+    "n_steps": 20,
+    "learning_rate": 0.0002,
+    "per_device_train_batch_size": 1,
+    "gradient_accumulation_steps": 2,
+    "seed": 42,
+    "min_abs_delta": 0.001,
+    "out_json": "RESULTS_merge_gate.json"
+  },
+  "versions": {
+    "host": "hpclab-RTXA6000",
+    "python": "3.11.15",
+    "unsloth": "2026.8.15",
+    "unsloth_zoo": "2026.8.10",
+    "peft": "0.20.0",
+    "transformers": "5.5.0",
+    "torch": "2.11.0+cu128",
+    "trl": "0.24.0",
+    "accelerate": "1.14.0",
+    "cuda": "12.8",
+    "capability": [
+      8,
+      9
+    ],
+    "gpu": "NVIDIA RTX 6000 Ada Generation"
+  },
+  "verdict": "FAIL \u2014 G3 FAIL (PARTIAL CARRY) \u2014 \ud83d\udd34 the merge kept some trained connector tensors and silently DROPPED others: {'model.visual.merger.linear_fc1.bias': 2.137822151184082, 'model.visual.merger.linear_fc2.bias': 1.0745066404342651}.\nCarried: {'model.visual.merger.linear_fc1.weight': 9299.0078125, 'model.visual.merger.linear_fc2.weight': 4995.455078125}\n\nThe merged model is NOT the model that was trained. This would never show up in a score. A summed criterion would have PASSED this, which is why the criterion is per-tensor.\n\n=> Decide explicitly: accept the loss with the number stated, or take PATH B.",
+  "model_class": "Qwen3_5ForConditionalGeneration",
+  "G1": {
+    "wrapped": [
+      "base_model.model.model.visual.merger.linear_fc1",
+      "base_model.model.model.visual.merger.linear_fc2"
+    ],
+    "n_targeted": 282
+  },
+  "n_connector_tensors_tracked": 10,
+  "train_loss": 0.6910395693033934,
+  "grad_norms": [
+    57.3637809753418,
+    56.09911346435547,
+    18.59091567993164,
+    78.7591781616211,
+    33.13309097290039,
+    11.441488265991211,
+    11.888825416564941,
+    5.985124111175537,
+    20.068927764892578,
+    29.07520866394043,
+    38.9490966796875,
+    15.391923904418945,
+    4.500707149505615,
+    2.3034446239471436,
+    1.6665359735488892,
+    41.1109733581543,
+    6.5273661613464355,
+    1.7194043397903442,
+    27.82581901550293,
+    1.0622105598449707
+  ],
+  "G2": {
+    "sum_abs_delta_trained": 14297.675219416618,
+    "per_tensor": {
+      "base_model.model.model.visual.merger.norm.weight": 0.0,
+      "base_model.model.model.visual.merger.norm.bias": 0.0,
+      "base_model.model.model.visual.merger.linear_fc1.original_module.weight": 0.0,
+      "base_model.model.model.visual.merger.linear_fc1.original_module.bias": 0.0,
+      "base_model.model.model.visual.merger.linear_fc1.modules_to_save.default.weight": 9299.0078125,
+      "base_model.model.model.visual.merger.linear_fc1.modules_to_save.default.bias": 2.137822151184082,
+      "base_model.model.model.visual.merger.linear_fc2.original_module.weight": 0.0,
+      "base_model.model.model.visual.merger.linear_fc2.original_module.bias": 0.0,
+      "base_model.model.model.visual.merger.linear_fc2.modules_to_save.default.weight": 4995.455078125,
+      "base_model.model.model.visual.merger.linear_fc2.modules_to_save.default.bias": 1.0745066404342651
+    }
+  },
+  "merged_files": [
+    ".cache",
+    "chat_template.jinja",
+    "config.json",
+    "generation_config.json",
+    "model.safetensors-00001-of-00001.safetensors",
+    "model.safetensors.index.json",
+    "processor_config.json",
+    "tokenizer.json",
+    "tokenizer_config.json"
+  ],
+  "base_dir": "/data/uaq_user/hf_cache/hub/models--Qwen--Qwen3.5-2B/snapshots/15852e8c16360a2fea060d615a32b45270f8a8fc",
+  "path": "B",
+  "elapsed_s": 76.18862360576168
+}

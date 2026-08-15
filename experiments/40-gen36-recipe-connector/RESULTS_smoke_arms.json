@@ -1,0 +1,134 @@
+{
+  "A_alpha": {
+    "verdict": "OK",
+    "diff_vs_rung38": {
+      "lora_alpha": {
+        "baseline": 32,
+        "arm": 16
+      }
+    },
+    "coverage": {
+      "n_targeted": 282,
+      "trainable": 11555328
+    },
+    "recorded_fields": {
+      "max_grad_norm": 1.0,
+      "weight_decay": 0.0,
+      "optim": "adamw_8bit",
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999
+    },
+    "train_loss": 1.8250232696533204,
+    "peak_vram_gib": 4.337193489074707,
+    "param_groups_post": null,
+    "merge_check": null,
+    "model_class": "Qwen3_5ForConditionalGeneration",
+    "versions": {
+      "host": "hpclab-RTXA6000",
+      "python": "3.11.15",
+      "unsloth": "2026.8.15",
+      "unsloth_zoo": "2026.8.10",
+      "peft": "0.20.0",
+      "transformers": "5.5.0",
+      "torch": "2.11.0+cu128",
+      "trl": "0.24.0",
+      "accelerate": "1.14.0",
+      "cuda": "12.8",
+      "capability": [
+        8,
+        9
+      ],
+      "gpu": "NVIDIA RTX 6000 Ada Generation"
+    },
+    "control_run": "38_qwen36_27b_v1",
+    "control_scores": {
+      "proxy_leaderboard": 0.4643,
+      "bucket_mean": 0.5302,
+      "object_recognition_ID": 0.5579,
+      "aggregation_ID": 0.3707,
+      "margin_OOD": 0.1388
+    }
+  },
+  "B_connector": {
+    "verdict": "OK",
+    "diff_vs_rung38": {
+      "modules_to_save": {
+        "baseline": [],
+        "arm": [
+          "model.visual.merger.linear_fc1",
+          "model.visual.merger.linear_fc2"
+        ]
+      },
+      "connector_lr": {
+        "baseline": null,
+        "arm": 4e-05
+      }
+    },
+    "coverage": {
+      "n_targeted": 282,
+      "trainable": 36727296
+    },
+    "recorded_fields": {
+      "max_grad_norm": 1.0,
+      "weight_decay": 0.0,
+      "optim": "adamw_8bit",
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999
+    },
+    "train_loss": 1.6186220407485963,
+    "peak_vram_gib": 4.589669227600098,
+    "param_groups_post": {
+      "when": "post-train",
+      "groups": [
+        {
+          "name": "connector",
+          "lr": 0.0,
+          "initial_lr": 4e-05,
+          "n_params": 4
+        },
+        {
+          "name": "lora",
+          "lr": 0.0,
+          "initial_lr": 0.0002,
+          "n_params": 564
+        }
+      ]
+    },
+    "merge_check": {
+      "dropped_by_merge": {
+        "model.visual.merger.linear_fc1.bias": 0.19869545102119446,
+        "model.visual.merger.linear_fc2.bias": 0.08995886147022247
+      },
+      "known_bias_loss": {
+        "model.visual.merger.linear_fc1.bias": 0.19869545102119446,
+        "model.visual.merger.linear_fc2.bias": 0.08995886147022247
+      }
+    },
+    "model_class": "Qwen3_5ForConditionalGeneration",
+    "versions": {
+      "host": "hpclab-RTXA6000",
+      "python": "3.11.15",
+      "unsloth": "2026.8.15",
+      "unsloth_zoo": "2026.8.10",
+      "peft": "0.20.0",
+      "transformers": "5.5.0",
+      "torch": "2.11.0+cu128",
+      "trl": "0.24.0",
+      "accelerate": "1.14.0",
+      "cuda": "12.8",
+      "capability": [
+        8,
+        9
+      ],
+      "gpu": "NVIDIA RTX 6000 Ada Generation"
+    },
+    "control_run": "38_qwen36_27b_v1",
+    "control_scores": {
+      "proxy_leaderboard": 0.4643,
+      "bucket_mean": 0.5302,
+      "object_recognition_ID": 0.5579,
+      "aggregation_ID": 0.3707,
+      "margin_OOD": 0.1388
+    }
+  }
+}

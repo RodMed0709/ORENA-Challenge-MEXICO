@@ -1505,3 +1505,49 @@ def jackknife_by_video(
         "n_videos": len(loo),
         "n": int(len(df)),
     }
+
+
+# ── the leaderboard proxy (lifted from rung 21, 2026-08-14) ──────────────────
+def leaderboard_proxy(report: dict) -> dict:
+    """The ID-only leaderboard proxy: mean of the two ID buckets we are scored on.
+
+    🔴 This is NOT a key of ``stratified_report`` and never has been. It was a
+    notebook-local ``_proxy()`` helper in ``21b_epoch_eval.ipynb``, so every consumer
+    that reached for ``report["proxy_leaderboard"]`` silently got ``None`` — rung 40's
+    eval declared it as its PRIMARY_CELL and would have returned a NULL verdict on both
+    arms after 16 h of training. Lifted here so it is computed once, canonically, per
+    RULES §EVAL rule 1 (extend the module, never reimplement beside it).
+
+    Purely additive: ``stratified_report``'s own output is untouched, so no archived
+    number changes.
+
+    ID-only on purpose — `decisions/local-eval-vs-judge-calibration.md`: the proxy is
+    the least misleading local number we own *precisely because* it excludes OOD.
+
+    Returns ``{"aggregation_ID", "object_recognition_ID", "proxy"}``. A missing bucket
+    yields NaN rather than raising: that is expected in a smoke (a 40-row head-of-list
+    sample need not contain a single aggregation×ID question) and is a FINDING in a
+    full run — so the CALLER raises, with the count in hand.
+    """
+    bb = pd.DataFrame(report["by_bucket"])
+    idc = bb[bb.distribution == "ID"].set_index("capability_group")
+    out: dict = {}
+    for key, group in (("aggregation_ID", "aggregation"),
+                       ("object_recognition_ID", "object_recognition")):
+        out[key] = float(idc.loc[group, "accuracy"]) if group in idc.index else float("nan")
+    out["proxy"] = (out["aggregation_ID"] + out["object_recognition_ID"]) / 2
+    return out
+
+
+def dist_from_qid(qid) -> str:
+    """Public name for the canonical ID/OOD derivation. Delegates, never duplicates.
+
+    Exposed on 2026-08-14 because rung 40's paired CI re-derived it by hand as
+    ``qID.split("_")[0].upper()`` and fell back to ``"ID"`` when that did not match —
+    which is ALWAYS, since the prefix is the dataset (``heico``/``lapchole``) and the
+    separator is a double underscore. Every OOD question was silently scored as ID: the
+    paired CI reported n=6252 for ID and n=0 for OOD against a control whose own report
+    says acc_OOD=0.5985. A private helper that callers cannot reach is an invitation to
+    reimplement it badly, so it has a public name now.
+    """
+    return _dist_from_qid(qid)

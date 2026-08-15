@@ -65,6 +65,29 @@ never received a gradient, and the cause is a regex rather than a decision
 
 **pending — pre-registered 2026-08-13.** The gate has not been run and the arm has not been run.
 
+## ✅ A question raised from outside this rung, and CLOSED BY THE GATE — 2026-08-13
+
+**Raised (before the gate ran):** in **PEFT**, `all-linear` is not expanded when it arrives inside a
+**list** — `_maybe_include_all_linear_layers` (`tuners_utils.py:2353`) early-returns unless
+`target_modules` is a `str` equal to the shorthand, and `"all-linear"` then falls to
+`key.endswith(".all-linear")`, which matches nothing. This rung passes exactly that shape: nine argv
+values. The open half was whether **ms-swift** expands it itself first.
+
+**Answered by measurement, not by argument.** The gate ran (`3f932db`) and the subject leg returned
+**736 = 504 LLM + 216 ViT + 16 aligner**, orphans 0, with the control leg at 0 aligner and
+`grad_norm` 139 → 14. An unexpanded `all-linear` would have collapsed coverage to the eight merger
+names alone; 504 and 216 are intact. ⇒ **ms-swift does resolve `all-linear` before PEFT sees it, and
+an explicit target survives its intersection.** Nothing to fix here.
+
+📌 **Kept rather than deleted, for two reasons.** It records that the rung's own coverage criteria
+(`n_llm == 504`, `n_vit == 216`) are what made this failure mode detectable — they earned their
+place. And the PEFT-level fact still binds **anywhere ms-swift is not in the path**: under Unsloth,
+or in plain PEFT, `all-linear` must travel **alone, as a string**. That is the gen-3.6 lane, where
+[[the-connector-is-reachable-via-modules-to-save]] carries it.
+
+Only this CONTEXT file was ever touched from outside; `PLAN.md` was not, and its `Results`/`Next`
+sections belong to the rung's author.
+
 ## Next
 
 Independent read-only review of `PLAN.md` + the code (GO / NO-GO with file:line), then render the
