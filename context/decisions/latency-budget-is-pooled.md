@@ -8,6 +8,36 @@ measured_in: orena-focus-submission-template/README.md §"The latency budget"
 
 # Decision: the FRAME latency budget is POOLED — the per-question ceiling was never real
 
+> ## ⚠️ CONTESTED, 2026-08-15 — a second official source says PER-QUESTION
+>
+> The **challenge design document** (`documentacion/papers/332-ORena_-_SAVE_FOCUS_challenge…pdf`,
+> dated **2026-04-22**, the BIAS/MICCAI structured description), p. 10 §"Submission method":
+>
+> > *"Inference will be limited to a single GPU and must be completed within **a maximum time
+> > budget per question**. If the answering of a question takes longer than the budget, **the
+> > respective question will be treated as answered incorrectly**."*
+> > *— FRAME track: **5 seconds** on a 48GB VRAM GPU*
+>
+> That is per-question with a per-question penalty — flatly contradicting this note's verdict,
+> which came from the submission template README.
+>
+> | source | date | says |
+> |---|---|---|
+> | submission template `README.md` | (undated in repo) | **pooled**, `120 s + B × 5 s`, graduated forfeit, `latency` field informational |
+> | challenge design document | 2026-04-22 | **per question**, that question scored incorrect |
+>
+> **Which governs is UNRESOLVED.** The template describes the *implementation* ("the platform
+> measures the execution time of each run itself"), which argues it is newer and operative; the
+> design document is the *formal commitment*. Neither claim has been tested against the platform.
+>
+> ⇒ **Do not cite either reading as settled.** Cost levers against the STRICTER (per-question)
+> reading until an organizer answers, because that is the one that can silently zero a
+> submission. 🔴 The cheap resolution is to **ask the organizers**, not to keep inferring.
+>
+> 📌 What does NOT change: a lever measured at **1.33 s/question batched** (rung 43's thinking
+> arm) fits comfortably under *both* readings. The discrepancy only bites for anything in the
+> 5–11 s range, where the two answers differ.
+
 - **Status:** MEASURED · 2026-07-19 · read from the **official submission template**, not inferred
 - **Applies when:** costing anything that spends compute per question — self-consistency,
   higher `max_pixels`, a larger model. Several levers were closed against a ceiling that does
