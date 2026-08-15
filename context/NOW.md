@@ -2,8 +2,57 @@
 
 > The living current-state of the project. Updated as things change. Read this + `context/INDEX.md`
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
-> Last updated: **2026-08-13** (rung 38 closed).
+> Last updated: **2026-08-15** (rung 40 closed and merged to `main`).
 
+## 🟢 2026-08-15 — rung 40 is CLOSED and MERGED: **both arms win, the connector wins bigger.** The live lever is the CONNECTOR, not the recipe.
+
+> ⬆️ **This supersedes the rung-38 section below on WHICH AXIS IS LIVE**, and closes the
+> "live work that is NOT on `main`" section with it. Merged as `6c2f504` (`--no-ff`, the rung is
+> one revertible unit). Numbers: `experiments/40-gen36-recipe-connector/RESULTS.csv`; full reading:
+> `context/40-gen36-recipe-connector/CONTEXT.md`.
+
+Two **pre-registered** arms on gen-3.6, single-variable each, read against the **rung 38 control**
+(`38_qwen36_27b_v1` ep1, proxy 0.4643 — 🔴 **not A2**, which is a different backbone). Both
+evaluated on all **6252** questions, **0 timeouts, 0 errors**, paired video-clustered CIs:
+
+| arm | change | `proxy_leaderboard` | Δ vs control | paired CI (ALL) |
+|---|---|---|---|---|
+| **`conn4e5`** (`40_B_connector_v1`) | connector trains @ **4e-5** | **0.5260** | **+0.0617** | **+0.0540 [+0.0312,+0.0784]** |
+| `alpha16` (`40_A_alpha_v1`) | `lora_alpha` 32 → 16 | 0.4972 | +0.0329 | +0.0251 [+0.0030,+0.0498] |
+| control (rung 38 ep1) | — | 0.4643 | — | — |
+
+🔑 **`conn4e5` beats `alpha16` head to head: +0.0289 `[+0.0104,+0.0476]`, excludes zero.** It is the
+**only arm that moves OOD** (+0.0312 `[+0.0008,+0.0598]`, where `alpha16` came out null), improves
+**all ten cells** over `alpha16` with none negative, and repairs `alpha16`'s single regression
+(`fo_class` OOD). `number_estimate` 0.3804 vs 0.3530 — the first gen-3.6 arm above A2 ep1's 0.3531,
+though the CIs overlap and **that alone is not significant**.
+
+⇒ **The rung 38 NO-GO was the RECIPE, not the backbone — and the connector is a better lever than
+the recipe.** Retires the "live axis is the RECIPE" call in the section below.
+
+🔴 **What did NOT change, and must travel with the number.** Against **A2 at matched epochs** the
+point estimate moved from −0.0083 to **+0.0206**, but the CI `[−0.0063,+0.0475]` **still contains
+zero**. **It is still a tie.** ⇒ *"there is no measured evidence to pick the 27B"* **survives both
+arms** — and the 27B costs 3–4× per epoch and does not fit the L40S's 48 GB. Being behind A2 ep2/ep3
+is **not** a loss and must not be quoted as one: those are 2 and 3 epochs against our 1.
+
+### State of the ladder right now
+
+| | state |
+|---|---|
+| **rung 40** (recipe + connector) | ✅ **CLOSED — both arms WIN, `conn4e5` wins bigger.** Merged to `main`. |
+| **rung 40 arm B cont** (`40_B_connector_ep23_v1`) | 🔵 **RUNNING** — epochs 2+3 continued from Leo's ep1 **merged** model, `num_train_epochs=2`. See the caveat below. |
+| **rung 43** (thinking at inference) | 🟡 **STAGED, NOT RUN.** Merged with rung 40 (its `PLAN.md` made that merge its prerequisite). Needs a GPU and someone to press go. |
+| **SEGMENT track** | 🔵 Open — rung 01 viability, `experiments_segment/NOW.md` is its own live state. |
+
+⚠️ **The arm B continuation is NOT a 3-epoch run, and the difference is load-bearing** (`1ab2509`).
+Leo's cosine annealed to lr 0.0 by the end of ep1, so the continuation starts a **fresh cosine**: one
+3-epoch run has ONE schedule over 2,703 steps, this has TWO over 901 + 1,802. They differ from step
+one and neither contains the other. ⇒ it is comparable **against Leo's ep1 and against itself**;
+comparing it to A2 ep3 (a single 3-epoch cosine) carries this caveat **in writing**. It also inherits
+the merge that **dropped the trained connector bias** (declared deviation, rung 40 `PLAN.md` §3d).
+
+---
 ## 🔴 2026-08-13 (close) — rung 38 is CLOSED: the A2 recipe transplanted to gen-3.6 LOSES. The live axis is the RECIPE.
 
 > ⬆️ **This supersedes the "arm is STAGED" section below.** The arm ran, was evaluated on all 6252
@@ -47,7 +96,7 @@ at lr 0 by step 901), so it costs ~9.5 h from scratch to scale a recipe already 
 |---|---|
 | **rung 38** (gen-3.6 backbone screen) | ✅ **CLOSED — NO-GO at A2-verbatim.** Trained, evaluated, analysed, committed. |
 | **rung 39** (connector LoRA) | 🟢 **GATE RAN AND PASSED on an A100** (`3f932db`, 2026-08-13 17:46). Arm not run yet. |
-| **gen-3.6 recipe design** | 🔵 **IN PROGRESS on a branch, not merged** — see below. |
+| **gen-3.6 recipe design** | 🔵 **IN PROGRESS on a branch, not merged** — see below. ⬆️ **SUPERSEDED 2026-08-15: it became rung 40, which is closed and merged.** |
 
 ### 🟢 The rung-39 gate PASSED — the connector IS reachable in ms-swift, measured
 
@@ -72,6 +121,12 @@ byte-identical; the duplicate was removed). **There is no independent replica of
 seed has ever been repeated in the campaign.**
 
 ### 🔵 Live work that is NOT on `main` — read the branch before reasoning about gen-3.6
+
+> ⬆️ **SUPERSEDED 2026-08-15 — this section is now HISTORY, do not act on it.** The branch
+> `task/gen36-recipe-and-connector` was **merged to `main` as `6c2f504`**. Everything it describes
+> (the two decision notes, the complete rung 40, the two Unsloth facts) is on `main`; the arms have
+> since RUN and both won. There is no longer anything to check out. Read the 2026-08-15 section at
+> the top instead.
 
 Desk research on **what recipe to use for the gen-3.6 ladder** (zero GPU) is in progress on branch
 **`task/gen36-recipe-and-connector`**, pushed but **deliberately not merged — the task is not
