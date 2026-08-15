@@ -374,6 +374,15 @@ def stratified_report(
             list(zip(dropped["capability_group"], dropped["distribution"], dropped["n"])),
         )
     bucket_mean = float(kept["accuracy"].mean()) if len(kept) else float("nan")
+    # The SET the headline averaged over, returned so a gate can assert on it.
+    # `by_bucket` below is UNFILTERED, so a check against it is blind to a dropped
+    # bucket: two arms could average different denominators and both be recorded as
+    # `bucket_mean`. FRAME risked one bucket; SEGMENT scores ten, three of whose ID
+    # cells have n < 100.
+    buckets_in_mean = sorted(
+        (str(r.capability_group), str(r.distribution), int(r.n))
+        for r in kept.itertuples(index=False)
+    )
     # per-bucket template-aware floor + margin (NaN without gold).
     by_bucket["floor"] = [
         _slice_floor(df[(df["capability_group"] == r.capability_group)
@@ -446,6 +455,8 @@ def stratified_report(
 
     return {
         "bucket_mean": bucket_mean,
+        "buckets_in_mean": buckets_in_mean,
+        "n_buckets_in_mean": len(buckets_in_mean),
         "by_bucket": by_bucket,
         "by_bucket_format": by_bucket_format,
         "by_format": by_format,
@@ -544,6 +555,35 @@ def assert_class_f1_reported(row, *, results_df: pd.DataFrame | None = None) -> 
             f"class-balanced F1 (RULES §9b). Present: {sorted(have)}. Use "
             "`frame.metrics.class_f1_report`; do not hand-roll it (RULES §1)."
         )
+
+
+def assert_bucket_set(report: dict, expected: set[tuple[str, str]]) -> None:
+    """Assert the headline averaged over EXACTLY the expected group×dist buckets.
+
+    Reads ``report["buckets_in_mean"]`` — the set that survived ``min_bucket_n`` —
+    never ``report["by_bucket"]``, which is unfiltered and cannot see a drop.
+
+    Without this, `bucket_mean` silently means "the mean over whatever survived", so a
+    filtered run and a full run are recorded under the same name with different
+    denominators. FRAME populated 4 buckets and SEGMENT populates 10, which is exactly
+    when that stops being a theoretical risk. RAISES.
+    """
+    got = {(g, d) for g, d, _ in report.get("buckets_in_mean", [])}
+    if got != set(expected):
+        raise AssertionError(
+            f"bucket_mean averaged {len(got)} buckets, expected {len(expected)}. "
+            f"missing={sorted(set(expected) - got)} "
+            f"extra={sorted(got - set(expected))}"
+        )
+
+
+SEGMENT_BUCKETS: set[tuple[str, str]] = {
+    (g, d)
+    for g in ("object_recognition", "temporal_grounding", "aggregation",
+              "event_understanding", "complex_reasoning")
+    for d in ("ID", "OOD")
+}
+"""The ten buckets SEGMENT populates. FRAME populates only the first two groups."""
 
 
 def assert_bucket_counts(
