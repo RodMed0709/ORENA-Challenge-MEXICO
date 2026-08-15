@@ -183,6 +183,26 @@ a copy local to its pod.
 If they resolve to the same inode, this rung **waits** — the adapters are 383 MB and
 regenerate either merge in ~10 min, so there is nothing to preserve and nothing to rush.
 
+#### 🔴 VERIFIED 2026-08-15 14:0x UTC — it IS the same path. Resolved by `keep_conn_merge`.
+
+`/workspace/tmp/armB_ep3.log`, the running job's own log:
+
+```
+continuing from /workspace/repo_leo/.../runs/40_B_connector_v1/merged (15 shards)
+  base_model = /workspace/repo_leo/.../runs/40_B_connector_v1/merged
+```
+
+Same MooseFS volume (`networkVolumeId gf78k60nlt`), mid-run. ⇒ **step 2 as written would
+have deleted a live training run's base model.**
+
+**Resolution — and the deletion was never necessary.** `du -sx` measures **550.1 GiB used
+of the 670 GB quota ⇒ ~120 GiB free**, not the ~43 GiB this document carried from the day
+before. Both 52 GB merges fit at once. Set **`keep_conn_merge=True`**: step 2 becomes an
+echo, `alpha16` is merged alongside, and the only surviving `rm -rf` targets
+`40_A_alpha_v1/merged`, which is ours. Verified by rendering the script and grepping every
+`rm -rf` line. The flag defaults **False**, so the script is unchanged for anyone who
+renders it without asking for this.
+
 ### 3. Can this rung just be CHAINED onto arm B's pod? — **not unilaterally.** Three traps are armed.
 
 Asked 2026-08-15: rather than wait for `5btpl229y7kuar` to stop and rent a new pod, append
