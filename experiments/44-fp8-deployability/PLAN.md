@@ -114,7 +114,41 @@ and reported beside it.
 3. **One card here is 49 GB; the L40S is 48 GB.** A result that fits with under ~1 GB to
    spare must be reported as **marginal**, not as GO.
 
-## ✅ VERDICT 2026-08-15: **GO** — measured, no longer extrapolated
+## ✅ VERDICT 2026-08-15: **GO — CONDITIONAL ON THE CONTAINER USING vLLM**
+
+🔴 **The condition was missing from the first write-up of this verdict and it is not optional.**
+Added the same evening, after HF transformers OOM'd on the same checkpoint.
+
+The constraint chain, every link measured today:
+
+```
+27B bf16              52 GB      → does NOT fit a 48 GB L40S      ⇒ must quantize
+      ↓
+FP8 (compressed-tensors)  33.5 GB → fits …but ONLY vLLM executes it natively
+      ↓                             HF transformers DEQUANTIZES back to bf16
+      ↓                             (measured twice: dtype=bfloat16 AND dtype="auto",
+      ↓                              OOM at 43.5 GiB in compressed_tensors _dequantize)
+      ↓
+⇒ the SUBMISSION CONTAINER would have to ship vLLM
+      ↓
+vLLM cold start       226 s      → against a 120 s setup allowance   🔴 UNRESOLVED
+```
+
+📌 The container today ships **HF transformers** and says `No vLLM needed` — true for the 8B,
+**false for a quantized 27B**. So "gen-3.6 is deployable" must be read as *"deployable **if** the
+container moves to vLLM and its cold start fits the setup allowance"*, and neither half of that
+is established.
+
+Three routes out, none tested:
+1. **Measure vLLM's cold start inside the container.** Much of the 226 s is kernel compilation a
+   prepared image can cache. This is the cheapest check and it belongs in the container, not here.
+2. **A quantization format HF executes natively** (bitsandbytes NF4 is the candidate) — pays in
+   speed and quality, but keeps the container as it is.
+3. **Ship the 8B**, for which none of this applies.
+
+⇒ **The size half of this rung is settled and good. The runtime half is now the open question.**
+
+### The original verdict — accurate for what it measured
 
 | | measured | pre-registered bar |
 |---|---|---|
