@@ -4,6 +4,36 @@
 > to get oriented fast. (Supersedes the older `HANDOFF.md` baseline-run handoff, kept as history.)
 > Last updated: **2026-08-15** (rung 40 closed and merged to `main`).
 
+## ⏱🔴 URGENT, measured 2026-08-15 14:05 UTC — `40_B_connector_ep23_v1` CANNOT FINISH. It is running 6.5× slower than its ETA and its own killer will stop it at ~25 %.
+
+Read from the job's own log, `/workspace/tmp/armB_ep3.log`, on the shared volume:
+
+```
+161/1802 [5:26:30<55:07:23, 120.93s/it]   eta 3378.8 min
+```
+
+| | planned | actual |
+|---|---|---|
+| rate | ~18.6 s/it | **120.93 s/it** (6.5× slower) |
+| ETA | ~17:40 UTC (~9 h) | **~55 h** |
+| progress after 5.4 h | — | **step 161 / 1802 = 9 %** |
+
+It was resumed at **08:27 UTC**. Its on-pod watchdog is **14 h** and the independent
+killer is **15 h** ⇒ it gets stopped around **23:27 UTC at roughly step 447 / 1802 ≈ 25 %**.
+🔴 **It will never reach epoch 3.** At $1.89/h that is **~$28 of a ~$35 remaining budget
+spent on a checkpoint nobody can use.**
+
+**This is a decision for its owner, not something to fix from outside** — but it needs to
+be made before ~23:27 UTC. The options are to raise both stop layers (the 15 h one lives
+on the operator's machine, `killer_b200.py`), to accept a partial ep2 checkpoint, or to
+stop it now and keep the budget. Nobody has been asked yet; it is recorded here because
+the numbers are measured and the clock is real.
+
+⚠️ **The slowdown predates the rung-43 pod** (rented 14:02, stopped 14:15): the 120.9 s/it
+is the average over the preceding 5.4 h. The documented MooseFS contention
+(`context/21-recipe-sweep/CONTEXT.md:204`, 10.7 → 22.6 s/it for two pods on one volume) is
+the likely cause, with three pods on `gf78k60nlt`.
+
 ## 🟢 2026-08-15 — rung 40 is CLOSED and MERGED: **both arms win, the connector wins bigger.** The live lever is the CONNECTOR, not the recipe.
 
 > ⬆️ **This supersedes the rung-38 section below on WHICH AXIS IS LIVE**, and closes the
@@ -64,12 +94,45 @@ for correctness reasons. It waits on the pod `orena-rung40-armbB-ep3` (`5btpl229
    `df`** — it reports the MooseFS cluster at 1.4 PB and a chain already died `Disk quota exceeded`
    trusting it.
 
-2. 🔴 **THE REAL ONE — `chain_probe.py` step 2 is `rm -rf` on `conn4e5`'s 52 GB merge, which may be the very
+2. ✅ **RESOLVED 2026-08-15 by `keep_conn_merge`.** The collision was **verified from the running
+   job's own log** — it declares `base_model = .../40_B_connector_v1/merged`, the exact path step 2
+   deletes, on the same volume, mid-run. But the deletion was never necessary: `du -sx` measures
+   **550.1 GiB used of 670 GB ⇒ ~120 GiB free**, not the ~43 GiB assumed, so **both 52 GB merges fit
+   at once**. `keep_conn_merge=True` turns step 2 into an echo and merges `alpha16` alongside; the
+   only surviving `rm -rf` targets our own `40_A_alpha_v1/merged`. Defaults False ⇒ byte-identical
+   for anyone who renders without asking. ⇒ **rung 43 can run in full with zero risk to that job.**
+   Original wording kept below for the record:
+
+   > 🔴 **`chain_probe.py` step 2 is `rm -rf` on `conn4e5`'s 52 GB merge, which may be the very
    model that pod is training FROM.** Per `1ab2509`, `40_B_connector_ep23_v1` takes **Leo's ep1
    merged model as its `base_model`**, and the volume is shared across pods. **Not confirmed
    either way** — his run may read a pod-local copy. **Verify, do not assume:** resolve his
    `base_model` against `experiments/40-gen36-recipe-connector/runs/40_B_connector_v1/merged`
    before launching. If they are the same, launching rung 43 **kills an ~11 h training run.**
+
+### 📋 Attempt of 2026-08-15 14:02–14:15 UTC — staged, gated, then the pod was stopped by a user
+
+A pod `rung43` (`hqnyx4oqf9fkwn`, **RTX PRO 6000 Blackwell Server, 96 GB, sm_120**, 1 GPU,
+$2.09/h) was rented and prepared. **Stopped by a user at 14:15:23 UTC** — not by the chain and not
+by any automation; total spend **~$0.45**. **Nothing destructive ran**: `conn4e5`'s merge is intact
+and the ep23 job was never touched.
+
+What the attempt established, and what is reusable next time:
+
+- An **isolated checkout at `/workspace/repo_rung43`** (code only), with
+  `experiments/40-gen36-recipe-connector/runs` **symlinked** to `repo_leo`'s. This exists because
+  `repo_leo` is on the old branch **and the live ep23 job reads its code from there** — switching
+  its branch would break a running job. Do not `git checkout` inside `repo_leo` while that runs.
+- **Import gate PASSED** on the pod: `papermill 2.7.0`, `frame.metrics` (incl. `leaderboard_proxy`),
+  `eval_arm`, `screen_engine`, `/workspace/orena-data` present, GPU 0 MiB used of 97887.
+- The pod has **no git credentials** (`could not read Username for 'https://github.com'`) ⇒ code
+  arrives by `scp`/`tar`, not `git fetch`.
+- 🔴 **The on-pod self-stop could not be armed.** `chain40`'s trap reads an API key from
+  `/workspace/tmp/leo_runpod_key`; staging it was blocked, so `stop_pod_on_exit` cannot work from
+  this operator. **Use layer 3 instead** — an off-pod killer with a hard deadline, which
+  `experiments_segment/NOW.md` argues is the layer that matters anyway since on-pod layers share a
+  failure domain with the pod. A ready one is in the session scratchpad (`killer_rung43.py`:
+  deadline + end-marker, retried stops, status read-back).
 
 Nothing is lost by waiting: the adapters are **383 MB** each and regenerate either 52 GB merge in
 ~10 min (a 135× saving), so the merges are disposable and only the adapters must survive.
