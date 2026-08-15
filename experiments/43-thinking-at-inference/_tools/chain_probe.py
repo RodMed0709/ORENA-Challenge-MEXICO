@@ -54,6 +54,13 @@ class ProbeChainConfig(ChainConfig):
 
     n_subset: int = 625
     max_new_tokens: int = 512
+    # 🔴 OFF by default: with this False the rendered script is byte-identical to the one
+    # this module has always produced. Turn it ON only when `{B}/merged` is load-bearing
+    # for somebody else — which on 2026-08-15 it was: `40_B_connector_ep23_v1` declares
+    # `base_model = .../40_B_connector_v1/merged` in its own log, on this same MooseFS
+    # volume, mid-run. Deleting it there is not reclaiming space, it is killing a
+    # teammate's job. Requires ~52 GiB of headroom, since both merges then coexist.
+    keep_conn_merge: bool = False
     probe_seed: int = 42
     # A reasoning pass is 3-5x slower per question than a bare answer, and this runs two
     # arms plus a re-merge. 6 h is generous on purpose: the wall clock is a backstop, not
@@ -102,11 +109,13 @@ RC1=$?
 [ $RC1 -ne 0 ] && echo "conn4e5 thinking arm FAILED (rc=$RC1) — its partial output is on the volume."
 
 # --- 2. reclaim before the rebuild ----------------------------------------------
-# Unconditional, and BEFORE step 3 rather than after step 1's success: with ~43 GB free
+{'''# 🔴 SKIPPED — keep_conn_merge is ON. Another run is training FROM this merge.
+echo "KEEPING conn4e5's merge — 40_B_connector_ep23_v1 declares it as its base_model"
+du -sx /workspace 2>/dev/null | tail -1''' if cfg.keep_conn_merge else '''# Unconditional, and BEFORE step 3 rather than after step 1's success: with ~43 GB free
 # a 52 GB write cannot start, so this is the step that makes step 3 possible at all.
 echo "removing conn4e5's merge (adapter kept — regenerable in ~10 min)"
-rm -rf "{B}/merged"
-du -sx /workspace 2>/dev/null | tail -1
+rm -rf "''' + B + '''/merged"
+du -sx /workspace 2>/dev/null | tail -1'''}
 
 # --- 3. rebuild alpha16's merge from its 383 MB adapter --------------------------
 {cfg.env_python} - <<'PY' || exit 1
