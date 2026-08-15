@@ -1,0 +1,41 @@
+{
+  "date": "2026-08-15",
+  "what": "20-question smoke of the thinking arm on OUR fine-tuned checkpoint (conn4e5), real FRAME questions and frames, on-pod. Aggregates only -- no generation text left the pod (DUA).",
+  "pod": "3h6c6y1dla6bsg (stopped after)",
+  "engine": "screen_engine / HF transformers, SEQUENTIAL, bf16 merge, enforce_latency=True",
+
+  "budget_512": {
+    "n": 22,
+    "truncated_no_close_tag": 14,
+    "truncated_rate": 0.636,
+    "mean_trace_chars": 1816,
+    "max_trace_chars": 2142,
+    "parsed_answers_under_40_chars": "8 / 8",
+    "latency_p99_s": 30.178,
+    "over_5s": "22 / 22"
+  },
+  "budget_2048": {
+    "n": 22,
+    "truncated_no_close_tag": 8,
+    "truncated_rate": 0.364,
+    "mean_trace_chars": 2651,
+    "max_trace_chars": 4000,
+    "parsed_answers_under_40_chars": "14 / 14",
+    "latency_p99_s": 115.56,
+    "over_5s": "22 / 22",
+    "CONFOUNDED": "max_trace_chars == 4000 == answer_char_cap EXACTLY. The CHAR cap truncated the string before </think> could appear. It was calibrated for a 512-token budget (~2000 chars) and not re-calibrated when the budget rose to 2048 (~8000 chars). So this truncation rate mixes 'the model did not close' with 'our cap cut it off' and CANNOT be decomposed. My error, stated rather than interpreted away."
+  },
+
+  "what_IS_established": {
+    "the_parser_works": "Every generation that closed the tag yielded an answer under 40 chars -- 8/8 and 14/14. mean chars RAW 1822-2663 vs PARSED 6-8 is the signature of the defect the extractor fixes: without it the judge scores the TRACE.",
+    "sequential_eval_is_infeasible": "30 s/question at 512 tokens, 115.6 s at 2048. The 626-question arm would take 5.2 h (with 64 % truncated = garbage) or 20 h (~$42). The rung as designed cannot be run.",
+    "the_bottleneck_is_OUR_HARNESS_not_thinking": "The same model, same thinking, through vLLM continuous batching measures 1.33 s/question (RESULTS_batched_thinking.json). Our eval path is ~100x slower than production because screen_engine generates one question at a time in HF transformers."
+  },
+
+  "what_is_NOT_established": {
+    "does_our_SFT_break_thinking": "Unknown. The base 27B closed in a median of 177 tokens on synthetic questions; this checkpoint truncates far more on real ones. That could be the fine-tuning OR the harder real prompts -- two variables moved at once, and the char-cap confound sits on top.",
+    "does_thinking_help_accuracy": "Not measured. enforce_latency=True marks 22/22 responses incorrect on the clock alone, so no accuracy read from this smoke means anything."
+  },
+
+  "decision_required": "Rung 43's eval must be rewritten for vLLM batched (~14 min for 626 questions at the measured rate), or the rung closes as NOT MEASURABLE with the current harness. It must NOT be reported as a verdict about reasoning."
+}
