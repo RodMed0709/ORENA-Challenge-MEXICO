@@ -296,8 +296,16 @@ def load(cfg: ExportConfig) -> pd.DataFrame:
     # Cost, stated honestly: 119 s clips fall to 3.4 s spacing (threshold 2.32) and
     # 299 s clips to 8.5 s (threshold 4.32), i.e. coverage-grade rather than
     # localisation-grade for the two longest duration classes.
+    # The cap is applied by STRIDING the fine grid, never by recomputing a coarse one:
+    # point j of a K/2 grid is exactly point 2j of a K grid, so a strided grid is a
+    # SUBSET of what the extractor materialised and needs no second extraction pass.
+    # Recomputing instead would reference interior frames nobody wrote -- the same
+    # failure this module already hit once.
+    df["g_K_fine"] = df.g_K
+    df["g_stride"] = 1
     if cfg_max_frames:
-        df["g_K"] = df.g_K.clip(upper=cfg_max_frames)
+        import numpy as _np
+        df["g_stride"] = _np.ceil(df.g_K_fine / cfg_max_frames).astype(int).clip(lower=1)
     return df
 
 
@@ -334,15 +342,18 @@ def frame_paths(cfg: ExportConfig, ds: str, video: str, st: float, dur: float, k
 
 
 def build_row(cfg: ExportConfig, r, sysmsg: str, lengths: dict | None = None) -> dict:
-    k_req = int(r.g_K)
+    k_fine = int(r.g_K_fine)
+    stride = int(r.g_stride)
     nf = (lengths or {}).get(f"{r.g_ds}|{r.video}")
-    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k_req, nf)
-    k = len(paths)                      # realised, after clamp + dedup
+    all_paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k_fine, nf)
+    paths = all_paths[::stride]         # a SUBSET of the materialised grid
+    k_req = k_fine
+    k = len(paths)                      # realised, after clamp + dedup + stride
     window = f"Clip [{seconds_to_ts(r.g_st)} - {seconds_to_ts(r.g_en)}] of the procedure."
     answer = str(r.answer)
     meta = {"qid": f"{r.g_ds}__{r.id}", "ds": r.g_ds, "video": r.video,
             "clip_start_s": float(r.g_st), "dur_s": float(r.g_dur),
-            "K": k, "K_requested": k_req,
+            "K": k, "K_fine": k_req, "stride": stride,
             "answer_format": r.answer_format, "primary": str(r.primary_capability),
             "split": r.g_split, "gold_original": answer, "time_kind": None,
             "visual_tokens": visual_tokens(k)}
