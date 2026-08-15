@@ -82,6 +82,34 @@ qIDs. Secondary and reported beside it, never quoted as the result: `bucket_mean
 two ID buckets, and `n_timed_out` (a trace that overruns 512 tokens is a truncation, not
 an opinion — it must be counted, not averaged in).
 
+### 🔴 Latency is a DECLARED read, not a footnote — added 2026-08-15, before any run
+
+`n_timed_out` above counts **truncation at 512 tokens**. It does not count the thing that
+actually disqualifies an answer in this challenge: **the 5.0 s/question wall clock**
+(CONSTITUTION §II — a timeout IS a wrong answer). This arm raises `max_new_tokens`
+**64 → 512**, and rung 40 measured p99 **1.515 s** (`alpha16`) and **1.755 s**
+(`conn4e5`) **at 64 tokens**. An 8× token budget is the one change most likely to cross
+5.0 s, so without this read the rung can return a WIN that cannot ship and we would not
+know it.
+
+Recorded per arm in `RESULTS.csv`, beside the accuracy columns, using the same names
+rung 40 already writes so the two rungs stay comparable:
+
+| column | meaning |
+|---|---|
+| `infer_latency_p99_s` | p99 wall clock per question. **The read** — §IV.7 says measure p99, not mean. |
+| `infer_latency_max_s` | max. Context only: rung 38's 4.81 s `max` was an outlier among 6252 and was briefly misread as the budget. |
+| `timed_out` | count over the 5.0 s cap. Distinct from `n_timed_out` (512-token truncation) — **both are reported, and they are not the same number.** |
+| `mean_new_tokens` | the mechanism, so a latency result is explainable rather than just observed. |
+
+🔴 **Pre-registered decision rule, so it is not argued after the numbers land:** a
+thinking arm whose **`timed_out > 0` or `infer_latency_p99_s` ≥ 5.0** is reported as
+**NOT DEPLOYABLE regardless of its accuracy delta**. Such an accuracy win is not void —
+it is evidence the capability exists — but it may not be quoted as a submission
+candidate without a second run that brings the trace inside budget. The eval pod is not
+the L40S, so a p99 measured here is **indicative, not certifying**; the certifying number
+is on the target hardware, and that gap is recorded now rather than discovered later.
+
 ⚠️ At n=626 the paired CI is **wider** than the 6252-question one. A |Δ| under ~0.05 will
 not separate from zero here. This probe is powered to see a **large** effect or none; it
 is not powered to certify a small one, and a null must be reported as *"no large effect"*.
@@ -108,6 +136,44 @@ saving over keeping them.
 
 Estimated: 2 × (load ~5 min + 626 questions at 3–5× the no-thinking rate) + one re-merge
 ≈ **1 h 45 – 2 h 30**.
+
+## 🔴 TWO LAUNCH BLOCKERS — check both, in this order, or do not start
+
+Written 2026-08-15 while rung 40 arm B's continuation was still running. **Neither is a
+preference; the first one this rung's own code enforces, and the second one this rung's
+own code can destroy.**
+
+### 1. Disk — the guard already says no
+
+`remerge.py` sets `min_free_gib = 60` and RAISES before touching a GPU. The last measured
+figure is **~43 GiB free** (2026-08-15), so **as written today this chain refuses to
+start**, and correctly.
+
+Free space will get **worse before better**: `40_B_connector_ep23_v1` writes ep2 and ep3
+checkpoints to the same ~670 GB quota while it runs. So the check must happen **after**
+that run finishes, not now.
+
+Measure with `remerge.free_gib()` — `du -sx` against the quota. 🔴 **Never `df` or
+`statvfs`**: they report the MooseFS cluster at **1.4 PB** and a chain already died
+`Disk quota exceeded` trusting them.
+
+### 2. 🔴 The chain deletes an artifact another run may be training FROM
+
+`chain_probe.py` step 2 is `rm -rf "{B}/merged"` — `conn4e5`'s 52 GB merged model. Per
+`1ab2509`, `40_B_connector_ep23_v1` uses **Leo's ep1 merged model as its `base_model`**,
+and the MooseFS volume is shared across pods.
+
+**If those are the same path, starting this rung pulls the base model out from under a
+live ~11 h training run.** Not confirmed either way as of this writing — his run may read
+a copy local to its pod.
+
+**Verify before launch, do not assume:** resolve `base_model` in
+`40_B_connector_ep23_v1`'s config and compare it to `{arms_exp_dir}/runs/40_B_connector_v1/merged`.
+If they resolve to the same inode, this rung **waits** — the adapters are 383 MB and
+regenerate either merge in ~10 min, so there is nothing to preserve and nothing to rush.
+
+⚠️ Both blockers clear on the same event: **`40_B_connector_ep23_v1` finishing and its pod
+stopping itself.** That is the trigger to re-check, not a clock.
 
 ## Before the full run
 
