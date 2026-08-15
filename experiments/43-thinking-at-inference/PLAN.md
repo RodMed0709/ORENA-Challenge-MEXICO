@@ -173,11 +173,24 @@ was collapsing into the answer and the whole framing needs re-reading.
 
 ### Two gates, because they fail differently
 
-- `assert_tag_survived` **RAISES** if not one generation contains `</think>`. That has two
-  causes needing opposite fixes: every trace overran the budget, **or** the tokenizer treats
-  the tag as SPECIAL and `skip_special_tokens=True` deleted it from the decoded string —
-  ⚠️ **unverified, it needs the real tokenizer**. The 20-question smoke is where this is
-  found, not a full arm.
+- `assert_tag_survived` **RAISES** if not one generation contains `</think>`.
+
+  ✅ **The tokenizer half of this is CLOSED, 2026-08-15 — and it cost nothing.** The worry
+  was that `</think>` might be a SPECIAL token, so `skip_special_tokens=True` in
+  `screen_engine.predict_samples` would delete it and leave nothing to split on. Answered
+  from `Qwen/Qwen3.6-27B`'s public `tokenizer_config.json` — **no GPU, no pod, no challenge
+  data, just model metadata**:
+
+  ```
+  id=248068  content='<think>'   special=False
+  id=248069  content='</think>'  special=False
+  additional_special_tokens: nothing containing 'think'
+  ```
+
+  `decode(skip_special_tokens=True)` filters `all_special_ids`; a `special=False` added
+  token is not in it. ⇒ **the tag survives the decode.** ⇒ the gate now has exactly ONE
+  meaning if it fires: every trace overran the budget. Raise `max_new_tokens` /
+  `answer_char_cap`; do not touch how the engine decodes.
 - **`n_truncated`** = generations that never reached `</think>`. They are scored as wrong,
   which they are — nothing was answered — but counted separately so truncation is never
   read as a claim about reasoning.
