@@ -269,6 +269,16 @@ def load(cfg: ExportConfig) -> pd.DataFrame:
     df["g_dur"] = df.g_en - df.g_st
     df["g_routed"] = df.question.map(needs_time_grid)
     df["g_K"] = [frames_for(d, r) for d, r in zip(df.g_dur, df.g_routed)]
+    # THE GRID IS A PROPERTY OF THE CLIP, NOT OF THE QUESTION.
+    # Two reasons, and the second is the important one:
+    #  1. the extractor materialises one grid per clip (the finest any of its questions
+    #     needs). A coarser per-question grid is NOT a subset of a finer one — only the
+    #     endpoints coincide — so a K=4 row on a clip that also carries a K=53 row
+    #     references interior frames nobody wrote. That is the 6-frame failure.
+    #  2. if K co-varied with question type, the frame COUNT would leak the question
+    #     type into the visual input, and the model could route on it without reading a
+    #     pixel. Uniform K per clip removes that shortcut by construction.
+    df["g_K"] = df.groupby(["g_ds", "video", "g_st", "g_en"]).g_K.transform("max")
     return df
 
 
