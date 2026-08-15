@@ -1,0 +1,32 @@
+{
+  "eval_set": {
+    "videos": [
+      "heico/0023 - Heico - Sigma - 4.avi",
+      "heico/0027 - Heico - Sigma - 8.avi",
+      "lapchole/0032 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0043 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0045 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0061 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0065 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0149 - Laparoscopic Cholecystectomy.mp4"
+    ],
+    "n_questions": 1283,
+    "n_heico_questions": 800
+  },
+  "ood_caveat": "8 of the 10 heico test videos were PROMOTED INTO TRAINING by this rung's corpus merge, so `heico`/`OOD` here means unseen VIDEO of a SEEN procedure. This arm cannot measure procedure-OOD locally.",
+  "selection_axis": "bucket_mean on the 8 held-out videos (RULES \u00a74c weighting)",
+  "selected_epoch": 4,
+  "selected_checkpoint": "checkpoint-4848",
+  "arm_curve": {
+    "ep1": 0.5648847718336971,
+    "ep2": 0.6241617935023538,
+    "ep3": 0.6262348614194053,
+    "ep4": 0.6744034086762798,
+    "ep5": 0.6591703484122964
+  },
+  "control_curve": {
+    "ep1": 0.5281783237473179,
+    "ep2": 0.6104394628521042,
+    "ep3": 0.6341808442136665
+  }
+}
