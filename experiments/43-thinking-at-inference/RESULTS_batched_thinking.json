@@ -1,0 +1,21 @@
+{
+  "B": 20,
+  "setup_secs_cold": 227.1,
+  "pooled_allowance_s": 220,
+  "no_thinking": {
+    "wall_secs_for_B": 5.49,
+    "secs_per_question": 0.275,
+    "total_gen_tokens": 1165,
+    "throughput_tok_s": 212.2,
+    "fits_pooled_with_cold_setup": false,
+    "fits_pooled_warm": true
+  },
+  "thinking": {
+    "wall_secs_for_B": 26.63,
+    "secs_per_question": 1.332,
+    "total_gen_tokens": 5985,
+    "throughput_tok_s": 224.7,
+    "fits_pooled_with_cold_setup": false,
+    "fits_pooled_warm": true
+  }
+}

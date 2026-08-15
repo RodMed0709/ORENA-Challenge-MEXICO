@@ -150,6 +150,40 @@ sequential could amortise to a fraction of that batched — the team's shipped c
 **0.79 s/question**. **Batched throughput with thinking on is NOT measured**, and no verdict
 about affordability should be issued from these sequential numbers.
 
+### ✅ MEASURED 2026-08-15 — batched, thinking costs **1.33 s/question**. Latency is NOT a blocker.
+
+`RESULTS_batched_thinking.json`. Same model and card, `B = 20` through vLLM continuous
+batching — the path the submission template actually uses, since it hands the batch over up
+front. Greedy both arms, synthetic images:
+
+| B = 20, batched | wall for 20 | **s/question** | gen tokens | tok/s |
+|---|---|---|---|---|
+| no-thinking (`max_new_tokens=64`) | 5.49 s | **0.275** | 1,165 | 212 |
+| **thinking** (`max_new_tokens=512`) | 26.63 s | **1.332** | 5,985 | 225 |
+
+🔑 **The 10.11 s sequential median collapses to 1.332 s batched — 7.6×**, exactly the
+amortisation `latency-budget-is-pooled.md` predicts. Against the warm pooled allowance of
+`B × 5 = 100 s`, the thinking arm uses **26.6 s — 27 % of it**. Against the ~11 s/question
+effective budget it uses **12 %**.
+
+⇒ **Thinking is affordable and latency is not a reason to avoid it.** It costs **4.8×** a bare
+answer, which is real and worth stating, but 4.8× of 0.275 s is still small. Every latency
+alarm I raised about this rung — the "NOT DEPLOYABLE" rule, the 5 s wall, the worry that a
+thinking loss would really be a clock loss — **dissolves at the batch size the challenge runs.**
+
+🔴 **What replaces it as THE risk, exactly as the pooled note said it would: COLD START.**
+`setup_secs_cold = 227.1 s` against a **120 s** allowance — over by itself, before a single
+question. ⚠️ Not a verdict: that figure includes vLLM kernel compilation which a prepared
+container caches, and this box is not the submission image. But it is now the only latency
+number that can fail us, and it must be measured **in the container**, not here. The pooled
+note said this a month ago: *"the danger was never `max_new_tokens` or a slow question. It is a
+cold start that eats the pool before the first answer is produced."*
+
+📌 Consequence for this rung's read: the `enforce_latency=True` / `False` double reporting
+pre-registered above **stays**, because the local harness still gates per-response at 5.0 s and
+our *sequential* eval path will trip it. But the expected size of that artifact is now known,
+and it is a harness artifact, not a property of thinking.
+
 <details><summary>Original section, written against the retired per-question ceiling — kept for the record</summary>
 
 ### 🔴 Latency is a DECLARED read, not a footnote — added 2026-08-15, before any run
