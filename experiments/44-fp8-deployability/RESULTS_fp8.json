@@ -1,0 +1,44 @@
+{
+  "date": "2026-08-15",
+  "machine": "UNAM hpclab-RTXA6000, RTX 6000 Ada, CC (8,9) = the L40S generation",
+  "model": "Qwen/Qwen3.6-27B (base, 15 shards)",
+  "env": "~/storage/envs/orena-quant — llmcompressor 0.13.0, compressed_tensors 0.18.0, transformers 5.14.1, torch 2.11.0+cu128",
+  "challenge_data_used": false,
+
+  "size": {
+    "size_bf16_gib": 51.75,
+    "size_fp8_gib": 33.46,
+    "size_ratio_MEASURED": 0.6466,
+    "rung38_ratio_EXTRAPOLATED": 0.756,
+    "rung38_extrapolated_gib": 39.12,
+    "verdict": "PASS — and BETTER than the extrapolation. The 0.756 came from a 4.25 GiB smoke model; at 27B scale the Linear layers dominate and the ratio improves. The prediction that the bf16 vision tower would make it WORSE was wrong.",
+    "quantize_secs": 33.4,
+    "scheme": "FP8_DYNAMIC, targets=Linear, no calibration data required"
+  },
+
+  "serving_one_card": {
+    "verdict": "FAIL under HF transformers",
+    "error": "torch.OutOfMemoryError in compressed_tensors/quantization/lifecycle/forward_helpers.py::_dequantize",
+    "vram_allocated_gib_at_oom": 43.48,
+    "card_capacity_gib": 47.37,
+    "root_cause": "HF transformers + compressed_tensors DEQUANTIZES the FP8 weights back to bf16 rather than executing native FP8 kernels. Reproduced with dtype=torch.bfloat16 AND dtype='auto', so it is not a load-time flag we set wrong.",
+    "implication": "The 33.46 GiB file does not mean 33.46 GiB resident. Under this runtime it expands toward the 51.75 GiB bf16 footprint and will not fit a 48 GB card."
+  },
+
+  "packaging_defect": {
+    "finding": "llmcompressor's output_dir contains only weights + config + recipe. It has NO preprocessor_config.json, tokenizer, vocab, merges or chat template.",
+    "consequence": "The quantized checkpoint is NOT servable as produced — AutoProcessor raises. Those files must be copied from the source snapshot.",
+    "relevance": "This is a submission-container step that would have failed offline, where nothing can be fetched."
+  },
+
+  "env_defect": {
+    "finding": "orena-quant lacked torchvision, which Qwen3VLVideoProcessor requires.",
+    "fix_applied": "installed torchvision==0.26.0+cu128 into ~/storage/envs/orena-quant, matching its torch 2.11.0+cu128"
+  },
+
+  "still_open": {
+    "vllm": "NOT installed in any UNAM env. CLAUDE.md prescribes serving via `vllm serve --quantization fp8`, which is the path that executes native FP8 w8a8 on Ada. It is now the ONLY untested link in the deployability claim.",
+    "latency": "not measured — the model never loaded on one card, so no p50/p99 exists yet",
+    "variant_B": "quantizing the vision tower too (to isolate what leaving it bf16 costs) not run"
+  }
+}
