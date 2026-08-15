@@ -1,0 +1,20 @@
+{
+  "n": 50,
+  "infer_wall_secs": 23.32,
+  "infer_secs_per_question": 0.466,
+  "vllm_setup_secs": 59.5,
+  "judge_secs": 5.9,
+  "raw_accuracy": 0.6,
+  "n_timed_out": 0,
+  "columns": [
+    "qID",
+    "video",
+    "ood",
+    "clinical",
+    "primary",
+    "answer_format",
+    "latency",
+    "timed_out",
+    "correctness"
+  ]
+}
