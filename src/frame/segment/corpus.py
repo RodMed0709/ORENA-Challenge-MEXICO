@@ -123,6 +123,7 @@ class ExportConfig:
     data_root: Path = Path("/workspace/orena-data")
     cache: Path = Path("/workspace/frames_cache")
     out: Path = Path("/workspace/tmp/segment_train.jsonl")
+    video_lengths: Path = Path("/workspace/tmp/video_lengths.json")
     sdk_base_dataset: Path = Path(
         "/workspace/repo/vendor/orena-focus/src/focus/data/base_dataset.py")
     splits: tuple[str, ...] = ("train",)
@@ -261,22 +262,37 @@ def load(cfg: ExportConfig) -> pd.DataFrame:
     return df
 
 
-def frame_paths(cfg: ExportConfig, ds: str, video: str, st: float, dur: float, k: int) -> list[str]:
+def frame_indices(ds: str, st: float, dur: float, k: int, n_frames: int | None = None) -> list[int]:
+    """THE frame grid. One function, imported by both the extractor and the exporter.
+
+    Two copies of this arithmetic is how a corpus ends up referencing a frame nobody
+    wrote: the extractor clamped an index past the end of the video, the exporter did
+    not, and the two disagreed on 6 of 257,047 frames. Caught by `assert_frames_exist`.
+    """
     bf = BASE_FPS[ds]
     out, seen = [], set()
     for i in range(k):
         t = st + (dur * i / (k - 1) if k > 1 else 0.0)
         idx = round(t * bf)
-        while idx in seen:      # a degenerate short clip can collide; step forward
-            idx += 1
+        if n_frames is not None:
+            idx = min(idx, n_frames - 1)
+        while idx in seen:      # a degenerate or clamped clip can collide; step back
+            idx = idx - 1 if (n_frames is not None and idx >= n_frames - 1) else idx + 1
         seen.add(idx)
-        out.append(str(cfg.cache / cache_name(ds, video, idx)))
+        out.append(idx)
     return out
 
 
-def build_row(cfg: ExportConfig, r, sysmsg: str) -> dict:
+def frame_paths(cfg: ExportConfig, ds: str, video: str, st: float, dur: float, k: int,
+                n_frames: int | None = None) -> list[str]:
+    return [str(cfg.cache / cache_name(ds, video, i))
+            for i in frame_indices(ds, st, dur, k, n_frames)]
+
+
+def build_row(cfg: ExportConfig, r, sysmsg: str, lengths: dict | None = None) -> dict:
     k = int(r.g_K)
-    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k)
+    nf = (lengths or {}).get(f"{r.g_ds}|{r.video}")
+    paths = frame_paths(cfg, r.g_ds, r.video, r.g_st, r.g_dur, k, nf)
     window = f"Clip [{seconds_to_ts(r.g_st)} - {seconds_to_ts(r.g_en)}] of the procedure."
     answer = str(r.answer)
     meta = {"qid": f"{r.g_ds}__{r.id}", "ds": r.g_ds, "video": r.video,
@@ -335,7 +351,11 @@ def build(cfg: ExportConfig) -> dict:
         rep["smoke_durations"] = sorted(int(x) for x in df.g_dur.unique())
 
     sysmsg = system_prompt()
-    rows = [build_row(cfg, r, sysmsg) for r in df.itertuples(index=False)]
+    lengths = {}
+    if Path(cfg.video_lengths).exists():
+        lengths = json.loads(Path(cfg.video_lengths).read_text(encoding="utf-8"))
+        rep["video_lengths_known"] = len(lengths)
+    rows = [build_row(cfg, r, sysmsg, lengths) for r in df.itertuples(index=False)]
 
     rep.update(assert_frames_exist(rows, cfg.cache))
     if cfg.relative_time:
