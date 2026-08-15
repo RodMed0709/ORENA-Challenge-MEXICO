@@ -1,0 +1,13 @@
+{
+  "n": 50,
+  "identical": 46,
+  "agreement_rate": 0.92,
+  "secs_sequential": 56.6,
+  "secs_batched": 53.2,
+  "speedup": 1.1,
+  "batch_size": 10,
+  "exact_match_gold_sequential": 30,
+  "exact_match_gold_batched": 31,
+  "mean_chars_seq": 6.5,
+  "mean_chars_bat": 6.4
+}
