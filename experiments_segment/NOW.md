@@ -5,7 +5,7 @@
 | pod | what | $/h | how it stops |
 |---|---|---|---|
 | `ocbm9adl4rc0ep` | SEGMENT arm A, 1 epoch | 1.39 | chain trap + on-pod watchdog (18 h wall) |
-| `lyxe3bqeqeselg` | **rung 40 arm B, 3 epochs (B200)** | **6.79** | chain trap + on-pod watchdog (14 h) + **an INDEPENDENT killer on the operator's machine (15 h)** |
+| `5btpl229y7kuar` | **rung 40 arm B, 3 epochs** — RTX PRO 6000 WK, **sm_120 = Leo's own family** | **1.89** | chain trap + on-pod watchdog (14 h) + **an INDEPENDENT killer on the operator's machine (15 h)** |
 | `7ckucfad9ws4ui` | rung 42 | 0.99 | its own chain |
 
 The third layer exists because layers 1 and 2 both live ON the pod and share a failure
@@ -14,8 +14,25 @@ independent killer talks only to the RunPod API. It is deliberately dumb — a h
 deadline and a stop, no log parsing, no liveness heuristics — so it cannot kill a
 healthy run for a clever reason. Script: `scratchpad/killer_b200.py`.
 
-⚠️ At $6.79/h the B200 costs **$163/day idle**. If everything else fails, stop it by hand
-in the RunPod console.
+⚠️ If everything else fails, stop the pod by hand in the RunPod console.
+
+📌 **The stop machinery has now fired FOUR times in real conditions** — three gate failures
+and one duplicate pod — and stopped the pod within minutes every time. Total wasted spend
+across all four: **~$2.80**. A B200 at $6.79/h was tried and abandoned on price; the run
+now sits on a $1.89/h PRO 6000 Workstation, which is **sm_120 — the same Blackwell family
+as Leo's ep1**, so the GPU-comparability caveat that applied to the B200 is GONE.
+
+🔑 **Both gates passed on the final launch**, and this is the record of what each protects:
+- Leo's: `single-variable OK — B_connector_ep3 moves exactly ['connector_lr',
+  'modules_to_save', 'num_train_epochs']`. It rejected the run three times while the arm
+  still claimed to be `B_connector`, whose declared set is two flags. Registering a NEW arm
+  that declares all three — rather than editing his file or loosening his gate — is what
+  made it honest. `cfg.arm` is read in exactly two places, both assertion messages, so the
+  new key is inert everywhere else.
+- Ours: `recipe drift vs his ep1: NONE`. It cried wolf twice first — once on tuple-vs-list
+  after a JSON round-trip, once on the arm RENAME that Leo's gate required. Both were fixed
+  by separating LABELS and machine paths from RECIPE. A gate that fires on a rename is a
+  gate people learn to bypass.
 
 ## rung 40 arm B at 3 epochs (running on the B200)
 
