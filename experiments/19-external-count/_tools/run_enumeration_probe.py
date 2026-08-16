@@ -54,7 +54,8 @@ def spearman(xs, ys):
     return num / den if den else float("nan")
 
 
-def main(model: str, questions: Path, frames_dir: Path, out: Path, tag: str, limit: int = 0):
+def main(model: str, questions: Path, frames_dir: Path, out: Path, tag: str,
+         limit: int = 0, thinking: bool = False):
     from PIL import Image
     from vllm_engine import VLLMBatchConfig, VLLMBatchEngine
 
@@ -79,8 +80,15 @@ def main(model: str, questions: Path, frames_dir: Path, out: Path, tag: str, lim
         else:
             raise FileNotFoundError(f"{r['qID']}: no frame for {name} under {frames_dir}")
 
-    cfg = VLLMBatchConfig(model_path=model, enable_thinking=False,
-                          max_new_tokens=64, answer_char_cap=300)
+    # With thinking on, the trace is left UNCAPPED inside a 4096 window and the engine splits on
+    # `</think>` — rung 43 measured that a guessed cap truncates the trace, and a truncated trace
+    # emits no answer at all, which scores as a wrong answer rather than as the artefact it is.
+    cfg = (VLLMBatchConfig(model_path=model, enable_thinking=True, max_new_tokens=None,
+                           answer_char_cap=1_000_000, max_model_len=4096,
+                           gpu_memory_utilization=0.88)
+           if thinking else
+           VLLMBatchConfig(model_path=model, enable_thinking=False,
+                           max_new_tokens=64, answer_char_cap=300))
     eng = VLLMBatchEngine(cfg, "You are an expert surgical assistant. Answer with a number and "
                                "nothing else.")
     answers, wall = eng.predict_batch(imgs, [r["question"] for r in rows])
@@ -110,6 +118,7 @@ def main(model: str, questions: Path, frames_dir: Path, out: Path, tag: str, lim
             [r["pred"] for r in recs if r["gold"] == k and r["pred"] is not None] or [float("nan")]), 2)
             for k in sorted(by_gold)},
         "secs_per_question": round(wall / len(recs), 3),
+        "thinking": thinking,
     }
     out.mkdir(parents=True, exist_ok=True)
     (out / f"RESULTS_{tag}.json").write_text(json.dumps(res, indent=2))
@@ -122,5 +131,6 @@ if __name__ == "__main__":
     ap.add_argument("--model", required=True); ap.add_argument("--questions", required=True)
     ap.add_argument("--frames", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--tag", required=True); ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--thinking", action="store_true")
     a = ap.parse_args()
-    main(a.model, Path(a.questions), Path(a.frames), Path(a.out), a.tag, a.limit)
+    main(a.model, Path(a.questions), Path(a.frames), Path(a.out), a.tag, a.limit, a.thinking)

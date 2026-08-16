@@ -1,5 +1,56 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 📋 2026-08-16 — FOR THE TEAM: submission 03 landed, and the counting question is answered
+
+Everything here is on `main`. Detail in `experiments/19-external-count/README.md`,
+`docs/viewers/backbone_scaling_viewer.html` and the decision notes linked below.
+
+**1. 🟢 Submission 03 scored 0.5809 — top 5.** The margin over the official fine-tuned baseline
+goes from **+0.0099 to +0.0620**, so the co-authorship condition is no longer a coin-flip. Current
+standings: Qwen3.6 Finetuned **0.6235**, Galen 1xHigh **0.5908**, LLaVA-Med **0.5835**, us
+**0.5809**, official FT baseline 0.5189. **The podium is +0.0026 away.**
+
+⚠️ **A 7B medical model from 2023 (LLaVA-Med) is on that podium.** Backbone generation does not
+order this leaderboard — see [[backbone-generation-is-not-the-lever]].
+
+**2. 🔴 `number` is 71 % of everything rung 42 gets wrong** — 313 of its 442 errors. That is the
+single largest identified pool of loss in the campaign.
+
+**3. 🔴 The counting failure is ENUMERATION, not object size (rung 19a, RUN and CLOSED).** Asked
+with the challenge's own template about **large, metallic laparoscopic instruments in our own
+procedure**, both our models collapse to **0.040 at three objects** — *worse* than the 0.200 they
+score on our 4 mm Clips. The mean answer saturates at ≈1 whether one object is present or nine.
+⇒ external counting data is on target (**19b is licensed**) and the detector/SAM/resolution branch
+is **not** the primary lever. [[counting-is-enumeration-not-small-object-perception]]
+
+**4. 🔴 Thinking at inference is dead.** 0.4188 accuracy against 0.6485 without it, at **9.888
+s/question** versus 0.515 — 19× the cost for 20 points less. But **83 % of its failed traces
+contain the gold answer** (against a 27.5 % chance control), which is rung 34's hidden-state
+finding seen one layer up: the model has the answer and loses it on the way out.
+
+**5. 🟡 The 27B enumerates markedly better than the 8B** — 0.670 vs 0.317 at two objects on
+identical frames, Spearman 0.692 vs 0.497. The larger backbone is better at the thing that is
+71 % of our errors and still scores lower overall. Recorded, not resolved.
+
+**6. 🟢 UNAM is now the team's machine.** One working copy at `~/storage/repo/` (no `.git`,
+stamped with the commit it came from), a single `~/storage/frames_cache/` with **15,213 frames
+covering all 20,000 questions**, the adapters under `experiments/*/runs/`, and the four
+environments frozen in `requirements/unam-*.lock`. Refresh it by rsync; all versioning stays on
+our own machines. See `SYNCED_FROM.md` on the box.
+
+**7. 🔻 Two repo documents were lying and are fixed.** `CLAUDE.md` pinned `transformers==4.57.*`
+and forbade 5.x while all four working environments run 5.x
+([[transformers-pin-is-per-tool-not-global]]); `vendor/VENDORED.md` warned the SDK copy was
+incomplete a month after it was fixed. Five decision notes stranded on an unmerged branch since
+July are now on `main` — two of them contradicted recommendations made this same day.
+
+**In flight:** a 401-question thinking run of the enumeration probe on UNAM GPU 0
+(`~/storage/tmp/run19a_think.log`, ~2.3 h). CholecT50 is being downloaded (60 GB) to give raw
+frames — the paired raw-vs-desmoke control failed today because Voxel51's frame numbering is not
+CholecT50's, and the mismatch produced a spectacular false result before it was caught.
+
+---
+
 ## 📋 2026-08-15 morning — FOR RODRIGO: four things that change what `main` says
 
 Everything below is merged and on `main`. Detail in `experiments/43-*/PLAN.md`,
