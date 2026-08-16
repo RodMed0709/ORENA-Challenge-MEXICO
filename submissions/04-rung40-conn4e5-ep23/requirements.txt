@@ -1,15 +1,25 @@
-# vLLM is NOT optional here. The 27B in FP8 is compressed-tensors, and HF transformers
-# DEQUANTIZES those weights back to bf16 on load -- measured, it OOMs at 43.5 GiB on a
-# 48 GB card. Submission 02's "No vLLM needed" is true for the 8B and false for this.
-vllm>=0.27.0
+# 🔴 CUDA 12.8, NOT 13.0, and the pin chain is deliberate. Read before bumping anything.
+#
+# vllm 0.27.1 pins `torch==2.13.0`, and the PyTorch cu128 index stops at torch 2.11.0 —
+# so 0.27.1 can only be installed with cu130 wheels. That builds fine and runs on UNAM,
+# but it puts a CUDA-13 runtime on hardware whose driver we have never seen: a driver too
+# old fails at CONTAINER START, at score time, offline, with the submission slot spent.
+#
+# vllm 0.26.0 pins `torch==2.11.0`, which HAS a cu128 build and is exactly what the RunPod
+# pods run — hardware we have watched serve this model. We trade a newer vLLM for a stack
+# with evidence behind it.
+#
+# It also still satisfies the hard requirement: vllm 0.26.0 needs `transformers>=5.5.3`,
+# and `qwen3_5` (the 27B's architecture) does not exist before transformers 5.x. The build
+# gate asserts that capability directly rather than trusting this comment.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+vllm==0.26.0
 
-# vLLM's EngineCore shells out to `ninja` and fails with an opaque FileNotFoundError
-# without it. Hit during rung 44; offline it is unrecoverable.
+# vLLM's EngineCore shells out to `ninja`; without it the failure is an opaque
+# FileNotFoundError inside a worker subprocess, at run time. The build gate checks it.
 ninja
-
-# Required by Qwen3VLVideoProcessor. Its absence surfaces as an ImportError from deep
-# inside transformers, not as a missing dependency.
-torchvision
 
 orena-focus>=0.3.4
 numpy>=1.23.0

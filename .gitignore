@@ -81,3 +81,8 @@ submissions/*/resources/
 submissions/*/test/
 submissions/*/*.tar.gz
 submissions/*/__pycache__/
+
+# Build artifacts for a submission: a 17 GB image tar and 33.5 GB of FP8 weights.
+# They are REPRODUCIBLE (buildah on UNAM + a 32 s re-quantization from the 323 MB adapter),
+# and 50 GB of binaries in a git history is not a mistake you undo.
+submissions/*/_artifacts/
