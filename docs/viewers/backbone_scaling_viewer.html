@@ -1,0 +1,588 @@
+<!doctype html><meta charset="utf-8">
+<title>27B vs 8B</title>
+<style>
+  :root{
+    --ground:#f4f6f5; --surface:#ffffff; --sunk:#eaeeec; --line:#d6dedb; --line-soft:#e5eae8;
+    --ink:#0f1a18; --ink-2:#42544f; --ink-3:#6d817b;
+    --accent:#0d6f6a; --accent-soft:#d5e8e5;
+    --good:#15803d; --bad:#b91c1c; --warn:#a16207; --warn-bg:#fbf1d8;
+    --s1:#2563eb; --s2:#0d9488; --s3:#ea580c; --s4:#c026d3;
+    --grid:#e2e8e6;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --shadow:0 1px 2px rgba(15,26,24,.05),0 8px 24px rgba(15,26,24,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0c1213; --surface:#131b1c; --sunk:#0a1011; --line:#243133; --line-soft:#1c2729;
+      --ink:#e4eceb; --ink-2:#a2b4b1; --ink-3:#71857f;
+      --accent:#4dbdb4; --accent-soft:#10312e;
+      --good:#4ade80; --bad:#f87171; --warn:#d9a441; --warn-bg:#2d240f;
+      --s1:#3b82f6; --s2:#0d9488; --s3:#ea580c; --s4:#c026d3;
+      --grid:#1f2b2c;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0c1213; --surface:#131b1c; --sunk:#0a1011; --line:#243133; --line-soft:#1c2729;
+    --ink:#e4eceb; --ink-2:#a2b4b1; --ink-3:#71857f;
+    --accent:#4dbdb4; --accent-soft:#10312e;
+    --good:#4ade80; --bad:#f87171; --warn:#d9a441; --warn-bg:#2d240f;
+    --s1:#3b82f6; --s2:#0d9488; --s3:#ea580c; --s4:#c026d3;
+    --grid:#1f2b2c;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 22px}
+  h1{font-size:clamp(1.9rem,4.5vw,2.6rem);line-height:1.05;margin:.2rem 0 0;
+     font-weight:660;letter-spacing:-.032em;text-wrap:balance}
+  h2{font-size:1.28rem;line-height:1.2;margin:0;font-weight:640;letter-spacing:-.02em;
+     text-wrap:balance}
+  .eyebrow{font:600 .7rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+           color:var(--ink-3);margin:0}
+  p{margin:.75rem 0 0;text-wrap:pretty}
+  .lede{font-size:1.03rem;color:var(--ink-2);max-width:70ch}
+  b,strong{font-weight:640}
+  code{font-family:var(--mono);font-size:.88em;background:var(--sunk);padding:1px 5px;
+       border-radius:3px;border:1px solid var(--line-soft)}
+
+  header{padding:46px 0 34px;border-bottom:1px solid var(--line);background:var(--surface)}
+  section{padding:40px 0;border-bottom:1px solid var(--line-soft)}
+  section:last-of-type{border-bottom:0}
+  .shead{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+  .snum{font:640 .78rem/1 var(--mono);color:var(--accent);letter-spacing:.06em;
+        border:1px solid var(--accent);border-radius:2px;padding:4px 7px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;
+         margin-top:22px}
+  .tile{background:var(--surface);border:1px solid var(--line-soft);border-radius:4px;
+        padding:14px 16px;box-shadow:var(--shadow)}
+  .tile .k{font:600 .7rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.07em;
+           color:var(--ink-3)}
+  .tile .v{font-size:1.7rem;font-weight:660;letter-spacing:-.03em;margin-top:6px;
+           font-variant-numeric:tabular-nums;line-height:1.05}
+  .tile .n{font-size:.83rem;color:var(--ink-2);margin-top:5px}
+  .tile.good .v{color:var(--good)} .tile.bad .v{color:var(--bad)}
+
+  figure{margin:24px 0 0;background:var(--surface);border:1px solid var(--line-soft);
+         border-radius:5px;padding:18px 18px 14px;box-shadow:var(--shadow)}
+  figcaption{font-size:.85rem;color:var(--ink-2);margin-top:12px;padding-top:11px;
+             border-top:1px solid var(--line-soft);text-wrap:pretty}
+  .chartbox{overflow-x:auto}
+  svg{display:block;max-width:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:2px 0 10px}
+  .lg{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink-2)}
+  .sw{width:14px;height:3px;border-radius:2px;flex:none}
+  .sw.dot{width:9px;height:9px;border-radius:50%}
+
+  table{border-collapse:collapse;width:100%;font-size:.87rem;margin-top:16px}
+  th,td{padding:8px 11px;text-align:right;border-bottom:1px solid var(--line-soft);
+        vertical-align:top}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font:600 .69rem/1.4 var(--mono);text-transform:uppercase;letter-spacing:.06em;
+           color:var(--ink-3);border-bottom:1px solid var(--line)}
+  tbody td{font-variant-numeric:tabular-nums}
+  tbody tr.us{background:var(--accent-soft)}
+  tbody tr.us td{font-weight:640}
+  tbody tr.diff td{background:var(--warn-bg)}
+  .tw{overflow-x:auto}
+  .l{text-align:left!important}
+  .chip{font:600 .67rem/1.5 var(--mono);padding:1px 7px;border-radius:2px;
+        background:var(--sunk);color:var(--ink-2);border:1px solid var(--line-soft);
+        white-space:nowrap}
+  .chip.dead{color:var(--bad)} .chip.live{color:var(--good)} .chip.open{color:var(--warn)}
+
+  .callout{margin-top:22px;padding:14px 17px;background:var(--warn-bg);
+           border-left:3px solid var(--warn);border-radius:0 4px 4px 0}
+  .callout p:first-child{margin:0}
+  .verdict{margin-top:22px;padding:16px 18px;background:var(--sunk);
+           border:1px solid var(--line);border-radius:4px}
+  ul{margin:.7rem 0 0;padding-left:1.15rem} li{margin:.35rem 0}
+  footer{padding:30px 0 70px;color:var(--ink-3);font-size:.82rem}
+  #flash{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+         background:var(--ink);color:var(--surface);padding:9px 16px;border-radius:4px;
+         font:600 .82rem/1 var(--mono);opacity:0;transition:opacity .25s;pointer-events:none;
+         z-index:40}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="app"></div>
+<div id="flash"></div>
+
+<script>
+/* ============================================================================
+   Copy lives here in both languages. The page renders from this object, so the
+   hidden translation command is a re-render, not a DOM rewrite.
+   Hidden command: type  e s p  for Spanish,  e n g  for English.
+   ========================================================================= */
+const T = {
+en:{
+  eyebrow:"ORENA FRAME · status report · 16 August 2026",
+  title:"27B vs 8B",
+  lede:"Everything we have measured about whether a larger backbone wins, in one place: four models on the same 800 questions, the real leaderboard, the training recipes side by side, and the literature. The conclusion does not favour either camp cleanly.",
+  tiles:[["our submission 03","0.5809","good","top 5 · official baseline cleared by +0.0620"],
+         ["to the podium","+0.0026","","behind LLaVA-Med, a 7B model from 2023"],
+         ["27B vs 8B, same corpus","−0.0588","bad","on the 800 shared questions"],
+         ["cost of the 27B reasoning","19×","","9.888 s/question against 0.515 s"]],
+  s1:{n:"01",h:"Model size does not order this leaderboard",
+   p1:"The entire competitive field fits in a 0.10 band above the official baseline. Inside that band sit a freshly fine-tuned Qwen3.6 and <b>LLaVA-Med, a 7B medical model from 2023</b>, 0.04 apart. If backbone generation ordered this table, those two would not be neighbours.",
+   cap:"Official <code>pre_evaluation_score</code> — the unweighted mean of the four populated buckets. The dashed line is the official fine-tuned baseline, which is the project's co-authorship condition.",
+   call:"<b>What this costs the 27B argument.</b> The only external evidence for scaling the backbone was that rank 1 is named <i>Qwen3.6 Finetuned</i>. The same table now supplies the counterexample: a model one generation older and smaller sits on the podium. Whatever separates the top entries, it is not parameter count.",
+   note:"<b>Submission 03 moved us +0.0521</b> (0.5288 → 0.5809) and turned a +0.0099 margin over the baseline — half a standard error, statistically indistinguishable from not clearing it — into <b>+0.0620</b>. The co-authorship condition is no longer at risk. The goal from here is rank, and the second evaluation stage."},
+  s2:{n:"02",h:"Four models, the same 800 questions",
+   p1:"HeiCo videos 0023 and 0027: held out of rung 42's training corpus, never in A2's, and inside the 27B's evaluation package. All three sources agree on all 800 gold answers, so the comparison is clean. <b>A2 and the 27B also share the same training corpus</b> (<code>train.jsonl</code> from rung 18) — that pair is the backbone A/B.",
+   th:["model","params","corpus","accuracy","s/question"],
+   rows:[["A2 ep3","8B","rung 18","0.5988","0.164",0],
+         ["rung 42 ep4 — what we shipped","8B","rung 18 +4969","0.6075","0.253",1],
+         ["gen-3.6 conn4e5, no thinking","27B","rung 18","0.5400","0.515",0],
+         ["gen-3.6 conn4e5, thinking","27B","rung 18","0.3812","9.888",0]],
+   cap:"Accuracy by answer format on the 800. The 27B wins <code>binary</code> and ties <code>multiple_choice</code>; its deficit is concentrated in <code>fo_class</code> (−0.128), which accounts for 76 % of the total gap.",
+   tiles:[["both correct","383","rung 42 and the 27B"],["only rung 42","103","what the 8B knows and the 27B does not"],
+          ["only the 27B","49","what it adds"],["both wrong","265","a third of the exam"]],
+   p2:"The 27B is not a different model seeing different things — it is <b>mostly a subset</b>. It adds 49 wins and gives up 103. Rung 38 measured the same thing with a confidence interval: paired <code>ALL</code> <b>−0.0334 [−0.0642, −0.0027]</b>, excluding zero."},
+  s3:{n:"03",h:"The training recipes, side by side",
+   p1:"Pulled from the runs' own <code>args.json</code>, not from memory. Two things stand out, and both change how the numbers above should be read.",
+   th:["hyperparameter","A2 (8B)","rung 42 (8B)","gen-3.6 conn4e5 (27B)"],
+   rows:[["backbone","Qwen3-VL-8B","Qwen3-VL-8B","Qwen3.6-27B",1],
+         ["lora_rank","8","8","8",0],
+         ["lora_alpha","32","32","32",0],
+         ["lora_dropout","0.1","0.1","<b>0.0</b>",1],
+         ["target_modules","all-linear","all-linear + merger","all-linear",0],
+         ["connector / merger","frozen","unfrozen + LoRA on the merger","<b>merger fully trained</b>, own LR 4e-5",1],
+         ["freeze_vit","false","false","false",0],
+         ["learning_rate","2e-4","2e-4","2e-4",0],
+         ["lr_scheduler","cosine · warmup 0.03","cosine · warmup 0.03","cosine · warmup 0.03",0],
+         ["weight_decay","0.1","0.1","not archived",1],
+         ["max_grad_norm","1.0","1.0","not archived",1],
+         ["optim","adamw_torch_fused","adamw_torch_fused","not archived",1],
+         ["effective batch","16 (1×16)","16 (1×16)","16 (1×16)",0],
+         ["max_pixels","none (native)","none (native)","921600 = 1280×720",0],
+         ["epochs · steps","3 · 2703","5, ep4 shipped · 4848","1 + continuation · ~2703",1],
+         ["corpus rows","14 415","19 384","14 415",1],
+         ["seed","42","42","42",0]],
+   call1:"<b>1. rung 42 is not “A2 plus data”.</b> It moves four things at once: the merged corpus, LoRA extended onto the <b>merger</b> layers, the <b>aligner unfrozen</b>, and five epochs instead of three. On the leaderboard that bundle was worth <b>+0.0521</b>. On our 800 HeiCo questions it shows as only +0.0087 — so the local HeiCo slice badly under-represents where rung 42 actually gained.",
+   call2:"<b>2. The 27B has never run a recipe of its own.</b> Every difference from A2 is in the same direction — <b>less regularisation on the model that was already over-fitting</b> (training loss 0.068 against the 8B's 0.28–0.29, versus a documented 0.2 threshold). And three fields were never archived, which rung 40's own PLAN flags as unresolvable after the fact. So “the 27B loses” is measured; “the 27B backbone loses” is not — the recipe was ported from an 8B sweep and never re-tuned.",
+   h2:"The fine-tuning setup — and the confound nobody can remove after the fact",
+   p2:"The recipes above run on <b>different machinery</b>. This is not a detail: rung 38's own README states it as a limit on what its result can be used for.",
+   sth:["setup","8B ladder (A2, rung 42)","27B (rung 38 → 40 conn4e5)"],
+   srows:[["training framework","<b>ms-swift</b>","<b>Unsloth</b>",1],
+          ["data format","ShareGPT-style <code>train.jsonl</code>","same rows, converted by <code>_tools/unsloth_data.py</code>",1],
+          ["hardware","RunPod A100 80 GB","RunPod A100 80 GB",0],
+          ["training precision","bf16 LoRA (no NF4)","bf16 LoRA (no NF4)",0],
+          ["throughput","≈13.1 s/it","12.8 s/it",0],
+          ["one epoch","901 steps (A2) · 1212 (rung 42)","901 steps · 3.17 h",0],
+          ["merge path","<code>swift export --merge_lora</code>","<code>save_pretrained_merged</code> (Unsloth)",1],
+          ["merge fidelity","clean","<b>PARTIAL CARRY</b> — connector weights carried (|Δ| 18 643), the two merger <b>biases dropped</b> (|Δ| 2.33) = <b>0.012 %</b> of the trained delta",1],
+          ["processor artefact","<code>preprocessor_config.json</code>","writes <code>processor_config.json</code> instead",1],
+          ["serving precision","bf16","FP8 w8a8, 33.46 GiB, <code>enforce_eager=true</code>",1],
+          ["serving engine","vLLM 0.27.1","vLLM 0.27.1, <code>max_model_len</code> 2048 · util 0.82",0],
+          ["replication","—","<b>none — no seed has ever been repeated</b>",1]],
+   call3:"<b>The comparison confounds three things at once.</b> Backbone × training framework × regularisation. Rung 38's README says the middle one plainly: <i>“Unsloth arms carry a framework confound against the ms-swift ladder — fine for a candidate search, <b>invalid for attribution</b>.”</i> Everything in section 02 is a faithful measurement of <i>this pipeline</i>; none of it isolates the backbone.",
+   call4:"<b>The merge defect, measured on the real model and sized.</b> Rung 40's G3 gate found Unsloth's merge silently dropping trained bias tensors, but it ran on a 2B proxy and the repeat on the 27B never happened — the guard crashed on a path-resolution bug before comparing anything. Repeated here directly against the base snapshot: the connector <b>weights carried</b> (|Δ| 8321.64 and 10321.09), and both merger <b>biases read exactly 0.0000</b> against base — dropped, confirming the gate on the real model. But the trained bias delta was <b>2.33 against 18 643 in the weights: 0.012 %</b>. So the evaluated checkpoint <b>is</b> the fine-tuned model — the full LoRA (604 modules, 107 M trainable) and the trained connector are all present. Worth fixing before the next 27B run; not an explanation for anything in section 02."},
+  s4:{n:"04",h:"The counting wall, which no model size crosses",
+   p1:"<code>number</code> is <b>71 % of everything rung 42 gets wrong</b> — 313 of its 442 errors. The failure has the same shape in all three models, 8B or 27B, one corpus or another: accuracy collapses as objects multiply, and reaches zero.",
+   cap:"Accuracy on <code>number</code>-format questions by how many objects were actually present. The curves overlap: from 6 objects up, rung 42 and the 27B score zero everywhere and A2 breaks zero once (2 of 18 at gold 8). The 27B's mean prediction saturates at 3–4 regardless of the true value.",
+   p2:"It is not a formatting problem — <b>of 235 failures, zero were malformed</b>; every one was a clean, wrong digit. It undercounts 6.6× more often than it overcounts. This is the subitizing limit: it enumerates well up to ~3 and then emits a small number.",
+   lit:"what the literature says",
+   lits:["<b>UniBench</b> (NeurIPS 2024) identifies counting as a capability where <b>scale produces no improvement</b>.",
+         "<b>Unveiling the Visual Counting Bottleneck in VLMs</b> (arXiv 2605.30170) localises the collapse in <i>symbolic mapping</i>, reports that <b>large models fail to ground their counting rule visually</b>, and that accuracy flatlines near chance for larger quantities — exactly the curve above. It adds that <b>scaling data is not sufficient either</b>.",
+         "Counting comparisons between 7B and 32B models show no consistent advantage for the larger one."],
+   litend:"Three measurements of ours and two independent papers say the same thing: <b>this wall does not fall to parameters.</b>"},
+  s5:{n:"05",h:"The 27B's reasoning carries information nothing else does",
+   p1:"As an answer, thinking is worse in every format, including where the trace closes cleanly (0.5009 against 0.6114 on those same 579 questions). The longer it reasons, the worse it scores.",
+   cap:"Accuracy by trace length across the 3115 questions where the 27B emitted an answer. Monotonically down — though part of the effect is that hard questions produce long traces, not only the other way round.",
+   p2:"But measuring the <b>answer</b> is not measuring the <b>reasoning</b>. Searching for the gold answer inside the text of the traces that failed:",
+   tiles:[["fo_class failures","84.1%","good","trace names every correct class (n=574)"],
+          ["number failures","82.9%","good","the correct number appears in the trace (n=527)"],
+          ["chance control","27.5%","","a different random number appears as often"],
+          ["rung 34, in the weights","0.5264","","linear probe on hidden states vs the head's 0.4680"]],
+   p3:"<b>The 27B has the answer and loses it on the way out</b>, and that is now measured at two different layers of the stack: in the text of the reasoning (83 %, three times chance) and in the model's own hidden states (rung 34). One fault, seen from two places.",
+   call:"<b>The literature backs this route.</b> <i>LiteMedCoT-VL</i> distills reasoning chains from a Qwen3-VL-235B into a 2B student and lifts it from <b>48.7 % to 64.9 %</b> on PMC-VQA. Reasoning distillation works in medical VQA — and the 83 % above says our traces carry the signal.<br><br>⚠️ Two warnings worth saying out loud: that paper's teacher is a 235B far stronger than its student, whereas <b>ours scores below the student</b>; and this campaign has twice found “the answer is in there” and twice failed to extract it (rung 33, reading P(value) before the argmax: +0.01; rung 35, ordinal NTL-WAS loss: NO-GO with collateral damage)."},
+  s6:{n:"06",h:"The counting attack: everything already ruled out",
+   p1:"Seven rungs and nine decision notes have gone at counting. The output side and the loss side are both measured dead. This table exists so nobody re-runs them.",
+   th:["intervention","rung","verdict"],
+   rows:[["post-hoc calibration of the emitted number","—","dead on 3 pre-registered rules; gold 2, 3 and 4 share one mode"],
+         ["global shift on the emitted integer","—","0.4718 → 0.2197"],
+         ["oracle value lookup table","—","ceiling +0.0148"],
+         ["GRPO, 0/1 exact-match reward","30","NO-GO, aggregation_ID −0.0094"],
+         ["read P(value) before the argmax","33","gate A fails; family worth ≈ +0.01"],
+         ["ordinal loss (NTL-WAS)","35","NO-GO — aggregation_ID −0.0262, veto cell −0.0880"],
+         ["synthetic counting SFT","15","null; settled as discarded"],
+         ["change the output format (name vs count)","—","same multiplicity, p = 0.45"],
+         ["SAM 2 temporal probe","29","closed unrun — its premise was a unit error"],
+         ["more corpus + more epochs","42","+0.0087 on these 800 (but +0.0521 on the leaderboard)"]],
+   p2:"Rung 35 is the painful one: it was the theoretically <i>right</i> intervention. Rung 34 proved the count is present in the hidden states and lost in the projection to tokens, and NTL-WAS attacked exactly that projection. It failed and did collateral damage."},
+  s7:{n:"07",h:"What is still open, and what it costs",
+   th:["bet","status","evidence","cost"],
+   rows:[["19a — enumeration probe","live","the one counting family never refuted: point supervision. HeiSurF is pixel-annotated for clips, specimen bags and drains","1–2 GPU-h, no training"],
+         ["reasoning distillation from the 27B","live","83 % of traces contain the gold · LiteMedCoT-VL 48.7 → 64.9","traces already on disk; one 8B training run"],
+         ["a 27B with a recipe of its own","untested","every 27B run was an 8B optimum transplanted onto another framework, through a lossy merge, never replicated","a sweep, not a run: 3–4 × 3.2 GPU-h"],
+         ["thinking at inference","dead","0.3812 and 19× the cost; worse even where the trace closes","—"],
+         ["scaling the backbone for counting","dead","three models, one curve · UniBench · arXiv 2605.30170","—"]],
+   h2:"19a in one paragraph",
+   p1:"Our model miscounts surgical clips, which are tiny and metallic on red tissue. That can fail two ways, and they want opposite fixes: <b>it cannot see them</b> (perception — needs resolution, segmentation, a detector) or <b>it sees them but cannot keep a tally</b> (enumeration — needs counting data). 19a separates the two for 1–2 GPU-hours by changing the object: take a model we already have, train nothing, show it externally annotated frames where the true count is exact, and ask how many <b>surgical instruments</b> are visible — large, obvious objects. If it also fails there, the deficit is enumeration and external counting data is on target. If it counts instruments fine and only misses clips, the deficit is small-object perception, external data cannot fix it, and the perception branch is the right one. Either way we learn it for ~5 % of what guessing costs.",
+   call:"<b>Operational facts worth keeping in view.</b> The latency budget is pooled — <code>120 s + B×5 s</code>, timed by the platform — and at rank 1 it uses 19 % of the allowance, so <b>latency bounds nobody's model size</b>. Container admission is free and does not spend a submission; it returns errors but no metrics. Our local eval transfers in <b>direction</b> (8 of 8 bucket comparisons) but not in magnitude, and it is <b>inverted on <code>object_recognition_OOD</code></b> — our best bucket locally, our worst on the judge."},
+  foot:"Measured on 800 shared questions (HeiCo 0023 + 0027) and the 4000-question HeiCo package. Leaderboard scores as of 16 August 2026. A2 and rung 42 latencies are a real per-question stopwatch; the 27B figures are batch means. Hyperparameters read from each run's archived <code>args.json</code>.",
+  boardRows:[["Qwen3.6 Finetuned",0.6235,0],["Galen 1xHigh",0.5908,0],["LLaVA-Med",0.5835,0],
+             ["us — submission 03",0.5809,1],["us — submission 02",0.5288,0],
+             ["official fine-tuned baseline",0.5189,2],["official proprietary baseline",0.3883,2]],
+  arms:["A2 · 8B","rung 42 · 8B","27B no thinking","27B thinking"],
+  fmtLabel:"answer format", countX:"objects actually present", traceX:"tokens generated in the trace",
+  zeroBand:"zero correct — except A2 at gold 8, which gets 2 of 18",
+  noThink:"no thinking: .6485",
+  flashTo:"Español"
+},
+es:{
+  eyebrow:"ORENA FRAME · informe de estado · 16 de agosto de 2026",
+  title:"27B contra 8B",
+  lede:"Todo lo que hemos medido sobre si un backbone más grande gana, en un sitio: cuatro modelos sobre las mismas 800 preguntas, la tabla real, las recetas de entrenamiento enfrentadas y la literatura. La conclusión no le da la razón limpia a ninguno de los dos bandos.",
+  tiles:[["nuestra submission 03","0.5809","good","top 5 · baseline oficial superada por +0.0620"],
+         ["al podio","+0.0026","","por detrás de LLaVA-Med, un 7B de 2023"],
+         ["27B contra 8B, mismo corpus","−0.0588","bad","sobre las 800 preguntas comunes"],
+         ["coste del 27B razonando","19×","","9.888 s/pregunta contra 0.515 s"]],
+  s1:{n:"01",h:"El tamaño no ordena esta tabla",
+   p1:"El campo competitivo entero cabe en una franja de 0.10 sobre la baseline oficial. Dentro de esa franja conviven un Qwen3.6 recién afinado y <b>LLaVA-Med, un modelo médico de 7B de 2023</b>, separados por 0.04. Si la generación del backbone ordenara esta tabla, esos dos no serían vecinos.",
+   cap:"<code>pre_evaluation_score</code> oficial — media sin pesos de los cuatro buckets poblados. La línea discontinua es la baseline oficial fine-tuned, que es la condición de coautoría del proyecto.",
+   call:"<b>Lo que esto le quita al argumento del 27B.</b> La única evidencia externa a favor de escalar el backbone era que el rank 1 se llama <i>Qwen3.6 Finetuned</i>. La misma tabla aporta ahora el contraejemplo: un modelo una generación más viejo y más pequeño está en el podio. Lo que separa a los de arriba no es el número de parámetros.",
+   note:"<b>La submission 03 nos movió +0.0521</b> (0.5288 → 0.5809) y convirtió un margen de +0.0099 sobre la baseline —medio error estándar, indistinguible de no superarla— en <b>+0.0620</b>. La coautoría ya no está en riesgo. A partir de aquí el objetivo es el puesto, y la segunda etapa de evaluación."},
+  s2:{n:"02",h:"Cuatro modelos, las mismas 800 preguntas",
+   p1:"Vídeos HeiCo 0023 y 0027: fuera del corpus de entrenamiento del rung 42, nunca en el de A2, y dentro del paquete de evaluación del 27B. Las tres fuentes coinciden en las 800 respuestas esperadas, así que la comparación es limpia. <b>A2 y el 27B comparten además el mismo corpus</b> (<code>train.jsonl</code> del rung 18) — ese par es el A/B de backbone.",
+   th:["modelo","parámetros","corpus","accuracy","s/pregunta"],
+   rows:[["A2 ep3","8B","rung 18","0.5988","0.164",0],
+         ["rung 42 ep4 — lo que enviamos","8B","rung 18 +4969","0.6075","0.253",1],
+         ["gen-3.6 conn4e5, sin thinking","27B","rung 18","0.5400","0.515",0],
+         ["gen-3.6 conn4e5, con thinking","27B","rung 18","0.3812","9.888",0]],
+   cap:"Accuracy por formato de respuesta sobre las 800. El 27B gana en <code>binary</code> y empata en <code>multiple_choice</code>; su déficit se concentra en <code>fo_class</code> (−0.128), que aporta el 76 % de la brecha total.",
+   tiles:[["aciertan los dos","383","rung 42 y el 27B"],["solo el rung 42","103","lo que el 8B sabe y el 27B no"],
+          ["solo el 27B","49","lo que aporta"],["fallan los dos","265","un tercio del examen"]],
+   p2:"El 27B no es un modelo distinto que ve otras cosas: es <b>mayormente un subconjunto</b>. Aporta 49 aciertos y cede 103. El rung 38 midió lo mismo con intervalo de confianza: pareado <code>ALL</code> <b>−0.0334 [−0.0642, −0.0027]</b>, que excluye el cero."},
+  s3:{n:"03",h:"Las recetas de entrenamiento, enfrentadas",
+   p1:"Sacadas del <code>args.json</code> archivado de cada corrida, no de memoria. Dos cosas saltan, y las dos cambian cómo hay que leer los números de arriba.",
+   th:["hiperparámetro","A2 (8B)","rung 42 (8B)","gen-3.6 conn4e5 (27B)"],
+   rows:[["backbone","Qwen3-VL-8B","Qwen3-VL-8B","Qwen3.6-27B",1],
+         ["lora_rank","8","8","8",0],
+         ["lora_alpha","32","32","32",0],
+         ["lora_dropout","0.1","0.1","<b>0.0</b>",1],
+         ["target_modules","all-linear","all-linear + merger","all-linear",0],
+         ["conector / merger","congelado","descongelado + LoRA sobre el merger","<b>merger entrenado entero</b>, LR propio 4e-5",1],
+         ["freeze_vit","false","false","false",0],
+         ["learning_rate","2e-4","2e-4","2e-4",0],
+         ["lr_scheduler","cosine · warmup 0.03","cosine · warmup 0.03","cosine · warmup 0.03",0],
+         ["weight_decay","0.1","0.1","sin archivar",1],
+         ["max_grad_norm","1.0","1.0","sin archivar",1],
+         ["optim","adamw_torch_fused","adamw_torch_fused","sin archivar",1],
+         ["batch efectivo","16 (1×16)","16 (1×16)","16 (1×16)",0],
+         ["max_pixels","ninguno (nativo)","ninguno (nativo)","921600 = 1280×720",0],
+         ["épocas · pasos","3 · 2703","5, se envió ep4 · 4848","1 + continuación · ~2703",1],
+         ["filas de corpus","14 415","19 384","14 415",1],
+         ["seed","42","42","42",0]],
+   call1:"<b>1. El rung 42 no es “A2 más datos”.</b> Mueve cuatro cosas a la vez: el corpus fusionado, LoRA extendido a las capas <b>merger</b>, el <b>aligner descongelado</b>, y cinco épocas en vez de tres. En el leaderboard ese paquete valió <b>+0.0521</b>. En nuestras 800 preguntas de HeiCo se ve como solo +0.0087 — o sea que la rebanada local de HeiCo infrarrepresenta gravemente dónde ganó el rung 42.",
+   call2:"<b>2. El 27B nunca ha corrido una receta suya.</b> Cada diferencia con A2 va en la misma dirección: <b>menos regularización en el modelo que ya sobreajustaba</b> (loss de entrenamiento 0.068 contra 0.28–0.29 del 8B, frente a un umbral documentado de 0.2). Y tres campos nunca se archivaron, algo que el propio PLAN del rung 40 marca como irrecuperable. Así que “el 27B pierde” está medido; “el backbone de 27B pierde” no lo está — la receta se trasplantó de un barrido hecho sobre el 8B y jamás se reajustó.",
+   h2:"El setup de fine-tuning — y el confundido que ya no se puede quitar",
+   p2:"Las recetas de arriba corren sobre <b>maquinaria distinta</b>. No es un detalle: el propio README del rung 38 lo declara como un límite a lo que su resultado puede usarse para afirmar.",
+   sth:["setup","escalera 8B (A2, rung 42)","27B (rung 38 → 40 conn4e5)"],
+   srows:[["framework de entrenamiento","<b>ms-swift</b>","<b>Unsloth</b>",1],
+          ["formato de datos","<code>train.jsonl</code> estilo ShareGPT","las mismas filas, convertidas por <code>_tools/unsloth_data.py</code>",1],
+          ["hardware","RunPod A100 80 GB","RunPod A100 80 GB",0],
+          ["precisión de entrenamiento","LoRA bf16 (sin NF4)","LoRA bf16 (sin NF4)",0],
+          ["throughput","≈13,1 s/it","12,8 s/it",0],
+          ["una época","901 pasos (A2) · 1212 (rung 42)","901 pasos · 3,17 h",0],
+          ["ruta de merge","<code>swift export --merge_lora</code>","<code>save_pretrained_merged</code> (Unsloth)",1],
+          ["fidelidad del merge","limpia","<b>PARTIAL CARRY</b> — los pesos del conector llegaron (|Δ| 18 643), los dos <b>bias del merger se perdieron</b> (|Δ| 2,33) = <b>0,012 %</b> del delta entrenado",1],
+          ["artefacto del procesador","<code>preprocessor_config.json</code>","escribe <code>processor_config.json</code> en su lugar",1],
+          ["precisión de servicio","bf16","FP8 w8a8, 33,46 GiB, <code>enforce_eager=true</code>",1],
+          ["motor de servicio","vLLM 0.27.1","vLLM 0.27.1, <code>max_model_len</code> 2048 · util 0,82",0],
+          ["replicación","—","<b>ninguna — jamás se ha repetido una semilla</b>",1]],
+   call3:"<b>La comparación confunde tres cosas a la vez.</b> Backbone × framework de entrenamiento × regularización. El README del rung 38 lo dice sin rodeos sobre la del medio: <i>“los brazos con Unsloth arrastran un confundido de <b>framework</b> contra la escalera de ms-swift — vale para buscar candidatos, <b>inválido para atribuir</b>”</i>. Todo lo de la sección 02 mide fielmente <i>este pipeline</i>; nada de ello aísla el backbone.",
+   call4:"<b>El defecto del merge, medido sobre el modelo real y dimensionado.</b> El gate G3 del rung 40 detectó que el merge de Unsloth tira en silencio tensores de bias entrenados, pero corrió sobre un 2B de sustituto y la repetición sobre el 27B nunca ocurrió — el guard se estrelló por un bug de resolución de rutas antes de comparar nada. Repetida aquí contra el snapshot base: los <b>pesos</b> del conector <b>llegaron</b> (|Δ| 8321,64 y 10321,09), y los dos <b>bias del merger dan exactamente 0,0000</b> contra la base — perdidos, confirmando el gate sobre el modelo real. Pero el delta entrenado de esos bias era <b>2,33 frente a 18 643 en los pesos: el 0,012 %</b>. O sea que el checkpoint evaluado <b>sí es</b> el modelo fine-tuneado — el LoRA completo (604 módulos, 107 M entrenables) y el conector entrenado están todos ahí. Conviene arreglarlo antes de la próxima corrida del 27B; no explica nada de la sección 02."},
+  s4:{n:"04",h:"El muro del conteo, que ningún tamaño cruza",
+   p1:"<code>number</code> es el <b>71 % de todo lo que falla el rung 42</b> — 313 de sus 442 errores. El fallo tiene la misma forma en los tres modelos, con 8B o con 27B, con un corpus o con otro: la precisión se desploma según se multiplican los objetos, y llega a cero.",
+   cap:"Accuracy en preguntas de formato <code>number</code> según cuántos objetos había de verdad. Las curvas se superponen: de 6 objetos en adelante el rung 42 y el 27B son cero en todos los valores y A2 rompe el cero una sola vez (2 de 18 en gold 8). La predicción media del 27B satura en 3–4 sin importar el valor real.",
+   p2:"No es un problema de formato — <b>de 235 fallos, cero estaban mal escritos</b>; todos eran un dígito limpio y equivocado. Subestima 6,6 veces más de lo que sobreestima. Es el límite de <i>subitizing</i>: enumera bien hasta ~3 y a partir de ahí emite un número pequeño.",
+   lit:"lo que dice la literatura",
+   lits:["<b>UniBench</b> (NeurIPS 2024) identifica el conteo como una capacidad donde <b>escalar no produce mejora</b>.",
+         "<b>Unveiling the Visual Counting Bottleneck in VLMs</b> (arXiv 2605.30170) localiza el colapso en el <i>mapeo simbólico</i>, informa que <b>los modelos grandes no anclan visualmente su regla de conteo</b>, y que la precisión cae a nivel de azar con cantidades grandes — exactamente la curva de arriba. Añade que <b>escalar datos tampoco basta</b>.",
+         "Las comparativas de conteo entre modelos de 7B y 32B no muestran una ventaja consistente del grande."],
+   litend:"Tres medidas nuestras y dos artículos independientes dicen lo mismo: <b>este muro no se derriba con parámetros.</b>"},
+  s5:{n:"05",h:"El razonamiento del 27B trae información que no da nada más",
+   p1:"Como respuesta, el thinking es peor en todos los formatos, incluso donde la traza cierra limpia (0.5009 contra 0.6114 en esas mismas 579 preguntas). Cuanto más razona, peor puntúa.",
+   cap:"Accuracy según la longitud de la traza, sobre las 3115 preguntas donde el 27B llegó a emitir respuesta. Monótona descendente — aunque parte del efecto es que las preguntas difíciles producen trazas largas, no solo al revés.",
+   p2:"Pero medir la <b>respuesta</b> no es medir el <b>razonamiento</b>. Buscando el gold dentro del texto de las trazas que fallaron:",
+   tiles:[["fo_class fallados","84.1%","good","la traza nombra todas las clases correctas (n=574)"],
+          ["number fallados","82.9%","good","el número correcto aparece en la traza (n=527)"],
+          ["control de azar","27.5%","","un número distinto al azar aparece igual de a menudo"],
+          ["rung 34, en los pesos","0.5264","","probe lineal sobre estados ocultos contra 0.4680 del head"]],
+   p3:"<b>El 27B tiene la respuesta y la pierde al salir</b>, y eso está medido ahora en dos capas distintas del stack: en el texto del razonamiento (83 %, tres veces el azar) y en los estados ocultos del propio modelo (rung 34). Una sola avería, vista desde dos sitios.",
+   call:"<b>La literatura respalda esta ruta.</b> <i>LiteMedCoT-VL</i> destila cadenas de razonamiento de un Qwen3-VL-235B hacia un alumno de 2B y lo sube de <b>48,7 % a 64,9 %</b> en PMC-VQA. La destilación de razonamiento funciona en VQA médico — y el 83 % de arriba dice que nuestras trazas llevan la señal.<br><br>⚠️ Dos avisos que hay que decir en voz alta: el maestro de ese trabajo es un 235B mucho más fuerte que su alumno, mientras que <b>el nuestro puntúa por debajo del alumno</b>; y esta campaña ya ha encontrado dos veces “la respuesta está ahí dentro” y ha fallado dos veces al extraerla (rung 33, leer P(valor) antes del argmax: +0.01; rung 35, pérdida ordinal NTL-WAS: NO-GO con daño colateral)."},
+  s6:{n:"06",h:"El ataque al conteo: todo lo ya descartado",
+   p1:"Siete rungs y nueve notas de decisión han ido contra el conteo. La familia de salida y la de pérdida están medidas y muertas. Esta tabla existe para que nadie las repita.",
+   th:["intervención","rung","veredicto"],
+   rows:[["calibración post-hoc del número emitido","—","muerta en 3 reglas pre-registradas; gold 2, 3 y 4 comparten moda"],
+         ["desplazamiento global del entero emitido","—","0.4718 → 0.2197"],
+         ["tabla oráculo de valores","—","techo +0.0148"],
+         ["GRPO, recompensa 0/1 exacta","30","NO-GO, aggregation_ID −0.0094"],
+         ["leer P(valor) antes del argmax","33","gate A falla; la familia vale ≈ +0.01"],
+         ["pérdida ordinal (NTL-WAS)","35","NO-GO — aggregation_ID −0.0262, celda de veto −0.0880"],
+         ["SFT sintético de conteo","15","nulo; descartado por decisión"],
+         ["cambiar el formato de salida (nombrar vs contar)","—","misma multiplicidad, p = 0,45"],
+         ["sonda temporal con SAM 2","29","cerrada sin correr — su premisa era un error de unidades"],
+         ["más corpus + más épocas","42","+0.0087 en estas 800 (pero +0.0521 en el leaderboard)"]],
+   p2:"El rung 35 es el doloroso: era la intervención teóricamente <i>correcta</i>. El rung 34 probó que el conteo está en los estados ocultos y se pierde en la proyección a tokens, y NTL-WAS atacaba justo esa proyección. Falló e hizo daño colateral."},
+  s7:{n:"07",h:"Qué sigue abierto, y cuánto cuesta",
+   th:["apuesta","estado","evidencia","coste"],
+   rows:[["19a — sonda de enumeración","viva","la única familia de conteo no refutada: supervisión por puntos. HeiSurF está anotado a nivel de píxel para clips, bolsas de extracción y drenajes","1–2 GPU-h, sin entrenar"],
+         ["destilar el razonamiento del 27B","viva","el 83 % de las trazas contienen el gold · LiteMedCoT-VL 48,7 → 64,9","las trazas ya están en disco; un entrenamiento del 8B"],
+         ["un 27B con receta propia","sin medir","cada corrida del 27B fue un óptimo del 8B trasplantado a otro framework, a través de un merge con pérdida, y jamás replicado","un barrido, no una corrida: 3–4 × 3,2 GPU-h"],
+         ["thinking en inferencia","muerta","0.3812 y 19× el coste; peor incluso donde la traza cierra","—"],
+         ["escalar el backbone para el conteo","muerta","tres modelos, una curva · UniBench · arXiv 2605.30170","—"]],
+   h2:"19a en un párrafo",
+   p1:"Nuestro modelo cuenta mal los clips quirúrgicos, que son diminutos y metálicos sobre tejido rojo. Eso puede fallar de dos maneras, y piden arreglos opuestos: <b>no los ve</b> (percepción — necesita resolución, segmentación, un detector) o <b>los ve pero pierde la cuenta</b> (enumeración — necesita datos de conteo). 19a separa las dos por 1–2 horas de GPU cambiando el objeto: coges un modelo que ya tienes, no entrenas nada, le enseñas frames anotados externamente donde el conteo real es exacto, y le preguntas cuántos <b>instrumentos quirúrgicos</b> hay — objetos grandes y obvios. Si también falla ahí, el déficit es de enumeración y los datos externos de conteo van al blanco. Si cuenta instrumentos bien y solo se le escapan los clips, el déficit es de percepción de objetos pequeños, los datos externos no lo arreglan, y la rama correcta es la de percepción. En cualquier caso lo aprendemos por ~5 % de lo que cuesta adivinar.",
+   call:"<b>Hechos operativos que conviene tener a la vista.</b> El presupuesto de latencia es agrupado — <code>120 s + B×5 s</code>, cronometrado por la plataforma — y el rank 1 usa el 19 % de la asignación, así que <b>la latencia no limita el tamaño de modelo de nadie</b>. La admisión del contenedor es gratis y no gasta envío; devuelve errores pero no métricas. Nuestra evaluación local transfiere en <b>dirección</b> (8 de 8 comparaciones de bucket) pero no en magnitud, y está <b>invertida en <code>object_recognition_OOD</code></b> — nuestro mejor bucket en local y el peor ante el juez."},
+  foot:"Medido sobre 800 preguntas comunes (HeiCo 0023 + 0027) y el paquete de 4000 de HeiCo. Puntuaciones del leaderboard a 16 de agosto de 2026. Las latencias de A2 y del rung 42 son cronómetro real por pregunta; las del 27B son medias de lote. Hiperparámetros leídos del <code>args.json</code> archivado de cada corrida.",
+  boardRows:[["Qwen3.6 Finetuned",0.6235,0],["Galen 1xHigh",0.5908,0],["LLaVA-Med",0.5835,0],
+             ["nosotros — submission 03",0.5809,1],["nosotros — submission 02",0.5288,0],
+             ["baseline oficial fine-tuned",0.5189,2],["baseline oficial propietaria",0.3883,2]],
+  arms:["A2 · 8B","rung 42 · 8B","27B sin thinking","27B con thinking"],
+  fmtLabel:"formato de respuesta", countX:"objetos que había de verdad", traceX:"tokens generados en la traza",
+  zeroBand:"cero aciertos — salvo A2 en gold 8, que acierta 2 de 18",
+  noThink:"sin thinking: .6485",
+  flashTo:"English"
+}};
+
+/* ---------- numeric data, language-independent ---------- */
+const FMT = [["number",333,[.306,.336,.294,.216]],["fo_class",321,[.788,.822,.695,.467]],
+  ["binary",88,[.795,.682,.739,.420]],["open_ended",51,[.922,.863,.765,.765]],
+  ["multiple_choice",7,[1,.857,1,1]]];
+const COUNT = [[1,2,3,4,5,6,7,8,9,10],
+  [[.871,.362,.300,.032,.028,0,0,.111,0,0],[.886,.507,.200,.161,.056,0,0,0,0,0],
+   [.814,.406,.200,.129,.028,0,0,0,0,0]]];
+const TRACE = [["0–200",691,.5876],["200–300",507,.6134],["300–400",570,.5825],
+  ["400–600",523,.5526],["600–1000",347,.4294],["1000–1600",228,.4035],[">1600",249,.3855]];
+
+/* ---------- tiny SVG helpers ---------- */
+const NS='http://www.w3.org/2000/svg';
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const S=()=>['--s1','--s2','--s3','--s4'].map(cssv);
+const el=(t,a={})=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const tx=(x,y,s,o={})=>{const t=el('text',{x,y,...o});t.textContent=s;return t;};
+const f3=v=>v.toFixed(3).replace('0.','.');
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+function tip(svg){
+  const g=el('g',{opacity:0,'pointer-events':'none'});
+  const r=el('rect',{rx:3,fill:cssv('--ink'),opacity:.95});
+  const t=el('text',{fill:cssv('--surface'),'font-size':12,'font-family':'var(--mono)'});
+  g.append(r,t);svg.append(g);
+  return (x,y,s)=>{
+    if(s===null){g.setAttribute('opacity',0);return;}
+    t.textContent=s;g.setAttribute('opacity',1);
+    const w=t.getComputedTextLength()+16;
+    const px=Math.max(2,Math.min(x-w/2,svg.viewBox.baseVal.width-w-2));
+    r.setAttribute('x',px);r.setAttribute('y',y-26);
+    r.setAttribute('width',w);r.setAttribute('height',22);
+    t.setAttribute('x',px+8);t.setAttribute('y',y-10);
+  };
+}
+const hov=(node,show,x,y,s)=>{
+  node.addEventListener('pointerenter',()=>show(x,y,s));
+  node.addEventListener('pointerleave',()=>show(0,0,null));
+};
+
+function chartBoard(L){
+  const rows=[...L.boardRows].sort((a,b)=>b[1]-a[1]);
+  const W=920,RH=34,P={l:236,r:60,t:8,b:26},H=P.t+rows.length*RH+P.b,max=.68;
+  const x=v=>P.l+(v/max)*(W-P.l-P.r);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,role:'img','aria-label':'Leaderboard scores'});
+  const show=tip(svg);
+  for(let v=0;v<=.6;v+=.2){
+    svg.append(el('line',{x1:x(v),x2:x(v),y1:P.t,y2:H-P.b,stroke:cssv('--grid'),'stroke-width':1}));
+    svg.append(tx(x(v),H-8,v.toFixed(1),{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'middle','font-family':'var(--mono)'}));
+  }
+  rows.forEach((r,i)=>{
+    const y=P.t+i*RH,col=r[2]===1?cssv('--accent'):r[2]===2?cssv('--ink-3'):S()[0];
+    const b=el('rect',{x:P.l,y:y+7,width:Math.max(2,x(r[1])-P.l),height:16,rx:4,fill:col,opacity:r[2]===2?.45:1});
+    hov(b,show,x(r[1]),y+8,`${r[0]} · ${r[1].toFixed(4)}`);svg.append(b);
+    svg.append(tx(P.l-10,y+20,r[0],{fill:r[2]===1?cssv('--ink'):cssv('--ink-2'),'font-size':12.5,'text-anchor':'end','font-weight':r[2]===1?640:400}));
+    svg.append(tx(x(r[1])+8,y+20,r[1].toFixed(4),{fill:cssv('--ink-2'),'font-size':12,'font-family':'var(--mono)'}));
+  });
+  const bx=x(.5189);
+  svg.append(el('line',{x1:bx,x2:bx,y1:P.t,y2:H-P.b,stroke:cssv('--warn'),'stroke-width':2,'stroke-dasharray':'4 3'}));
+  return svg;
+}
+
+function chartFmt(L){
+  const W=920,H=314,P={l:42,r:12,t:12,b:70};
+  const gw=(W-P.l-P.r)/FMT.length,bw=(gw-26)/4;
+  const y=v=>P.t+(1-v)*(H-P.t-P.b);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,role:'img','aria-label':'Accuracy by answer format'});
+  const show=tip(svg);
+  for(let v=0;v<=1;v+=.25){
+    svg.append(el('line',{x1:P.l,x2:W-P.r,y1:y(v),y2:y(v),stroke:cssv('--grid'),'stroke-width':1}));
+    svg.append(tx(P.l-8,y(v)+4,v.toFixed(2).replace('0.','.'),{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'end','font-family':'var(--mono)'}));
+  }
+  FMT.forEach((d,gi)=>{
+    const gx=P.l+gi*gw+13;
+    d[2].forEach((v,i)=>{
+      const bx=gx+i*bw;
+      const b=el('rect',{x:bx+1,y:y(v),width:bw-2,height:Math.max(2,y(0)-y(v)),rx:3,fill:S()[i]});
+      hov(b,show,bx+bw/2,y(v),`${L.arms[i]} · ${f3(v)}`);svg.append(b);
+    });
+    svg.append(tx(gx+bw*2,H-50,d[0],{fill:cssv('--ink-2'),'font-size':12,'text-anchor':'middle'}));
+    svg.append(tx(gx+bw*2,H-34,`n=${d[1]}`,{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'middle','font-family':'var(--mono)'}));
+  });
+  svg.append(tx((P.l+W-P.r)/2,H-8,L.fmtLabel,{fill:cssv('--ink-3'),'font-size':11.5,'text-anchor':'middle'}));
+  return svg;
+}
+
+function chartCount(L){
+  const [golds,series]=COUNT;
+  const W=920,H=320,P={l:44,r:22,t:14,b:46};
+  const x=i=>P.l+i*(W-P.l-P.r)/(golds.length-1),y=v=>P.t+(1-v)*(H-P.t-P.b);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,role:'img','aria-label':'Counting accuracy by true object count'});
+  const show=tip(svg);
+  for(let v=0;v<=1;v+=.25){
+    svg.append(el('line',{x1:P.l,x2:W-P.r,y1:y(v),y2:y(v),stroke:cssv('--grid'),'stroke-width':1}));
+    svg.append(tx(P.l-8,y(v)+4,v.toFixed(2).replace('0.','.'),{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'end','font-family':'var(--mono)'}));
+  }
+  golds.forEach((g,i)=>svg.append(tx(x(i),H-24,g,{fill:cssv('--ink-3'),'font-size':11.5,'text-anchor':'middle','font-family':'var(--mono)'})));
+  svg.append(tx((P.l+W-P.r)/2,H-6,L.countX,{fill:cssv('--ink-3'),'font-size':11.5,'text-anchor':'middle'}));
+  svg.append(el('rect',{x:x(5),y:P.t,width:x(9)-x(5),height:y(0)-P.t,fill:cssv('--bad'),opacity:.05}));
+  svg.append(tx((x(5)+x(9))/2,P.t+16,L.zeroBand,{fill:cssv('--bad'),'font-size':11.5,'text-anchor':'middle','font-weight':600}));
+  series.forEach((vals,si)=>{
+    svg.append(el('path',{d:vals.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join(' '),fill:'none',
+      stroke:S()[si],'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    vals.forEach((v,i)=>{
+      const c=el('circle',{cx:x(i),cy:y(v),r:4.5,fill:S()[si],stroke:cssv('--surface'),'stroke-width':2});
+      hov(c,show,x(i),y(v),`${L.arms[si]} · gold ${golds[i]} · ${f3(v)}`);svg.append(c);
+    });
+    // No direct labels here: the three series converge on zero at the right edge and sit within
+    // a few pixels of each other at the left, so any anchor collides. Legend + hover carry identity.
+  });
+  return svg;
+}
+
+function chartTrace(L){
+  const W=920,H=280,P={l:44,r:16,t:26,b:48};
+  const x=i=>P.l+i*(W-P.l-P.r)/(TRACE.length-1),y=v=>P.t+(1-v/.7)*(H-P.t-P.b);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,role:'img','aria-label':'Accuracy by reasoning trace length'});
+  const show=tip(svg);
+  for(let v=0;v<=.7;v+=.175){
+    svg.append(el('line',{x1:P.l,x2:W-P.r,y1:y(v),y2:y(v),stroke:cssv('--grid'),'stroke-width':1}));
+    svg.append(tx(P.l-8,y(v)+4,v.toFixed(2).replace('0.','.'),{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'end','font-family':'var(--mono)'}));
+  }
+  svg.append(el('line',{x1:P.l,x2:W-P.r,y1:y(.6485),y2:y(.6485),stroke:cssv('--accent'),'stroke-width':2,'stroke-dasharray':'5 3'}));
+  svg.append(tx(W-P.r,y(.6485)-8,L.noThink,{fill:cssv('--accent'),'font-size':11.5,'text-anchor':'end','font-weight':600}));
+  svg.append(el('path',{d:TRACE.map((p,i)=>`${i?'L':'M'}${x(i)},${y(p[2])}`).join(' '),fill:'none',stroke:S()[3],'stroke-width':2,'stroke-linejoin':'round'}));
+  TRACE.forEach((p,i)=>{
+    const c=el('circle',{cx:x(i),cy:y(p[2]),r:4.5,fill:S()[3],stroke:cssv('--surface'),'stroke-width':2});
+    hov(c,show,x(i),y(p[2]),`${p[0]} · ${f3(p[2])} · n=${p[1]}`);svg.append(c);
+    svg.append(tx(x(i),H-26,p[0],{fill:cssv('--ink-3'),'font-size':11,'text-anchor':'middle','font-family':'var(--mono)'}));
+  });
+  svg.append(tx((P.l+W-P.r)/2,H-8,L.traceX,{fill:cssv('--ink-3'),'font-size':11.5,'text-anchor':'middle'}));
+  return svg;
+}
+
+/* ---------- page assembly ---------- */
+const tiles=a=>`<div class="tiles">${a.map(t=>
+  `<div class="tile ${t[2]||''}"><div class="k">${esc(t[0])}</div><div class="v">${esc(t[1])}</div>
+   <div class="n">${t[3]??''}</div></div>`).join('')}</div>`;
+const table=(th,rows,cls='')=>`<div class="tw"><table><thead><tr>${
+  th.map((h,i)=>`<th${i?'':' class="l"'}>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+  rows.map(r=>{const flag=r[r.length-1];const cells=typeof flag==='number'?r.slice(0,-1):r;
+    const rc=typeof flag==='number'&&flag?(cls||'us'):'';
+    return `<tr class="${rc}">${cells.map((c,i)=>`<td${i?'':' class="l"'}>${c}</td>`).join('')}</tr>`;}).join('')}</tbody></table></div>`;
+const legend=(names,dot)=>`<div class="legend">${names.map((a,i)=>
+  `<span class="lg"><span class="sw${dot?' dot':''}" style="background:${S()[i]}"></span>${esc(a)}</span>`).join('')}</div>`;
+
+function render(lang){
+  const L=T[lang];
+  document.title=L.title;
+  const A=document.getElementById('app');
+  A.innerHTML=`
+<header><div class="wrap">
+  <p class="eyebrow">${L.eyebrow}</p><h1>${L.title}</h1>
+  <p class="lede">${L.lede}</p>${tiles(L.tiles)}
+</div></header>
+<main class="wrap">
+  <section>
+    <div class="shead"><span class="snum">${L.s1.n}</span><h2>${L.s1.h}</h2></div>
+    <p>${L.s1.p1}</p>
+    <figure><div class="chartbox" id="c1"></div><figcaption>${L.s1.cap}</figcaption></figure>
+    <div class="callout"><p>${L.s1.call}</p></div>
+    <p>${L.s1.note}</p>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s2.n}</span><h2>${L.s2.h}</h2></div>
+    <p>${L.s2.p1}</p>${table(L.s2.th,L.s2.rows)}
+    <figure>${legend(L.arms)}<div class="chartbox" id="c2"></div><figcaption>${L.s2.cap}</figcaption></figure>
+    ${tiles(L.s2.tiles)}<p>${L.s2.p2}</p>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s3.n}</span><h2>${L.s3.h}</h2></div>
+    <p>${L.s3.p1}</p>${table(L.s3.th,L.s3.rows,'diff')}
+    <div class="callout"><p>${L.s3.call1}</p></div>
+    <div class="callout"><p>${L.s3.call2}</p></div>
+    <div class="shead" style="margin-top:34px"><h2>${L.s3.h2}</h2></div>
+    <p>${L.s3.p2}</p>${table(L.s3.sth,L.s3.srows,'diff')}
+    <div class="callout"><p>${L.s3.call3}</p></div>
+    <div class="callout"><p>${L.s3.call4}</p></div>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s4.n}</span><h2>${L.s4.h}</h2></div>
+    <p>${L.s4.p1}</p>
+    <figure>${legend(L.arms.slice(0,3),true)}<div class="chartbox" id="c3"></div><figcaption>${L.s4.cap}</figcaption></figure>
+    <p>${L.s4.p2}</p>
+    <div class="verdict"><p class="eyebrow">${L.s4.lit}</p>
+      <ul>${L.s4.lits.map(x=>`<li>${x}</li>`).join('')}</ul><p>${L.s4.litend}</p></div>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s5.n}</span><h2>${L.s5.h}</h2></div>
+    <p>${L.s5.p1}</p>
+    <figure><div class="chartbox" id="c4"></div><figcaption>${L.s5.cap}</figcaption></figure>
+    <p>${L.s5.p2}</p>${tiles(L.s5.tiles)}<p>${L.s5.p3}</p>
+    <div class="callout"><p>${L.s5.call}</p></div>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s6.n}</span><h2>${L.s6.h}</h2></div>
+    <p>${L.s6.p1}</p>${table(L.s6.th,L.s6.rows)}<p>${L.s6.p2}</p>
+  </section>
+  <section>
+    <div class="shead"><span class="snum">${L.s7.n}</span><h2>${L.s7.h}</h2></div>
+    ${table(L.s7.th,L.s7.rows.map(r=>[r[0],
+      `<span class="chip ${{live:'live',viva:'live',dead:'dead',muerta:'dead'}[r[1]]||'open'}">${r[1]}</span>`,
+      r[2],r[3]]))}
+    <div class="shead" style="margin-top:30px"><h2>${L.s7.h2}</h2></div>
+    <p>${L.s7.p1}</p>
+    <div class="callout"><p>${L.s7.call}</p></div>
+  </section>
+  <footer>${L.foot}</footer>
+</main>`;
+  document.getElementById('c1').append(chartBoard(L));
+  document.getElementById('c2').append(chartFmt(L));
+  document.getElementById('c3').append(chartCount(L));
+  document.getElementById('c4').append(chartTrace(L));
+}
+
+let LANG='en';
+render(LANG);
+
+/* ---- hidden command: type "esp" for Spanish, "eng" for English ---- */
+let buf='';
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const t=e.target.tagName;
+  if(t==='INPUT'||t==='TEXTAREA')return;
+  buf=(buf+e.key.toLowerCase()).slice(-3);
+  const want=buf==='esp'?'es':buf==='eng'?'en':null;
+  if(want&&want!==LANG){
+    LANG=want;render(LANG);
+    const f=document.getElementById('flash');
+    f.textContent=T[LANG==='es'?'en':'es'].flashTo;
+    f.style.opacity=1;setTimeout(()=>f.style.opacity=0,1400);
+    buf='';
+  }
+});
+</script>
