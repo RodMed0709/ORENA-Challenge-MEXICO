@@ -1,0 +1,33 @@
+{
+  "tag": "r42_surgsigma",
+  "model": "/home/uaq_user/storage/rung19/r42_ep4_merged",
+  "n": 1105,
+  "n_unparseable": 0,
+  "accuracy": 0.4027,
+  "bias_mean_pred_minus_gold": -0.3529,
+  "mae": 0.7529,
+  "off_by_one_share": 0.7697,
+  "spearman": 0.4965,
+  "accuracy_by_gold": {
+    "0": 0.2892,
+    "1": 0.93,
+    "2": 0.3167,
+    "3": 0.04,
+    "4": 0.0
+  },
+  "n_by_gold": {
+    "0": 204,
+    "1": 300,
+    "2": 300,
+    "3": 300,
+    "4": 1
+  },
+  "mean_pred_by_gold": {
+    "0": 0.93,
+    "1": 1.03,
+    "2": 1.35,
+    "3": 1.7,
+    "4": 1
+  },
+  "secs_per_question": 0.092
+}

@@ -1,0 +1,33 @@
+{
+  "tag": "conn4e5_surgsigma",
+  "model": "/home/uaq_user/storage/rung43/conn4e5_ep23_fp8",
+  "n": 1105,
+  "n_unparseable": 0,
+  "accuracy": 0.4905,
+  "bias_mean_pred_minus_gold": -0.2434,
+  "mae": 0.5692,
+  "off_by_one_share": 0.8828,
+  "spearman": 0.6921,
+  "accuracy_by_gold": {
+    "0": 0.25,
+    "1": 0.9267,
+    "2": 0.67,
+    "3": 0.04,
+    "4": 0.0
+  },
+  "n_by_gold": {
+    "0": 204,
+    "1": 300,
+    "2": 300,
+    "3": 300,
+    "4": 1
+  },
+  "mean_pred_by_gold": {
+    "0": 0.81,
+    "1": 1.02,
+    "2": 1.67,
+    "3": 1.87,
+    "4": 2
+  },
+  "secs_per_question": 0.197
+}
