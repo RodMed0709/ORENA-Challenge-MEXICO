@@ -64,27 +64,25 @@ Every one was hit during rung 44 *with* network access. Offline, each is fatal.
 - **The input handling is submission 02's, unchanged.** It has three input-boundary holes
   closed in it. Do not rewrite it.
 
-## 🔴 One unverified risk: the CUDA version
+## ✅ The CUDA risk, closed by pinning
 
-The image is built on `cuda12.4` but **vLLM pulls `cu130` wheels** — torch `2.13.0+cu130`,
-torchvision `0.28.0+cu130`. Those need an NVIDIA driver new enough for CUDA 13.
+An earlier draft flagged this red: the build pulled `cu130` wheels, which need a driver new
+enough for CUDA 13. UNAM's driver runs them — but **the challenge host's driver is unknown**,
+and a driver too old fails at container start, offline, with a submission slot spent.
 
-UNAM's driver runs them (that is how every rung-44 number was produced) but **the challenge
-host's driver is unknown**, and a driver too old fails at container start — at score time,
-offline, with a submission slot already spent.
-
-Two ways to close it, neither taken yet:
-1. Check what driver the platform runs, if it is documented anywhere.
-2. Pin vLLM's wheels to `cu128` to match the pods (`torch 2.11.0+cu128` is what the pod
-   envs run), trading a newer stack for one we have seen work on rented hardware.
+Closed by taking option 2: **pinned to `cu128`**, matching what the rented pods actually run.
+A newer stack traded for one we have seen work on hardware we do not control.
 
 Exact versions baked in, for a future build log to diff against:
 
 ```
-torch 2.13.0+cu130   cuda 13.0        vllm 0.27.1
-torchvision 0.28.0+cu130              transformers 5.15.0
-numpy 2.1.2                           orena-focus 0.3.5
+torch 2.11.0+cu128   cuda 12.8        vllm 0.26.0
+torchvision (cu128)                   transformers 4.57.*
+orena-focus 0.3.5
 ```
+
+⚠️ Still unasked: **what driver the platform runs.** The pin makes the requirement older and
+so more likely met, but "more likely" is not "verified".
 
 ## Honest caveat on the model itself
 
@@ -96,7 +94,10 @@ official data. It is not a bid for the leaderboard.
 
 ## Status and how to test it
 
-🔴 **NOT BUILT YET.** But it IS testable, in two halves — the split submission 02 already
+🟡 **BUILT, never asked a question.** The image exists
+(`_artifacts/orena-frame-04-cu128.tar`, 17 GB, built with buildah on UNAM and pulled local
+alongside the 33.48 GiB FP8 checkpoint), and its capability gate passes. What has never
+happened is the container producing an answer. Testable in two halves — the split submission 02 already
 established, and which an earlier draft of this README wrongly said did not exist.
 
 **Half 1 — wiring, LOCAL, on CPU, free.** `./do_test_run.sh` runs the container against
