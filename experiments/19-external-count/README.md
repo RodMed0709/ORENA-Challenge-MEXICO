@@ -14,8 +14,48 @@
 | `../06-vit-lora/06_vit_lora.ipynb` | 06 | 0.5667 (ep2) | 🟡 PARTIAL |
 | `../06-vit-lora/06c_epoch3_eval.ipynb` | 06c | **0.5724 (ep3)** | 🟡 NULL vs ep2 — **the control for this rung** |
 | `../15-count-target/15_count_target.ipynb` | 15 | 0.5699 | NULL — the count *format*, without the count *data* |
-| `19a_enumeration_probe.ipynb` | 19a | *pending* | — |
-| `19b_external_mix.ipynb` | 19b | *pending* | 🔒 gated on 19a |
+| `_tools/run_enumeration_probe.py` | **19a** | **enumeration, not `bucket_mean`** | 🔴 **RUN 2026-08-16 — the model fails on LARGE instruments too. The deficit is ENUMERATION.** 19b is licensed |
+| `19b_external_mix.ipynb` | 19b | *pending* | 🟢 **unblocked by 19a** |
+
+## 🔴 19a RESULT — it fails on the big obvious objects too
+
+Ran the pre-registered read below on **2,145 external frames / 3,185 questions per model**, on two
+substrates and two of our own models, for **~9 minutes of GPU**. The question was held fixed —
+the challenge's own template, `How many {Class}s appear in this frame? Please provide a number.` —
+and only the object changed.
+
+| substrate | model | acc | Spearman | gold 1 | gold 2 | gold 3 | gold ≥4 |
+|---|---|---|---|---|---|---|---|
+| **SurgΣ-DB** — lap-chole, large instruments | rung 42 ep4 (8B) | 0.403 | 0.497 | **0.930** | 0.317 | **0.040** | 0.000 |
+| **SurgΣ-DB** | gen-3.6 conn4e5 (27B) | 0.491 | 0.692 | 0.927 | **0.670** | **0.040** | 0.000 |
+| **MISAW-Seg** — microsurgery | rung 42 ep4 (8B) | 0.205 | **0.076** | 0.709 | 0.065 | 0.000 | 0.000 |
+| **MISAW-Seg** | gen-3.6 conn4e5 (27B) | 0.391 | 0.155 | 0.857 | 0.415 | 0.000 | 0.000 |
+
+Against the same two models on **our own Clips**: 0.886 / 0.507 / 0.200 (rung 42) and
+0.814 / 0.406 / 0.200 (27B) at gold 1 / 2 / 3.
+
+**The pre-registered branch resolves to the first leg.** Large, metallic, high-contrast
+laparoscopic instruments — in the model's own procedure — collapse to **0.04 at three objects**,
+*worse* than our 4 mm Clips at 0.20. It is not that clips are small. **The model cannot enumerate
+past about two.** On MISAW the mean prediction is flat at ≈1 whether the true count is 1 or 9, and
+rung 42's Spearman is **0.076** — no relationship at all between what is present and what it says.
+
+⇒ **External counting data is on target. 19b lives**, and the small-object-perception branch
+(higher resolution, a detector, SAM) is **not** the primary lever, which is what this rung was
+built to find out for 1–2 GPU-hours instead of ~20.
+
+⚠️ **Two substrates on purpose, because neither is clean alone.** SurgΣ-DB is our own domain but
+its frames are `desmoke` outputs — processed, and [[inference-only-input-tests-biased]] says an
+input transform met only at inference is biased toward the negative. MISAW-Seg has raw frames and
+COCO instance masks but is microsurgical anastomosis, a domain the model has never seen. The
+collapse appears in **both**, so it survives either objection; the difference in severity is what
+domain shift adds on top.
+
+🟡 **A second finding this rung did not go looking for: the 27B enumerates markedly better than
+the 8B** on identical frames — 0.670 against 0.317 at two objects, Spearman 0.692 against 0.497.
+The larger backbone is better at the thing that is 71 % of rung 42's errors, and still scores
+lower overall. See [[backbone-generation-is-not-the-lever]]; this does not overturn it, it tensions
+it.
 
 ## 🔴 Read this before anything else: there is no label-matched data
 

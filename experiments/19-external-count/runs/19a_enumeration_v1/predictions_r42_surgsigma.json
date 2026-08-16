@@ -1,0 +1,7737 @@
+[
+ {
+  "qID": "surgsigma__250644",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222259",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219002",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233453",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232318",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230866",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225285",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222102",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246764",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221438",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248390",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241197",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219161",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219092",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221634",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230514",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231737",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245183",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248597",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219037",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247136",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228400",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250884",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246757",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241148",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230755",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242322",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248370",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233803",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218518",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226076",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241209",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236826",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233743",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225989",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230448",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236602",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222097",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221618",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238647",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221998",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237738",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236943",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248625",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232940",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219594",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242632",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246523",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223282",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238608",
+  "gold": 1,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221246",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246880",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234679",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249761",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249469",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237815",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248050",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228142",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220740",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219633",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251554",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231413",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234367",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221262",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231749",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222076",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238650",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233800",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242391",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250197",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237875",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226143",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237984",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237666",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229256",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233009",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250854",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220941",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249159",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250177",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227604",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246468",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232316",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226167",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242879",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238623",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233060",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250695",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247018",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230623",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235990",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219976",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231543",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219166",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235768",
+  "gold": 1,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240292",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233021",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220651",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229835",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247553",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235697",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230040",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251322",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244455",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239975",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250748",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242517",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225342",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232946",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225286",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232390",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247138",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246659",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232898",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248266",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241402",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248249",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240064",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237820",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230617",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225258",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245312",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244209",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221588",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219662",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222223",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225837",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249732",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226082",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241201",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248487",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220476",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239359",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238880",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248479",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243157",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246260",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232656",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246924",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218708",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222325",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246536",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233006",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250716",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236825",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222266",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234684",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241511",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226050",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242396",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218465",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232913",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244503",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227728",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245244",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222167",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249685",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234859",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250636",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248736",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228401",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238270",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226115",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246666",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246328",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218015",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248530",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235987",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244010",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218868",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222271",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237838",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235136",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232062",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220192",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232200",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247562",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221245",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221415",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243793",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220733",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246427",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223299",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223342",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251522",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243358",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246836",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226339",
+  "gold": 1,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232949",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246211",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248672",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241244",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229852",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246664",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228876",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235601",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240058",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238262",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241806",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245551",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242360",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223056",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232486",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230901",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220485",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236726",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218893",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248354",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246935",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231681",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248357",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230715",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218529",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220928",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249830",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220250",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231540",
+  "gold": 1,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220683",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219155",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236158",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220925",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245495",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232020",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233808",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243783",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230402",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246663",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224935",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247636",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247923",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243315",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232258",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243320",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240741",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228070",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221676",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222002",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251509",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241448",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237621",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241307",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240871",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243111",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219796",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251170",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250810",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222034",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220327",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240480",
+  "gold": 1,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236806",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222217",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232519",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228131",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228067",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246524",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242313",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225295",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227944",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233809",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242885",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232624",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221190",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242033",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246852",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222025",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219734",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251147",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246685",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218776",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221627",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231863",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227479",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240730",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243786",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243525",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230168",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240290",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220203",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226331",
+  "gold": 1,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238616",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218297",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239643",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232952",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242417",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234120",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241242",
+  "gold": 1,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246965",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251564",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243848",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225978",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228062",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234831",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230498",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220201",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248112",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246712",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220429",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235673",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220090",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219712",
+  "gold": 1,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244639",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239725",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240655",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242252",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225869",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220297",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240937",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221486",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228543",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220797",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244979",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220788",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248986",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230036",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236722",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223225",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244082",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230322",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244379",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244968",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219846",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246070",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221528",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237319",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247894",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244630",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243966",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241815",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233106",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231037",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229278",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248880",
+  "gold": 2,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250238",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232985",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230114",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231120",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236553",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224853",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248927",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247365",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232247",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239014",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233103",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221027",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218269",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239038",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246109",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243928",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222588",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221048",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242688",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229624",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240879",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231114",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224879",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234024",
+  "gold": 2,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220802",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230263",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235365",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231726",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225875",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238315",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242812",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249939",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232355",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245480",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247710",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242204",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218245",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248737",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243401",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232236",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248041",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222724",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224912",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231102",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223140",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222806",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243237",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225751",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231298",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231551",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245150",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229565",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250279",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233771",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229263",
+  "gold": 2,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249239",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246422",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231093",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240704",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240261",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230466",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220144",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221949",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246423",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237537",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231401",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220018",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218159",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233614",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224852",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246907",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231057",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226135",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238400",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243148",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249997",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237606",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243893",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218275",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222931",
+  "gold": 2,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221159",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249353",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225497",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242960",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219422",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235359",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244611",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243210",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225441",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237649",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223535",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219882",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232484",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234988",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219848",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234458",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229551",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249107",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230391",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248336",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222708",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234206",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243731",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236786",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246100",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225717",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230079",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226156",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228197",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237035",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218943",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228379",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233592",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237009",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248883",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230366",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231144",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225900",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249889",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222824",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236083",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219828",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239540",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229779",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229157",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239249",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234060",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232431",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229893",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229789",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218924",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247972",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228824",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236606",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233482",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231434",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220820",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231450",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234144",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247291",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240971",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236652",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249066",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242577",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233574",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219148",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223123",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231044",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228366",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244555",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231118",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219590",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222829",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245004",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238037",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233835",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250999",
+  "gold": 2,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232977",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238147",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245232",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241068",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223143",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236206",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244332",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228747",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230605",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220023",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250058",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238142",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218113",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241592",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242701",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249229",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250318",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248910",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229003",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234980",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237975",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220895",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248143",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233557",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246141",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232981",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223480",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250326",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232277",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240900",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232514",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248335",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236849",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233353",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236698",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249750",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232131",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243398",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223530",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228800",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237343",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248203",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235787",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249030",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228098",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245862",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244072",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232287",
+  "gold": 2,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236781",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243026",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218023",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232392",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231825",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229553",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237651",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244545",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245253",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247725",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233238",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239326",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238399",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238443",
+  "gold": 2,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248993",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229633",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241064",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239657",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227547",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247953",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221666",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231641",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241278",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248118",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246401",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246068",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233641",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222254",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230031",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248947",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232698",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229828",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229149",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225426",
+  "gold": 2,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218937",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220061",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230280",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239698",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245466",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221040",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238954",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237125",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246285",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244316",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228937",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250292",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249697",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236111",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240410",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236651",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230252",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225429",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247869",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249242",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218207",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222799",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237563",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229720",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228173",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249674",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241553",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239319",
+  "gold": 2,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220134",
+  "gold": 2,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240708",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229953",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222332",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235643",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222336",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236468",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247126",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239079",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240805",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243095",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230904",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235246",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244389",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248516",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238595",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234027",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239391",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235394",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223076",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237092",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__235621",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230799",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251358",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246502",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230822",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238785",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237718",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245317",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229526",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248198",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234960",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220945",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230825",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229481",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230821",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230909",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250249",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239244",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220947",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222337",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222445",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229476",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232038",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223075",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229213",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220933",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233849",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233421",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230908",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246506",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236470",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244450",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220932",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228917",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234009",
+  "gold": 0,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232039",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218767",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232037",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237289",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218322",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231352",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230845",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242430",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242988",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239239",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229424",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247657",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243958",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247125",
+  "gold": 0,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234931",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239390",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219499",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240287",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230912",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233417",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225576",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243099",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236432",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245254",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230864",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230801",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218705",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251196",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228861",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230844",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230824",
+  "gold": 0,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244250",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241415",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220918",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230905",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245300",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220938",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234669",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245675",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221270",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219069",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222335",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228853",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223080",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222186",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229426",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233842",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__227484",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241546",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250252",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246503",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232036",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229197",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222334",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248344",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250614",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218325",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250411",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234010",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228012",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222322",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230907",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220650",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230913",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241570",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249977",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251337",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222031",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231548",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248165",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247417",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222331",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237823",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231549",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220931",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250736",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250012",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239078",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231674",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228709",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220948",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230843",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246505",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247638",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220930",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246891",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230823",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230863",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222338",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232041",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249976",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221279",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246526",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228258",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220929",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218729",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222443",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231101",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248531",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242991",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250365",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228862",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247513",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229952",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248213",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238784",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238253",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230903",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221054",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251168",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247412",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249843",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232040",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247420",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237504",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218014",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222165",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249598",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248333",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230395",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220922",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248342",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245360",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230800",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236942",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238515",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222329",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__237840",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251508",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238598",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247419",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228854",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239081",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229425",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220939",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230978",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220915",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242990",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230798",
+  "gold": 0,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230846",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240806",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231541",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250043",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228312",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238652",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229246",
+  "gold": 0,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231550",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249679",
+  "gold": 0,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232714",
+  "gold": 0,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231657",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228676",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242550",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229172",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234138",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230194",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233149",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230305",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244804",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249922",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230296",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244661",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218109",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243582",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228696",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224832",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229563",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250992",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238289",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242574",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244659",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229556",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247556",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241835",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245816",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250139",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242674",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240192",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218184",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224954",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231159",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229467",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238285",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247558",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229573",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231186",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247206",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244732",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234387",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241769",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244647",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243687",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233274",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238807",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244579",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232092",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234093",
+  "gold": 3,
+  "raw": "0",
+  "pred": 0,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249935",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240354",
+  "gold": 3,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230265",
+  "gold": 3,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230056",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229499",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225659",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250995",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228700",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231371",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225656",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243698",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247360",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228683",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228697",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229272",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242533",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230297",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251007",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244781",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243670",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244807",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230319",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225458",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228703",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231163",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229482",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234315",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228671",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231178",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218167",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250100",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243694",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228277",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230287",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221030",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221708",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231035",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249865",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228276",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245797",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225464",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218157",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244709",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230326",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241759",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241841",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239100",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228681",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221685",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230063",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241839",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225634",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222959",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238040",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242677",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223419",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244715",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245780",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247330",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__221702",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228594",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228578",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244682",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231181",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224831",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229986",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225649",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244669",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238309",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245728",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245754",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229478",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243666",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236266",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240197",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239419",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231165",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244775",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238815",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231184",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244697",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245759",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222938",
+  "gold": 3,
+  "raw": "5",
+  "pred": 5,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245735",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225456",
+  "gold": 3,
+  "raw": "4",
+  "pred": 4,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228795",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245771",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229018",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230233",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246088",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223525",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228610",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229554",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228657",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244583",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223421",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228609",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218086",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238293",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247358",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244799",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241760",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230889",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220821",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229501",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230545",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250081",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223116",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247335",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229505",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245770",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__246909",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228762",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238806",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225636",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243721",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229475",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245820",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230244",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228552",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223243",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222937",
+  "gold": 3,
+  "raw": "6",
+  "pred": 6,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228634",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231189",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244801",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244698",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230546",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238849",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__226272",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241754",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247357",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249917",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238280",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230268",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243042",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243706",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243002",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238845",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223439",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244809",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220883",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238828",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231652",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245723",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230054",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219260",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224921",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229486",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247228",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244712",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244769",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218413",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247224",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230261",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244714",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220884",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228660",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241761",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243600",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245841",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__239417",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230300",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228675",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244743",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238841",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245791",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224920",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233347",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232499",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231611",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247220",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225468",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228619",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231881",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238300",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__248140",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243030",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__247201",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244578",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__220876",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240358",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__224844",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231369",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230062",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231654",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225638",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238284",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243516",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__218082",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245853",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243716",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240983",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238303",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228689",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243599",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__234316",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245763",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243037",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228786",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230251",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244576",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228425",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230488",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238847",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__249905",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242534",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225661",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__219830",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245781",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245733",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229546",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250114",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228614",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231245",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244580",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244643",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238292",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225632",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240982",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__225641",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228600",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250984",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231034",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243433",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__250002",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230274",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238307",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242123",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__241767",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__229574",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240409",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228558",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__236392",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228695",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244812",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243431",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228527",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__223019",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__238306",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233148",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243430",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__230253",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__251010",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__231168",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__244727",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__245858",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__242641",
+  "gold": 3,
+  "raw": "3",
+  "pred": 3,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__228574",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__240148",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243704",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__233326",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__232487",
+  "gold": 3,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__243717",
+  "gold": 3,
+  "raw": "2",
+  "pred": 2,
+  "group": "instruments"
+ },
+ {
+  "qID": "surgsigma__222965",
+  "gold": 4,
+  "raw": "1",
+  "pred": 1,
+  "group": "instruments"
+ }
+]
