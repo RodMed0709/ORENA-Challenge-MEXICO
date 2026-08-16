@@ -25,7 +25,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 | Component | Pin | Why this exact floor |
 |---|---|---|
 | Python | `>=3.10,<3.13` | SDK requires ≥3.10; vLLM 0.11 wheels cover 3.10–3.12 |
-| `transformers` | `==4.57.*` | **Hard floor for Qwen3-VL = 4.57.0.** ms-swift caps `<5.13`; stay on the 4.57 line — do NOT jump to transformers 5.x (breaks `qwen-vl-utils`/SDK). |
+| `transformers` | **8B line:** `==4.57.*` · **gen-3.6 line:** `>=5.5,<5.13` | **Two lines, two pins** ([[transformers-pin-is-per-tool-not-global]], 2026-08-16). 4.57.0 is the hard floor for Qwen3-VL and stands for everything we ship. It **cannot load gen-3.6 at all** (`Qwen3_5ForConditionalGeneration`), so rungs 38/40/43/44 run 5.x — `ms_swift 4.4.1` sits at **5.12.1**, inside its own `<5.13` cap. The frozen truth is `requirements/unam-*.lock`. |
 | `qwen-vl-utils` | `>=0.0.14` | Required companion for Qwen3-VL vision processing; the SDK's `inference.py` imports `process_vision_info`. |
 | `torch` | `>=2.5` (let vLLM pin) | Ada Lovelace (L40S, CC 8.9) FP8 path needs recent CUDA/torch. |
 | `accelerate` | `>=1.0` | Training launcher + `device_map`. |
@@ -72,7 +72,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 ## What NOT to use (and why)
 | Avoid | Reason |
 |---|---|
-| `transformers` 5.x / bleeding main | Breaks ms-swift cap (`<5.13`) and `qwen-vl-utils`; Qwen3-VL is stable on the 4.57 line. |
+| `transformers` **>=5.13** / bleeding main | Breaks the ms-swift cap. 🔻 **Corrected 2026-08-16 — this row used to forbid all of 5.x, and that was wrong**: the cap is `<5.13`, so 5.12.1 satisfies it; `qwen-vl-utils` is installed nowhere we run; and the SDK imports clean under 5.15.0. Keep the 8B on 4.57 because it ships there, not because 5.x breaks it ([[transformers-pin-is-per-tool-not-global]]). |
 | Raw `trl` for training | Excess multimodal plumbing; no `max_pixels`/vision-freeze ergonomics. |
 | Unsloth (primary) | Lagging Qwen3-VL multimodal support, single-GPU, reproducibility risk. |
 | NF4/QLoRA to **serve** the 8B | 8B bf16 already fits 48 GB; dequant only adds latency. |
@@ -83,7 +83,8 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 ## Confidence
 | Area | Level | Note |
 |---|---|---|
-| Version floors (transformers 4.57 / vllm 0.11 / qwen-vl-utils 0.0.14) | HIGH | Verified in vLLM + ms-swift + Qwen docs. |
+| Version floors — **8B line** (transformers 4.57 / vllm 0.11) | HIGH | Verified in vLLM + ms-swift + Qwen docs, and it is what the shipped submission is built on. |
+| Version floors — **gen-3.6 line** (transformers 5.5–5.12 / vllm 0.27.1) | HIGH | Not from docs: `pip freeze` of the four environments that actually produced every gen-3.6 result, in `requirements/unam-*.lock`. |
 | ms-swift as framework | HIGH | Official Qwen3-VL best-practice recipe. |
 | FP8-on-L40S serving path | HIGH | Ada CC 8.9 native w8a8 confirmed in vLLM FP8 docs. |
 | SDK integration points | HIGH | Read directly from cloned `orena-focus` source. |
