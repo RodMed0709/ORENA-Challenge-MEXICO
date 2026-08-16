@@ -64,6 +64,28 @@ Every one was hit during rung 44 *with* network access. Offline, each is fatal.
 - **The input handling is submission 02's, unchanged.** It has three input-boundary holes
   closed in it. Do not rewrite it.
 
+## 🔴 One unverified risk: the CUDA version
+
+The image is built on `cuda12.4` but **vLLM pulls `cu130` wheels** — torch `2.13.0+cu130`,
+torchvision `0.28.0+cu130`. Those need an NVIDIA driver new enough for CUDA 13.
+
+UNAM's driver runs them (that is how every rung-44 number was produced) but **the challenge
+host's driver is unknown**, and a driver too old fails at container start — at score time,
+offline, with a submission slot already spent.
+
+Two ways to close it, neither taken yet:
+1. Check what driver the platform runs, if it is documented anywhere.
+2. Pin vLLM's wheels to `cu128` to match the pods (`torch 2.11.0+cu128` is what the pod
+   envs run), trading a newer stack for one we have seen work on rented hardware.
+
+Exact versions baked in, for a future build log to diff against:
+
+```
+torch 2.13.0+cu130   cuda 13.0        vllm 0.27.1
+torchvision 0.28.0+cu130              transformers 5.15.0
+numpy 2.1.2                           orena-focus 0.3.5
+```
+
 ## Honest caveat on the model itself
 
 `conn4e5` ep2+3 is **not** our best checkpoint. On 4000 HeiCo questions it scores
