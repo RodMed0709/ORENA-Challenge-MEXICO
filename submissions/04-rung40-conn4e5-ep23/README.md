@@ -72,9 +72,26 @@ from two extra epochs where the 8B gained **+0.0690** — with `aggregation` com
 (−0.0034, CI crossing zero). This container exists to answer the *thinking* question on
 official data. It is not a bid for the leaderboard.
 
-## Status
+## Status and how to test it
 
-🔴 **NOT BUILT AND NOT TESTED.** No machine we have access to has Docker and a GPU together:
-the pod has no Docker, UNAM's daemon is not running and we are not in its group, and the
-local Docker has no GPU. Before this is submitted it must be built, run through
-`do_test_run.sh`, and its startup timed.
+🔴 **NOT BUILT YET.** But it IS testable, in two halves — the split submission 02 already
+established, and which an earlier draft of this README wrongly said did not exist.
+
+**Half 1 — wiring, LOCAL, on CPU, free.** `./do_test_run.sh` runs the container against
+`test/input` with `ALLOW_CPU=1`. Every answer comes back empty by design; what it proves is
+that the container starts, parses `batch.json`, indexes frames, and writes valid
+`answer.json`. It also catches **two of the five packaging defects**, because those checks
+run before the CUDA gate: missing processor files, and a `torchvision` import failure.
+
+```bash
+./do_build.sh
+./do_test_run.sh                          # wiring smoke, CPU, empty answers
+ENABLE_THINKING=1 ./do_test_run.sh        # same, with the switch on
+```
+
+**Half 2 — inference and startup, needs a GPU.** The remaining three defects (`ninja`, the
+`PATH`, `max_model_len`) only surface once vLLM's engine actually starts, and the startup
+time — the one number that can fail us — can only be measured there.
+
+⚠️ **Time the startup before submitting.** It is ~60 s warm and ~127 s cold against a 120 s
+allowance, so it straddles the limit and the answer depends on the host's cache state.
