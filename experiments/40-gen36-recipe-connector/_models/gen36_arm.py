@@ -452,11 +452,40 @@ def _resolve_base_dir(cfg: ArmConfig) -> Path:
     This project has twice been bitten by two HF caches holding different things;
     a hardcoded path that quietly points at the wrong one turns the merge check
     into nonsense.
+
+    🔴 A LOCAL DIRECTORY is also a legal base_model, and this used to crash on one.
+    A CONTINUATION trains from a previously merged checkpoint — `40_B_connector_ep23_v1`
+    set `base_model` to `.../40_B_connector_v1/merged` — and the hub-cache branch below
+    would then `split("/", 1)` a filesystem path into ('', 'workspace/...'), glob for a
+    `models--` directory that cannot exist, and raise:
+
+        ArmFailure: cannot locate the base snapshot for '/workspace/.../merged'
+        under '/workspace/hf_cache'. The merge guard has nothing to compare against.
+
+    It cost a completed run its exit code on 2026-08-16: 1802/1802 steps, a full
+    51.7 GiB merge, both cosines annealed — and `rc=1` because the *verifier* could not
+    find its reference. Nothing was wrong with the artifact.
+    Worse than the crash is WHERE it happens: at the end, after ~6.7 h of training,
+    when the same condition is knowable in preflight.
     """
     import glob
     import os
 
+    local = Path(cfg.effective_model).expanduser()
+    if local.is_dir():
+        if not any(local.glob("*.safetensors")):
+            raise ArmFailure(
+                f"base_model {str(local)!r} is a directory but holds no *.safetensors. "
+                "The merge guard would compare against nothing."
+            )
+        return local
+
     hf = cfg.hf_home or os.environ.get("HF_HOME", "")
+    if "/" not in cfg.effective_model:
+        raise ArmFailure(
+            f"base_model {cfg.effective_model!r} is neither an existing directory nor a "
+            "hub id of the form 'org/name'."
+        )
     org, name = cfg.effective_model.split("/", 1)
     hits = sorted(glob.glob(str(Path(hf) / "hub" / f"models--{org}--{name}" / "snapshots" / "*")))
     if not hits:
