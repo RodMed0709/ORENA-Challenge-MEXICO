@@ -333,8 +333,27 @@ def load_model():
             f"{MODEL_PATH} is missing {missing}. llmcompressor does not write processor "
             "files; copy them from the pre-quantization checkpoint into the image."
         )
+    # ALLOW_CPU=1 is submission 02's escape hatch and it is kept deliberately: the
+    # container smoke (`do_test_run.sh`) is designed to run on CPU and validate WIRING --
+    # that the container starts, parses batch.json, indexes frames and writes valid JSON.
+    # vLLM cannot serve a 27B on CPU, so this returns a stub that answers "" and lets the
+    # rest of the path be exercised. It also still catches TWO of the five packaging
+    # defects, because the checks above run first: missing processor files, and a
+    # torchvision import failure when AutoProcessor is touched downstream.
     if not torch.cuda.is_available():
-        raise RuntimeError("CUDA is not available. A 27B cannot answer this batch on CPU.")
+        if os.environ.get("ALLOW_CPU") != "1":
+            raise RuntimeError(
+                "CUDA is not available and a 27B cannot answer this batch on CPU. "
+                "Refusing to start: a CPU run would burn the wall clock and produce a "
+                "failure nothing downstream can diagnose. Set ALLOW_CPU=1 for a local "
+                "wiring smoke, which answers nothing but exercises every other path."
+            )
+        log.warning("CUDA unavailable and ALLOW_CPU=1 -- WIRING SMOKE ONLY. Every answer "
+                    "will be empty. This validates the container, never the model.")
+        from transformers import AutoProcessor  # touches torchvision -> defect 4 surfaces here
+        AutoProcessor.from_pretrained(str(MODEL_PATH), max_pixels=MAX_PIXELS)
+        log.info("processor loads cleanly (tokenizer + preprocessor + chat template present)")
+        return None, None
 
     from vllm import LLM
     log.info("Loading FP8 %s via vLLM (enforce_eager=True, thinking=%s) ...",
@@ -362,6 +381,10 @@ def answer_batch(llm, requests, frames: dict, system_prompt: str) -> tuple[list[
     wrong question and nothing downstream would notice.
     """
     from vllm import SamplingParams
+
+    if llm is None:      # ALLOW_CPU wiring smoke -- see load_model()
+        log.warning("wiring smoke: emitting %d empty answers", len(requests))
+        return [""] * len(requests), 0.0
 
     convs, kept = [], []
     for req in requests:
