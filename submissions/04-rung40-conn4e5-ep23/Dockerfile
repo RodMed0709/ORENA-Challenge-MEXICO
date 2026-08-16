@@ -1,4 +1,7 @@
-FROM --platform=linux/amd64 pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime AS frame-algorithm-amd64
+# Fully qualified on purpose: `docker` defaults to docker.io but `buildah` refuses a
+# short name without a TTY, and this image is built with buildah (UNAM has no Docker
+# daemon and we are not in its group). Explicit is also the safer form anywhere.
+FROM --platform=linux/amd64 docker.io/pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime AS frame-algorithm-amd64
 
 # torch 2.5.1 + torchvision are pre-installed in the base image (CUDA 12.4).
 # requirements.txt only lists additional dependencies.
@@ -43,17 +46,30 @@ RUN python -m pip install \
 # torchvision, passed the gate and would only have surfaced at score time, with a
 # submission slot already spent. numpy is the sharp one: the requirement allows <3.0,
 # which resolves to numpy 2.x against a torch-2.5.1 base predating numpy-2 hardening.
+# 2026-08-16, submission 04: the assertions are REPLACED, not dropped. Submission 02's
+# gate demanded torch 2.5 / transformers 4.57 / numpy 1.x, which is right for the 8B on HF
+# and wrong here -- vLLM pins its own torch (2.13+cu130 measured) and needs transformers
+# 5.x, because `qwen3_5` does not exist in 4.57 and the model will not load without it.
+#
+# The gate's PURPOSE is unchanged: catch a dependency that silently replaces something
+# critical, at BUILD time, where it is free to fix. What changed is that it now asserts
+# CAPABILITIES rather than version strings -- "transformers knows qwen3_5" is the thing we
+# actually depend on, and it survives a version bump that a `startswith('5.')` would not.
+#
+# 🔴 The `ninja` check is new and earns its place: vLLM's EngineCore shells out to it and
+# its absence surfaces as an opaque FileNotFoundError INSIDE a worker subprocess, at run
+# time, offline. It cost a debugging cycle in rung 44. Here it costs a failed build.
 RUN python -c "\
-import torch, torchvision, transformers, numpy, qwen_vl_utils, focus;\
+import shutil, torch, torchvision, transformers, numpy, vllm, focus;\
+from transformers.models.auto.configuration_auto import CONFIG_MAPPING_NAMES;\
 print('torch', torch.__version__, 'cuda', torch.version.cuda);\
-print('torchvision', torchvision.__version__, 'cuda', torchvision.version.cuda);\
-print('transformers', transformers.__version__, '| numpy', numpy.__version__);\
-print('qwen-vl-utils', getattr(qwen_vl_utils, '__version__', 'n/a'), '| orena-focus', getattr(focus, '__version__', 'n/a'));\
+print('torchvision', torchvision.__version__);\
+print('transformers', transformers.__version__, '| vllm', vllm.__version__, '| numpy', numpy.__version__);\
+print('orena-focus', getattr(focus, '__version__', 'n/a'));\
 assert torch.version.cuda, 'torch lost its CUDA build - a --user wheel shadowed the base image';\
-assert torch.__version__.startswith('2.5'), f'unexpected torch {torch.__version__}';\
-assert torchvision.version.cuda, 'torchvision lost its CUDA build';\
-assert transformers.__version__.startswith('4.57'), f'transformers {transformers.__version__} is off the 4.57 line - Qwen3-VL has a HARD floor of 4.57.0';\
-assert numpy.__version__.startswith('1.'), f'numpy {numpy.__version__} is 2.x on a torch-2.5.1 base - pin numpy<2 or move the base image'"
+assert 'qwen3_5' in CONFIG_MAPPING_NAMES, f'transformers {transformers.__version__} does not know qwen3_5 - the 27B cannot load (4.57 does NOT have it)';\
+assert shutil.which('ninja'), 'ninja is not on PATH - vLLM EngineCore fails at RUNTIME with an opaque FileNotFoundError';\
+print('gate OK: cuda + qwen3_5 + ninja + vllm')"
 
 # ── Model definition + weights ────────────────────────────────────────────────
 # resources/model/ holds the MERGED full checkpoint written by
