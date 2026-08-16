@@ -84,7 +84,25 @@ class VLLMBatchEngine:
 
         if len(outs) != len(questions):
             raise AssertionError(f"vLLM returned {len(outs)} outputs for {len(questions)} questions")
-        answers = [o.outputs[0].text.strip()[: self._cfg.answer_char_cap] for o in outs]
+        raw = [o.outputs[0].text.strip() for o in outs]
+        self.last_raw = raw
+        # Per-request generation facts. `finish_reason == "length"` means WE cut the trace;
+        # "stop" means the model closed it on its own. n_gen_tokens over the "stop" set is
+        # the empirical answer to "what max_new_tokens do we actually need?".
+        self.last_meta = [{"n_prompt_tokens": len(o.prompt_token_ids or []),
+                           "n_gen_tokens": len(o.outputs[0].token_ids),
+                           "finish_reason": o.outputs[0].finish_reason} for o in outs]
+        if self._cfg.enable_thinking:
+            # 🔴 FIXED 2026-08-16. This line used to hand the RAW text to the judge. With
+            # thinking on every generation is "<trace></think>answer", so the judge got a
+            # 4000-char reasoning dump where it expected "2" or "Clip" -- raw_accuracy 0.0
+            # on all 4000 questions, and a judge that finished in 5.1 s instead of 58.8 s.
+            # The split layer already existed in think_parse.py; nothing called it here.
+            from think_parse import assert_tag_survived, split_thinking
+            assert_tag_survived(raw)   # RULES §7 -- a truncated run raises, it never scores 0
+            answers = [split_thinking(r).answer[: self._cfg.answer_char_cap] for r in raw]
+        else:
+            answers = [r[: self._cfg.answer_char_cap] for r in raw]
         logger.info("batch of %d in %.2fs (%.3f s/question amortised)",
                     len(answers), wall, wall / len(answers))
         return answers, wall
