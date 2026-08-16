@@ -1,0 +1,16 @@
+# vLLM is NOT optional here. The 27B in FP8 is compressed-tensors, and HF transformers
+# DEQUANTIZES those weights back to bf16 on load -- measured, it OOMs at 43.5 GiB on a
+# 48 GB card. Submission 02's "No vLLM needed" is true for the 8B and false for this.
+vllm>=0.27.0
+
+# vLLM's EngineCore shells out to `ninja` and fails with an opaque FileNotFoundError
+# without it. Hit during rung 44; offline it is unrecoverable.
+ninja
+
+# Required by Qwen3VLVideoProcessor. Its absence surfaces as an ImportError from deep
+# inside transformers, not as a missing dependency.
+torchvision
+
+orena-focus>=0.3.4
+numpy>=1.23.0
+pillow>=9.0
