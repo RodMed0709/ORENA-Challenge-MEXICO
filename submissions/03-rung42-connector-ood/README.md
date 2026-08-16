@@ -170,6 +170,48 @@ Unchanged and deliberately so: `MAX_FAILED_FRACTION = 0.5` (at B=20 a 0.05 thres
 to ONE question — two unlucky failures would discard eighteen good answers), the warm-up
 inference, the widened build guard, `numpy<2.0`, and `normalize_answer`.
 
+## Built and shipped — 2026-08-16
+
+| | |
+|---|---|
+| artifact | `D:\ORENA_submission_03\frame-algorithm_2026-08-15_23-45-42.tar.gz` |
+| size | 17,473,576,506 B (16.27 GB) — submission 02's was 17,474,536,270 B |
+| image | `frame-algorithm:latest`, id `19c4d01f8b75`, 17.5 GB |
+| integrity | `docker save` rc=0, `gzip` rc=0, **`gzip -t` rc=0** |
+| weights | 17 files, every size byte-identical to what the pod reported; the transferred archive passed `unzip -t` (full CRC) before extraction |
+
+**Smoke (offline, `--network none`, CPU).** It exercised exactly the three things this
+package changed and all three passed:
+
+```
+--- /input inventory ---            (logged BEFORE the weight load, as designed)
+batch.json: layout={'frames': 'frames/<qID>.png'}
+Frames: 3 from DECLARED layout 'frames/<qID>.png' -> /input/frames
+fo_class vocabulary read from the SDK at runtime: 10 names
+  ('Sponge', 'Clip', 'Specimen Bag', 'Silicone Loop', 'External Drain',
+   'Needle', 'Gallstone', 'Specimen', 'Mesh', 'Absorbable Hemostatic Agent')
+```
+
+📌 That last line is `RULES §8b` confirmed live: the registry's 10th element is
+**`Absorbable Hemostatic Agent`**, not the `foreign object` the prompt's list carries. A
+container shipping a hard-coded copy of either list would have been shipping a guess.
+
+The run then stops at `RuntimeError: CUDA is not available` — the container refusing to
+start an 8B bf16 VLM on CPU, which is the designed behaviour and not a failure.
+
+### 🔴 Known defect, shipped deliberately
+
+`inference.py:553` logs `=== ORena SAVE FOCUS FRAME — rung 21 arm A2 (lr 2e-4, ep3)
+inference start ===`. **The startup line names the wrong rung.** It is a label only — it
+touches no answer, no format and no score — but submission 02's own README calls this line
+"the ONLY artifact you get back from a run that dies early", so it is a real cost if this
+container ever fails early on the platform.
+
+Not fixed because the fix is not cheap: BuildKit re-transfers the whole 17 GB context on
+**every** `docker build` invocation (~14 min, measured three times, cache warm or not), and
+`do_save.sh` re-invokes `do_build.sh`, so correcting one string costs a rebuild plus a
+~19 min single-threaded gzip — ~50 min for zero points. Fix it in the next package.
+
 ## What is NOT verified
 
 - **The GPU path inside the image.** Never exercised live, for submissions 01 or 02 either.
