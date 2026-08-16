@@ -1,0 +1,39 @@
+{
+  "date": "2026-08-16",
+  "run": "40_B_connector_ep23_v1",
+  "headline": "TRAINING AND MERGE BOTH SUCCEEDED. The chain exited rc=1 on the post-merge GUARD, which could not find anything to compare against. Nothing needs retraining or re-merging.",
+
+  "verdict_from_RESULTS_arm_json": "ArmFailure: cannot locate the base snapshot for '/workspace/repo_leo/experiments/40-gen36-recipe-connector/runs/40_B_connector_v1/merged' under '/workspace/hf_cache'. The merge guard has nothing to compare against.",
+
+  "root_cause": "gen36_arm.py:596 calls assert_merge_carried -> _resolve_base_dir, which assumes base_model is a HUB ID resolvable inside HF_HOME. This run's base_model was a LOCAL DIRECTORY (Leo's ep1 merged model), so the lookup found nothing and raised. A guard bug, not a data problem.",
+
+  "what_is_intact": {
+    "training": "1802/1802 steps, 24097 s (6.7 h), train_loss 0.00717, 13.4 s/it with no degradation across 19 measured windows",
+    "connector_trained": {
+      "model.visual.merger.linear_fc1.weight": 7318.42,
+      "model.visual.merger.linear_fc1.bias": 0.332,
+      "model.visual.merger.linear_fc2.weight": 9338.26,
+      "model.visual.merger.linear_fc2.bias": 2.001,
+      "note": "non-zero deltas -- the connector really trained, which is the whole point of arm B"
+    },
+    "schedules_completed": "param_groups_post: connector lr 4e-5 -> 0.0, lora 2e-4 -> 0.0. Both cosines annealed fully.",
+    "coverage": {"n_targeted": 604, "wrapped_connector_modules": 2, "trainable_params": 107050240},
+    "merge": "15/15 shards, 51.7 GiB, no shard missing, plus config.json and chat_template.jinja",
+    "checkpoints": "checkpoint-901 and checkpoint-1802 both present, adapter_model.safetensors 323 MB each"
+  },
+
+  "ruled_out": {
+    "disk": "543 GiB used / 97 free at 23:26, 48 min before the failure, stable since 22:00. 543+52=595 < the 640 wall. Never approached the 588 cut. Monitored every 3 min with no alert.",
+    "truncated_merge": "15/15 shards present -- the peer's leading hypothesis (a truncated merge reading as dropped connector weights) is disproven by the object listing",
+    "external_stop": "the '[trap] chain exiting rc=1' is the script reacting to its own stage-1 failure. RunPod logs it as 'Exited by user' because the trap calls the API with the key."
+  },
+
+  "how_this_was_diagnosed": "Entirely over S3 against the network volume (bucket gf78k60nlt) with the pod already EXITED. No pod was started, nothing was spent. Network volumes are S3-addressable, which makes post-mortems on a stopped pod free.",
+
+  "cost": "6 h 58 min at $2.09/h = ~$14.6, and the artifact is usable",
+
+  "still_to_do": [
+    "Fix _resolve_base_dir so a local-directory base_model resolves. Any continuation from a merged checkpoint will fail identically, and it raises AFTER 6.7 h of training rather than in preflight.",
+    "Evaluate the ep2+3 model. Its 323 MB adapter can be pulled over S3 and merged on UNAM, then scored on the 4000 HeiCo questions for free."
+  ]
+}
