@@ -89,9 +89,27 @@ run before the CUDA gate: missing processor files, and a `torchvision` import fa
 ENABLE_THINKING=1 ./do_test_run.sh        # same, with the switch on
 ```
 
-**Half 2 — inference and startup, needs a GPU.** The remaining three defects (`ninja`, the
-`PATH`, `max_model_len`) only surface once vLLM's engine actually starts, and the startup
-time — the one number that can fail us — can only be measured there.
+**Half 2 — inference and startup, on a POD, WITHOUT Docker.** This is how the team has
+always done it: `inference.py` is run directly against a real fixture on a GPU box, never
+the image. Submission 02's `RESULTS_container_vs_eval.csv` came from exactly that — the
+container's logic executed beside the eval to prove the answers matched.
 
-⚠️ **Time the startup before submitting.** It is ~60 s warm and ~127 s cold against a 120 s
-allowance, so it straddles the limit and the answer depends on the host's cache state.
+```bash
+# on a pod with the FP8 checkpoint at MODEL_PATH
+python inference.py                       # bare
+ENABLE_THINKING=1 python inference.py     # with the switch
+```
+
+That closes the remaining three defects (`ninja`, the `PATH`, `max_model_len`) and produces
+the startup number.
+
+📌 **Most of half 2 is already evidenced**, just not through this file's code path. The
+exact serving configuration — FP8 on one CC 8.9 card, `enforce_eager=True`,
+`max_model_len=2048`, `gpu_memory_utilization=0.82` — was measured on UNAM and produced
+0.498 s/question with gold accuracy identical to bf16
+(`experiments/44-fp8-deployability/RESULTS_fp8_1gpu_real.json`). What has NOT been
+exercised is the glue in *this* file between that engine and the platform's input contract.
+
+⚠️ **Time the startup when you do.** ~60 s warm, ~127 s cold, against a 120 s allowance —
+it straddles the limit and the answer depends on the host's cache state. It is the one
+number that can still cost us questions.
