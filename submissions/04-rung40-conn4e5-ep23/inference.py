@@ -322,10 +322,18 @@ def load_model():
             f"FP8 model not found at {MODEL_PATH} -- the quantized checkpoint "
             "(config + 2 safetensors shards + processor files) must be baked into the image."
         )
-    # 🔴 llmcompressor writes NO processor files. Without tokenizer.json,
-    # preprocessor_config.json, vocab/merges and the chat template, AutoProcessor raises
-    # and vLLM cannot start. They must be COPIED from the source checkpoint at build time.
-    # This check exists because that failure is opaque and offline it is unrecoverable.
+    # 🔴 llmcompressor writes NO processor files -- its output is weights, config.json and
+    # recipe.yaml. They must be COPIED into the checkpoint at build time, and offline that
+    # failure is unrecoverable.
+    #
+    # ⚠️ Calibrated against what actually happened, not against what I assumed: the FP8
+    # checkpoint answered all 4000 HeiCo questions through vLLM WITHOUT
+    # `preprocessor_config.json` present, so this assert is stricter than the runtime.
+    # It is kept strict on purpose -- a complete processor bundle is what makes the
+    # checkpoint portable, and shipping one that happens to work under today's vLLM is how
+    # a version bump becomes an offline failure. `preprocessor_config.json` and
+    # `video_preprocessor_config.json` come from the BASE Qwen3.6-27B snapshot; the Unsloth
+    # merge does not produce them either.
     missing = [f for f in ("tokenizer.json", "preprocessor_config.json", "chat_template.jinja")
                if not (MODEL_PATH / f).is_file()]
     if missing:
