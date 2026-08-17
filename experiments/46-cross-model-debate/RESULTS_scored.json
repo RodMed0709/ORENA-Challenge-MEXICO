@@ -1,0 +1,273 @@
+{
+  "reports": {
+    "A_alone": {
+      "bucket_mean": 0.591565532165413,
+      "buckets_in_mean": [
+        [
+          "aggregation",
+          "ID",
+          233
+        ],
+        [
+          "aggregation",
+          "OOD",
+          421
+        ],
+        [
+          "object_recognition",
+          "ID",
+          250
+        ],
+        [
+          "object_recognition",
+          "OOD",
+          379
+        ]
+      ],
+      "n_buckets_in_mean": 4,
+      "by_bucket": "     capability_group distribution  accuracy    n  floor  margin\n0         aggregation           ID  0.484979  233    NaN     NaN\n1         aggregation          OOD  0.384798  421    NaN     NaN\n2  object_recognition           ID  0.792000  250    NaN     NaN\n3  object_recognition          OOD  0.704485  379    NaN     NaN",
+      "by_bucket_format": "     capability_group distribution    answer_format  ...    n  floor  margin\n0         aggregation           ID           binary  ...   48    NaN     NaN\n1         aggregation           ID           number  ...  185    NaN     NaN\n2         aggregation          OOD           binary  ...   88    NaN     NaN\n3         aggregation          OOD           number  ...  333    NaN     NaN\n4  object_recognition           ID         fo_class  ...  169    NaN     NaN\n5  object_recognition           ID  multiple_choice  ...   31    NaN     NaN\n6  object_recognition           ID       open_ended  ...   50    NaN     NaN\n7  object_recognition          OOD         fo_class  ...  321    NaN     NaN\n8  object_recognition          OOD  multiple_choice  ...    7    NaN     NaN\n9  object_recognition          OOD       open_ended  ...   51    NaN     NaN\n\n[10 rows x 7 columns]",
+      "by_format": "     answer_format distribution  accuracy  ...   ci_high  floor  margin\n0           binary           ID  0.875000  ...  0.986111    NaN     NaN\n1           binary          OOD  0.727273  ...  0.812500    NaN     NaN\n2         fo_class           ID  0.792899  ...  0.898316    NaN     NaN\n3         fo_class          OOD  0.688474  ...  0.734522    NaN     NaN\n4  multiple_choice           ID  0.935484  ...  1.000000    NaN     NaN\n5  multiple_choice          OOD  1.000000  ...  1.000000    NaN     NaN\n6           number           ID  0.383784  ...  0.516245    NaN     NaN\n7           number          OOD  0.294294  ...  0.460728    NaN     NaN\n8       open_ended           ID  0.700000  ...  0.875791    NaN     NaN\n9       open_ended          OOD  0.764706  ...  0.893095    NaN     NaN\n\n[10 rows x 8 columns]",
+      "acc_ID": 0.6438923395445134,
+      "acc_OOD": 0.53625,
+      "acc_overall": 0.5767731878409976,
+      "floor_ID": NaN,
+      "floor_OOD": NaN,
+      "margin_ID": NaN,
+      "margin_OOD": NaN,
+      "number_estimate": {
+        "accuracy": 0.36748524883749634,
+        "ci_low": 0.2779240703259676,
+        "ci_high": 0.47993842566554173,
+        "n": 518
+      },
+      "class_f1_error": "TypeError(\"class_f1_report() missing 1 required positional argument: 'gold'\")"
+    },
+    "A_selfrevise": {
+      "bucket_mean": 0.5893192323250831,
+      "buckets_in_mean": [
+        [
+          "aggregation",
+          "ID",
+          233
+        ],
+        [
+          "aggregation",
+          "OOD",
+          421
+        ],
+        [
+          "object_recognition",
+          "ID",
+          250
+        ],
+        [
+          "object_recognition",
+          "OOD",
+          379
+        ]
+      ],
+      "n_buckets_in_mean": 4,
+      "by_bucket": "     capability_group distribution  accuracy    n  floor  margin\n0         aggregation           ID  0.489270  233    NaN     NaN\n1         aggregation          OOD  0.384798  421    NaN     NaN\n2  object_recognition           ID  0.784000  250    NaN     NaN\n3  object_recognition          OOD  0.699208  379    NaN     NaN",
+      "by_bucket_format": "     capability_group distribution    answer_format  ...    n  floor  margin\n0         aggregation           ID           binary  ...   48    NaN     NaN\n1         aggregation           ID           number  ...  185    NaN     NaN\n2         aggregation          OOD           binary  ...   88    NaN     NaN\n3         aggregation          OOD           number  ...  333    NaN     NaN\n4  object_recognition           ID         fo_class  ...  169    NaN     NaN\n5  object_recognition           ID  multiple_choice  ...   31    NaN     NaN\n6  object_recognition           ID       open_ended  ...   50    NaN     NaN\n7  object_recognition          OOD         fo_class  ...  321    NaN     NaN\n8  object_recognition          OOD  multiple_choice  ...    7    NaN     NaN\n9  object_recognition          OOD       open_ended  ...   51    NaN     NaN\n\n[10 rows x 7 columns]",
+      "by_format": "     answer_format distribution  accuracy  ...   ci_high  floor  margin\n0           binary           ID  0.895833  ...  1.000000    NaN     NaN\n1           binary          OOD  0.727273  ...  0.812500    NaN     NaN\n2         fo_class           ID  0.781065  ...  0.892925    NaN     NaN\n3         fo_class          OOD  0.685358  ...  0.734499    NaN     NaN\n4  multiple_choice           ID  0.935484  ...  1.000000    NaN     NaN\n5  multiple_choice          OOD  1.000000  ...  1.000000    NaN     NaN\n6           number           ID  0.383784  ...  0.516245    NaN     NaN\n7           number          OOD  0.294294  ...  0.460728    NaN     NaN\n8       open_ended           ID  0.700000  ...  0.890417    NaN     NaN\n9       open_ended          OOD  0.745098  ...  0.885714    NaN     NaN\n\n[10 rows x 8 columns]",
+      "acc_ID": 0.6418219461697723,
+      "acc_OOD": 0.53375,
+      "acc_overall": 0.5744349181605611,
+      "floor_ID": NaN,
+      "floor_OOD": NaN,
+      "margin_ID": NaN,
+      "margin_OOD": NaN,
+      "number_estimate": {
+        "accuracy": 0.36748524883749634,
+        "ci_low": 0.2779240703259676,
+        "ci_high": 0.47993842566554173,
+        "n": 518
+      },
+      "class_f1_error": "TypeError(\"class_f1_report() missing 1 required positional argument: 'gold'\")"
+    },
+    "A_debate": {
+      "bucket_mean": 0.6314483127543038,
+      "buckets_in_mean": [
+        [
+          "aggregation",
+          "ID",
+          233
+        ],
+        [
+          "aggregation",
+          "OOD",
+          421
+        ],
+        [
+          "object_recognition",
+          "ID",
+          250
+        ],
+        [
+          "object_recognition",
+          "OOD",
+          379
+        ]
+      ],
+      "n_buckets_in_mean": 4,
+      "by_bucket": "     capability_group distribution  accuracy    n  floor  margin\n0         aggregation           ID  0.562232  233    NaN     NaN\n1         aggregation          OOD  0.418052  421    NaN     NaN\n2  object_recognition           ID  0.812000  250    NaN     NaN\n3  object_recognition          OOD  0.733509  379    NaN     NaN",
+      "by_bucket_format": "     capability_group distribution    answer_format  ...    n  floor  margin\n0         aggregation           ID           binary  ...   48    NaN     NaN\n1         aggregation           ID           number  ...  185    NaN     NaN\n2         aggregation          OOD           binary  ...   88    NaN     NaN\n3         aggregation          OOD           number  ...  333    NaN     NaN\n4  object_recognition           ID         fo_class  ...  169    NaN     NaN\n5  object_recognition           ID  multiple_choice  ...   31    NaN     NaN\n6  object_recognition           ID       open_ended  ...   50    NaN     NaN\n7  object_recognition          OOD         fo_class  ...  321    NaN     NaN\n8  object_recognition          OOD  multiple_choice  ...    7    NaN     NaN\n9  object_recognition          OOD       open_ended  ...   51    NaN     NaN\n\n[10 rows x 7 columns]",
+      "by_format": "     answer_format distribution  accuracy  ...   ci_high  floor  margin\n0           binary           ID  0.895833  ...  1.000000    NaN     NaN\n1           binary          OOD  0.738636  ...  0.843750    NaN     NaN\n2         fo_class           ID  0.804734  ...  0.894106    NaN     NaN\n3         fo_class          OOD  0.716511  ...  0.768081    NaN     NaN\n4  multiple_choice           ID  0.935484  ...  1.000000    NaN     NaN\n5  multiple_choice          OOD  1.000000  ...  1.000000    NaN     NaN\n6           number           ID  0.475676  ...  0.585543    NaN     NaN\n7           number          OOD  0.333333  ...  0.566929    NaN     NaN\n8       open_ended           ID  0.760000  ...  0.918260    NaN     NaN\n9       open_ended          OOD  0.803922  ...  0.916667    NaN     NaN\n\n[10 rows x 8 columns]",
+      "acc_ID": 0.6915113871635611,
+      "acc_OOD": 0.5675,
+      "acc_overall": 0.6141855027279813,
+      "floor_ID": NaN,
+      "floor_OOD": NaN,
+      "margin_ID": NaN,
+      "margin_OOD": NaN,
+      "number_estimate": {
+        "accuracy": 0.44942284044536357,
+        "ci_low": 0.34449267241514825,
+        "ci_high": 0.5541815183258343,
+        "n": 518
+      },
+      "class_f1_error": "TypeError(\"class_f1_report() missing 1 required positional argument: 'gold'\")"
+    }
+  },
+  "paired_ci": {
+    "debate_vs_selfrevise": {
+      "ALL_ID": {
+        "delta": 0.049689440993788817,
+        "delta_video_mean": 0.04971707818930041,
+        "ci": [
+          0.004269547325102881,
+          0.09902263374485597
+        ],
+        "n_q": 483,
+        "n_videos": 6
+      },
+      "ALL_OOD": {
+        "delta": 0.03375,
+        "delta_video_mean": 0.03375,
+        "ci": [
+          0.0025,
+          0.065
+        ],
+        "n_q": 800,
+        "n_videos": 2
+      },
+      "ALL": {
+        "delta": 0.03975058456742011,
+        "delta_video_mean": 0.04572530864197531,
+        "ci": [
+          0.011114969135802469,
+          0.0870255594135802
+        ],
+        "n_q": 1283,
+        "n_videos": 8
+      },
+      "disagreements_only": {
+        "delta": 0.1101123595505618,
+        "delta_video_mean": 0.11413871216502795,
+        "ci": [
+          0.030016447368421056,
+          0.20189584538268743
+        ],
+        "n_q": 445,
+        "n_videos": 8
+      }
+    },
+    "debate_vs_alone": {
+      "ALL_ID": {
+        "delta": 0.047619047619047616,
+        "delta_video_mean": 0.04765946502057613,
+        "ci": [
+          0.006403034979423869,
+          0.08494534465020553
+        ],
+        "n_q": 483,
+        "n_videos": 6
+      },
+      "ALL_OOD": {
+        "delta": 0.03125,
+        "delta_video_mean": 0.03125,
+        "ci": [
+          0.0,
+          0.0625
+        ],
+        "n_q": 800,
+        "n_videos": 2
+      },
+      "ALL": {
+        "delta": 0.037412314886983634,
+        "delta_video_mean": 0.043557098765432095,
+        "ci": [
+          0.012615740740740742,
+          0.07598476080246912
+        ],
+        "n_q": 1283,
+        "n_videos": 8
+      },
+      "disagreements_only": {
+        "delta": 0.10786516853932585,
+        "delta_video_mean": 0.11351214574898785,
+        "ci": [
+          0.03276418208983998,
+          0.19027273713128975
+        ],
+        "n_q": 445,
+        "n_videos": 8
+      }
+    },
+    "selfrevise_vs_alone": {
+      "ALL_ID": {
+        "delta": -0.002070393374741201,
+        "delta_video_mean": -0.0020576131687242804,
+        "ci": [
+          -0.02052469135802469,
+          0.016460905349794237
+        ],
+        "n_q": 483,
+        "n_videos": 6
+      },
+      "ALL_OOD": {
+        "delta": -0.0025,
+        "delta_video_mean": -0.0025,
+        "ci": [
+          -0.0025,
+          -0.0025
+        ],
+        "n_q": 800,
+        "n_videos": 2
+      },
+      "ALL": {
+        "delta": -0.002338269680436477,
+        "delta_video_mean": -0.0021682098765432095,
+        "ci": [
+          -0.01607638888888889,
+          0.012014371141975306
+        ],
+        "n_q": 1283,
+        "n_videos": 8
+      },
+      "disagreements_only": {
+        "delta": -0.0022471910112359553,
+        "delta_video_mean": -0.0006265664160400993,
+        "ci": [
+          -0.022117794486215536,
+          0.020238095238095236
+        ],
+        "n_q": 445,
+        "n_videos": 8
+      }
+    }
+  },
+  "union": {
+    "A_alone": 0.5767731878409976,
+    "B_alone": 0.6547155105222136,
+    "union_ceiling": 0.7162899454403742,
+    "both_right": 0.5151987529228371,
+    "only_A": 0.06157443491816056,
+    "only_B": 0.13951675759937646,
+    "neither": 0.2837100545596259,
+    "oracle_headroom": 0.061574434918160614
+  },
+  "n": 1283,
+  "n_videos": 8
+}

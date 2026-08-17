@@ -16,7 +16,7 @@ import re
 
 import numpy as np
 
-__all__ = ["WORD_TO_NUM", "parse_number"]
+__all__ = ["WORD_TO_NUM", "parse_number", "normalize_answer"]
 
 WORD_TO_NUM = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4,
@@ -56,3 +56,41 @@ def parse_number(text: str) -> float:
 
     # 5. Nothing applies
     return np.nan
+
+
+_TRAILING_DOT_INT = re.compile(r"^(\d+)\s*\.$")
+_TRAILING_DOT_YESNO = re.compile(r"^(yes|no)\s*\.$", re.I)
+
+
+def normalize_answer(text: str) -> str:
+    """Strip a trailing period that would make an otherwise-correct answer auto-incorrect.
+
+    Moved here VERBATIM from `experiments/06-vit-lora/_tools/submission/inference.py`
+    (2026-08-17) by the same rule that moved `parse_number`: a second consumer appeared —
+    rung 46's debate turns push the model onto off-template phrasings, which is exactly the
+    condition probe 16a measured at **86.7 % (ID) / 87.5 % (OOD)** `"1."` emission on the
+    fine-tuned checkpoint against the base model's 0.0000. A folder-private copy cannot be
+    imported across experiments, and a second hand-written copy would drift.
+
+    🔴 The container keeps its own copy and that duplication is DELIBERATE: the submission
+    image is a sealed artifact with no `src/` on its path, so it cannot import this. The two
+    must be kept identical — `experiments/06-vit-lora/_tools/submission/test_normalize_answer.py`
+    validates the container's copy against the SDK's real verifiers.
+
+        Number.verify -> ``text.strip().isdigit()``            so ``"1."``   is INCORRECT
+        Binary.verify -> ``text.strip().lower() in (yes, no)`` so ``"Yes."`` is INCORRECT
+
+    Format-AGNOSTIC by necessity (`Request` carries no `answer_format`) and as narrow as it
+    can be: it fires only when the ENTIRE answer is digits-then-period or yes/no-then-period.
+    Everything else is returned byte-identical. Not output laundering — it repairs punctuation
+    the verifier rejects, and [[trailing-period-costs-nothing-scored]] measured that it repairs
+    nothing on the corpus's own templates (0 of 2,094 scored `number` answers need it).
+    """
+    s = (text or "").strip()
+    m = _TRAILING_DOT_INT.match(s)
+    if m:
+        return m.group(1)
+    m = _TRAILING_DOT_YESNO.match(s)
+    if m:
+        return m.group(1).lower()
+    return s

@@ -1,5 +1,48 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 📋 2026-08-17 pm — SEGMENT is approved, UNAM is stood down, and the debate rung landed
+
+**1. 🆕 WE ARE APPROVED TO SUBMIT TO THE SEGMENT TRACK.** Rodrigo got the go-ahead. That is a
+second track, a second leaderboard and a second shot at the co-authorship bar, and nothing in this
+repo is built for it yet — every rung 00–46 is FRAME. Build starts now.
+
+**2. 🔻 UNAM IS STOOD DOWN by the lead's decision (2026-08-17).** Work moves to **RunPod + local**
+only. The box was never ours alone: `uaq_user` is shared with legokna, and the other six accounts
+see one tenant. Everything produced there is pulled into the repo before it is dropped. The
+[redacted]
+[redacted]
+close that, it makes deleting the data the natural next step.
+
+**3. 🟢🔴 Rung 46 — the two-model debate WORKS and the roles are BACKWARDS.**
+[[debate-works-and-the-roles-are-backwards]]. On rung 42's 8 held-out videos (1,283 questions):
+
+| arm | `bucket_mean` |
+|---|---|
+| 27B alone | 0.5916 |
+| 27B re-reading its own answer (control) | 0.5893 |
+| **27B after the 8B critiques it** | **0.6314** |
+| **the 8B alone — one model, one pass** | **0.6727** |
+
+The pre-registered cell wins (`ALL_ID` **+0.0497**, CI [+0.0043, +0.0990]) and the self-revision
+control is **flat**, so the +0.05 is the other model's critique and not a second look. It is the
+cleanest single-variable inference-time result we have. **And it does not ship** — the checkpoint
+we already own beats the whole pipeline by +0.0413 at a fifth of the compute. 🎯 One-variable
+follow-up, unrun: **swap the roles**, 8B decides and the 27B critiques.
+
+**4. 🔴 Rung 43's trace-extraction idea is CLOSED.** [[trace-extractor-is-a-coin-flip]]. The
+"83 % of failed traces contain the gold" figure was an oracle recall with no denominator: median 3
+plausible candidates per trace, `gold ± 1` present in 83 % of them, trivial extractors at 0.18/0.22
+against a 0.22 random-pick control, and they break 24–38 % of what was already right. Zero GPU.
+
+**5. 📌 Housekeeping that was overdue.** `assert_decisions_indexed` had been RED since 2026-07-27 on
+four notes, so `MEASURED.md` — the file `RULES` makes binding reading before proposing anything —
+was three decision notes stale. Fixed, plus the Windows `UnicodeDecodeError` that made the
+generator unrunnable off Linux. `UNAM_SERVER.md` now records the shared-box rules that were paid
+for in blood today (never kill a PID because it holds a GPU; the ACCOUNT holds one card, not one
+per person).
+
+---
+
 ## 📋 2026-08-17 — FOR THE TEAM: rung 45 is TRAINING on UNAM right now
 
 Everything here is on `main` (`c7cf835`…`d0dedbc`). What is **not** in git and cannot be: the

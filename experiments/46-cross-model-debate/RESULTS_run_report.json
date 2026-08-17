@@ -1,0 +1,35 @@
+{
+ "meta": {
+  "n_items": 1283,
+  "n_heico": 800,
+  "n_lapchole": 483,
+  "held_out_videos": [
+   "heico/0023 - Heico - Sigma - 4.avi",
+   "heico/0027 - Heico - Sigma - 8.avi",
+   "lapchole/0032 - Laparoscopic Cholecystectomy.mp4",
+   "lapchole/0043 - Laparoscopic Cholecystectomy.mp4",
+   "lapchole/0045 - Laparoscopic Cholecystectomy.mp4",
+   "lapchole/0061 - Laparoscopic Cholecystectomy.mp4",
+   "lapchole/0065 - Laparoscopic Cholecystectomy.mp4",
+   "lapchole/0149 - Laparoscopic Cholecystectomy.mp4"
+  ]
+ },
+ "turns": {
+  "T1_A_alone": {
+   "wall": 699.5804936159402,
+   "parse_fail": 0.002338269680436477
+  },
+  "T2_B_critic": {
+   "wall": 208.69647875707597,
+   "disagree_rate": 0.34684333593141076,
+   "b_parse_fail": 0.002338269680436477,
+   "empty_reason_on_disagree": 0
+  }
+ },
+ "G_FORMAT": {
+  "T1": 0.002338269680436477,
+  "debate": 0.003897116134060795,
+  "selfrevise": 0.002338269680436477,
+  "fires": false
+ }
+}
