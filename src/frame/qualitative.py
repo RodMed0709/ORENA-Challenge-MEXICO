@@ -29,7 +29,14 @@ FRAMES_CACHE = Path("/workspace/frames_cache")
 def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -> None:
     """Write ``out/inspect.csv``; materialize any missing frame into the shared cache."""
     out.mkdir(parents=True, exist_ok=True)
-    FRAMES_CACHE.mkdir(parents=True, exist_ok=True)
+    # 🔴 The cache location comes off the cfg when it is set. The module constant is a
+    # RunPod path, and on any other box it fails HERE — after inference, after the judge,
+    # after the report is computed — with `PermissionError: '/workspace'`. Measured on
+    # UNAM 2026-08-17: a 40-question smoke produced a correct bucket_mean and then threw
+    # the whole run away on the last line. `frames_cache` unset keeps the old constant,
+    # so every pod run is byte-identical.
+    cache = Path(getattr(cfg, "frames_cache", None) or FRAMES_CACHE)
+    cache.mkdir(parents=True, exist_ok=True)
 
     item_by_q = {it.request.qID: it for it in items}
     resp_by_q = {r.qID: r for r in responses}
@@ -47,7 +54,7 @@ def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -
             it = item_by_q[q]
             resp = resp_by_q.get(q)
             res = res_by_q.loc[q]
-            frame_path = FRAMES_CACHE / frame_cache_name(it)   # identity-keyed shared store
+            frame_path = cache / frame_cache_name(it)   # identity-keyed shared store
             if not frame_path.exists():                        # materialize ONCE
                 try:
                     provider.ensure_reader(it)
@@ -79,4 +86,4 @@ def export_inspect(cfg, items, responses, results_df: pd.DataFrame, out: Path) -
     df.to_csv(out / "inspect.csv", index=False)
     n_ok = int(df["correct"].sum()) if not df.empty else 0
     logger.info("inspect.csv: %d questions (%d ✅ / %d ❌), frames in %s → %s",
-                len(df), n_ok, len(df) - n_ok, FRAMES_CACHE, out / "inspect.csv")
+                len(df), n_ok, len(df) - n_ok, cache, out / "inspect.csv")
