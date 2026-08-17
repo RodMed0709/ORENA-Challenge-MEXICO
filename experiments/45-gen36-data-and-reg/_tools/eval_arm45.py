@@ -141,6 +141,14 @@ class EvalConfig:
     seed: int = 42
     n_boot: int = 4000
 
+    # 🔴 vLLM, not HF, and it is forced rather than preferred. MEASURED on UNAM
+    # 2026-08-17: HF materialises the FP8 build at 43.32 GiB of a 47.37 GiB card and
+    # every generation OOMs. vLLM loads the same checkpoint at 33.46 GiB with ~14 GiB
+    # spare, at 0.454 s/q against HF's 1.13, scoring an identical 30/50 (rung 44). See
+    # `vllm_batch.py`. Held identical across all three arms, so it cancels in their
+    # difference; against rung 40's HF control it is a declared bridge confound.
+    use_vllm: bool = True
+
     smoke: bool = False
     smoke_n: int = 40
 
@@ -163,8 +171,10 @@ def ensure_paths(repo_root: str) -> None:
     import sys
 
     for p in (f"{repo_root}/src",
-              f"{repo_root}/vendor/orena-focus/src",              # the vendored SDK
-              f"{repo_root}/experiments/23-backbone-screen/_tools"):  # GenericVLMEngine
+              f"{repo_root}/vendor/orena-focus/src",                  # the vendored SDK
+              f"{repo_root}/experiments/23-backbone-screen/_tools",   # GenericVLMEngine
+              f"{repo_root}/experiments/43-thinking-at-inference/_tools",  # vllm_engine
+              f"{repo_root}/experiments/45-gen36-data-and-reg/_tools"):    # vllm_batch
         if p not in sys.path:
             sys.path.insert(0, p)
 
@@ -277,7 +287,7 @@ def build_baseline_config(cfg: EvalConfig):
     ensure_paths(cfg.repo_root)
     from frame.config import BaselineConfig
 
-    return BaselineConfig(
+    bc = BaselineConfig(
         data_root=Path(cfg.data_root),
         model_path=Path(cfg.merged_dir),
         out_dir=Path(cfg.out_dir),
@@ -287,6 +297,11 @@ def build_baseline_config(cfg: EvalConfig):
         n_eval=cfg.smoke_n if cfg.smoke else None,
         frames_cache=Path(cfg.frames_cache),
     )
+    if cfg.use_vllm:
+        from vllm_batch import make_batch_infer
+
+        bc.batch_infer = make_batch_infer()
+    return bc
 
 
 def assert_inference_path_unmoved(cfg_eval) -> None:
@@ -356,9 +371,13 @@ def score(cfg: EvalConfig, split: dict) -> dict:
     # model at all — so the fallback ALWAYS fired and the warning scrolled past in a
     # 16 h log. A forced deviation that silently un-forces itself is not a fallback, it
     # is a way to score nothing and call it a result.
-    from screen_engine import GenericVLMEngine
+    # On the vLLM path the engine is never constructed — `run_baseline` takes the
+    # batch_infer branch — so importing GenericVLMEngine there would only assert that a
+    # class we do not use is importable.
+    if not cfg.use_vllm:
+        from screen_engine import GenericVLMEngine
 
-    cfg_eval.engine_factory = GenericVLMEngine
+        cfg_eval.engine_factory = GenericVLMEngine
 
     video_filter = split["held_videos"] if cfg.eval_set == PRIMARY_EVAL else None
     report = run_baseline(cfg_eval, video_filter=video_filter)
