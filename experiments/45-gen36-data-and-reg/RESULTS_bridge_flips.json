@@ -1,0 +1,62 @@
+{
+  "n_questions": 6252,
+  "both_correct": 2712,
+  "both_wrong": 2058,
+  "control_only": 1025,
+  "arm_only": 457,
+  "n_flipped": 1482,
+  "churn": 0.237,
+  "net": -568,
+  "acc_control": 0.5977,
+  "acc_arm": 0.5069,
+  "videos_worse": 35,
+  "videos_total": 38,
+  "video_delta_median": -0.075,
+  "video_delta_min": -0.2375,
+  "video_delta_max": 0.05,
+  "decode_path_max_share_of_churn": 0.253,
+  "confounds_not_separated": [
+    "NF4 vs bf16 training precision",
+    "weight_decay 0.1 (R00) vs 0.0 (conn4e5)",
+    "JPEG q95 round-trip on frames",
+    "vLLM batched vs HF sequential decode"
+  ],
+  "reading": "Broad, not targeted: every answer format degrades and 35 of 38 videos degrade. `binary` losing 0.082 is what rules out a purely structural cause \u2014 a two-way choice should not cost that. This is consistent with a generally weaker model; it does NOT attribute the loss to NF4, because weight_decay and the JPEG round-trip degrade just as broadly.",
+  "by_video_worst5": [
+    {
+      "video": "0043 - Laparoscopic Cholecystectomy.mp4",
+      "n": 80,
+      "acc_control": 0.6625,
+      "acc_arm": 0.425,
+      "delta": -0.2375
+    },
+    {
+      "video": "0061 - Laparoscopic Cholecystectomy.mp4",
+      "n": 81,
+      "acc_control": 0.6543,
+      "acc_arm": 0.4321,
+      "delta": -0.2222
+    },
+    {
+      "video": "0028 - Heico - Sigma - 9.avi",
+      "n": 400,
+      "acc_control": 0.645,
+      "acc_arm": 0.4475,
+      "delta": -0.1975
+    },
+    {
+      "video": "0100 - Laparoscopic Cholecystectomy.mp4",
+      "n": 81,
+      "acc_control": 0.5679,
+      "acc_arm": 0.3951,
+      "delta": -0.1728
+    },
+    {
+      "video": "0026 - Heico - Sigma - 7.avi",
+      "n": 400,
+      "acc_control": 0.7,
+      "acc_arm": 0.535,
+      "delta": -0.165
+    }
+  ]
+}
