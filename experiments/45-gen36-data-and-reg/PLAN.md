@@ -5,7 +5,9 @@
 > was designed. If you find a rung-45 *outcome* in this file, it was added after the fact and the
 > rung is void.
 >
-> Pre-registered 2026-08-17 · status **NOT RUN**.
+> Pre-registered 2026-08-17 · status **R00 + R0 RUN AND SCORED 2026-08-17 · R1 NOT RUN**.
+> Outcome in `RESULTS.csv` / `RESULTS_paired_ci.csv`, never edited into the sections below —
+> everything from §1 down is the pre-registration and stays as written.
 > Design evidence: [[merged-corpus-buys-the-id-half]] · [[the-recipe-lever-is-alpha-over-rank]] ·
 > [[backbone-generation-is-not-the-lever]].
 

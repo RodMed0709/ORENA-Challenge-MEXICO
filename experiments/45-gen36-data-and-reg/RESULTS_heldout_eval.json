@@ -1,0 +1,29 @@
+{
+  "eval_set": {
+    "videos": [
+      "heico/0023 - Heico - Sigma - 4.avi",
+      "heico/0027 - Heico - Sigma - 8.avi",
+      "lapchole/0032 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0043 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0045 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0061 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0065 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0149 - Laparoscopic Cholecystectomy.mp4"
+    ],
+    "n_questions": 1283
+  },
+  "arms_scored": [
+    "R00",
+    "R0"
+  ],
+  "arms_not_run": [
+    "R1"
+  ],
+  "ood_caveat": "On these SAME questions `*_OOD` means unseen PROCEDURE for R00 and unseen VIDEO of a SEEN procedure for R0/R1 \u2014 rung 42's merge promoted 8 of the 10 heico test videos into their training set. An R0/R1 win on an *_OOD cell is partly that shift and is NOT evidence that more data generalises better. Two videos carry the whole OOD side; no *_OOD CI here is readable.",
+  "frame_source": "frames_cache (UNAM holds no video). Same frames, one JPEG q95 round-trip apart; cancels across arms, does NOT cancel on the bridge.",
+  "selection_axis": "bucket_mean on the held-out videos (RULES \u00a74c weighting)",
+  "granting_cells": [
+    "ALL_ID"
+  ],
+  "n_boot": 4000
+}
