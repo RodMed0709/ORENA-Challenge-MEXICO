@@ -272,7 +272,13 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     # ── 3. evaluation ────────────────────────────────────────────────
     judge = TransformersJudge(model_name=cfg.judge_model, device=cfg.device)
     evaluator = Evaluator(judges=[judge], seed=cfg.seed)
-    track = Track.FRAME if cfg.enforce_latency else None
+    # 🔴 B1 — this line used to read `Track.FRAME if cfg.enforce_latency else None`, which
+    # enforced FRAME's 5.0 s cap on EVERY run including SEGMENT's. SEGMENT's budget is 15.0 s
+    # (`focus.config.TRACK_MAX_LATENCY`), so a SEGMENT run scored ≈0 — every answer marked
+    # `timed_out` — and exited rc=0. A wrong number with a clean exit is the failure mode this
+    # repo has paid for most often ([[rc-zero-is-not-evidence]]). The track now comes from the
+    # config; the FRAME default keeps every existing caller byte-identical.
+    track = Track(cfg.track) if cfg.enforce_latency else None
     results_df, summary_df = evaluator.run(
         requests=requests,
         references=references,

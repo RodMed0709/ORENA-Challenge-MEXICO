@@ -60,6 +60,13 @@ def parse_number(text: str) -> float:
 
 _TRAILING_DOT_INT = re.compile(r"^(\d+)\s*\.$")
 _TRAILING_DOT_YESNO = re.compile(r"^(yes|no)\s*\.$", re.I)
+# 🔴 SEGMENT (B5). `Time.verify` accepts one or more `hh:mm:ss` separated by commas and
+# **RAISES** on anything else; `Evaluator._evaluate_single` catches that raise and scores the
+# answer INCORRECT behind a `logger.debug`. So a single trailing period silently fails a
+# question — on the 38.2 % of SEGMENT that is `time`, the largest format in the track. The
+# FRAME-era pattern above only ever repaired digits-then-period and yes/no-then-period, so a
+# `"00:10:12."` went through untouched. Anchored on the WHOLE string, like the others.
+_TRAILING_DOT_TIME = re.compile(r"^((?:\d{1,2}:\d{2}:\d{2})(?:\s*,\s*\d{1,2}:\d{2}:\d{2})*)\s*\.$")
 
 
 def normalize_answer(text: str) -> str:
@@ -93,4 +100,7 @@ def normalize_answer(text: str) -> str:
     m = _TRAILING_DOT_YESNO.match(s)
     if m:
         return m.group(1).lower()
+    m = _TRAILING_DOT_TIME.match(s)
+    if m:
+        return m.group(1).strip()
     return s

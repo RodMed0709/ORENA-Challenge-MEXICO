@@ -100,7 +100,15 @@ class BaselineConfig:
     # kept deliberately — the whole ladder is comparable under it and no past number
     # needs restating. Running the official judge needs its own venv on transformers 5.x.
     judge_model: str = "Qwen/Qwen3-4B"
-    enforce_latency: bool = True  # Track.FRAME → 5.0 s cap
+    enforce_latency: bool = True  # cap comes from `track`, below
+
+    # 🔴 The track this run belongs to, and it is LOAD-BEARING, not metadata.
+    # `focus.config.TRACK_MAX_LATENCY` is {frame: 5.0, segment: 15.0, procedure: 30.0} and
+    # `Evaluator.run(track=…)` marks anything slower INCORRECT. Before this field existed,
+    # `run.py` hardcoded `Track.FRAME`, so a SEGMENT run was scored against FRAME's 5.0 s cap
+    # and returned ≈0 with rc=0 — every answer `timed_out`, nothing raised. Default "frame"
+    # keeps every rung 00–46 byte-identical; a SEGMENT run MUST set this.
+    track: str = "frame"
 
     # ── rung 23: swap the backbone wrapper ───────────────────────────
     # DEFAULT OFF IS BYTE-IDENTICAL: None makes `run_baseline` construct the same
