@@ -15,20 +15,13 @@
     "over_5s": "22 / 22"
   },
   "budget_2048": {
-    "n": 22,
-    "truncated_no_close_tag": 8,
-    "truncated_rate": 0.364,
-    "mean_trace_chars": 2651,
-    "max_trace_chars": 4000,
-    "parsed_answers_under_40_chars": "14 / 14",
-    "latency_p99_s": 115.56,
-    "over_5s": "22 / 22",
-    "CONFOUNDED": "max_trace_chars == 4000 == answer_char_cap EXACTLY. The CHAR cap truncated the string before </think> could appear. It was calibrated for a 512-token budget (~2000 chars) and not re-calibrated when the budget rose to 2048 (~8000 chars). So this truncation rate mixes 'the model did not close' with 'our cap cut it off' and CANNOT be decomposed. My error, stated rather than interpreted away."
+    "RETRACTED": "2026-08-17. This block is WITHDRAWN and its numbers must not be quoted. legokna states the 2048-token configuration was never actually run; no log, no artifact and no commit produces these figures, and the block's own CONFOUNDED note already said the truncation rate could not be decomposed. Its 63.6 %/36.4 % pair (n=22) has induced an error at least once. The numbers are deleted rather than kept beside a caveat, because a caveated number is still a number somebody quotes.",
+    "what_stands_from_this_file": "the budget_512 block below/above, which did run, and its two established findings."
   },
 
   "what_IS_established": {
-    "the_parser_works": "Every generation that closed the tag yielded an answer under 40 chars -- 8/8 and 14/14. mean chars RAW 1822-2663 vs PARSED 6-8 is the signature of the defect the extractor fixes: without it the judge scores the TRACE.",
-    "sequential_eval_is_infeasible": "30 s/question at 512 tokens, 115.6 s at 2048. The 626-question arm would take 5.2 h (with 64 % truncated = garbage) or 20 h (~$42). The rung as designed cannot be run.",
+    "the_parser_works": "Every generation that closed the tag yielded an answer under 40 chars -- 8/8 at budget_512. mean chars RAW ~1822 vs PARSED 6-8 is the signature of the defect the extractor fixes: without it the judge scores the TRACE. (2026-08-17: the '14/14' and the 2663 upper figure came from the RETRACTED budget_2048 block and are removed. The claim survives on budget_512 alone, and is independently confirmed by the 4,000-generation uncapped run of 2026-08-16, whose traces parse.)",
+    "sequential_eval_is_infeasible": "30 s/question at 512 tokens. The 626-question arm would take 5.2 h with 64 % truncated = garbage. The rung as designed cannot be run. (2026-08-17: the '115.6 s at 2048 -> 20 h / ~$42' half of this sentence rested on the RETRACTED budget_2048 block and is removed; the 512 half stands on its own and reaches the same conclusion.)",
     "the_bottleneck_is_OUR_HARNESS_not_thinking": "The same model, same thinking, through vLLM continuous batching measures 1.33 s/question (RESULTS_batched_thinking.json). Our eval path is ~100x slower than production because screen_engine generates one question at a time in HF transformers."
   },
 

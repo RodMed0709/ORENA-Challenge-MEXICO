@@ -131,3 +131,39 @@ assumed, and either of these suffices:
 📌 Recorded so the earlier phrasing cannot be quoted against a future proposal: **"never
 re-propose without new evidence" applies to the zero-shot claim.** A fine-tuned screen is not a
 re-proposal of a settled question — it is the measurement that was never taken.
+
+## 🔻 AMENDED 2026-08-17 — the leaderboard settles it from outside, and one of our own kills was wrong
+
+The final standings after submission 03 are the external evidence this note asked for, and they
+say something stronger than "generation buys little": **generation and size do not order this
+leaderboard at all.**
+
+| rank | entry | score |
+|---|---|---|
+| 1 | Qwen3.6 Finetuned | 0.6235 |
+| 2 | Galen 1xHigh | 0.5908 |
+| **3** | **LLaVA-Med** — a **7B medical VLM from 2023** | **0.5835** |
+| 4 | **us** (rung 42 ep4, fine-tuned 8B gen-3) | 0.5809 |
+| 5 | official FT baseline | 0.5189 |
+
+A 2023 7B sits **+0.0026** above a 2026 fine-tuned 8B, and both sit far above the organizers'
+own fine-tuned baseline. Rank 1 being a fine-tuned gen-3.6 remains the one datum favouring
+migration — and it is the *fine-tuning*, not the generation, that the ranking rewards, which is
+this note's thesis and not a counter-example to it.
+
+### 🔴 And we dismissed LLaVA-Med on a mechanism that was right and a conclusion that was wrong
+
+The internal call was **NO-GO on resolution**: CLIP ViT-L/336 with letterbox padding leaves the
+surgical content at roughly **6.9 % of the pixels** the Qwen line receives. That arithmetic is
+not disputed. **The conclusion drawn from it — that such a model cannot compete here — is
+falsified by rank 3.**
+
+Recorded because the failure mode is reusable and we will meet it again: a correct mechanism was
+converted into a capability verdict without a measurement, and the resolution axis had *already*
+been closed on our own model for the same kind of reason ([[resolution-is-not-the-gap]],
+[[max-pixels-not-a-lever]]). We knew resolution was not our gap and still used resolution to kill
+somebody else's model.
+
+⇒ **Nothing here recommends switching to LLaVA-Med** — that is a different backbone, a different
+licence question and three weeks from the close. What it changes is the *screening rule*: an
+entry is not dismissed on architecture specs. Either it is measured or it is left open.
