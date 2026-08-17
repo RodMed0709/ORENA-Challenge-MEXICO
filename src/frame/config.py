@@ -125,6 +125,16 @@ class BaselineConfig:
     # A cache miss RAISES; it never falls back to decord (see CachedFrameProvider).
     frames_cache: Path | None = None
 
+    # ── rung 45: answer the whole list at once (vLLM) ────────────────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None and `run_baseline` takes the engine_factory
+    # path exactly as before. Called as `fn(cfg, items, provider) -> list[Response]`.
+    # It replaces ONLY the inference stage — data loading, the judge, and every metric
+    # stay in `run_baseline`, so a batched run is scored by the same code as a
+    # sequential one (RULES §EVAL 1).
+    # ⚠️ A batch path reports AMORTISED per-question latency; see the note at the call
+    # site. `timed_out` is not comparable across the two paths.
+    batch_infer: Callable[["BaselineConfig", list, object], list] | None = None
+
     # ── run scope ────────────────────────────────────────────────────
     # None = full test set; an int caps total questions (SMOKE / sample).
     n_eval: int | None = None
