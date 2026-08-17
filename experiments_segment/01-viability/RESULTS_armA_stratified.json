@@ -1,0 +1,72 @@
+{
+ "bucket_mean": 0.49641330889330454,
+ "buckets_in_mean": [
+  [
+   "aggregation",
+   "ID",
+   22
+  ],
+  [
+   "aggregation",
+   "OOD",
+   572
+  ],
+  [
+   "complex_reasoning",
+   "ID",
+   43
+  ],
+  [
+   "complex_reasoning",
+   "OOD",
+   148
+  ],
+  [
+   "event_understanding",
+   "ID",
+   65
+  ],
+  [
+   "event_understanding",
+   "OOD",
+   145
+  ],
+  [
+   "object_recognition",
+   "ID",
+   1440
+  ],
+  [
+   "object_recognition",
+   "OOD",
+   1383
+  ],
+  [
+   "temporal_grounding",
+   "ID",
+   684
+  ],
+  [
+   "temporal_grounding",
+   "OOD",
+   1752
+  ]
+ ],
+ "n_buckets_in_mean": 10,
+ "by_bucket": "      capability_group distribution  accuracy     n  floor  margin\n0          aggregation           ID  0.636364    22    NaN     NaN\n1          aggregation          OOD  0.416084   572    NaN     NaN\n2    complex_reasoning           ID  0.627907    43    NaN     NaN\n3    complex_reasoning          OOD  0.594595   148    NaN     NaN\n4  event_understanding           ID  0.815385    65    NaN     NaN\n5  event_understanding          OOD  0.600000   145    NaN     NaN\n6   object_recognition           ID  0.579167  1440    NaN     NaN\n7   object_recognition          OOD  0.613883  1383    NaN     NaN\n8   temporal_grounding           ID  0.035088   684    NaN     NaN\n9   temporal_grounding          OOD  0.045662  1752    NaN     NaN",
+ "by_bucket_format": "       capability_group distribution    answer_format  ...     n  floor  margin\n0           aggregation           ID         fo_class  ...     2    NaN     NaN\n1           aggregation           ID           number  ...     1    NaN     NaN\n2           aggregation           ID       open_ended  ...    19    NaN     NaN\n3           aggregation          OOD         fo_class  ...    91    NaN     NaN\n4           aggregation          OOD           number  ...   481    NaN     NaN\n5     complex_reasoning           ID       open_ended  ...    43    NaN     NaN\n6     complex_reasoning          OOD         fo_class  ...    51    NaN     NaN\n7     complex_reasoning          OOD       open_ended  ...    97    NaN     NaN\n8   event_understanding           ID       open_ended  ...    65    NaN     NaN\n9   event_understanding          OOD           binary  ...   106    NaN     NaN\n10  event_understanding          OOD       open_ended  ...    39    NaN     NaN\n11   object_recognition           ID           binary  ...   193    NaN     NaN\n12   object_recognition           ID         fo_class  ...   689    NaN     NaN\n13   object_recognition           ID  multiple_choice  ...   465    NaN     NaN\n14   object_recognition           ID       open_ended  ...    93    NaN     NaN\n15   object_recognition          OOD           binary  ...   181    NaN     NaN\n16   object_recognition          OOD         fo_class  ...   669    NaN     NaN\n17   object_recognition          OOD  multiple_choice  ...   468    NaN     NaN\n18   object_recognition          OOD       open_ended  ...    65    NaN     NaN\n19   temporal_grounding           ID         fo_class  ...     2    NaN     NaN\n20   temporal_grounding           ID       percentage  ...     2    NaN     NaN\n21   temporal_grounding           ID             time  ...   680    NaN     NaN\n22   temporal_grounding          OOD         fo_class  ...    40    NaN     NaN\n23   temporal_grounding          OOD       percentage  ...    22    NaN     NaN\n24   temporal_grounding          OOD             time  ...  1690    NaN     NaN\n\n[25 rows x 7 columns]",
+ "by_format": "      answer_format distribution  accuracy  ...   ci_high  floor  margin\n0            binary           ID  0.647668  ...  0.731299    NaN     NaN\n1            binary          OOD  0.606272  ...  0.692892    NaN     NaN\n2          fo_class           ID  0.529582  ...  0.615696    NaN     NaN\n3          fo_class          OOD  0.594595  ...  0.687822    NaN     NaN\n4   multiple_choice           ID  0.580645  ...  0.636457    NaN     NaN\n5   multiple_choice          OOD  0.594017  ...  0.659310    NaN     NaN\n6            number           ID  0.000000  ...  0.000000    NaN     NaN\n7            number          OOD  0.378378  ...  0.489934    NaN     NaN\n8        open_ended           ID  0.759091  ...  0.837846    NaN     NaN\n9        open_ended          OOD  0.691542  ...  0.817753    NaN     NaN\n10       percentage           ID  0.000000  ...  0.000000    NaN     NaN\n11       percentage          OOD  0.045455  ...  0.125000    NaN     NaN\n12             time           ID  0.033824  ...  0.052003    NaN     NaN\n13             time          OOD  0.036686  ...  0.048657    NaN     NaN\n\n[14 rows x 8 columns]",
+ "acc_ID": 0.422360248447205,
+ "acc_OOD": 0.3355,
+ "acc_overall": 0.36680524464342823,
+ "floor_ID": NaN,
+ "floor_OOD": NaN,
+ "margin_ID": NaN,
+ "margin_OOD": NaN,
+ "number_estimate": {
+  "accuracy": 0.36741561643189846,
+  "ci_low": 0.2657621651094436,
+  "ci_high": 0.47214876386611926,
+  "n": 482
+ }
+}
