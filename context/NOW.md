@@ -2,9 +2,9 @@
 
 ## 📋 2026-08-17 — FOR THE TEAM: rung 45 is TRAINING on UNAM right now
 
-🔴 **Nothing in this section is committed yet.** `main` is at `91c1f5a`; the rung-45 files listed
-below exist on disk and on UNAM but not in git. If you are picking this up, review and commit them
-first.
+Everything here is on `main` (`c7cf835`…`d0dedbc`). What is **not** in git and cannot be: the
+19b corpus artifacts and the rung-45 checkpoints, both under gitignored `experiments/*/runs/`.
+They live on UNAM.
 
 **1. 📡 Two arms are running on UNAM, one per GPU, started 01:59 UTC.** Nobody needs to babysit
 them (`setsid nohup`).
