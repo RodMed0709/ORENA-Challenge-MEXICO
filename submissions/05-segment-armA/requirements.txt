@@ -1,0 +1,58 @@
+# SEGMENT submission — arm A (Qwen3-VL-8B + rung-21 A2 + SEGMENT LoRA, stacked).
+#
+# torch 2.8.0+cu128 and torchvision come from the BASE IMAGE
+# (pytorch/pytorch:2.8.0-cuda12.8-cudnn9-runtime) and are deliberately NOT pinned here —
+# pinning `torch==2.8.0+cu128` makes pip fetch a 3 GB wheel to replace a satisfied
+# dependency, and a `--user` install of torch shadows the base image's CUDA build. The
+# build gate in the Dockerfile asserts the version and the CUDA build instead.
+#
+# Every version below was OBSERVED in `/workspace/envs/infer` on the pod — the environment
+# that ran this exact inference path over the 6,254 SEGMENT test questions and produced
+# `experiments_segment/01-viability/RESULTS_armA_stratified.json`. The frozen record is
+# `requirements/train.lock`. Unlike the FRAME container, the base image here matches that
+# environment's torch, so the observed pins are transferable rather than aspirational.
+#
+# A build that resolves something unexpected must fail at BUILD time, not at submission
+# time — see the version-echo step in the Dockerfile.
+
+# 🔴 EXACT. `orena-focus` owns the Request/Response dataclasses, `FOType.names()` (the
+# accepted class set the answer guard reads at runtime), `VIDEO_SUFFIXES`, and
+# assets/FO_definitions.txt, which is pasted verbatim into our system prompt. A minor bump
+# can change the prompt or add a Request field — `load_requests` does `Request(**row)`, so
+# an unexpected key is an unhandled TypeError that kills the run.
+orena-focus==0.3.4
+
+# 🔴 EXACT. Qwen3-VL hard floor: 4.57 is the first release that has it. Pinned to the
+# patch because tokenizer/processor changes move generations, and this is the patch the
+# scored run used. Do NOT jump to 5.x: `Qwen3VLForConditionalGeneration` and the video
+# branch of the chat template are what the arm was trained against.
+transformers==4.57.6
+
+# 🔴 EXACT. `peft` applies and merges the two stacked adapters. `merge_and_unload()` is
+# arithmetic on the base weights, and this is the version that produced the scored
+# checkpoint — a change in how LoRA scaling or merging is implemented changes the model
+# silently, with no error and no log line.
+peft==0.19.1
+
+# 🔴 EXACT. The clip decoder. SEGMENT delivers video, not stills; decord is the primary
+# reader (OpenCV is the guarded fallback in `_decode_video`). Same version as the pod.
+decord==0.6.0
+
+# 🔴 EXACT. The Qwen3-VL companion named in CLAUDE.md's version floor. ⚠️ Stated honestly:
+# THIS path does not import `process_vision_info` — `seg_eval.py` builds the video input
+# by hand and so does `inference.py`. It is pinned rather than dropped because it is a
+# declared floor of the stack and it costs nothing; if a future edit reaches for it, the
+# version it gets is the one the pod had.
+qwen-vl-utils==0.0.14
+
+# Compatibility-only. Used for `device_map` in `from_pretrained`. Bounded rather than
+# pinned to the observed 1.14.0 so the build can resolve what its own torch needs.
+accelerate>=1.0.0,<2.0
+
+# Compatibility-only. The OpenCV fallback decoder, and a transitive dependency of
+# orena-focus. Bounded: the pod resolved 5.0.0.93, the SDK floor is 4.8.
+opencv-python>=4.8,<6.0
+
+# Compatibility-only.
+numpy>=1.23.0,<3.0
+pillow>=9.0,<14.0
