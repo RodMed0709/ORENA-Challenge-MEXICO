@@ -1,5 +1,84 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 📋 2026-08-17 — FOR THE TEAM: rung 45 is TRAINING on UNAM right now
+
+🔴 **Nothing in this section is committed yet.** `main` is at `91c1f5a`; the rung-45 files listed
+below exist on disk and on UNAM but not in git. If you are picking this up, review and commit them
+first.
+
+**1. 📡 Two arms are running on UNAM, one per GPU, started 01:59 UTC.** Nobody needs to babysit
+them (`setsid nohup`).
+
+| | R00 (GPU 0) | R0 (GPU 1) |
+|---|---|---|
+| corpus | 14 415 (rung 18) | **19 384 (rung 42's merged corpus)** |
+| steps | 901 | 1 212 |
+| ETA | ~12:45 UTC | ~16:25 UTC |
+
+```bash
+ssh UNAM 'for a in R00 R0; do tail -1 ~/storage/rung45/code/arm_$a.log; done'
+```
+
+**What they answer:** the 27B has **never seen the merged corpus**. Every 27B run — rungs 38, 40,
+43 — trained on rung 18's 14 415 rows, pinned by sha256. The 8B went from rank 11 to rank 5 with
+that corpus. **R0 vs R00 is that question with one variable.** A third arm, **R1**
+(`lora_dropout` 0.0 → 0.1), starts when a card frees: the 27B ends epoch 1 at loss **0.068**
+against a 0.2 over-fitting threshold and is the arm carrying **less** regularisation than the 8B.
+
+Pre-registration, arms, judges and declared NO-GOs: `experiments/45-gen36-data-and-reg/PLAN.md`.
+
+**2. 🔴 This rung's eval is NOT the usual one, and quoting the usual one would be wrong.** Rung 42's
+corpus promoted 30 of the 38 public test videos into training, so the **6 252-question local eval is
+CONTAMINATED for R0 and R1**. Primary eval is rung 42's **8 held-out videos, 1 283 questions**,
+clean for all three arms. Effective n is 8 videos (`RULES §13`) ⇒ **no heico CI is readable here**.
+Also: epoch-1 train loss is a screen that **can kill an arm but never crown one** — R0 sees 35 %
+more data, so its loss trajectory differs for reasons unrelated to being a better model.
+
+**3. 🟢 What unblocked a rung that was hardware-blocked since rung 38.** Rung 38 measured the bf16
+27B arm at **52.64 GiB** and concluded it *"does not fit a 48 GB card"*, which is why every 27B arm
+has run on rented A100s. A new gate — `experiments/40-gen36-recipe-connector/_tools/fit_gate_4bit.py`
+— measured the **NF4** load at **18.31 GiB reserved, 29.69 GiB spare**, with `trainable_params`
+identical to `40_B_connector_v1` (107 050 240) so the number provably transfers. 2.3 min, $0.
+⇒ **the whole sweep runs free on UNAM.**
+
+🔻 **`CLAUDE.md`'s "Unsloth is single-GPU" is stale** — Unsloth does DDP via `torchrun`. But DDP
+*replicates* the model per GPU, so it never addressed this blocker; **only NF4 did.** DDP was
+consequently dropped: two full arms fit, one per card, which gives the same parallelism without
+adding a variable. The `assert_effective_batch` guard stays as the net — under `torchrun`, reusing
+rung 40's literal `grad_accum 16` would train at effective batch 32 silently.
+
+⚠️ **NF4 is a declared confound** against rung 40's bf16 absolutes. Arms are comparable to each
+other; R00 minus rung 40 prices the quantization, and whether the winner must be re-run in bf16 is
+deferred to that point.
+
+**4. 🔴 Thinking at inference is dead a second way (rung 19a closed).** On 401 balanced enumeration
+questions: **0.2943 vs 0.4414** for its own no-thinking control, at 19.2 s/question against a 5 s
+budget. The mechanism is not reasoning quality — **150 of 401 generations returned an empty
+string**: the trace consumes the 4096 window and no answer is ever emitted. Among the 251 that do
+answer it scores 0.4701, *above* the control, but that is a self-selected subset and an empty answer
+is a wrong answer. ⚠️ `assert_tag_survived` does **not** catch this — it only fires when *no*
+generation closes `</think>`. Fix proposed (budget forcing, s1 / arXiv 2501.19393) in
+`local/tasks/thinking-trace-budget.md`.
+
+**5. 🟢 CholecT50 is joined to SurgSigma, and it was checked by eye.** 85 676/85 676 = **100 %**
+after normalising zero-padding (`VID2` vs `VID02`; the raw string join is 91.08 %). Three frames and
+seven boxes opened and looked at before anything was built — the 2026-08-16 Voxel51 mismatch is what
+that check exists to prevent. 🔴 **Boxes are normalised to 1000, not pixels**; divide before drawing
+or cropping. A 19b enumeration corpus (8 079 train / 2 500 held out, split by video) is built at
+`experiments/19-external-count/runs/19b_corpus_v1/` and **deliberately parked**: it enters the
+winning backbone afterwards, never inside a data-vs-regularisation A/B, and its prior is not
+favourable (UniBench; arXiv 2605.30170 reports that scaling counting data is not sufficient either).
+
+**6. 📌 Rung 42's corpus was recovered from S3.** It was on neither laptop nor UNAM — it lived on a
+dead pod. Rung 18's sha256 is `180e28f0…`, matching the pin in rung 40's own guard, so the identity
+is confirmed rather than assumed. Both corpora had their `images[]` roots rewritten from RunPod's
+`/workspace/frames_cache` to UNAM's store by `_tools/rehost_corpus.py`, which **proves the rewrite is
+path-only**; that changes the file hash, so both the original and rehosted digests are pinned in
+`_models/gen36_data_reg_arm.py`. Frames were **not** copied — `~/storage/frames_cache/` already
+covers every row.
+
+---
+
 ## 📋 2026-08-16 — FOR THE TEAM: submission 03 landed, and the counting question is answered
 
 Everything here is on `main`. Detail in `experiments/19-external-count/README.md`,
