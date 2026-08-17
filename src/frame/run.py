@@ -18,7 +18,7 @@ from focus.enums import Track
 from focus.evaluation.evaluator import Evaluator
 from focus.evaluation.judges import TransformersJudge
 
-from frame.data import FrameProvider, load_frame_items
+from frame.data import CachedFrameProvider, FrameProvider, load_frame_items
 from frame.engine import QwenFrameEngine
 from frame.metrics import (
     assert_all_rows_grouped,
@@ -218,7 +218,10 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     factory = getattr(cfg, "engine_factory", None) or QwenFrameEngine
     engine = factory(cfg)
     engine.load()
-    provider = FrameProvider(cfg)
+    # rung 45: serve frames from the shared cache when the box has no source videos.
+    # DEFAULT OFF IS BYTE-IDENTICAL — `frames_cache` unset builds the same decord
+    # FrameProvider as always. Both classes share a surface, so nothing below changes.
+    provider = CachedFrameProvider(cfg) if getattr(cfg, "frames_cache", None) else FrameProvider(cfg)
     responses = _infer_all(cfg, items, engine, provider)
     provider.close()
 
