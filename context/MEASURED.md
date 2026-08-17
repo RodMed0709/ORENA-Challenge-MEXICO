@@ -14,6 +14,22 @@
 
 | | Question | Verdict | Status | Where |
 |---|---|---|---|---|
+|  | Can a second model read the gold answer out of the first model's reasoning trace — the "double model communicating by the trace" design? | NO — the "83 % of failed traces contain the gold" figure is an ORACLE RECALL with no denominator. On the same archived traces a median of 3 (strict) to 4 (loose) distinct plausible numbers coexist, the two trivial extractors score 0.1786 and 0.2233 against a 0.2189 random-pick control — i.e. exactly 1/k — and they BREAK 24.2 %/37.7 % of the questions the model already answered correctly. The extraction that reproduces the 83 % is the one with the LARGEST candidate set: recall and ambiguity are the same number seen from two sides. | MEASURED | `context/decisions/trace-extractor-is-a-coin-flip.md` |
+|  | Does the binding `transformers==4.57.*` pin still describe what we run? | NO — it describes ONE of our two lines and forbids the other. All four environments that actually train, quantise and serve gen-3.6 run transformers 5.x (5.5.0 to 5.15.0), and they work: ms_swift 4.4.1 sits at 5.12.1, inside its own `<5.13` cap, and the vendored SDK imports clean under 5.15.0. The pin conflated "5.x" with ">=5.13". It stays for the Qwen3-VL-8B line and is superseded for gen-3.6 | SETTLED | `context/decisions/transformers-pin-is-per-tool-not-global.md` |
+|  | Is the `number` deficit a model failure, or is the counting target itself unstable? | NOT AN EXCUSE — the July claim inverted when its own number was corrected. The label moves 0.384 at the corpus's true minimum separation, against a model MAE of 1.01: the target is 2.6x MORE stable than the model, so "the model sits at its label's noise floor" is false. Annotation noise does not bound the counting gap. What survives is the shape: cost levers on gold 1-4, where the mass and the movable error are | RE_SCOPED | `context/decisions/number-is-an-annotation-ceiling.md` |
+|  | Does the model miscount because the foreign objects are small, or because it cannot enumerate? | ENUMERATION. On large, high-contrast laparoscopic instruments in its own procedure both our models collapse to 0.04 at three objects — worse than the 0.20 they score on our 4 mm Clips. The mean prediction saturates at about 1-2 whatever is really there, and on the microsurgical substrate rung 42's Spearman against the true count is 0.076. Size is not the barrier; tallying is | MEASURED | `context/decisions/counting-is-enumeration-not-small-object-perception.md` |
+|  | What did 2026-08-15 teach about renting, accepting and watching a training pod — and what would each lesson have cost again? *(derived)* | Eight measured lessons. The expensive one is that a pod must be ACCEPTED on its rate in the first 10 minutes, and the subtle one is that the naive way of doing that kills healthy pods. | MEASURED | `context/decisions/pod-operations-lessons-20260815.md` |
+|  | Does promoting our own public TEST videos into training buy anything, at what epoch, and what does it cost us as an instrument? | YES on the ID half and it ships — rung 42 epoch 4 beats A2 ep3 by +0.0402 held-out `bucket_mean`, with paired video-clustered CIs excluding zero on all three ID cells and no cell showing harm. Epoch 5 FALLS on both halves while train `token_acc` climbs to 0.987, so the peak ships and the last epoch does not. The price is that this rung can no longer measure procedure-OOD locally: 8 of the 10 `heico` test videos are now IN its training set, so `RULES §3`'s qID→OOD reading is FALSE for this checkpoint alone. | SETTLED | `context/decisions/merged-corpus-buys-the-id-half.md` |
+|  | Which recipe knob explains gen-3.6's failure under the A2 recipe — the learning rate, or something else? | `alpha/rank`, NOT the learning rate. lr/rank/alpha/batch/cosine/warmup/seed/max_pixels/data are identical between the two runs; the real deltas are framework, `lora_dropout` 0.1->0.0, coverage, and `num_train_epochs` 3->1 (a comparison confound). The loss gap is the tell: A2 ends epoch 1 at 0.293, the 27B at 0.068 — 3x past Unsloth's own over-fitting threshold after ONE epoch, so the problem is over-fitting, not a too-high LR. The off-guide term is `alpha/rank = 32/8 = 4` against a documented 1-2. Diagnosis SETTLED; the fix (`lora_alpha` 32->8, r held at 8) is proposed, not yet measured | SETTLED | `context/decisions/the-recipe-lever-is-alpha-over-rank.md` |
+|  | Is the ViT->LLM connector reachable by LoRA at all, given that `all-linear` misses it in both ms-swift and Unsloth? | YES — via `modules_to_save`, not via `target_modules`. On the 27B the connector is 2 Linear layers (`model.visual.merger.linear_fc{1,2}`) and there is NO `deepstack_merger_list`, so rung 39's eight names do not port. Census from the weight index: 108 visual + 496 LLM reached, exactly 2 missed. Two hazards: a non-matching target fails SILENTLY (assert `targeted_module_names`), and PEFT's `out_proj` incompatibility guard is `model_type`-gated and skips `qwen3_5`. Says nothing about whether it HELPS, and the Unsloth merge path for `modules_to_save` is UNVERIFIED | SETTLED | `context/decisions/the-connector-is-reachable-via-modules-to-save.md` |
+|  | Reopening [[backbone-generation-is-not-the-lever]]: one epoch of the A2 recipe on a gen-3.6 model, read against A2's own epoch-1 checkpoint. Does fine-tuning a newer-generation backbone beat our 8B? | THE A2 RECIPE TRANSPLANTED VERBATIM ONTO Qwen3.6-27B LOSES — paired ALL -0.0334 [-0.0642, -0.0027], and the pre-registered read fails on BOTH conditions. But the loss is NARROWER than the headline suggests: the ID cell the proxy is made of does NOT exclude zero, ALL of the damage sits in `object_recognition` while counting is a dead tie, and the arm FIXES the frequency prior without converting it into accuracy. This closes the RECIPE TRANSPLANT, not the backbone — rank 1 on the leaderboard is a fine-tuned Qwen3.6 | MEASURED | `context/decisions/gen36-fails-the-8b-recipe-not-the-backbone-test.md` |
+|  | The tech stack lists Unsloth as "do not use — lagging Qwen3-VL multimodal support, single-GPU, reproducibility risk". Does that still hold? | AMENDED, not reversed. The first leg is FALSE — Unsloth fine-tunes Qwen3-VL (incl. 32B/235B), does vision RL on it, and is the only known trainer that handles gen-3.5/3.6 with the vision tower. The second is mitigated (`device_map='balanced'`; our 8B fits one card). The THIRD stands and is now the binding one — rungs 02–35 are ms-swift artifacts, so any Unsloth arm confounds framework with whatever else it changes. Adopt it for a candidate SEARCH, never for a single-variable attribution against the existing ladder. | SETTLED | `context/decisions/unsloth-is-the-route-to-gen35.md` |
+|  | Rung 32 measured that `--freeze_aligner false` adds 0 aligner tensors. Is that an ms-swift defect, and would another trainer reach the ViT→LLM connector? | Not a defect, and no. The merger is unreachable by DEFAULT in BOTH trainers, measured in each. The cause is structural: `model.visual.merger.linear_fc{1,2}` carries no attention or MLP token in its path, and every generic matcher — ms-swift's `all-linear` and Unsloth's `finetune_vision_layers` regex alike — requires one. Reaching the connector needs an EXPLICIT target, in any framework. This is a mechanism for rung 32's null, and it makes the connector rung's reachability gate mandatory rather than cautious. | SETTLED | `context/decisions/the-merger-is-unreachable-by-default.md` |
+|  | Can ms-swift fine-tune a Qwen gen-3.5/3.6 model with our recipe — i.e. with LoRA reaching the vision tower, which `--freeze_vit false` has provided since rung 06? | No. ms-swift 4.4.1 and 4.4.2 register `qwen3_5` as a model TYPE but have NO entry for it in `MODEL_ARCH_MAPPING`, which is the table that supplies the `vision_tower` / `aligner` / `language_model` prefixes. Without it `--freeze_vit`, `--freeze_aligner` and `--vit_lr` have nothing to point at. Measured at runtime with a live control. transformers is NOT the blocker — 5.5 through 5.15 all ship `qwen3_5`. | SETTLED | `context/decisions/ms-swift-cannot-train-gen35.md` |
+|  | Are SAM masks usable as a localization target on our footage — i.e. does rung 37 (step 7, attention vs SAM masks) get to run? | NO. G-BOUNDARY FAILS. B1 (covered) passes decisively at 0.9714, B2 (clean | covered) fails at 0.3529 with its ENTIRE CI below the 0.70 threshold. Per the pre-registration the rung dies here, with only the export spent. It failed where nobody was looking: SAM finds the objects and does not delimit them, and the metallic-clip objection that consumed 2026-08-11 decided nothing | SETTLED | `context/decisions/g-boundary-fails-on-precision-not-coverage.md` |
+|  | Should we domain-adapt SAM on surgical data (SurgΣ-DB, CholecInstanceSeg) so it segments our footage properly, and then use it? | DEFERRED — not on cost, not on licence, and not on SAM's quality. The blocker is the LAST link: there is no known way to turn "better masks" into "better score" before Sep 8. The only mechanism that attaches segmentation knowledge to the VLM without shipping an expert is CoVT, which is already NO-GO; and the cheap alternative — feeding the model the segmented image — was measured on 2026-08-11 and moves the model AWAY from the gold | SETTLED | `context/decisions/sam-adaptation-has-no-route-to-points.md` |
+|  | Do input-side visual levers fail because the frozen ViT cannot encode them — i.e. is the information failing to reach the model? | NO, and it is now measured twice from opposite ends. Rung 12c refuted the STRONG form (composite vs control agree 83.8 %, versus 79.5 % between two DIFFERENT models — a frozen encoder ignoring the input would give ~100 %). Rung 37's overlay refutes the WEAK form too: painting SAM's masks drops agreement to 0.40, moving the model FURTHER than swapping the model. Access is not the bottleneck; discrimination is | MEASURED | `context/decisions/input-side-access-was-never-the-bottleneck.md` |
+|  | Why did NTL-WAS lose, and what does that say about the whole family? | NTL worked EXACTLY as designed — it corrected the systematic undercount (bias -0.420 -> -0.342, mean prediction 2.27 -> 2.35, off-by->=3 down 14.3% -> 13.3%) — and that is precisely why it lost. Of the 271 `number` questions A2 got right and NTL lost, 161 moved +1 against only 87 that moved -1. It pushed already-correct answers one step too far. The off-by-one RATE did not move at all: 65.8% -> 65.7%. Moving the distribution cannot fix off-by-one, because off-by-one is not a location error. | MEASURED | `context/decisions/moving-the-distribution-cannot-fix-off-by-one.md` |
 |  | Does cropping the black letterbox buy effective resolution for free? | NO, not by the mechanism proposed. The "+27% effective resolution" claim was wrong twice over — a rectangle cannot remove a circular scope vignette, and on Qwen3-VL with `max_pixels` non-binding a crop buys ZERO pixels-per-object, it only removes tokens. The axis is NOT dead (a rectangle still recovers 18.3% of heico and 10.5% of lapchole, both above the 8% kill line) but it is a different, smaller, ID/OOD-asymmetric lever than the one that was pitched. | MEASURED | `context/decisions/letterbox-crop-is-not-free-resolution.md` |
 |  | Is our counting failure one defect, or two? | TWO, and the campaign has been treating them as one. 83% of `number` questions (gold<=4) fail by EXACTLY ONE — 77.8% of their errors are off-by-one, bias -0.125, acc 0.542. The remaining 17% (gold>=5) collapse hard — bias -1.841, acc 0.127, only 34.1% off-by-one. The brain's "counting is symbolic mapping, Spearman 0.49" was measured on the HARD TAIL ONLY and generalised to all counting. | MEASURED | `context/decisions/counting-has-two-failure-modes.md` |
 |  | The corpus carries counting golds malformed for `Number` (`'2.'`, `'Two.'`, `'Intestine: 1.'`) under one phrasing that appears nowhere else. Does that data defect — and the trailing-period habit probe 16a attributes to it — cost anything where we are scored? | No, and it is now measured on both halves. The phrasing lives in 25 of 20,000 rows, ALL of them `open_ended` and ALL of them `ood == False`; its 7 scored instances route to the LLM judge, which the period does not affect. Zero of the 2,094 `number` questions in the scored split use it. And on A2 ep3's raw outputs, 2,094 of 2,094 `number` answers are clean digits — no periods, no word-numbers, no prefixes. The habit is real off-template and costs nothing on-template. ⇒ Do NOT touch the corpus (it would invalidate the sha256 anchoring rungs 18/21/27/30) and do NOT remove `normalize_answer` (the final test set is different data). Closed on merit, no rung opened. | MEASURED | `context/decisions/trailing-period-costs-nothing-scored.md` |
@@ -52,6 +68,10 @@
 |  | Is synthetic-counting SFT a live lever or a discarded one — and what exactly does the ±0.86 label-noise number measure? | DISCARDED stands. Calibration's death did not promote it, and rung 15 already ran the only half of it our labels can support — null. | SETTLED | `context/decisions/synthetic-counting-reconciled.md` |
 |  | Does Chain-of-Visual-Thought (CoVT) transfer to FRAME, and if not, what survives of it? | CoVT AS PUBLISHED = NO-GO (774.6k-row corpus, 17K steps, outside any recipe framework). But its gains land in `object_recognition`, which is 50% of the leaderboard headline — so the perceptual branch is REOPENED via a bespoke SAM 2 route. | SETTLED | `context/decisions/covt-reduced-sam-route.md` |
 |  | How far are we from the two baselines — and does our container actually run on the platform? | Shipped (Qwen3VL-8B-FT-ViT-LLM-v1). It exposed a conflict between the platform interface (batch-frames.zip) and the organizers' own template (frames/<qID>.png); the container now accepts both. The baselines are still not identified on the leaderboard. | MEASURED | `context/decisions/submission-01-rung06.md` |
+|  | Can image transforms be ranked by separability pooled across videos? | NO — pooled ranking is confounded by between-video appearance and manufactures winners (`tophat` +0.0043 pooled collapses to −0.0172 within video). `within_video()` is the standard gate | SETTLED | `context/decisions/pooled-screening-manufactures-winners.md` |
+|  | Would raising `max_pixels` give the model more visual detail to count with? | NO — no frame in the cache exceeds the configured cap (px_max = 921,600 = the cap exactly), so the model already receives every frame at full native resolution. There is no knob to turn | MEASURED | `context/decisions/max-pixels-not-a-lever.md` |
+|  | Is an inference-only test a fair test of an INPUT-side intervention? | NO — it is biased toward the negative on a model fine-tuned without the transform (−0.056 measured at inference, +0.021 when trained with). Applies retroactively to rung 11. Does NOT apply to the output-side family | SETTLED | `context/decisions/inference-only-input-tests-biased.md` |
+|  | What size of format-specific gain actually moves the headline? | FOUR EQUAL CELLS — `fo_class` is 71 %/83 % of the two object_recognition cells, so a `fo_class`-only gain of +0.02 buys +0.004 of `bucket_mean` (ID only) or +0.008 (both distributions). The right question is never *does it help* but *does it move a whole cell* | MEASURED | `context/decisions/headline-arithmetic-four-cells.md` |
 |  | Is the "untested cell" experiment 09 was designed on actually untested? | NO — scaffold-SFT without RL is a published wash on our exact backbone (62.0 vs bare-gold SFT's 65.7 on EndoVis2018). The +16.3 belongs to RLVR. Rung 09 is RE-SCOPED, not cancelled. | MEASURED | `context/decisions/coa-sft-published-null.md` |
 |  | Can majority voting over k sampled answers lift the `number` format? | NO — negative in all three pre-registered arms on the full 2094. k=16 SIGNIFICANTLY HARMS OOD (−0.043, CI excludes 0) and doubling k doubled the harm — the signature of a mode sitting on the wrong value. On OOD the voted answer falls BELOW the trivial floor | MEASURED | `context/decisions/self-consistency-dead.md` |
 |  | Does frame resolution explain part of the model's failure — is the ID/OOD split confounded by it? | NO — resolution is a per-video constant (130/130 videos, one resolution each), so it is PERFECTLY confounded with video identity and cannot be separated even in principle. Accuracy across resolution buckets is non-monotonic. And the premise was false: `lapchole` (ID) has SIX resolutions, its minimum (230k px) below `heico`'s uniform 518k | MEASURED | `context/decisions/resolution-is-not-the-gap.md` |
@@ -98,145 +118,169 @@
 | What did rung 14 change, and what came of it? | pending → — | `experiments/14-appearance-aug` |
 | What did rung 15 change, and what came of it? | (not yet run) → — | `experiments/15-count-target` |
 | What did rung 17 change, and what came of it? | _pending_ → 🚧 Qwen3-VL-32B, zero-shot, **as a perceiver | `experiments/17-generator-probe` |
-| What did rung 19a change, and what came of it? | pending → — | `experiments/19-external-count` |
-| What did rung 19b change, and what came of it? | pending → 🔒 gated on 19a | `experiments/19-external-count` |
+| What did rung 19a change, and what came of it? | enumeration, not `bucket_mean` → 🔴 **RUN 2026-08-16 — the model fails on LARGE instruments too. The deficit is ENUMERATION.** 19b is licensed | `experiments/19-external-count` |
+| What did rung 19b change, and what came of it? | pending → 🟢 **unblocked by 19a | `experiments/19-external-count` |
 
 ## Runs and probes that produced a number
 
 | Question | Answer | Where |
 |---|---|---|
-| What numbers does 00-baseline report? | 1 row(s); columns: rung, notebook, model, judge, split, n_questions… | `experiments/00-baseline/RESULTS.csv` |
-| What numbers does 01-ood-split report? | 1 row(s); columns: manifest, partition, n_train_videos, n_val_id_videos, n_val_ood_videos, n_train_q… | `experiments/01-ood-split/RESULTS.csv` |
-| What numbers does 02-lora-sft report? | 1 row(s); columns: run, lora_rank, lora_alpha, lr, epochs, ckpt_selected… | `experiments/02-lora-sft/RESULTS.csv` |
-| What numbers does 03-prompt-variants report? | 7 row(s); columns: arm, val_id_acc, val_id_fo_class, val_id_number, val_ood_acc, val_ood_fo_class… | `experiments/03-prompt-variants/RESULTS.csv` |
-| What numbers does 05-bottleneck-audit report? | 3 row(s); columns: arm, acc_overall, acc_ID, acc_OOD, acc_fmt_fo_class, acc_fmt_open_ended… | `experiments/05-bottleneck-audit/RESULTS.csv` |
-| What numbers does 05-bottleneck-audit report? | 1 row(s); columns: oracle_gain_weighted, rule1_oracle_ge_0.05, transfer_gain_weighted, rule2_transfer_gt_0, rule3_argmax_injective_on_dominant, n… | `experiments/05-bottleneck-audit/RESULTS_count_confusion.csv` |
-| What numbers does 05-bottleneck-audit report? | 1 row(s); columns: source, n, n_no_parseable, n_ambiguous_negation, mode_value, mode_rate… | `experiments/05-bottleneck-audit/RESULTS_number_probe.csv` |
-| What numbers does 06-vit-lora report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/06-vit-lora/RESULTS.csv` |
-| What numbers does 06-vit-lora report? | 2 row(s); columns: arm, trainable_params, bucket_mean, acc_bucket_object_recognition_ID, acc_bucket_object_recognition_OOD, acc_bucket_aggregation_ID… | `experiments/06-vit-lora/RESULTS_arms.csv` |
-| What numbers does 06-vit-lora report? | 2 row(s); columns: arm, bucket_mean_ep1, bucket_mean_ep2, delta_ep1_minus_ep2, margin_ID, margin_OOD… | `experiments/06-vit-lora/RESULTS_epoch1.csv` |
-| What numbers does 06-vit-lora report? | 1 row(s); columns: checkpoint, bucket_mean, acc_ID, acc_OOD, margin_ID, margin_OOD… | `experiments/06-vit-lora/RESULTS_epoch3.csv` |
-| What numbers does 06-vit-lora report? | 18 row(s); columns: comparison, distribution, answer_format, delta, ci_low, ci_high… | `experiments/06-vit-lora/RESULTS_epoch3_paired_ci.csv` |
-| What numbers does 09-coa-sft report? | 0 row(s); columns: run, lora_rank, lora_alpha, lr, epochs, ckpt_selected… | `experiments/09-coa-sft/RESULTS.csv` |
-| What numbers does 10-self-consistency report? | 3 row(s); columns: run, arm, k, temperature, n_all, n_nondegenerate… | `experiments/10-self-consistency/RESULTS.csv` |
-| What numbers does 10-self-consistency report? | 78 row(s); columns: run, dist, n, videos, acc, spread… | `experiments/10-self-consistency/RESULTS_jackknife_by_video.csv` |
-| What numbers does 10-self-consistency report? | 3 row(s); columns: answer_format, n, zero_advantage_frac, pass_at_k, greedy, entropy_mean… | `experiments/10-self-consistency/RESULTS_step5_gate.csv` |
-| What numbers does 10-self-consistency report? | 3 row(s); columns: answer_format, n, zero_advantage_frac, pass_at_k, greedy, entropy_mean… | `experiments/10-self-consistency/RESULTS_step5_gate_seed43.csv` |
-| What numbers does 10-self-consistency report? | 600 row(s); columns: qID, answer_format, k, n_unique, entropy, mode_share… | `experiments/10-self-consistency/RESULTS_step5_per_question.csv` |
-| What numbers does 10-self-consistency report? | 600 row(s); columns: qID, answer_format, k, n_unique, entropy, mode_share… | `experiments/10-self-consistency/RESULTS_step5_per_question_seed43.csv` |
-| What numbers does 12-image-processing report? | 8 row(s); columns: format, arm, distribution, n, n_videos, acc_control… | `experiments/12-image-processing/RESULTS.csv` |
-| What numbers does 13-wise-ft report? | 0 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/13-wise-ft/RESULTS.csv` |
-| What numbers does 13-wise-ft report? | 0 row(s); columns: arm, alpha, bucket_mean, delta_bucket_mean, acc_ID, acc_OOD… | `experiments/13-wise-ft/RESULTS_arms.csv` |
-| What numbers does 14-appearance-aug report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/14-appearance-aug/RESULTS.csv` |
-| What numbers does 14-appearance-aug report? | 3 row(s); columns: checkpoint, bucket_mean, d_bucket_mean_vs_06, acc_ID, acc_OOD, margin_ID… | `experiments/14-appearance-aug/RESULTS_epochs.csv` |
-| What numbers does 14-appearance-aug report? | 18 row(s); columns: checkpoint, distribution, answer_format, delta, ci_low, ci_high… | `experiments/14-appearance-aug/RESULTS_paired_ci.csv` |
-| What numbers does 14-appearance-aug report? | 3 row(s); columns: score, delta, ci_low, ci_high, n_videos, n_questions… | `experiments/14-appearance-aug/RESULTS_quality_diag.csv` |
-| What numbers does 15-count-target report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/15-count-target/RESULTS.csv` |
-| What numbers does 15-count-target report? | 3 row(s); columns: checkpoint, bucket_mean, acc_ID, acc_OOD, margin_ID, margin_OOD… | `experiments/15-count-target/RESULTS_epochs.csv` |
-| What numbers does 15-count-target report? | 14 row(s); columns: template, distribution, n, accuracy, floor, margin… | `experiments/15-count-target/RESULTS_number_by_template.csv` |
-| What numbers does 16-count-probes report? | 10 row(s); columns: model, distribution, answer_format, n, n_absent, n_present… | `experiments/16-count-probes/RESULTS_16a.csv` |
-| What numbers does 16-count-probes report? | 109 row(s); columns: img, frame_key, distribution, video_id, gold, detector_n_clip… | `experiments/16-count-probes/RESULTS_16b_human.csv` |
-| What numbers does 16-count-probes report? | 9 row(s); columns: arm, distribution, n, n_videos, acc, floor… | `experiments/16-count-probes/RESULTS_16c.csv` |
-| What numbers does 17-generator-probe report? | 0 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/17-generator-probe/RESULTS.csv` |
-| What numbers does 18-count-aug report? | 3 row(s); columns: run, epoch, checkpoint, bucket_mean, acc_ID, acc_OOD… | `experiments/18-count-aug/RESULTS.csv` |
-| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments/18-count-aug/RESULTS_rank_ep1.csv` |
-| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments/18-count-aug/RESULTS_rank_ep2.csv` |
-| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments/18-count-aug/RESULTS_rank_ep3.csv` |
-| What numbers does 18-count-aug report? | 6 row(s); columns: probe, dataset, per_device, grad_accum, probe_eff_batch, peak_mib… | `experiments/18-count-aug/RESULTS_vram.csv` |
-| What numbers does 20-judge-swap report? | 2 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/20-judge-swap/RESULTS.csv` |
-| What numbers does 20-judge-swap report? | 16 row(s); columns: metric, Qwen3-4B_substitute, Qwen3_5-4B_official, delta, n, note | `experiments/20-judge-swap/RESULTS_judge_agreement.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments/21-recipe-sweep/RESULTS_A2_lr.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments/21-recipe-sweep/RESULTS_A3_vitlr.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments/21-recipe-sweep/RESULTS_A_lr.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments/21-recipe-sweep/RESULTS_B_rank.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments/21-recipe-sweep/RESULTS_D_clip.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A2_lr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A2_lr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A2_lr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A3_vitlr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A3_vitlr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A3_vitlr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A_lr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A_lr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_A_lr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_B_rank_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_B_rank_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_B_rank_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_D_clip_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_D_clip_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments/21-recipe-sweep/RESULTS_class_f1_D_clip_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments/21-recipe-sweep/RESULTS_paired_ci.csv` |
-| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments/21-recipe-sweep/RESULTS_paired_ci_A2_vs_A.csv` |
-| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments/21-recipe-sweep/RESULTS_paired_ci_A3_vitlr_vs_A2.csv` |
-| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments/21-recipe-sweep/RESULTS_paired_ci_B_vs_A.csv` |
-| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments/21-recipe-sweep/RESULTS_paired_ci_D_clip_vs_A2.csv` |
-| What numbers does 21-recipe-sweep report? | 110 row(s); columns: qID, with_period, no_period, answer_format, our_answer, ground_truth… | `experiments/21-recipe-sweep/RESULTS_period_judge_ab.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A2_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A2_lr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A2_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A2_lr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A2_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A2_lr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A3_vitlr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A3_vitlr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A3_vitlr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A3_vitlr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A3_vitlr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A3_vitlr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A_lr_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A_lr_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A_lr, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_A_lr_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_B_rank, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_B_rank_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_B_rank, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_B_rank_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_B_rank, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_B_rank_ep3.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_D_clip, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_D_clip_ep1.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_D_clip, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_D_clip_ep2.csv` |
-| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_D_clip, delta_r, ci_arm… | `experiments/21-recipe-sweep/RESULTS_rank_D_clip_ep3.csv` |
-| What numbers does 23-backbone-screen report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments/23-backbone-screen/RESULTS.csv` |
-| What numbers does 23-backbone-screen report? | 14 row(s); columns: bucket, rung00_zeroshot_8B_gen3, rung23a_zeroshot_27B_gen36, delta_generation, rung06ep3_finetuned_8B, delta_finetuning | `experiments/23-backbone-screen/RESULTS_generation_deltas.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments/24-geometric-aug/RESULTS_class_f1_flip_p25_ep1.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments/24-geometric-aug/RESULTS_class_f1_flip_p25_ep2.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments/24-geometric-aug/RESULTS_class_f1_flip_p25_ep3.csv` |
-| What numbers does 24-geometric-aug report? | 14415 row(s); columns: row_key, flipped, rule, src_frame, train_frame, question_changed… | `experiments/24-geometric-aug/RESULTS_flip_manifest_p25.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: run, epoch, checkpoint, baseline_run, flip_probability, n_flipped_train_rows… | `experiments/24-geometric-aug/RESULTS_flip_p25.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep1, r_flip, delta_r, ci_flip… | `experiments/24-geometric-aug/RESULTS_rank_flip_p25_ep1.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep2, r_flip, delta_r, ci_flip… | `experiments/24-geometric-aug/RESULTS_rank_flip_p25_ep2.csv` |
-| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep3, r_flip, delta_r, ci_flip… | `experiments/24-geometric-aug/RESULTS_rank_flip_p25_ep3.csv` |
-| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments/24-geometric-aug/RESULTS_transformable_flip_p25_ep1.csv` |
-| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments/24-geometric-aug/RESULTS_transformable_flip_p25_ep2.csv` |
-| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments/24-geometric-aug/RESULTS_transformable_flip_p25_ep3.csv` |
-| What numbers does 28-vcd-gate report? | 228 row(s); columns: qID, p_clip_real, p_clip_degraded, delta | `experiments/28-vcd-gate/RESULTS_step4_per_question.csv` |
-| What numbers does 30-grpo-number report? | 2 row(s); columns: arm, run, step, checkpoint, smoke, n_scored… | `experiments/30-grpo-number/RESULTS_verdict.csv` |
-| What numbers does 31-attention-probe report? | 4 row(s); columns: arm, label, n_questions, n_image_tokens, visual_mass_mean, visual_mass_last_layer… | `experiments/31-attention-probe/RESULTS_attention.csv` |
-| What numbers does 31-attention-probe report? | 144 row(s); columns: arm, layer, visual_mass | `experiments/31-attention-probe/RESULTS_attention_curve.csv` |
-| What numbers does 31-attention-probe report? | 4 row(s); columns: arm, margin_fraction, content_fraction, visual_mass_raw, visual_mass_content, vs_base… | `experiments/31-attention-probe/RESULTS_attention_margin.csv` |
-| What numbers does 31-attention-probe report? | 48 row(s); columns: arm, q, dataset, ood, gold, n_image_tokens… | `experiments/31-attention-probe/RESULTS_attention_per_question.csv` |
-| What numbers does 32-aligner-unfreeze report? | 2 row(s); columns: leg, freeze_aligner, total_tensors, n_llm, n_vit, n_aligner… | `experiments/32-aligner-unfreeze/RESULTS_reachability.csv` |
-| What numbers does 33-number-logit-probe report? | 2094 row(s); columns: qID, gold, dataset, greedy, greedy_legal, p_top1… | `experiments/33-number-logit-probe/RESULTS_value_probs.csv` |
-| What numbers does 34-hidden-state-probe report? | 19 row(s); columns: layer, C, n_comp, acc_ID_insample, acc_OOD_transfer | `experiments/34-hidden-state-probe/RESULTS_probe_full.csv` |
+| What numbers does 00-baseline report? | 1 row(s); columns: rung, notebook, model, judge, split, n_questions… | `experiments\00-baseline\RESULTS.csv` |
+| What numbers does 01-ood-split report? | 1 row(s); columns: manifest, partition, n_train_videos, n_val_id_videos, n_val_ood_videos, n_train_q… | `experiments\01-ood-split\RESULTS.csv` |
+| What numbers does 02-lora-sft report? | 1 row(s); columns: run, lora_rank, lora_alpha, lr, epochs, ckpt_selected… | `experiments\02-lora-sft\RESULTS.csv` |
+| What numbers does 03-prompt-variants report? | 7 row(s); columns: arm, val_id_acc, val_id_fo_class, val_id_number, val_ood_acc, val_ood_fo_class… | `experiments\03-prompt-variants\RESULTS.csv` |
+| What numbers does 05-bottleneck-audit report? | 3 row(s); columns: arm, acc_overall, acc_ID, acc_OOD, acc_fmt_fo_class, acc_fmt_open_ended… | `experiments\05-bottleneck-audit\RESULTS.csv` |
+| What numbers does 05-bottleneck-audit report? | 1 row(s); columns: oracle_gain_weighted, rule1_oracle_ge_0.05, transfer_gain_weighted, rule2_transfer_gt_0, rule3_argmax_injective_on_dominant, n… | `experiments\05-bottleneck-audit\RESULTS_count_confusion.csv` |
+| What numbers does 05-bottleneck-audit report? | 1 row(s); columns: source, n, n_no_parseable, n_ambiguous_negation, mode_value, mode_rate… | `experiments\05-bottleneck-audit\RESULTS_number_probe.csv` |
+| What numbers does 06-vit-lora report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\06-vit-lora\RESULTS.csv` |
+| What numbers does 06-vit-lora report? | 2 row(s); columns: arm, trainable_params, bucket_mean, acc_bucket_object_recognition_ID, acc_bucket_object_recognition_OOD, acc_bucket_aggregation_ID… | `experiments\06-vit-lora\RESULTS_arms.csv` |
+| What numbers does 06-vit-lora report? | 2 row(s); columns: arm, bucket_mean_ep1, bucket_mean_ep2, delta_ep1_minus_ep2, margin_ID, margin_OOD… | `experiments\06-vit-lora\RESULTS_epoch1.csv` |
+| What numbers does 06-vit-lora report? | 1 row(s); columns: checkpoint, bucket_mean, acc_ID, acc_OOD, margin_ID, margin_OOD… | `experiments\06-vit-lora\RESULTS_epoch3.csv` |
+| What numbers does 06-vit-lora report? | 18 row(s); columns: comparison, distribution, answer_format, delta, ci_low, ci_high… | `experiments\06-vit-lora\RESULTS_epoch3_paired_ci.csv` |
+| What numbers does 09-coa-sft report? | 0 row(s); columns: run, lora_rank, lora_alpha, lr, epochs, ckpt_selected… | `experiments\09-coa-sft\RESULTS.csv` |
+| What numbers does 10-self-consistency report? | 3 row(s); columns: run, arm, k, temperature, n_all, n_nondegenerate… | `experiments\10-self-consistency\RESULTS.csv` |
+| What numbers does 10-self-consistency report? | 78 row(s); columns: run, dist, n, videos, acc, spread… | `experiments\10-self-consistency\RESULTS_jackknife_by_video.csv` |
+| What numbers does 10-self-consistency report? | 3 row(s); columns: answer_format, n, zero_advantage_frac, pass_at_k, greedy, entropy_mean… | `experiments\10-self-consistency\RESULTS_step5_gate.csv` |
+| What numbers does 10-self-consistency report? | 3 row(s); columns: answer_format, n, zero_advantage_frac, pass_at_k, greedy, entropy_mean… | `experiments\10-self-consistency\RESULTS_step5_gate_seed43.csv` |
+| What numbers does 10-self-consistency report? | 600 row(s); columns: qID, answer_format, k, n_unique, entropy, mode_share… | `experiments\10-self-consistency\RESULTS_step5_per_question.csv` |
+| What numbers does 10-self-consistency report? | 600 row(s); columns: qID, answer_format, k, n_unique, entropy, mode_share… | `experiments\10-self-consistency\RESULTS_step5_per_question_seed43.csv` |
+| What numbers does 12-image-processing report? | 8 row(s); columns: format, arm, distribution, n, n_videos, acc_control… | `experiments\12-image-processing\RESULTS.csv` |
+| What numbers does 12-image-processing report? | 8 row(s); columns: format, arm, distribution, n, n_videos, acc_control… | `experiments\12-image-processing\RESULTS_arms.csv` |
+| What numbers does 13-wise-ft report? | 0 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\13-wise-ft\RESULTS.csv` |
+| What numbers does 13-wise-ft report? | 0 row(s); columns: arm, alpha, bucket_mean, delta_bucket_mean, acc_ID, acc_OOD… | `experiments\13-wise-ft\RESULTS_arms.csv` |
+| What numbers does 14-appearance-aug report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\14-appearance-aug\RESULTS.csv` |
+| What numbers does 14-appearance-aug report? | 3 row(s); columns: checkpoint, bucket_mean, d_bucket_mean_vs_06, acc_ID, acc_OOD, margin_ID… | `experiments\14-appearance-aug\RESULTS_epochs.csv` |
+| What numbers does 14-appearance-aug report? | 18 row(s); columns: checkpoint, distribution, answer_format, delta, ci_low, ci_high… | `experiments\14-appearance-aug\RESULTS_paired_ci.csv` |
+| What numbers does 14-appearance-aug report? | 3 row(s); columns: score, delta, ci_low, ci_high, n_videos, n_questions… | `experiments\14-appearance-aug\RESULTS_quality_diag.csv` |
+| What numbers does 15-count-target report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\15-count-target\RESULTS.csv` |
+| What numbers does 15-count-target report? | 3 row(s); columns: checkpoint, bucket_mean, acc_ID, acc_OOD, margin_ID, margin_OOD… | `experiments\15-count-target\RESULTS_epochs.csv` |
+| What numbers does 15-count-target report? | 14 row(s); columns: template, distribution, n, accuracy, floor, margin… | `experiments\15-count-target\RESULTS_number_by_template.csv` |
+| What numbers does 16-count-probes report? | 10 row(s); columns: model, distribution, answer_format, n, n_absent, n_present… | `experiments\16-count-probes\RESULTS_16a.csv` |
+| What numbers does 16-count-probes report? | 109 row(s); columns: img, frame_key, distribution, video_id, gold, detector_n_clip… | `experiments\16-count-probes\RESULTS_16b_human.csv` |
+| What numbers does 16-count-probes report? | 9 row(s); columns: arm, distribution, n, n_videos, acc, floor… | `experiments\16-count-probes\RESULTS_16c.csv` |
+| What numbers does 17-generator-probe report? | 0 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\17-generator-probe\RESULTS.csv` |
+| What numbers does 18-count-aug report? | 3 row(s); columns: run, epoch, checkpoint, bucket_mean, acc_ID, acc_OOD… | `experiments\18-count-aug\RESULTS.csv` |
+| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments\18-count-aug\RESULTS_rank_ep1.csv` |
+| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments\18-count-aug\RESULTS_rank_ep2.csv` |
+| What numbers does 18-count-aug report? | 3 row(s); columns: cell, n, r_06ep3_archived, r_18, delta_r, ci_18… | `experiments\18-count-aug\RESULTS_rank_ep3.csv` |
+| What numbers does 18-count-aug report? | 6 row(s); columns: probe, dataset, per_device, grad_accum, probe_eff_batch, peak_mib… | `experiments\18-count-aug\RESULTS_vram.csv` |
+| What numbers does 20-judge-swap report? | 2 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\20-judge-swap\RESULTS.csv` |
+| What numbers does 20-judge-swap report? | 16 row(s); columns: metric, Qwen3-4B_substitute, Qwen3_5-4B_official, delta, n, note | `experiments\20-judge-swap\RESULTS_judge_agreement.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_A2_lr.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_A3_vitlr.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_A_lr.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_B_rank.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: run, arm, epoch, checkpoint, baseline_run, lr… | `experiments\21-recipe-sweep\RESULTS_D_clip.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A2_lr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A2_lr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A2_lr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A3_vitlr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A3_vitlr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A3_vitlr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_A_lr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_B_rank_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_D_clip_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_D_clip_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, illegal, macro_f1_18, macro_f1_arm, d_macro… | `experiments\21-recipe-sweep\RESULTS_class_f1_D_clip_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 1 row(s); columns: arm, run, step, checkpoint, smoke, n_scored… | `experiments\21-recipe-sweep\RESULTS_collapse_guard.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci_A2_vs_A.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci_A3_vitlr_vs_A2.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci_B_vs_A.csv` |
+| What numbers does 21-recipe-sweep report? | 30 row(s); columns: epoch, cell, n, videos, delta, ci_low… | `experiments\21-recipe-sweep\RESULTS_paired_ci_D_clip_vs_A2.csv` |
+| What numbers does 21-recipe-sweep report? | 110 row(s); columns: qID, with_period, no_period, answer_format, our_answer, ground_truth… | `experiments\21-recipe-sweep\RESULTS_period_judge_ab.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A2_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A2_lr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A2_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A2_lr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A2_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A2_lr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A3_vitlr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A3_vitlr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A3_vitlr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A3_vitlr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A3_vitlr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A3_vitlr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_A_lr, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_A_lr_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_B_rank, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_B_rank_ep3.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep1, r_D_clip, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_D_clip_ep1.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep2, r_D_clip, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_D_clip_ep2.csv` |
+| What numbers does 21-recipe-sweep report? | 3 row(s); columns: cell, n, r_18_ep3, r_D_clip, delta_r, ci_arm… | `experiments\21-recipe-sweep\RESULTS_rank_D_clip_ep3.csv` |
+| What numbers does 23-backbone-screen report? | 1 row(s); columns: run, model, bucket_mean, acc_ID, acc_OOD, floor_ID… | `experiments\23-backbone-screen\RESULTS.csv` |
+| What numbers does 23-backbone-screen report? | 14 row(s); columns: bucket, rung00_zeroshot_8B_gen3, rung23a_zeroshot_27B_gen36, delta_generation, rung06ep3_finetuned_8B, delta_finetuning | `experiments\23-backbone-screen\RESULTS_generation_deltas.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments\24-geometric-aug\RESULTS_class_f1_flip_p25_ep1.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments\24-geometric-aug\RESULTS_class_f1_flip_p25_ep2.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, illegal, macro_f1_armA, macro_f1_flip, d_macro… | `experiments\24-geometric-aug\RESULTS_class_f1_flip_p25_ep3.csv` |
+| What numbers does 24-geometric-aug report? | 14415 row(s); columns: row_key, flipped, rule, src_frame, train_frame, question_changed… | `experiments\24-geometric-aug\RESULTS_flip_manifest_p25.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: run, epoch, checkpoint, baseline_run, flip_probability, n_flipped_train_rows… | `experiments\24-geometric-aug\RESULTS_flip_p25.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep1, r_flip, delta_r, ci_flip… | `experiments\24-geometric-aug\RESULTS_rank_flip_p25_ep1.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep2, r_flip, delta_r, ci_flip… | `experiments\24-geometric-aug\RESULTS_rank_flip_p25_ep2.csv` |
+| What numbers does 24-geometric-aug report? | 3 row(s); columns: cell, n, r_armA_ep3, r_flip, delta_r, ci_flip… | `experiments\24-geometric-aug\RESULTS_rank_flip_p25_ep3.csv` |
+| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments\24-geometric-aug\RESULTS_transformable_flip_p25_ep1.csv` |
+| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments\24-geometric-aug\RESULTS_transformable_flip_p25_ep2.csv` |
+| What numbers does 24-geometric-aug report? | 4 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments\24-geometric-aug\RESULTS_transformable_flip_p25_ep3.csv` |
+| What numbers does 28-vcd-gate report? | 228 row(s); columns: qID, p_clip_real, p_clip_degraded, delta | `experiments\28-vcd-gate\RESULTS_step4_per_question.csv` |
+| What numbers does 30-grpo-number report? | 2 row(s); columns: arm, run, step, checkpoint, smoke, n_scored… | `experiments\30-grpo-number\RESULTS_verdict.csv` |
+| What numbers does 31-attention-probe report? | 4 row(s); columns: arm, label, n_questions, n_image_tokens, visual_mass_mean, visual_mass_last_layer… | `experiments\31-attention-probe\RESULTS_attention.csv` |
+| What numbers does 31-attention-probe report? | 144 row(s); columns: arm, layer, visual_mass | `experiments\31-attention-probe\RESULTS_attention_curve.csv` |
+| What numbers does 31-attention-probe report? | 4 row(s); columns: arm, margin_fraction, content_fraction, visual_mass_raw, visual_mass_content, vs_base… | `experiments\31-attention-probe\RESULTS_attention_margin.csv` |
+| What numbers does 31-attention-probe report? | 48 row(s); columns: arm, q, dataset, ood, gold, n_image_tokens… | `experiments\31-attention-probe\RESULTS_attention_per_question.csv` |
+| What numbers does 32-aligner-unfreeze report? | 2 row(s); columns: leg, freeze_aligner, total_tensors, n_llm, n_vit, n_aligner… | `experiments\32-aligner-unfreeze\RESULTS_reachability.csv` |
+| What numbers does 33-number-logit-probe report? | 2094 row(s); columns: qID, gold, dataset, greedy, greedy_legal, p_top1… | `experiments\33-number-logit-probe\RESULTS_value_probs.csv` |
+| What numbers does 34-hidden-state-probe report? | 19 row(s); columns: layer, C, n_comp, acc_ID_insample, acc_OOD_transfer | `experiments\34-hidden-state-probe\RESULTS_probe_full.csv` |
+| What numbers does 35-ntl-was report? | 1 row(s); columns: arm, run, step, checkpoint, smoke, n_scored… | `experiments\35-ntl-was\RESULTS_collapse_guard.csv` |
+| What numbers does 36-clip-sponge-probes report? | 529 row(s); columns: qID, gold, a2, gold_rank, top1, n_cands… | `experiments\36-clip-sponge-probes\RESULTS_kta_rerank_full.csv` |
+| What numbers does 36-clip-sponge-probes report? | 148 row(s); columns: qID, gold, a2, base, base_correct, dataset… | `experiments\36-clip-sponge-probes\RESULTS_ktc_base_full.csv` |
+| What numbers does 37-attention-vs-masks report? | 40 row(s); columns: tag, ds, video, asked_class, n_masks, question… | `experiments\37-attention-vs-masks\RESULTS_ab_overlay.csv` |
+| What numbers does 38-gen36-ft-screen report? | 1 row(s); columns: run, arm, model, epoch, checkpoint, baseline_run… | `experiments\38-gen36-ft-screen\RESULTS.csv` |
+| What numbers does 38-gen36-ft-screen report? | 6252 row(s); columns: qID, correct, answer_format, primary_capability, question, ground_truth… | `experiments\38-gen36-ft-screen\RESULTS_eval_27b_ep1_inspect.csv` |
+| What numbers does 38-gen36-ft-screen report? | 17 row(s); columns: level, name, accuracy, ci_low, ci_high, count | `experiments\38-gen36-ft-screen\RESULTS_eval_27b_ep1_summary.csv` |
+| What numbers does 38-gen36-ft-screen report? | 13 row(s); columns: cell, n, videos, delta_27b_minus_A2, ci_low, ci_high… | `experiments\38-gen36-ft-screen\RESULTS_paired_ci_27b_vs_A2_ep1.csv` |
+| What numbers does 38-gen36-ft-screen report? | 19 row(s); columns: kind, cell, n, A2_ep1, arm_27b, delta | `experiments\38-gen36-ft-screen\RESULTS_side_by_side_27b_vs_A2_ep1.csv` |
+| What numbers does 39-connector-lora report? | 3 row(s); columns: cell, n, illegal, macro_f1_A2, macro_f1_arm, d_macro… | `experiments\39-connector-lora\RESULTS_class_f1_ep1_full.csv` |
+| What numbers does 39-connector-lora report? | 8 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments\39-connector-lora\RESULTS_paired_ci_ep1_full.csv` |
+| What numbers does 39-connector-lora report? | 2 row(s); columns: leg, freeze_aligner, returncode, n_target_modules, total_tensors, n_llm… | `experiments\39-connector-lora\RESULTS_reachability39.csv` |
+| What numbers does 40-gen36-recipe-connector report? | 2 row(s); columns: run, arm, model, epoch, checkpoint, baseline_run… | `experiments\40-gen36-recipe-connector\RESULTS.csv` |
+| What numbers does 42-merged-corpus report? | 5 row(s); columns: run, arm, epoch, checkpoint, eval_set, n_eval… | `experiments\42-merged-corpus\RESULTS.csv` |
+| What numbers does 42-merged-corpus report? | 24 row(s); columns: arm, epoch, cell, n, illegal, macro_f1… | `experiments\42-merged-corpus\RESULTS_class_f1.csv` |
+| What numbers does 42-merged-corpus report? | 6 row(s); columns: cell, delta, ci_low, ci_high, n, n_videos… | `experiments\42-merged-corpus\RESULTS_paired_ci.csv` |
 
 ## Cuts already computed (do not recompute these)
 
 | Question | Answer | Where |
 |---|---|---|
-| Which cuts are precomputed for 00_zeroshot_qwen3vl? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments/00-baseline/runs/00_zeroshot_qwen3vl/stratified.json` |
-| Which cuts are precomputed for 02_lora_sft_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments/02-lora-sft/runs/02_lora_sft_v1/stratified.json` |
-| Which cuts are precomputed for 06_vit_lora_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments/06-vit-lora/runs/06_vit_lora_v1/stratified.json` |
-| Which cuts are precomputed for 23a_qwen36_27b_bf16? | `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments/23-backbone-screen/runs/23a_qwen36_27b_bf16/stratified.json` |
+| Which cuts are precomputed for 00_zeroshot_qwen3vl? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\00-baseline\runs\00_zeroshot_qwen3vl\stratified.json` |
+| Which cuts are precomputed for 02_lora_sft_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\02-lora-sft\runs\02_lora_sft_v1\stratified.json` |
+| Which cuts are precomputed for 06_vit_lora_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\06-vit-lora\runs\06_vit_lora_v1\stratified.json` |
+| Which cuts are precomputed for 12c_composite_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\12-image-processing\runs\12c_composite_v1\stratified.json` |
+| Which cuts are precomputed for 12c_control_v1? | `_meta`, `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\12-image-processing\runs\12c_control_v1\stratified.json` |
+| Which cuts are precomputed for 23a_qwen36_27b_bf16? | `acc_ID`, `acc_OOD`, `acc_overall`, `bucket_mean`, `by_bucket`, `by_bucket_format`, `by_format`, `floor_ID`, `floor_OOD`, `margin_ID`, `margin_OOD`, `number_estimate` | `experiments\23-backbone-screen\runs\23a_qwen36_27b_bf16\stratified.json` |
 
 ## ⚠️ Not indexed
 
 These READMEs have no parseable `## Ladder` table, so their rungs are missing
 from this index. Reported rather than dropped silently:
 
-- `experiments/11-resolution/README.md`
-- `experiments/12-image-processing/README.md`
-- `experiments/16-count-probes/README.md`
-- `experiments/18-count-aug/README.md`
-- `experiments/20-judge-swap/README.md`
-- `experiments/21-recipe-sweep/README.md`
-- `experiments/23-backbone-screen/README.md`
-- `experiments/24-geometric-aug/README.md`
-- `experiments/26-deshortcut-eval/README.md`
-- `experiments/28-vcd-gate/README.md`
-- `experiments/29-sam2-temporal/README.md`
-- `experiments/30-grpo-number/README.md`
-- `experiments/33-number-logit-probe/README.md`
-- `experiments/34-hidden-state-probe/README.md`
-- `experiments/35-ntl-was/README.md`
-- `experiments/37-attention-vs-masks/README.md`
-- `experiments/splits/README.md`
+- `experiments\11-resolution\README.md`
+- `experiments\12-image-processing\README.md`
+- `experiments\16-count-probes\README.md`
+- `experiments\18-count-aug\README.md`
+- `experiments\20-judge-swap\README.md`
+- `experiments\21-recipe-sweep\README.md`
+- `experiments\23-backbone-screen\README.md`
+- `experiments\24-geometric-aug\README.md`
+- `experiments\26-deshortcut-eval\README.md`
+- `experiments\28-vcd-gate\README.md`
+- `experiments\29-sam2-temporal\README.md`
+- `experiments\30-grpo-number\README.md`
+- `experiments\33-number-logit-probe\README.md`
+- `experiments\34-hidden-state-probe\README.md`
+- `experiments\35-ntl-was\README.md`
+- `experiments\36-clip-sponge-probes\README.md`
+- `experiments\37-attention-vs-masks\README.md`
+- `experiments\38-gen36-ft-screen\README.md`
+- `experiments\39-connector-lora\README.md`
+- `experiments\40-gen36-recipe-connector\README.md`
+- `experiments\splits\README.md`

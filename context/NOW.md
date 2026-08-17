@@ -103,9 +103,19 @@ score on our 4 mm Clips. The mean answer saturates at ≈1 whether one object is
 is **not** the primary lever. [[counting-is-enumeration-not-small-object-perception]]
 
 **4. 🔴 Thinking at inference is dead.** 0.4188 accuracy against 0.6485 without it, at **9.888
-s/question** versus 0.515 — 19× the cost for 20 points less. But **83 % of its failed traces
-contain the gold answer** (against a 27.5 % chance control), which is rung 34's hidden-state
-finding seen one layer up: the model has the answer and loses it on the way out.
+s/question** versus 0.515 — 19× the cost for 20 points less.
+
+🔻 **AMENDED 2026-08-17 — the "but" this paragraph used to carry is WITHDRAWN.** It read
+*"83 % of its failed traces contain the gold answer (against a 27.5 % chance control), which is
+rung 34's hidden-state finding seen one layer up"*. That 83 % is an **oracle recall with no
+denominator**: measured on the same archived traces, a median of **3** distinct plausible numbers
+coexist per failed trace, the gold's own **± 1 neighbour is also present in 83.0 %** of them, and
+the two trivial extractors score **0.1786 / 0.2233** against a **0.2189** random-pick control while
+breaking **24.2 %/37.7 %** of the questions the model already got right. The 83 % reproduces only
+under the loosest extraction — which is also the one with the *most* candidates. **It is not rung
+34's finding one layer up**; the hidden-state probe reads a representation, a trace is a lossy
+function of it, and only the probe survives. [[trace-extractor-is-a-coin-flip]],
+`experiments/43-thinking-at-inference/RESULTS_trace_extractor_audit.json`.
 
 **5. 🟡 The 27B enumerates markedly better than the 8B** — 0.670 vs 0.317 at two objects on
 identical frames, Spearman 0.692 vs 0.497. The larger backbone is better at the thing that is

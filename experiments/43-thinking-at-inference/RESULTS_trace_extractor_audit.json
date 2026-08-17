@@ -1,0 +1,178 @@
+{
+  "what": "Task 1 \u2014 denominator audit of the trace-extractor claim. Zero GPU. Source: rung 43 ep2/3 thinking arm, uncapped, 4000 heico-test questions, restricted to answer_format == number.",
+  "source_files": {
+    "traces": "/home/uaq_user/storage/rung43/r43_ep23_think_uncapped/predictions.json",
+    "judge": "/home/uaq_user/storage/rung43/r43_ep23_think_uncapped/results.csv",
+    "control_nothink": "/home/uaq_user/storage/rung43/r43_ep23_nothink/results.csv",
+    "gold": "/home/uaq_user/storage/orena-data/heico/data/frame/test.parquet"
+  },
+  "population": {
+    "n_number_questions": 1326,
+    "n_failed_think": 963,
+    "n_correct_think": 363,
+    "acc_think_number": 0.2738,
+    "acc_nothink_number": 0.4811,
+    "gold_vocab_max": 12,
+    "gold_hist": {
+      "1": 567,
+      "2": 373,
+      "3": 146,
+      "4": 98,
+      "5": 55,
+      "6": 20,
+      "7": 19,
+      "8": 18,
+      "9": 13,
+      "10": 9,
+      "11": 6,
+      "12": 2
+    },
+    "closed_think_tag": 0.6719
+  },
+  "A0_oracle_recall": {
+    "strict_pre_close_plus_words": {
+      "on_failed": {
+        "n": 963,
+        "hits": 653,
+        "recall": 0.6781
+      },
+      "on_correct": {
+        "n": 363,
+        "hits": 309,
+        "recall": 0.8512
+      },
+      "on_all": {
+        "n": 1326,
+        "hits": 962,
+        "recall": 0.7255
+      }
+    },
+    "loose_any_digit_full_content": {
+      "on_failed": {
+        "n": 963,
+        "hits": 826,
+        "recall": 0.8577
+      },
+      "on_all": {
+        "n": 1326,
+        "hits": 1189,
+        "recall": 0.8967
+      },
+      "median_k": 4,
+      "note": "THIS is the extraction that reproduces the reported ~83 % \u2014 and it is also the extraction with the LARGEST candidate set. The recall and the ambiguity are the same number seen from two sides."
+    },
+    "note": "recall on ALL number questions is the hard CEILING of any trace extractor",
+    "neighbour_of_gold_also_in_trace_failed": 0.8297
+  },
+  "Aa_candidates_per_trace": {
+    "failed": {
+      "min": 0,
+      "p25": 2,
+      "median": 3,
+      "p75": 4,
+      "p90": 6,
+      "max": 12,
+      "mean": 3.291
+    },
+    "correct": {
+      "min": 0,
+      "p25": 1,
+      "median": 1,
+      "p75": 2,
+      "p90": 3,
+      "max": 8,
+      "mean": 1.54
+    },
+    "all": {
+      "min": 0,
+      "p25": 1,
+      "median": 3.0,
+      "p75": 4,
+      "p90": 5,
+      "max": 12,
+      "mean": 2.811
+    },
+    "n_tokens_failed": {
+      "min": 0,
+      "p25": 4,
+      "median": 21,
+      "p75": 59,
+      "p90": 86,
+      "max": 211,
+      "mean": 34.388
+    },
+    "k_histogram_failed": {
+      "0": 45,
+      "1": 82,
+      "2": 222,
+      "3": 237,
+      "4": 182,
+      "5": 90,
+      "6": 50,
+      "7": 23,
+      "8": 15,
+      "9": 3,
+      "10": 10,
+      "11": 2,
+      "12": 2
+    },
+    "random_pick_acc_failed": 0.2189,
+    "random_pick_acc_all": 0.3337
+  },
+  "Ab_trivial_rules": {
+    "failed": {
+      "last_before_close": {
+        "n": 963,
+        "hits": 172,
+        "acc": 0.1786
+      },
+      "most_frequent": {
+        "n": 963,
+        "hits": 215,
+        "acc": 0.2233
+      }
+    },
+    "all_number": {
+      "last_before_close": {
+        "n": 1326,
+        "hits": 447,
+        "acc": 0.3371
+      },
+      "most_frequent": {
+        "n": 1326,
+        "hits": 441,
+        "acc": 0.3326
+      }
+    },
+    "comparators": {
+      "think_arm_as_shipped": 0.2738,
+      "nothink_arm_control": 0.4811
+    },
+    "net": {
+      "last_before_close": {
+        "fixed": 172,
+        "broken": 88,
+        "net": 84,
+        "delta_vs_think": 0.0633
+      },
+      "most_frequent": {
+        "fixed": 215,
+        "broken": 137,
+        "net": 78,
+        "delta_vs_think": 0.0588
+      }
+    }
+  },
+  "Ac_flip_rate_on_correct": {
+    "last_before_close": {
+      "n": 363,
+      "breaks": 88,
+      "break_rate": 0.2424
+    },
+    "most_frequent": {
+      "n": 363,
+      "breaks": 137,
+      "break_rate": 0.3774
+    }
+  }
+}
