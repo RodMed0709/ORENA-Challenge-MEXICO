@@ -1,81 +1,83 @@
 # context/NOW.md — what is happening RIGHT NOW
 
-## 📋 2026-08-17 — FOR THE TEAM: rung 45 is TRAINING on UNAM right now
+## 📋 2026-08-17 — FOR THE TEAM: rung 45 is SCORED, and the 27B line is closed
 
-Everything here is on `main` (`c7cf835`…`d0dedbc`). What is **not** in git and cannot be: the
-19b corpus artifacts and the rung-45 checkpoints, both under gitignored `experiments/*/runs/`.
-They live on UNAM.
+Everything below is on `main`. Not in git and cannot be: the rung-45 checkpoints and the 19b
+corpus, both under gitignored `experiments/*/runs/`.
 
-**1. 📡 Two arms are running on UNAM, one per GPU, started 01:59 UTC.** Nobody needs to babysit
-them (`setsid nohup`).
+**1. 🔴 The merged corpus HARMS the 27B.** R00 (rung 18's 14 415) vs R0 (rung 42's merged
+19 384), one variable — `diff_vs_R00` lists exactly two fields, `arm` and `corpus`. On the clean
+1 283:
 
-| | R00 (GPU 0) | R0 (GPU 1) |
-|---|---|---|
-| corpus | 14 415 (rung 18) | **19 384 (rung 42's merged corpus)** |
-| steps | 901 | 1 212 |
-| ETA | ~12:45 UTC | ~16:25 UTC |
+| | R00 | R0 | Δ |
+|---|---|---|---|
+| `bucket_mean` | 0.4315 | 0.3170 | **−0.1145** |
+| `object_recognition_ID` | 0.5680 | 0.3120 | −0.2560 |
+| `macro_f1_ID` | 0.6876 | 0.3465 | −0.3411 |
+| train loss ep1 | 0.0694 | **0.0589** | — |
 
-```bash
-ssh UNAM 'for a in R00 R0; do tail -1 ~/storage/rung45/code/arm_$a.log; done'
-```
+Paired, video-clustered: **four cells veto**, including `object_recognition` — the cell PLAN §6
+named in advance as this rung's modal failure. **Same rows gained the 8B +0.0402 and cost the 27B
+−0.1145.** Full numbers in `experiments/45-gen36-data-and-reg/RESULTS*.csv`.
 
-**What they answer:** the 27B has **never seen the merged corpus**. Every 27B run — rungs 38, 40,
-43 — trained on rung 18's 14 415 rows, pinned by sha256. The 8B went from rank 11 to rank 5 with
-that corpus. **R0 vs R00 is that question with one variable.** A third arm, **R1**
-(`lora_dropout` 0.0 → 0.1), starts when a card frees: the 27B ends epoch 1 at loss **0.068**
-against a 0.2 over-fitting threshold and is the arm carrying **less** regularisation than the 8B.
+🔑 **Three things harden the negative:** R0's train loss was **lower**, so selecting on loss picks
+the worse arm; the OOD cells structurally favour R0 (8 of the 10 heico test videos are in its
+training) **and it loses them anyway**; and it emits **zero** illegal `fo_class` tokens against
+R00's 31 while macro-F1 halves — it stopped guessing outside the vocabulary and **collapsed onto the
+head class**, answering `Clip` to almost everything.
 
-Pre-registration, arms, judges and declared NO-GOs: `experiments/45-gen36-data-and-reg/PLAN.md`.
+**2. 🔴 The 27B line stops as a shipped candidate — see [[27b-is-a-teacher-not-a-candidate]].**
+On the clean 1 283 at the same corpus: 8B A2 **0.6342**, 27B bf16 `conn4e5` **~0.558**, 27B NF4 R00
+**0.4315**. Quantization costs −0.127 here, but handing all of it back still leaves the 27B
+**−0.076 behind the 8B**, and rung 42's 0.6744 sits 0.116 above the best 27B imaginable.
 
-**2. 🔴 This rung's eval is NOT the usual one, and quoting the usual one would be wrong.** Rung 42's
-corpus promoted 30 of the 38 public test videos into training, so the **6 252-question local eval is
-CONTAMINATED for R0 and R1**. Primary eval is rung 42's **8 held-out videos, 1 283 questions**,
-clean for all three arms. Effective n is 8 videos (`RULES §13`) ⇒ **no heico CI is readable here**.
-Also: epoch-1 train loss is a screen that **can kill an arm but never crown one** — R0 sees 35 %
-more data, so its loss trajectory differs for reasons unrelated to being a better model.
+⚠️ **This does NOT establish that the 27B backbone loses, and the note says so explicitly.** Every
+27B arm ever run inherited hyperparameters swept **on an 8B**; the backbones train on different
+frameworks; the only 27B-native recipe rung swept two knobs; and `weight_decay` differs (0.0 in
+`conn4e5`, 0.1 in R00). **The stop is on time and resources, not on the backbone being fairly
+beaten.** What would reopen it is listed in the note.
 
-**3. 🟢 What unblocked a rung that was hardware-blocked since rung 38.** Rung 38 measured the bf16
-27B arm at **52.64 GiB** and concluded it *"does not fit a 48 GB card"*, which is why every 27B arm
-has run on rented A100s. A new gate — `experiments/40-gen36-recipe-connector/_tools/fit_gate_4bit.py`
-— measured the **NF4** load at **18.31 GiB reserved, 29.69 GiB spare**, with `trainable_params`
-identical to `40_B_connector_v1` (107 050 240) so the number provably transfers. 2.3 min, $0.
-⇒ **the whole sweep runs free on UNAM.**
+⇒ **R1, `alpha` 32→16 and the bf16 re-run are all dead with it.** They were levers on a model that
+is no longer a candidate. Both GPUs are free.
 
-🔻 **`CLAUDE.md`'s "Unsloth is single-GPU" is stale** — Unsloth does DDP via `torchrun`. But DDP
-*replicates* the model per GPU, so it never addressed this blocker; **only NF4 did.** DDP was
-consequently dropped: two full arms fit, one per card, which gives the same parallelism without
-adding a variable. The `assert_effective_batch` guard stays as the net — under `torchrun`, reusing
-rung 40's literal `grad_accum 16` would train at effective batch 32 silently.
+**3. 🟢 The 27B becomes the teacher.** It counts BETTER than the 8B on external data
+(`experiments/19-external-count/`): MISAW **0.3913 vs 0.2048**, SurgSigma **0.4905 vs 0.4027**,
+Spearman **0.6921 vs 0.4965**. It does not merely get more right — it **orders quantities better**,
+and `number` is 71 % of our error. ⇒ **ship the 8B, distil the 27B into it.**
 
-⚠️ **NF4 is a declared confound** against rung 40's bf16 absolutes. Arms are comparable to each
-other; R00 minus rung 40 prices the quantization, and whether the winner must be re-run in bf16 is
-deferred to that point.
+The one live bet now has three sources, all pointing at `number` and all landing on rung 42's
+checkpoint: the 27B as teacher, **SurgΣ-DB**'s 309 123 human traces, and the **19b** corpus (8 079
+exact-count rows). ⚠️ They are **three interventions, not one** — folding them together repeats the
+two-variable mistake rung 45 just paid for.
 
-**4. 🔴 Thinking at inference is dead a second way (rung 19a closed).** On 401 balanced enumeration
-questions: **0.2943 vs 0.4414** for its own no-thinking control, at 19.2 s/question against a 5 s
-budget. The mechanism is not reasoning quality — **150 of 401 generations returned an empty
-string**: the trace consumes the 4096 window and no answer is ever emitted. Among the 251 that do
-answer it scores 0.4701, *above* the control, but that is a self-selected subset and an empty answer
-is a wrong answer. ⚠️ `assert_tag_survived` does **not** catch this — it only fires when *no*
-generation closes `</think>`. Fix proposed (budget forcing, s1 / arXiv 2501.19393) in
-`local/tasks/thinking-trace-budget.md`.
+⚠️ **SurgΣ-DB is the dataset and SurgVLM is a model that never released weights** — verify-fail in
+the licence sweep alongside LLaVA-Surg and Surgical-LVLM. There is no SurgVLM to use.
 
-**5. 🟢 CholecT50 is joined to SurgSigma, and it was checked by eye.** 85 676/85 676 = **100 %**
-after normalising zero-padding (`VID2` vs `VID02`; the raw string join is 91.08 %). Three frames and
-seven boxes opened and looked at before anything was built — the 2026-08-16 Voxel51 mismatch is what
-that check exists to prevent. 🔴 **Boxes are normalised to 1000, not pixels**; divide before drawing
-or cropping. A 19b enumeration corpus (8 079 train / 2 500 held out, split by video) is built at
-`experiments/19-external-count/runs/19b_corpus_v1/` and **deliberately parked**: it enters the
-winning backbone afterwards, never inside a data-vs-regularisation A/B, and its prior is not
-favourable (UniBench; arXiv 2605.30170 reports that scaling counting data is not sufficient either).
+**4. 🔴 Nothing is ready to launch, and the blocker is the environment.** Qwen3-VL needs
+`transformers 4.57`; UNAM's four envs are at 5.12 / 5.14 / 5.5 / 5.15. **UNAM cannot train the 8B
+at all** — that line has always run on RunPod. Also missing on the box: the 19b corpus (6.3 GB,
+local only), rung 42's checkpoint, and the 8B base. Where the distillation line runs is the
+decision that unblocks everything else.
 
-**6. 📌 Rung 42's corpus was recovered from S3.** It was on neither laptop nor UNAM — it lived on a
-dead pod. Rung 18's sha256 is `180e28f0…`, matching the pin in rung 40's own guard, so the identity
-is confirmed rather than assumed. Both corpora had their `images[]` roots rewritten from RunPod's
-`/workspace/frames_cache` to UNAM's store by `_tools/rehost_corpus.py`, which **proves the rewrite is
-path-only**; that changes the file hash, so both the original and rehosted digests are pinned in
-`_models/gen36_data_reg_arm.py`. Frames were **not** copied — `~/storage/frames_cache/` already
-covers every row.
+**5. 🟢 The box now has one checkout per person.** `~/storage/repo_leo` and `~/storage/repo_rod`.
+`~/storage/repo` was **retired without a symlink on purpose** — a symlink would keep the old path
+working straight into somebody else's copy. `~/storage/ESTADO.md`, regenerated by
+`python3 ~/storage/estado.py`, says which checkout is at which commit and **which checkout a
+running GPU process belongs to**. It also flags when a `SYNCED_FROM.md` is lying.
+
+⚠️ **Launch inside `tmux`, one session per rung.** A 40 GB process started with `setsid nohup` is
+invisible and looks like an abandoned orphan — one was killed mid-run on 17 Aug.
+
+**6. 🔻 PLAN §5 of rung 45 was FALSE and is corrected.** It claimed rung 40 "never archived"
+`optim` / `weight_decay` / `max_grad_norm`. They are in rung 40's own `RESULTS_arm.json`; only
+`RESULTS.csv` omits them, and that is what got checked. **Lesson for rung 46: check
+`RESULTS_arm.json`, not `RESULTS.csv`.**
+
+**7. 🟢 The eval harness for gen-3.6 now exists**, and three things in it are new and reusable:
+`frame.data.CachedFrameProvider` (UNAM holds every frame and **zero** `.mp4`), a **batch** hook on
+`run_baseline` for vLLM (`batch_infer`, default OFF byte-identical), and the FP8 path — **HF
+materialises the FP8 build at 43.32 GiB of a 47.37 GiB card and OOMs; vLLM loads it at 33.46.**
+The 33.46 figure in `CLAUDE.md` is vLLM's, not HF's.
 
 ---
 
