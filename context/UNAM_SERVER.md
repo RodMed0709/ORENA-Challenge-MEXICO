@@ -4,6 +4,31 @@
 > a **complement with a different legal status**. Read the COMPLIANCE section before putting any
 > file on it.
 
+## Connecting (verified from Rodrigo's machine, 2026-08-17)
+
+```
+Host unam hpclab
+    HostName 132.247.20.40
+    Port     60307
+    User     uaq_user
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
+```
+
+Then simply `ssh unam`. Saved in Rodrigo's `~/.ssh/config`.
+
+- 🔴 **The user is `uaq_user`, with a Q.** `uas_user` returns
+  `Permission denied (publickey,...)`. Dr. Olivares' mail of 2026-08-17 exists precisely to
+  correct that typo, and it cost a round trip anyway — write it down rather than retype it.
+- **No password is ever needed, and none should be typed.** The account is key-only. The
+  private half of `RodrigoMedellinUAQ.pub` is already `~/.ssh/id_rsa`
+  (`SHA256:VaxGLwd/eNHAR/9xSg74N18YKhMEOqRBIKGtLG3umHc`, comment `rodrigo-medellinUAQ`) and the
+  public half is already registered on the box. If a password prompt ever appears, the key is
+  not being offered — fix the key path, do not type the password.
+- Reachable through a **US VPN** (tested on a Minnesota exit), so no split-tunnel is required.
+- Test the login non-interactively with `-o BatchMode=yes`: it then fails cleanly instead of
+  hanging on a prompt.
+
 ## Hardware (measured, not quoted)
 
 | | |
