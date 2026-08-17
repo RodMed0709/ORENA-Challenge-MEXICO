@@ -1,3 +1,12 @@
+---
+question: Which recipe knob explains gen-3.6's failure under the A2 recipe — the learning rate, or something else?
+verdict: `alpha/rank`, NOT the learning rate. lr/rank/alpha/batch/cosine/warmup/seed/max_pixels/data are identical between the two runs; the real deltas are framework, `lora_dropout` 0.1->0.0, coverage, and `num_train_epochs` 3->1 (a comparison confound). The loss gap is the tell: A2 ends epoch 1 at 0.293, the 27B at 0.068 — 3x past Unsloth's own over-fitting threshold after ONE epoch, so the problem is over-fitting, not a too-high LR. The off-guide term is `alpha/rank = 32/8 = 4` against a documented 1-2. Diagnosis SETTLED; the fix (`lora_alpha` 32->8, r held at 8) is proposed, not yet measured
+status: SETTLED
+date: 2026-08-13
+measured_in: read from the artifacts the frameworks themselves wrote (rung 38 / rung 40 configs + trainer state), plus official docs. Zero GPU
+question_derived: false
+---
+
 # The recipe lever is `alpha/rank`, not the learning rate
 
 **SETTLED 2026-08-13** for the *diagnosis*; the *fix* is proposed, not yet measured.

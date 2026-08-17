@@ -1,3 +1,12 @@
+---
+question: Is the ViT->LLM connector reachable by LoRA at all, given that `all-linear` misses it in both ms-swift and Unsloth?
+verdict: YES — via `modules_to_save`, not via `target_modules`. On the 27B the connector is 2 Linear layers (`model.visual.merger.linear_fc{1,2}`) and there is NO `deepstack_merger_list`, so rung 39's eight names do not port. Census from the weight index: 108 visual + 496 LLM reached, exactly 2 missed. Two hazards: a non-matching target fails SILENTLY (assert `targeted_module_names`), and PEFT's `out_proj` incompatibility guard is `model_type`-gated and skips `qwen3_5`. Says nothing about whether it HELPS, and the Unsloth merge path for `modules_to_save` is UNVERIFIED
+status: SETTLED
+date: 2026-08-13
+measured_in: desk research against PEFT/Unsloth source + official docs, plus a module census read from the model's own weight index (zero GPU)
+question_derived: false
+---
+
 # The connector IS reachable — via `modules_to_save`, not via `target_modules`
 
 **SETTLED 2026-08-13.** Zero GPU, zero pod. Desk research against PEFT/Unsloth source + official

@@ -1,7 +1,8 @@
 ---
 question: Is the `number` deficit a model failure, or is the counting target itself unstable?
 verdict: NOT AN EXCUSE — the July claim inverted when its own number was corrected. The label moves 0.384 at the corpus's true minimum separation, against a model MAE of 1.01: the target is 2.6x MORE stable than the model, so "the model sits at its label's noise floor" is false. Annotation noise does not bound the counting gap. What survives is the shape: cost levers on gold 1-4, where the mass and the movable error are
-status: AMENDED
+status: RE_SCOPED
+amended: 2026-08-16 (was `AMENDED`, a value the indexer does not accept; the note's content is unchanged)
 date: 2026-08-16
 supersedes: the 2026-07-23 version of this note, written on `task/audit-rung12` and never merged
 measured_in: experiments/29-sam2-temporal/_tools/label_gap_audit.py (the corrected gap), experiments/43-thinking-at-inference (the per-gold-value curve)

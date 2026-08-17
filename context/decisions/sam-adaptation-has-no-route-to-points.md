@@ -1,7 +1,8 @@
 ---
 question: Should we domain-adapt SAM on surgical data (SurgΣ-DB, CholecInstanceSeg) so it segments our footage properly, and then use it?
 verdict: DEFERRED — not on cost, not on licence, and not on SAM's quality. The blocker is the LAST link: there is no known way to turn "better masks" into "better score" before Sep 8. The only mechanism that attaches segmentation knowledge to the VLM without shipping an expert is CoVT, which is already NO-GO; and the cheap alternative — feeding the model the segmented image — was measured on 2026-08-11 and moves the model AWAY from the gold
-status: SETTLED (deferred, revisit after Sep 8) — RE-AFFIRMED 2026-08-12, and the reason is sharpened to TIME
+status: SETTLED
+qualifier: deferred, revisit after Sep 8 — RE-AFFIRMED 2026-08-12, and the reason is sharpened to TIME
 date: 2026-08-11
 measured_in: experiments/37-attention-vs-masks/RESULTS_ab_overlay.json (n=40) · HF API listing of SurgSigma/SurgSigma-DB · legokna's licence sweep
 ---

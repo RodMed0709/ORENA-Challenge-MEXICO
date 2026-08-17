@@ -288,7 +288,10 @@ def read_results(repo: Path = REPO) -> list[Measurement]:
     rows = []
     for csv_path in sorted((repo / "experiments").glob("*/RESULTS*.csv")):
         try:
-            with csv_path.open() as fh:
+            # encoding is explicit on purpose: the default is locale-dependent and on
+            # Windows (cp1252) this raised UnicodeDecodeError on committed UTF-8 CSVs,
+            # so the generator could not run at all outside Linux.
+            with csv_path.open(encoding="utf-8", errors="replace") as fh:
                 header = next(csv.reader(fh), [])
                 n_rows = sum(1 for _ in fh)
         except OSError:
