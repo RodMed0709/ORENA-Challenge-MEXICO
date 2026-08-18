@@ -1,5 +1,67 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 📋 2026-08-18 — FOR THE TEAM: a training run is LIVE on UNAM, and "UNAM cannot train the 8B" was false
+
+**1. 🔴 There is a job on UNAM GPU 0 right now. Do not kill it.** `tmux leo-rung47`, started
+00:33:56 box time, **ETA ~20 h** (swift's own `remaining_time`, not an estimate of ours).
+
+```
+tail -3 ~/storage/rung47/runs/47_a2_ep5_v1/ckpt/v0-*/logging.jsonl
+```
+
+⚠️ Its `full.log` has been frozen at 44,854 bytes since startup because stdout is block-buffered.
+**That is not a hang** — progress is in `logging.jsonl`, and the GPU reads 19.5 GiB at 100 %.
+
+**2. 🎯 What it is: rung 21's arm `C_epochs`, finally run.** One variable off baseline A2 —
+`--num_train_epochs` 3 → 5 — on A2's own corpus. Rung 21 designed it, VRAM-probed it
+(`RESULTS_vram_C_epochs.json`) and never trained it. It has been waiting 20 days.
+
+**Why it matters:** rung 42's shipped +0.0402 may be **epochs, not data**. At the matched epoch
+its merged corpus *loses* 0.0079 against A2; the whole gain appears at epoch 4, which the control
+never ran. Nobody separated the two. This run separates them — ep4 vs rung 42's ep4, corpus as the
+only difference.
+
+| ckpt | ~at | what it is |
+|---|---|---|
+| **ep3** | ~12 h | 🔑 **the stack control** — must reproduce A2's **0.6342** |
+| **ep4** | ~16 h | 🎯 **the answer** — against rung 42's **0.6744** |
+| ep5 | ~20 h | the epoch that already fell in rung 42 |
+
+`--save_strategy epoch`, so value accrues and the run can be cut at any epoch without loss.
+
+**3. 🔴 "UNAM cannot train the 8B" was FALSE and is retracted.** `transformers>=4.57` is a **floor,
+not a ceiling** — all four envs import `Qwen3VLForConditionalGeneration`. No fifth env was built
+from scratch: `~/storage/envs/orena-train` is a **clone of `orena-gen36`** plus `qwen-vl-utils
+0.0.14` and `torchvision 0.26.0+cu128`, both `--no-deps`. `orena-gen36` is verified untouched.
+
+⚠️ **Clone trap, worth knowing:** `conda create --clone` leaves pip console scripts carrying the
+**source env's shebang**, so `swift` ran on gen36's interpreter and died on a missing
+`qwen_vl_utils`. Fixed by rewriting line 1 of every script in `bin/` that pointed at the old env.
+
+⚠️ **The stack is NOT the ladder's:** 5.12.1 / torch 2.11 vs the 4.57 / 2.8 every 8B rung was
+scored on. That is why ep3 is a control and not just another checkpoint.
+
+**4. 🟢 The corpus was rebuilt on the box and PROVEN, not uploaded.** No `train*.jsonl` existed on
+UNAM. Regenerated from `orena-data` + `frames_cache` with rung 18's own builder: **14,415 rows**
+(13,748 real + 667 minted), every rung-18 gate passing, and its pod-path twin hashes **exactly**
+to the `180e28f0…fbd8e8b` rung 21 declared. Zero challenge data transferred. Gates cleared before
+the GPU was touched: dataset sha256, a diff against A2 that is **exactly `--num_train_epochs`**,
+and G1 (LoRA reaches the ViT, 25.67 M trainable).
+
+**5. 🔴 Distilling the 27B is DEAD, by measurement.** The vocabularies do not match — **248,320
+(27B, `TokenizersBackend`) vs 151,936 (8B, `Qwen2Tokenizer`)**, different `tokenizer.json`. GKD's
+token-level JSD (`swift/rlhf_trainers/gkd_trainer.py:105`) has no route across that, and neither
+ms-swift nor TRL ships a vocabulary mapping. ms-swift *does* support GKD/OPD-RL/OPSD on our exact
+pin — the blocker is the pair, not the framework.
+
+**6. 🔻 Two doc corrections, both pushed.** `--train_type` **does not exist** (it is `--tuner_type`)
+and `CLAUDE.md:33` had carried it for a month while four other files had it right. And the aligner
+flag **does** reach the connector on transformers 5.x (368 modules vs 360; the 8 extra are the
+merger + deepstack) while rung 32's zero stands on **4.57** ⇒ version-dependent, so the ladder still
+needs the explicit `target_modules`. See [[aligner-flag-reads-reachable-but-measured-zero]].
+
+---
+
 ## 📋 2026-08-17 — FOR THE TEAM: rung 45 is SCORED, and the 27B line is closed
 
 Everything below is on `main`. Not in git and cannot be: the rung-45 checkpoints and the 19b
