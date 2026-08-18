@@ -1,7 +1,7 @@
 ---
 question: ms-swift 4.4.1 registers the merger as the `aligner` and builds a LoRA target regex from it when `--freeze_aligner false`. So why did rung 32 measure ZERO aligner tensors with exactly that flag?
-verdict: UNRESOLVED, AND THE MEASUREMENT WINS. The source path says the connector SHOULD be reached — `model_arch.py:596` registers `aligner=['model.visual.merger', 'model.visual.deepstack_merger_list']`, `pipelines/train/tuner.py:98` routes `all-linear` on a multimodal model into `get_multimodal_target_regex`, and that builder appends `model_arch.aligner` when `freeze_aligner` is false. Rung 32 ran that exact argv on that exact version and got 720 = 504 llm + 216 vit + 0 aligner. One candidate mechanism is a SILENT SKIP at `transformers_utils.py:231-234`, where a module whose path does not resolve is logged and dropped. Until that is checked, the explicit `target_modules` of rungs 39/42 stays the only PROVEN route
-status: OPEN
+verdict: RESOLVED THE SAME DAY, AND IT IS VERSION-DEPENDENT. Measured on the UNAM box with ms_swift 4.4.1 + transformers 5.12.1: `--freeze_aligner false` DOES reach the connector — 368 modules matched vs 360 with it true, and the 8 extra are exactly `model.visual.merger.linear_fc{1,2}` plus the three `deepstack_merger_list` blocks. Rung 32 measured 0 on transformers 4.57. Both stand: the likely mechanism is the silent skip below, firing on 4.57 where the module hung at a different path. ⇒ the flag is a REAL route on 5.x and NOT on the stack the ladder was trained on. Original reading kept below.  The source path says the connector SHOULD be reached — `model_arch.py:596` registers `aligner=['model.visual.merger', 'model.visual.deepstack_merger_list']`, `pipelines/train/tuner.py:98` routes `all-linear` on a multimodal model into `get_multimodal_target_regex`, and that builder appends `model_arch.aligner` when `freeze_aligner` is false. Rung 32 ran that exact argv on that exact version and got 720 = 504 llm + 216 vit + 0 aligner. One candidate mechanism is a SILENT SKIP at `transformers_utils.py:231-234`, where a module whose path does not resolve is logged and dropped. Until that is checked, the explicit `target_modules` of rungs 39/42 stays the only PROVEN route
+status: SETTLED
 kind: source read only, zero GPU — conflicts with an existing measurement
 date: 2026-08-18
 measured_in: ms_swift 4.4.1 at ~/storage/envs/orena-gen36 on the UNAM box (model_arch.py:592-598, pipelines/train/tuner.py:91-108, utils/transformers_utils.py:178-252) vs experiments/32-aligner-unfreeze/RESULTS_reachability.csv
@@ -9,8 +9,28 @@ measured_in: ms_swift 4.4.1 at ~/storage/envs/orena-gen36 on the UNAM box (model
 
 # The aligner flag reads as reachable in the source and measured zero on the machine
 
-- **Status:** 🔴 **OPEN** · 2026-08-18 · **zero GPU** — a source read that does NOT agree with a
-  measurement we already own.
+- **Status:** 🟢 **SETTLED** · 2026-08-18 · **zero GPU** (meta-device load, seconds).
+- 🔑 **The measurement that closed it**, on `orena-train` (ms_swift 4.4.1, transformers 5.12.1),
+  `get_multimodal_target_regex(model, freeze_llm=False, freeze_vit=False, freeze_aligner=…)`
+  matched against the real module names of Qwen3-VL-8B:
+
+  | `freeze_aligner` | modules matched | of them, connector |
+  |---|---|---|
+  | `True` | 360 | **0** |
+  | `False` | **368** | **8** — `model.visual.merger.linear_fc{1,2}` + `deepstack_merger_list.{0,1,2}.linear_fc{1,2}` |
+
+  ⇒ **the flag works on transformers 5.x.** Rung 32's zero was measured on **4.57**, and the
+  silent-skip mechanism described below is the likely cause there: if the connector hung at
+  `visual.merger` rather than `model.visual.merger` under that version, `deep_getattr` returned
+  None and the module was dropped with a warning.
+- ⚠️ **Consequence, and it is not "use the flag":** the 8B ladder is trained on 4.57, where the
+  flag is measured NOT to work. Anything that means to train the connector **on the ladder's
+  stack** still needs the explicit `target_modules`. The flag becomes available only if the whole
+  line moves to 5.x — which rung 47 is the first run to test.
+- 🟢 Corroborated independently by rung 47's own smoke on 5.12.1: with `freeze_vit false,
+  freeze_aligner true` the resolved LoRA regex carries a negative lookahead
+  `(?!(model.visual.merger|model.visual.deepstack_merger_list))`, i.e. the builder is actively
+  *excluding* the connector — it can see it.
 - **Applies when:** designing any rung that intends to train the merger / aligner / connector, and
   before anyone "simplifies" rung 42's hand-written `target_modules` into a single flag.
 - **Extends** [[the-merger-is-unreachable-by-default]]. It does not overturn it.
