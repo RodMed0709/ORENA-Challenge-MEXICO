@@ -66,12 +66,32 @@ The counting crosstab shows the known shape unchanged: correct at 1–4, and a s
 **undercount** above that (gold 9 → predicted 3–6, gold 11–12 → predicted 6). `number` remains
 the error mass.
 
-## Where the run is
+## Where the run is, and what is running UNATTENDED
 
-GPU 0 still training, into epoch 4 (`tmux leo-rung47`). **ep4 lands at step 3604**, and that is the
-one the rung exists for. `RESULTS.csv` is deliberately unwritten until the sweep holds ep3 **and**
-ep4 — running the notebook with `EPOCHS=[3, 4]` then costs **zero GPU on ep3**, whose answers are
-archived at `runs/47_a2_ep5_v1/eval/47_a2_ep5_v1_ep3_full/`.
+Two `tmux` sessions on UNAM, both self-contained — **nobody is watching them live**:
+
+| session | GPU | what |
+|---|---|---|
+| `leo-rung47` | 0 | the training, into epoch 4 (step 3604) and then 5 |
+| `leo-rung47-ep4` | 1 | waits for `checkpoint-3604`, then fires the `EPOCHS=[3, 4]` sweep by itself |
+
+At hand-off the run was at **step 2830/4505**; ep4 was ~3 h 40 m out. First thing to read:
+
+```
+cat /mnt/storage/uaq_user/tmp/rung47_ep4_STATUS      # EVAL_DONE … | EVAL_FAILED …
+tail -1 /mnt/storage/uaq_user/rung47/runs/47_a2_ep5_v1/ckpt/v0-*/logging.jsonl
+```
+
+The sweep is `[3, 4]` and not `[4]` because ep3's answers are archived, so including it costs
+**zero GPU** and is what unlocks the difference-in-differences, the peak-epoch selection, and
+`RESULTS.csv` — all deliberately gated on holding both decisive epochs.
+
+⚠️ **`repo_leo` on the box is NOT a git checkout.** Whatever the sweep writes to
+`repo_leo/experiments/47-epochs-vs-corpus/` has to be rsynced back to a real checkout and
+committed from there. The per-question answers stay on the box under
+`runs/47_a2_ep5_v1/eval/47_a2_ep5_v1_ep{3,4}_full/`.
+
+`/mnt/storage/uaq_user/rung47/OWNER.md` carries the do-not-kill note and the same map.
 
 ## 🟢 2026-08-18 12:25 — FOR THE TEAM: UNAM rebooted and killed rung 47; it is RESUMED and running
 
