@@ -1,5 +1,78 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 🔴 2026-08-18 17:00 — rung 47 ep3 scored **0.6142**, the control is RED, and the control was MIS-DESIGNED
+
+**The number.** `checkpoint-2703` on the 8 held-out videos / 1,283 questions:
+`bucket_mean` **0.6142** against A2's archived **0.6342** ⇒ **−0.0200**, twice the ±0.01 band
+that was declared before the run. The notebook printed RED and said "a STACK effect is present".
+
+🔴 **That conclusion does not follow, and the fault is in how the control was specified.**
+`--num_train_epochs` is not only the number of epochs: with `--lr_scheduler_type cosine` it sets
+the length the cosine is annealed over. So **"epoch 3 of a 5-epoch run" is not the same model as
+"epoch 3 of a 3-epoch run"**, and never could have been. MEASURED in this run's own log:
+
+| at step 2703 | learning rate |
+|---|---|
+| rung 47 (cosine over 4,505 steps) | **7.1e-05** — 35 % of the 2e-4 peak, mid-anneal |
+| A2 (cosine over 2,703 steps) | **≈ 0** — fully annealed, its final checkpoint |
+
+A half-annealed checkpoint scoring below a fully-annealed one is the expected result, not a
+finding. ⇒ the −0.0200 is **stack + schedule**, and nothing here separates them. The RED is real;
+its stated cause is not established and must not be quoted as "the stack costs 0.02".
+
+## 🟢 What survives — and it is cleaner than the design assumed
+
+**Rung 42 also ran 5 epochs** (1,212 steps each, checkpoints 1212…6060). So `47_ep3 − 42_ep3` is
+**schedule-matched**: same epoch, same cosine length, same peak LR. Its only differences are the
+corpus and the stack. Measured, video-clustered, n = 8 videos:
+
+| cell | delta | CI | excludes 0 |
+|---|---|---|---|
+| `aggregation_ID` | +0.0217 | [−0.061, 0.109] | — |
+| `aggregation_OOD` | +0.0130 | [−0.026, 0.048] | — |
+| `object_recognition_ID` | −0.0620 | [−0.145, 0.021] | — |
+| `object_recognition_OOD` | −0.0159 | [−0.082, 0.052] | — |
+| `ALL_ID` | −0.0207 | [−0.067, 0.023] | — |
+| `ALL_OOD` | −0.0038 | [−0.051, 0.039] | — |
+
+`d(bucket_mean) = −0.0120`. **No cell wins and no cell vetoes.** At matched epoch and matched
+schedule, A2's corpus and rung 42's merged corpus are not distinguishable on this eval set.
+
+**The difference-in-differences is now the primary read on firmer ground than when it was
+proposed:** both arms anneal a cosine over 5 epochs, so the schedule cancels inside each arm's
+`ep4 − ep3`. Rung 42's own internal rise is **+0.0482** (and it is concentrated entirely in
+`aggregation` — both counting cells exclude zero, neither recognition cell does). If rung 47 rises
+by about the same on A2's corpus, the +0.0402 was **epochs**.
+
+## 🔻 This retroactively qualifies a number rung 42 published
+
+Rung 42's "at the matched epoch its corpus **loses 0.0079**" is `42_ep3 (0.6262)` against
+`A2_ep3 (0.6342)` — and that pair carries the **same schedule confound**: a 5-epoch mid-anneal
+checkpoint against a 3-epoch fully-annealed one. It was never a clean corpus comparison. The
+schedule-matched version of that question is the table above, which says **no difference**.
+
+🟢 **The confound runs AGAINST rung 42 in the number that shipped**, so `+0.0402` is if anything
+understated: `42_ep4` (step 4848/6060, LR still ~1.9e-05) beat a fully-annealed A2 by that margin
+while itself not being fully annealed.
+
+## 🟢 Class-balanced F1 ran for the first time, and it is healthy
+
+Never executed before — the smoke skips it and rung 42's archive has no `predictions.json`.
+Pooled macro-F1 **0.8450** (n = 490), **0 illegal `fo_class` tokens**, exact-set 0.7776;
+ID 0.8528, OOD 0.8303. The tail holds: `Sponge` at n = 12 scores F1 0.783, so there is **no
+collapse onto the head class** — the failure mode rung 45 found in the 27B is absent here.
+
+The counting crosstab shows the known shape unchanged: correct at 1–4, and a systematic
+**undercount** above that (gold 9 → predicted 3–6, gold 11–12 → predicted 6). `number` remains
+the error mass.
+
+## Where the run is
+
+GPU 0 still training, into epoch 4 (`tmux leo-rung47`). **ep4 lands at step 3604**, and that is the
+one the rung exists for. `RESULTS.csv` is deliberately unwritten until the sweep holds ep3 **and**
+ep4 — running the notebook with `EPOCHS=[3, 4]` then costs **zero GPU on ep3**, whose answers are
+archived at `runs/47_a2_ep5_v1/eval/47_a2_ep5_v1_ep3_full/`.
+
 ## 🟢 2026-08-18 12:25 — FOR THE TEAM: UNAM rebooted and killed rung 47; it is RESUMED and running
 
 **1. 🔴 There is a job on UNAM GPU 0 again. Do not kill it.** `tmux leo-rung47`, relaunched
@@ -96,8 +169,15 @@ both sides. Every read-only gate passed **before** the reboot: judge resolves of
 items load, split 8 videos / 1 283 questions, frames-cache 1 283/1 283.
 
 Rung 42's per-question archive for all five epochs is already on the box at
-`runs/47_a2_ep5_v1/controls/` (1 283 rows, 800 heico, verified). The pipeline smoke never got to
-run — the reboot took it first.
+`runs/47_a2_ep5_v1/controls/` (1 283 rows, 800 heico, verified).
+
+🔴 **A2's per-question archive does NOT exist**, settled by a full-bucket S3 scan — so the ep3
+control is a SCALAR check against 0.6342, with no paired CI. Two findings worth keeping: the
+`tmp/leo_chain/critico/` and `tmp/leo_backup_*/` prefixes DO hold `runs/` trees that no `repo_*/`
+prefix can (`runs/` is gitignored), which is where to look before declaring a run's artifacts
+gone; and `tmp/leo_backup_20260806/step5_seed42/full/greedy/results.csv` is a **decoy** — A2
+greedy, but rung 10's stratified subsample, 600 rows over 91 videos, **zero** of the 8 held-out,
+~0.83 accuracy. Overlap with the 1,283 is 0.
 
 ### Three things measured on the way, so nobody pays for them twice
 

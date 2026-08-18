@@ -71,10 +71,16 @@ advantage was **epochs**. This is the primary read.
 
 ## 🔴 A2's per-question archive no longer exists
 
-It lived on the pod at `repo_rodri/.../21_lr_2e4_v1/ep3_full/`. Searched 2026-08-18 and
-not found: UNAM (`find ~/storage -name results.csv` returns only rung 45's), and the S3
-prefixes `repo_rodri/ repo_leo/ repo_yyy/ repo_rung40/ tmp/ evidence_*/ submission/` —
-zero keys matching `21_lr_2e4` across 14,000+. **The ep3 control is a scalar check with no paired CI.**
+It lived on the pod at `repo_rodri/.../21_lr_2e4_v1/ep3_full/`. Settled 2026-08-18 by a
+**full-bucket S3 scan** plus UNAM, which has no `results.csv` outside rung 45's.
+**The ep3 control is a scalar check with no paired CI.**
+
+⚠️ The scan turned up a convincing decoy — record it before re-chasing it:
+`tmp/leo_backup_20260806/step5_seed42/full/greedy/results.csv` is A2 greedy, but it is
+rung 10's stratified subsample: **600 rows over 91 videos, zero of the 8 held-out ones**,
+~0.83 accuracy. Overlap with the 1,283 is **0**. Also worth knowing for other rungs:
+`tmp/leo_chain/critico/` and `tmp/leo_backup_*/` hold `runs/` trees the `repo_*/` prefixes
+cannot, but mostly `summary.csv` / `stratified.json`, rarely per-question `results.csv`.
 Rung 42's archive *is* in S3 at `evidence_42/ep{1..5}_full/results.csv` (155 KB each,
 verified present) and the notebook fetches it before the GPU — rung 45's scar.
 

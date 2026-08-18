@@ -59,12 +59,20 @@ to have come back green.
   allowed — the object can be seen and not downloaded by the obvious call.
 * **A2's per-question answers do NOT exist any more.** They lived on the pod at
   `/workspace/repo_rodri/experiments/21-recipe-sweep/runs/21_lr_2e4_v1/ep3_full/`.
-  Searched 2026-08-18: UNAM has no `results.csv` outside rung 45's, and the S3 prefixes
-  `repo_rodri/ repo_leo/ repo_yyy/ repo_rung40/ tmp/ evidence_*/ submission/` carry zero
-  keys matching `21_lr_2e4` across 14,000+. Consequence, stated here so
-  the notebook cannot quietly overclaim: **the ep3 control is a SCALAR check against
-  0.6342, with no paired CI.** `CONTROL_A2_EP3` carries the archived cells so a
+  Settled 2026-08-18 by a **full-bucket S3 scan** (~20 min — the one time that is worth
+  paying) plus UNAM, which has no `results.csv` outside rung 45's. Consequence, stated
+  here so the notebook cannot quietly overclaim: **the ep3 control is a SCALAR check
+  against 0.6342, with no paired CI.** `CONTROL_A2_EP3` carries the archived cells so a
   transcription error is visible.
+
+  ⚠️ **Two dead ends the scan turned up, recorded so nobody chases them twice.**
+  `tmp/leo_chain/critico/` and `tmp/leo_backup_*/` DO hold `runs/` trees that the
+  `repo_*/` prefixes cannot (`runs/` is gitignored, so it never reached S3 that way) —
+  but they carry `summary.csv` and `stratified.json` far more often than per-question
+  `results.csv`. And `tmp/leo_backup_20260806/step5_seed42/full/greedy/results.csv` IS
+  A2 greedy and looks exactly like the missing control. It is not: that is rung 10's
+  stratified subsample — **600 rows over 91 videos, ZERO of the 8 held-out ones**, and
+  ~0.83 accuracy against the 0.6342 we want. Overlap with the 1,283 is **0**.
 
 🔴 **RULES §EVAL is binding and this file does not relax it:** score ONLY through
 `frame.metrics`; leaf→group ALWAYS via `Capability.group` (`metrics._leaf_to_group`);
@@ -651,12 +659,30 @@ def score_epoch(cfg: Rung47Config, epoch: int, split: dict, gold=None) -> dict:
 
 
 def control_verdict(ep3_bucket_mean: float) -> dict:
-    """🔑 Did the stack reproduce A2? Declared BEFORE the number (RULES §S4).
+    """🔑 How far is ep3 from A2's 0.6342? Declared BEFORE the number (RULES §S4).
 
-    GREEN inside ±0.01 of 0.6342 ⇒ the transformers-5.12.1 / JPEG-cache / RTX-6000
-    stack is jointly bounded and ep4 reads clean against rung 42.
-    RED outside it ⇒ we have measured a STACK effect. ep4 vs rung 42 is then
-    uninterpretable as a corpus comparison, and the DiD below is what survives.
+    🔴 **This control is CONFOUNDED and cannot attribute its own result. Measured
+    2026-08-18: ep3 came back 0.6142, −0.0200, and calling that "a stack effect" —
+    which an earlier version of this function did — is wrong.**
+
+    `--num_train_epochs` is this arm's single variable, but with
+    `--lr_scheduler_type cosine` it also sets the length the cosine anneals over. So
+    **"epoch 3 of a 5-epoch run" is not the same model as "epoch 3 of a 3-epoch run"**,
+    and no stack effect is needed to explain a gap:
+
+    | at step 2703 | learning rate |
+    |---|---|
+    | rung 47, cosine over 4,505 steps | **7.1e-05** — 35 % of the 2e-4 peak, mid-anneal |
+    | A2, cosine over 2,703 steps | **≈ 0** — fully annealed, its final checkpoint |
+
+    A half-annealed checkpoint scoring below a fully-annealed one is expected. The delta
+    is therefore **stack + schedule jointly**, and this arm contains nothing that
+    separates them. The number is reported; the attribution is not.
+
+    🟢 The two reads that are NOT confounded this way, and that the notebook prints
+    beside this one: `47_epN − 42_epN` is schedule-matched, because rung 42 also ran 5
+    epochs (1,212 steps each); and the difference-in-differences cancels the schedule
+    inside each arm. Prefer both over this verdict.
     """
     d = ep3_bucket_mean - CONTROL_A2_EP3["bucket_mean"]
     green = abs(d) <= CONTROL_TOLERANCE
@@ -666,11 +692,17 @@ def control_verdict(ep3_bucket_mean: float) -> dict:
         "delta": d,
         "tolerance": CONTROL_TOLERANCE,
         "verdict": "GREEN" if green else "RED",
+        "confounded_with": ["eval stack (transformers 5.12.1 / JPEG frame cache / RTX 6000)",
+                            "LR schedule (cosine over 5 epochs vs over 3)"],
         "means": (
-            "stack reproduces A2 — ep4 vs rung 42 is readable as a corpus comparison"
+            "ep3 lands on A2 despite BOTH the stack and the schedule differing — a "
+            "coincidence of two confounds cancelling is possible, so read the "
+            "schedule-matched 47_epN − 42_epN beside it."
             if green else
-            "a STACK effect is present; ep4 vs rung 42 confounds corpus with stack. "
-            "Read the difference-in-differences instead, and do NOT quote 47_ep4 − 42_ep4."
+            "ep3 does NOT reproduce A2. This says nothing about WHICH of the two "
+            "confounds moved it — stack and LR schedule are both in play and this arm "
+            "cannot separate them. Do NOT quote it as a stack effect. Use the "
+            "schedule-matched 47_epN − 42_epN and the difference-in-differences."
         ),
     }
 
