@@ -567,8 +567,56 @@ def cells(report: dict) -> dict:
     return out
 
 
-def score_epoch(cfg: Rung47Config, epoch: int, split: dict) -> dict:
-    """Merge → eval on the 1,283 → reclaim. Returns the canonical report + cells.
+def score_on_heldout(cfg: Rung47Config, results_csv: Path, held_qids: set,
+                     gold, label: str) -> dict:
+    """Canonical scoring of one arm restricted to the held-out questions. RULES §1.
+
+    🔴 This is rung 42's `score_on_heldout`, and it exists because `run_baseline`'s own
+    report is NOT the same dict. MEASURED 2026-08-18: it carries `by_bucket`,
+    `bucket_mean`, `acc_ID` and `acc_OOD` but **no `margin_ID` / `margin_OOD`**, so
+    reading cells off it raised `KeyError: 'margin_ID'` after a full merge + eval + judge
+    pass had already been paid for.
+
+    The deeper reason to route through `metrics.stratified_report` is comparability, not
+    the missing key: every number rung 47 is read against — A2's 0.6342, rung 42's 0.6744
+    — came out of `stratified_report`. Scoring this arm any other way makes the delta
+    partly an artefact of the scoring path.
+    """
+    import pandas as pd
+    from frame import metrics
+
+    res = pd.read_csv(results_csv)
+    res = res[res["qID"].isin(held_qids)].copy()
+    if not cfg.smoke and len(res) != len(held_qids):
+        raise EvalFailure(
+            f"{label}: {len(res)} of {len(held_qids)} held-out questions scored"
+        )
+    missing = set(res["qID"]) - set(gold.dropna(subset=["answer"])["qID"])
+    if missing:
+        raise EvalFailure(f"{label}: {len(missing)} qIDs without gold — every margin inflated")
+
+    metrics.assert_no_dup_qid(res)
+    metrics.assert_ood_from_qid(res)
+    metrics.assert_all_rows_grouped(res)
+    # n_boot=0 is NOT a supported value: _hier_bootstrap builds an empty array and
+    # np.percentile raises IndexError. A smoke uses a cheap 200.
+    strat = metrics.stratified_report(res, gold=gold, n_boot=200 if cfg.smoke else 1000)
+
+    # ⚠️ 40 questions cannot populate the four buckets, so the floor guard is expected to
+    # be unreadable on a smoke. It RAISES on a full run, where it means something.
+    if cfg.smoke:
+        try:
+            metrics.assert_floors_vs_eval_set(strat)
+        except AssertionError as exc:
+            log.warning("SMOKE: floor guard not readable at n=%d (%s) — expected, not a "
+                        "finding. It RAISES on the full sweep.", len(res), exc)
+    else:
+        metrics.assert_floors_vs_eval_set(strat)
+    return {"strat": strat, "res": res}
+
+
+def score_epoch(cfg: Rung47Config, epoch: int, split: dict, gold=None) -> dict:
+    """Merge → eval on the 1,283 → reclaim → score through `frame.metrics`.
 
     Reuses an existing `results.csv` when one is on disk: re-running ep3 to add ep4
     later must cost zero GPU. That reuse is why the sweep can be run incrementally.
@@ -577,20 +625,27 @@ def score_epoch(cfg: Rung47Config, epoch: int, split: dict) -> dict:
     existing = Path(eval_cfg.out_dir) / eval_cfg.run_name / "results.csv"
     if existing.exists():
         log.info("epoch %d already answered -> %s (no GPU)", epoch, existing)
-        report = json.loads((existing.parent / "report.json").read_text(encoding="utf-8"))
     else:
         ckpt_root = resolve_ckpt_root(cfg)
         eval_cfg.merged_dir = str(merge_checkpoint(cfg, ckpt_root, epoch))
         try:
-            report = score(eval_cfg, split)
+            score(eval_cfg, split)
         finally:
             reclaim_merged(cfg, epoch)
+
+    results_csv = arm_results_csv(eval_cfg)
+    if gold is None:
+        from frame import ledger
+
+        gold = ledger.gold_from_frame_parquets(Path(cfg.data_root))
+    scored = score_on_heldout(cfg, results_csv, split["held_qids"], gold, f"ep{epoch}")
     return {
         "epoch": epoch,
         "step": EPOCH_STEPS[epoch],
-        "report": report,
-        "cells": cells(report),
-        "results_csv": arm_results_csv(eval_cfg),
+        "report": scored["strat"],
+        "cells": cells(scored["strat"]),
+        "res": scored["res"],
+        "results_csv": results_csv,
         "run_name": eval_cfg.run_name,
     }
 
@@ -686,5 +741,5 @@ __all__ = [
     "resolve_ckpt_root", "assert_run_moved_weights", "assert_checkpoint_complete",
     "assert_single_variable", "assert_cache_covers", "held_out_split", "ensure_paths",
     "ensure_control_42", "merge_checkpoint", "reclaim_merged",
-    "swift_cmd", "cells", "score_epoch", "control_verdict", "did_verdict", "paired_ci_vs_42",
+    "swift_cmd", "cells", "score_on_heldout", "score_epoch", "control_verdict", "did_verdict", "paired_ci_vs_42",
 ]
