@@ -1,71 +1,92 @@
 # context/NOW.md — what is happening RIGHT NOW
 
-## 🔴 2026-08-18 12:00 — FOR THE TEAM: UNAM REBOOTED, the rung-47 run is DEAD, and `/data` is not mounted
+## 🟢 2026-08-18 12:25 — FOR THE TEAM: UNAM rebooted and killed rung 47; it is RESUMED and running
 
-**Read this before you try to run anything on UNAM. Nothing there works right now.**
-
-**1. The box rebooted at 11:55:53 box time.** Previous boot was Jul 11 — 38 days of uptime, ended
-by something we cannot see from user space (`last -x reboot`, no shutdown record, no fstab change).
-Nothing we ran can reboot a machine; the training was healthy 6 minutes before, at step 2390 with
-its `train_speed` unchanged.
-
-**2. 🔴 The rung-47 training is GONE. Do not go looking for `tmux leo-rung47`.** It died at
-**step 2400 / 4505, epoch 2.66, after 11 h 17 m.** Both GPUs are idle, there is no tmux server.
-The section below this one says a job is live and must not be killed — **that is now false and is
-superseded by this one.**
-
-**3. 🟢 NOTHING WAS LOST.** The 16.4 T volume survived intact. Both saved checkpoints are complete
-and **fully resumable** — they carry optimiser, scheduler and RNG state, not just the adapter:
+**1. 🔴 There is a job on UNAM GPU 0 again. Do not kill it.** `tmux leo-rung47`, relaunched
+12:24:41 from `checkpoint-1802`, stepping from **1805/4505**. **ETA ~12 h.** The do-not-kill note
+on the box is `/mnt/storage/uaq_user/rung47/OWNER.md`.
 
 ```
-/mnt/storage/uaq_user/rung47/runs/47_a2_ep5_v1/ckpt/v0-20260818-003356/
-  checkpoint-901  (ep1)   295 MB
-  checkpoint-1802 (ep2)   295 MB
-  → adapter_model.safetensors  optimizer.pt  scheduler.pt  rng_state.pth  trainer_state.json
+tail -3 /mnt/storage/uaq_user/rung47/runs/47_a2_ep5_v1/ckpt/v0-*/logging.jsonl
 ```
 
-ep3 (step 2703) was ~1 h 25 m away and never got written.
+**2. What happened.** The box rebooted at **11:55:53** after 38 days of uptime (previous boot
+Jul 11). No shutdown record, and nothing we ran can reboot a machine — the training was healthy 6
+minutes before at step 2390 with its `train_speed` unchanged. It died at **step 2400/4505, epoch
+2.66, after 11 h 17 m**. ep3 (step 2703) was ~1 h 25 m away and never got written.
 
-## 🔴 THE BLOCKER: the volume came back on a different mountpoint
+**3. 🟢 Nothing was lost, and the resume cost ~2 h 48 m instead of 11 h 17 m.** `checkpoint-901`
+and `checkpoint-1802` carry optimiser, scheduler and RNG state, so `--resume_from_checkpoint`
+restored rather than restarted — verified by the first logged step being **1810**, not 0.
+
+## 🔴 `/data` is gone as a mountpoint — use `/mnt/storage`
 
 | | before the reboot | now |
 |---|---|---|
 | `/dev/sda1` (16.4 T, ext4) | `/data` | **`/mnt/storage`** |
 | `~/storage` → `/data/uaq_user` | fine | **dangling symlink** |
 
-There is **no `/etc/fstab` entry for `/data`** — that mount was set up by hand and did not survive.
-`/data` is now a root-owned directory containing only `ai-projects`.
+There is **no `/etc/fstab` entry for `/data`** — that mount was set up by hand and did not
+survive. Worth asking whoever administers the box to add one, or the next reboot repeats this.
 
-⚠️ **Do NOT "fix" this by repointing the `~/storage` symlink at `/mnt/storage`.** The envs have the
-old path baked in — every pip console script starts with
+⚠️ **Do NOT "fix" this by repointing the `~/storage` symlink.** The envs bake the old path into
+every pip console script (`#!/data/uaq_user/envs/orena-train/bin/python`), plus `argv.json`, the
+Jupyter kernelspec and every recorded run path. Repointing leaves those broken and produces a box
+that looks fixed and is not. What restores the old path exactly is
+`sudo mkdir -p /data && sudo mount --bind /mnt/storage /data`, and `sudo` prompts for a password.
+
+🟢 **But we are NOT blocked on root, and an earlier version of this section wrongly said we
+were.** MEASURED 2026-08-18: the interpreter relocates fine —
+`/mnt/storage/uaq_user/envs/orena-train/bin/python` reports the right `sys.prefix`, `torch.cuda`
+is True, and `transformers` / `ms-swift` import. Conda derives its prefix from the binary's real
+path. **Only the console scripts are broken**, and they are bypassed by calling the module:
+
+```python
+python -c "import sys; from swift.cli.main import cli_main; sys.exit(cli_main())" sft ...
+```
+
+⚠️ **A broken shebang reports as `FileNotFoundError: 'swift'`**, which reads as "swift is not
+installed". It is — the file is on PATH. `execve` returns ENOENT for a missing *interpreter* too
+and Python blames the command. That cost one smoke run; do not re-diagnose it as PATH.
+
+**The env was NOT modified** — no shebang rewritten — so a later bind mount leaves nothing to undo.
+
+## 🔴 Absolute paths inside the CORPUS are what actually stopped the resume
+
+`corpus/train.jsonl` carries the **absolute image path in every one of its 14,415 rows** (that is
+what `_record` writes), all under `/data/uaq_user/frames_cache/...`. The first resume attempt loaded
+the 8B, reached swift's `train_dataset[0]` sanity check and died with
 
 ```
-#!/data/uaq_user/envs/orena-train/bin/python
+ValueError: Failed to retrieve the dataset. You can avoid this issue by increasing `max_length` ...
 ```
 
-and so do `argv.json`, the Jupyter kernelspec and every recorded run path. Repointing the symlink
-leaves all of those broken and produces a box that looks fixed and is not.
+which names `max_length` and `truncation_strategy` and has **nothing to do with either**. If you
+see that error after a move, look at the paths inside the data, not at the tokenizer.
 
-**The fix restores the old path exactly, and needs root** (`sudo` prompts for a password here):
+⇒ `--dataset` now points at **`corpus/train_mntpaths.jsonl`**. **`train.jsonl` was NOT touched** —
+its sha256 is the provenance anchor against the digest rung 21 declared. The twin is proven to be a
+pure prefix rewrite: undoing it reproduces the original **byte for byte**, and
+`corpus/PATH_REWRITE.json` records both digests plus that proof. Same pattern as the existing
+`train_podpaths.jsonl`, in the other direction.
 
-```
-sudo mkdir -p /data && sudo mount --bind /mnt/storage /data
-```
+## How it was relaunched
 
-Worth asking whoever administers the box to add it to `/etc/fstab` so the next reboot is free.
+`rung47/code/resume_a2_ep5.py` **derives the argv from the run's own `argv.json`** instead of
+retyping 24 flags — that is how a "resume" silently becomes a different experiment. It adds only
+what the resume forces: `--resume_from_checkpoint`, `--output_dir` set to the existing `v0-*`
+directory, `--add_version false` (without it swift's default creates a new `v1-<stamp>` and splits
+ep1/ep2 from ep3/ep4/ep5 across two trees), and `--load_args false` (with the default True swift
+reads `args.json` from the checkpoint, which is full of `/data` paths). The exact argv is archived
+at `runs/47_a2_ep5_v1/argv_resume.json`.
 
-## 🟢 Recovery, once `/data` is back
+Preflight, all before the GPU: no `/data` path survives the rewrite, every path exists, the
+checkpoint is complete and at step 1802, the corpus twin is a pure prefix rewrite, and
+`diff_vs_A2.json` still says the only difference from A2 is `--num_train_epochs`.
 
-`ms-swift 4.4.1` has `--resume_from_checkpoint` (in `swift/arguments/base_args/`), and the
-checkpoints carry full trainer state, so the run resumes rather than restarts:
-
-| | lost |
-|---|---|
-| **resume from `checkpoint-1802`** | **~598 steps ≈ 2 h 48 m** |
-| relaunch from zero | 11 h 17 m |
-
-Everything else about the arm is unchanged — same corpus, same recipe, `diff_vs_A2.json` still
-`{"--num_train_epochs": ["3", "5"]}`.
+⚠️ `swift export` has the same disease: it resolves the base model from the **adapter's**
+`args.json`, so a merge after a move needs `--model` passed explicitly or it dies with
+`ValueError: path: '/data/...' not found` before touching a weight. `eval_arm47` now derives it.
 
 ## 🟢 The scoring for this rung is BUILT and already on the box
 
@@ -105,9 +126,10 @@ instead of below them (the rung-16 trap). The rung-47 notebook is tagged.
 
 ## 📋 2026-08-18 — FOR THE TEAM: a training run is LIVE on UNAM, and "UNAM cannot train the 8B" was false
 
-> 🔻 **SUPERSEDED 2026-08-18 12:00 by the section above — the run described here is DEAD (box
-> reboot at 11:55:53), and `~/storage` is a dangling symlink until `/data` is remounted.** Point 3
-> (the env myth is retracted) and the clone-shebang trap both still stand.
+> 🔻 **SUPERSEDED 2026-08-18 12:25 by the section above.** The run it describes was killed by the
+> 11:55:53 reboot and has been RESUMED from `checkpoint-1802`; its ETA, its step count and every
+> `~/storage/...` path here are stale (use `/mnt/storage/uaq_user/...`). Point 3 (the env myth is
+> retracted) and the clone-shebang trap both still stand.
 
 **1. 🔴 There is a job on UNAM GPU 0 right now. Do not kill it.** `tmux leo-rung47`, started
 00:33:56 box time, **ETA ~20 h** (swift's own `remaining_time`, not an estimate of ours).
