@@ -77,6 +77,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -204,6 +205,10 @@ class Rung47Config:
 
     split_json: str = field(default="")   # rung 42's RESULTS_split_42.json
 
+    # The Qwen3-VL-8B base the adapter was trained on. Left empty it is DERIVED from the
+    # run's own `argv.json` and re-prefixed onto this storage root — see `base_model_path`.
+    base_model: str = ""
+
     def __post_init__(self) -> None:
         if not self.split_json:
             self.split_json = (
@@ -223,6 +228,42 @@ class Rung47Config:
 
     def run_name(self, epoch: int) -> str:
         return f"{RUN}_ep{epoch}" + ("_smoke" if self.smoke else "_full")
+
+    @property
+    def storage_root(self) -> Path:
+        """The volume root, whatever it is mounted at today (`work_root`'s parent)."""
+        return Path(self.work_root).parent
+
+    def base_model_path(self) -> Path:
+        """The base model, re-prefixed onto THIS storage root. RAISES if absent.
+
+        🔴 `swift export` resolves the base model from the ADAPTER's `args.json`, which
+        records an absolute path — `/data/uaq_user/hf_cache/...` for this arm. After the
+        2026-08-18 reboot that path does not exist and the merge dies with
+        `ValueError: path: '...' not found` *before* touching a weight. Passing `--model`
+        explicitly wins over the loaded value (`model` is in swift's `load_keys`, which
+        only apply when the current value is None), so the fix is to supply it.
+
+        Derived from `argv.json` rather than hardcoded: the base is part of the arm's
+        identity, and a merge against a different snapshot is not this arm's checkpoint.
+        """
+        if self.base_model:
+            p = Path(self.base_model)
+        else:
+            argv = json.loads((self.run_dir / "argv.json").read_text(encoding="utf-8"))
+            recorded = argv[argv.index("--model") + 1]
+            # re-prefix: /data/uaq_user/hf_cache/... -> <storage_root>/hf_cache/...
+            tail = recorded.split("/hf_cache/", 1)
+            if len(tail) != 2:
+                raise EvalFailure(f"cannot re-prefix the recorded --model: {recorded}")
+            p = self.storage_root / "hf_cache" / tail[1]
+        if not p.exists():
+            raise EvalFailure(
+                f"base model not found at {p}. It is derived from the run's argv.json and "
+                f"re-prefixed onto {self.storage_root}; if the volume moved again, that root "
+                "is what needs updating (one `STORAGE` parameter in the notebook)."
+            )
+        return p
 
     def to_eval_config(self, epoch: int) -> EvalConfig:
         """Rung 45's `EvalConfig`, filled for one epoch of this arm."""
@@ -426,16 +467,33 @@ def _assert_control_42_shape(path: Path, epoch: int) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def merge_checkpoint(cfg: Rung47Config, ckpt_root: Path, epoch: int) -> Path:
-    """`swift export --merge_lora` one epoch's adapter into a loadable model.
+def swift_cmd() -> list[str]:
+    """The argv prefix that runs swift's CLI. NEVER the `swift` console script.
 
-    🔴 `swift` must be THIS interpreter's console script. The env is a
-    `conda create --clone` of `orena-gen36`, and a clone leaves pip's console
-    scripts carrying the ORIGINAL env's shebang — that is what made `swift` start
-    under gen36's interpreter and die on a missing `qwen_vl_utils`. They were
-    repaired with `sed` on 2026-08-18, but the failure mode is silent enough that
-    the resolved path is logged here every time.
+    🔴 **Do not call `swift` by name, and do not trust that it is on PATH.** pip's console
+    scripts carry an absolute interpreter in their shebang, and that interpreter is not
+    guaranteed to exist:
+
+    * the env is a `conda create --clone` of `orena-gen36`, so the scripts first pointed at
+      gen36's python and died on a missing `qwen_vl_utils` (repaired with `sed` 2026-08-18);
+    * then the 2026-08-18 reboot moved the volume, and every shebang went back to pointing
+      at `/data/uaq_user/envs/orena-train/bin/python`, which no longer exists.
+
+    ⚠️ **The second failure reports as `FileNotFoundError: 'swift'`**, which reads as "swift
+    is not installed". It is: the file is right there on PATH. `execve` returns ENOENT for a
+    *missing interpreter* too, and Python attributes it to the command. That error cost one
+    smoke run; do not re-diagnose it as a PATH problem.
+
+    Going through `sys.executable` sidesteps all of it — the interpreter relocates fine
+    because conda derives `sys.prefix` from the binary's real path — and needs no write to
+    the env, so a later `mount --bind /mnt/storage /data` leaves nothing to undo.
     """
+    return [sys.executable, "-c",
+            "import sys; from swift.cli.main import cli_main; sys.exit(cli_main())"]
+
+
+def merge_checkpoint(cfg: Rung47Config, ckpt_root: Path, epoch: int) -> Path:
+    """`swift export --merge_lora` one epoch's adapter into a loadable model."""
     ckpt = assert_checkpoint_complete(ckpt_root, epoch)
     out = cfg.merged_dir(epoch)
     if out.is_dir() and any(out.iterdir()):
@@ -444,8 +502,11 @@ def merge_checkpoint(cfg: Rung47Config, ckpt_root: Path, epoch: int) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     t0 = time.perf_counter()
     p = subprocess.run(
-        ["swift", "export", "--adapters", str(ckpt), "--merge_lora", "true",
-         "--output_dir", str(out)],
+        swift_cmd() + ["export", "--adapters", str(ckpt), "--merge_lora", "true",
+                       # 🔴 explicit, or swift reads the adapter's args.json and looks for
+                       # the base under the OLD mountpoint. See `base_model_path`.
+                       "--model", str(cfg.base_model_path()),
+                       "--output_dir", str(out)],
         capture_output=True, text=True,
     )
     if p.returncode != 0:
@@ -625,5 +686,5 @@ __all__ = [
     "resolve_ckpt_root", "assert_run_moved_weights", "assert_checkpoint_complete",
     "assert_single_variable", "assert_cache_covers", "held_out_split", "ensure_paths",
     "ensure_control_42", "merge_checkpoint", "reclaim_merged",
-    "cells", "score_epoch", "control_verdict", "did_verdict", "paired_ci_vs_42",
+    "swift_cmd", "cells", "score_epoch", "control_verdict", "did_verdict", "paired_ci_vs_42",
 ]
