@@ -1,6 +1,113 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 🔴 2026-08-18 12:00 — FOR THE TEAM: UNAM REBOOTED, the rung-47 run is DEAD, and `/data` is not mounted
+
+**Read this before you try to run anything on UNAM. Nothing there works right now.**
+
+**1. The box rebooted at 11:55:53 box time.** Previous boot was Jul 11 — 38 days of uptime, ended
+by something we cannot see from user space (`last -x reboot`, no shutdown record, no fstab change).
+Nothing we ran can reboot a machine; the training was healthy 6 minutes before, at step 2390 with
+its `train_speed` unchanged.
+
+**2. 🔴 The rung-47 training is GONE. Do not go looking for `tmux leo-rung47`.** It died at
+**step 2400 / 4505, epoch 2.66, after 11 h 17 m.** Both GPUs are idle, there is no tmux server.
+The section below this one says a job is live and must not be killed — **that is now false and is
+superseded by this one.**
+
+**3. 🟢 NOTHING WAS LOST.** The 16.4 T volume survived intact. Both saved checkpoints are complete
+and **fully resumable** — they carry optimiser, scheduler and RNG state, not just the adapter:
+
+```
+/mnt/storage/uaq_user/rung47/runs/47_a2_ep5_v1/ckpt/v0-20260818-003356/
+  checkpoint-901  (ep1)   295 MB
+  checkpoint-1802 (ep2)   295 MB
+  → adapter_model.safetensors  optimizer.pt  scheduler.pt  rng_state.pth  trainer_state.json
+```
+
+ep3 (step 2703) was ~1 h 25 m away and never got written.
+
+## 🔴 THE BLOCKER: the volume came back on a different mountpoint
+
+| | before the reboot | now |
+|---|---|---|
+| `/dev/sda1` (16.4 T, ext4) | `/data` | **`/mnt/storage`** |
+| `~/storage` → `/data/uaq_user` | fine | **dangling symlink** |
+
+There is **no `/etc/fstab` entry for `/data`** — that mount was set up by hand and did not survive.
+`/data` is now a root-owned directory containing only `ai-projects`.
+
+⚠️ **Do NOT "fix" this by repointing the `~/storage` symlink at `/mnt/storage`.** The envs have the
+old path baked in — every pip console script starts with
+
+```
+#!/data/uaq_user/envs/orena-train/bin/python
+```
+
+and so do `argv.json`, the Jupyter kernelspec and every recorded run path. Repointing the symlink
+leaves all of those broken and produces a box that looks fixed and is not.
+
+**The fix restores the old path exactly, and needs root** (`sudo` prompts for a password here):
+
+```
+sudo mkdir -p /data && sudo mount --bind /mnt/storage /data
+```
+
+Worth asking whoever administers the box to add it to `/etc/fstab` so the next reboot is free.
+
+## 🟢 Recovery, once `/data` is back
+
+`ms-swift 4.4.1` has `--resume_from_checkpoint` (in `swift/arguments/base_args/`), and the
+checkpoints carry full trainer state, so the run resumes rather than restarts:
+
+| | lost |
+|---|---|
+| **resume from `checkpoint-1802`** | **~598 steps ≈ 2 h 48 m** |
+| relaunch from zero | 11 h 17 m |
+
+Everything else about the arm is unchanged — same corpus, same recipe, `diff_vs_A2.json` still
+`{"--num_train_epochs": ["3", "5"]}`.
+
+## 🟢 The scoring for this rung is BUILT and already on the box
+
+`experiments/47-epochs-vs-corpus/` — `01_eval_epochs.ipynb` + `_tools/eval_arm47.py` (which imports
+rung 45's `eval_arm45.py` rather than copying it) + README. Synced to `repo_leo`, checksums verified
+both sides. Every read-only gate passed **before** the reboot: judge resolves offline, 6 252 test
+items load, split 8 videos / 1 283 questions, frames-cache 1 283/1 283.
+
+Rung 42's per-question archive for all five epochs is already on the box at
+`runs/47_a2_ep5_v1/controls/` (1 283 rows, 800 heico, verified). The pipeline smoke never got to
+run — the reboot took it first.
+
+### Three things measured on the way, so nobody pays for them twice
+
+* 🔴 **UNAM has no `boto3` and no S3 credentials.** Fetch control archives on the LAPTOP and rsync
+  them over; the notebook only verifies. A fetch written as a notebook cell runs on UNAM, which is
+  how this was found.
+* 🔴 **`s3.download_file` 403s on bucket `gf78k60nlt`.** Our credentials are denied `HeadObject`,
+  and `download_file` HEADs before it GETs. `get_object` and `ListObjects` are allowed — so an
+  object can be *listed* and not *downloaded* by the obvious call.
+* 🔴 **`ping` is useless for deciding whether UNAM is up.** ICMP is blocked, so 100 % packet loss
+  is the normal state and says nothing. Test with `ssh`. (This cost one wrong "the box is down"
+  call today.)
+
+### Jupyter now works in `orena-train`, and it cost the training nothing
+
+`jupyterlab 4.6.3 + ipykernel 7.3.0 + papermill 2.7.0`, kernel registered as `orena-train`.
+Installed with the env's own `pip freeze` as a **constraints file**, so pip could only ADD: dry-run
+showed 71 packages and **zero** overlap with the 153 installed, and the post-install diff against
+the run's own `pip_freeze.txt` was **0 packages changed**. `torch 2.11.0+cu128 / transformers 5.12.1
+/ torchvision 0.26.0+cu128 / ms-swift 4.4.1` all intact; the training kept its 16.93 s/it.
+
+⚠️ Papermill needs the parameters cell **tagged** `parameters`, or it injects above the imports
+instead of below them (the rung-16 trap). The rung-47 notebook is tagged.
+
+---
+
 ## 📋 2026-08-18 — FOR THE TEAM: a training run is LIVE on UNAM, and "UNAM cannot train the 8B" was false
+
+> 🔻 **SUPERSEDED 2026-08-18 12:00 by the section above — the run described here is DEAD (box
+> reboot at 11:55:53), and `~/storage` is a dangling symlink until `/data` is remounted.** Point 3
+> (the env myth is retracted) and the clone-shebang trap both still stand.
 
 **1. 🔴 There is a job on UNAM GPU 0 right now. Do not kill it.** `tmux leo-rung47`, started
 00:33:56 box time, **ETA ~20 h** (swift's own `remaining_time`, not an estimate of ours).
