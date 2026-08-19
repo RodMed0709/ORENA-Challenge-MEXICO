@@ -1,8 +1,8 @@
 # Rung 48 — the centre probe: does recognition survive a change of hospital?
 
-> **Status: PARTITION FROZEN (2026-08-19). Nothing scored yet.**
-> `01_build_cholect50_split.ipynb` wrote `experiments/splits/cholect50_split_v1.csv`
-> (sha256 `098b6c05`): **35 train / 15 hold** over CholecT50's 50 videos.
+> **Status: v1 SCORED and its instrument FAILED calibration. v2 RUNNING (2026-08-19, 17:09).**
+> Partition frozen (`cholect50_split_v1.csv`, sha256 `098b6c05`, 35 train / 15 hold).
+> Probe v1 answered by four models. **The training corpus is built and validated.**
 
 ## Ladder
 
@@ -78,3 +78,75 @@ changes is what the arm's own number means. **Say which one you are reporting.**
   not built. This rung so far is one frozen CSV.
 - **Any score.** No model has answered a CholecT50 question.
 - **SurgΣ-DB.** It supplies the *questions* for training on the 35; it is not part of the ruler.
+
+
+---
+
+# What v1 measured, and why the instrument was rebuilt the same day
+
+Four models answered the 2,445 positive frames of the 15 held-out videos. Three of them carry a
+platform score, which is the whole point: **if the probe ranks them the way the leaderboard did,
+it has ordinal validity on the axis that scores.**
+
+| model | platform | recall ALL | mean_set_size | Clip | Specimen bag |
+|---|---:|---:|---:|---:|---:|
+| rung 06 ep2 | **0.4767** | 0.8429 | **1.42** | 0.9989 | 0.7457 |
+| A2 ep3 | **0.5288** | 0.8896 | **1.40** | 0.9936 | 0.8247 |
+| rung 42 ep4 | **0.5809** | 0.8871 | **1.22** | 0.9968 | 0.8187 |
+| rung 47 ep4 | — | 0.8748 | 1.33 | 1.0000 | 0.7968 |
+
+## 🔴 As a recall instrument it FAILED, in two distinct ways
+
+**1. It does not reproduce the platform order.** Platform is r06 < A2 < r42; recall gives
+r06 < r42 < A2. But the A2–r42 gap on the probe is **0.0025** where the platform separates them
+by **0.052** — this is a non-separation, not an inversion. With 15 clusters and ~20 % gold noise,
+0.0025 is zero.
+
+**2. The `Clip` cell is degenerate.** All four models score **0.9936–1.0000**. That is the `Clip`
+attractor the campaign already documented, answering `Clip` to everything: on frames whose gold
+*is* `Clip`, recall is 1 by construction. The cell measured the bias, not recognition. All of v1's
+signal lived in `Specimen bag`.
+
+## 🟢 But its GUARD ordered the anchors 3 of 3
+
+```
+platform    0.4767   0.5288   0.5809
+set_size      1.42     1.40     1.22
+```
+
+Monotone, and with a mechanism: the challenge scores `fo_class` by **exact set equality**, so
+listing extra classes is punished. The probe cannot measure precision, but `mean_set_size` is its
+direct proxy — and the proxy is what tracked. **The metric added as an anti-gaming guard ordered
+better than the metric added as the headline.**
+
+⚠️ Three points have six orderings, so 3/3 is a 1-in-6 coincidence. This is a hypothesis with a
+mechanism, not a validated ruler.
+
+📌 It also places rung 47 (`set_size` 1.33) **between A2 and rung 42** — i.e. below what shipped,
+which is what the local eval said when we decided not to send it.
+
+# v2 — the fix, and why it was available all along
+
+If `set_size` is what predicts, the probe should be scored on **precision** — which is exactly
+what its data appeared not to support. It does, through the same temporal rule read backwards:
+
+| | positives | negatives |
+|---|---:|---:|
+| `Clip` | 939 (post-event ∧ applier) | **12,281** (before the first clipping event) |
+| `Specimen bag` | 1,506 (annotated) | **23,331** (before the bag first appears) |
+
+🔑 **The negatives are the strong side, which is unusual and is the point.** A frame before the
+first `clipper,clip,*` triplet cannot contain a placed clip — not because none is visible, but
+because none exists yet. Absence is a fact about the timeline, not a judgement about visibility.
+The positives are the ~80 %-precision side. Precision, which is what we need, is measured against
+the clean one.
+
+**What it fixes:** a `Clip`-attractor model answering `Clip` everywhere scored **1.0000** under
+v1. Under v2 those same answers land on frames where no clip exists and become false positives —
+validated on a synthetic attractor: **precision 0.2848, F1 0.4433** (an oracle scores 1.0).
+
+Sampled 1:1 per video: **4,890 items** (2,445 pos + 2,445 neg), ~26 min per model.
+
+⚠️ Still unmeasurable: whether `Sponge` on a CholecT50 frame is right. Scoring is **per class** —
+"did it say Clip?" — never as a set.
+⚠️ Still 15 clusters. No metric fixes that.
