@@ -333,22 +333,36 @@ def assert_run_moved_weights(ckpt_root: Path) -> dict:
     if not log_path.exists():
         raise EvalFailure(f"no logging.jsonl at {log_path}")
     rows = [json.loads(l) for l in log_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+
+    # 🔴 A run that FINISHES appends two trailer lines a running one does not have, and
+    # neither carries `loss`/`token_acc`: a summary (`train_runtime`, `train_loss`) and a
+    # `model_parameter_info` line holding the whole `log_history`. Reading `rows[-1]` for
+    # the last epoch therefore returns None the moment training completes — the gate passed
+    # at ep3 and ep4 and broke on ep5, on nothing but the run ending (MEASURED 2026-08-19).
+    # Progress fields must come from the last row that actually logged a step.
+    steps = [r for r in rows if isinstance(r.get("loss"), (int, float))]
+    if not steps:
+        raise EvalFailure(f"no training step lines in {log_path} — only trailers?")
+
     g = [r["grad_norm"] for r in rows if isinstance(r.get("grad_norm"), (int, float))]
-    losses = [r["loss"] for r in rows if isinstance(r.get("loss"), (int, float))]
+    losses = [r["loss"] for r in steps]
     zero = sum(1 for v in g if v == 0.0)
     if not g or zero:
         raise EvalFailure(f"{zero} of {len(g)} logged steps had grad_norm 0.0 — no weight moved")
     if losses[-1] >= losses[0]:
         raise EvalFailure(f"loss did not fall ({losses[0]:.4f} -> {losses[-1]:.4f})")
-    ta = [r["token_acc"] for r in rows if isinstance(r.get("token_acc"), (int, float))]
+    ta = [r["token_acc"] for r in steps if isinstance(r.get("token_acc"), (int, float))]
     out = {
-        "n_steps_logged": len(rows),
+        "n_steps_logged": len(steps),
         "grad_norm_first": g[0], "grad_norm_last": g[-1],
         "loss_first": losses[0], "loss_last": losses[-1],
         # TRAIN token_acc is NOT a result. It is here for the memorisation read only:
         # rung 42 rose to 0.980 while its held-out curve turned over at ep4.
         "token_acc_first": ta[0] if ta else None, "token_acc_last": ta[-1] if ta else None,
-        "last_epoch_logged": rows[-1].get("epoch"),
+        "last_epoch_logged": steps[-1].get("epoch"),
+        # True once the trainer wrote its end-of-run trailer. ep5 is the first epoch of this
+        # arm for which this is True, and it is what broke the gate the first time.
+        "run_finished": any("train_runtime" in r for r in rows),
     }
     log.info("train gate OK — %s", out)
     return out
