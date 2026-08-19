@@ -1,5 +1,148 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 🟢 2026-08-19 01:30 — FOR THE TEAM: rung 47 is CLOSED, and the platform payload moved the target
+
+Everything here is on `main` (`754d618`). The full verdict is
+[[rung42-gain-was-epochs-not-corpus]]; this is the operational summary.
+
+### 1. 🟢 rung 47 answered its question: it was EPOCHS, and four is the epoch
+
+| epoch | rung 47 (A2 corpus, clean) | rung 42 (merged) | 47 − 42 |
+|---|---|---|---|
+| 3 | 0.6142 | 0.6262 | −0.0120 |
+| **4** | **0.6468** ← peak | **0.6744** ← peak | −0.0276 |
+| 5 | 0.6466 | 0.6592 | −0.0126 |
+
+The epoch step is large on **both** corpora (+0.0327 / +0.0482, DiD −0.0155) and that half is
+confound-free. At matched epoch the two corpora are **indistinguishable three times over** — at
+ep5 not one of six video-clustered cells excludes zero. **ep4 is the peak on both arms**, so
+rung 19b and everything after it select at four epochs, not three.
+
+🔴 **The arm does NOT ship.** 0.6466 never reaches rung 42's 0.6744. The standing rule is that a
+candidate must beat the incumbent on the local instrument before it costs a submission.
+
+⚠️ **ep5 is not flat, it is a trade the headline hides**: `aggregation_ID` +0.0257 and
+`macro_f1_ID` → 0.9110 while `aggregation_OOD` −0.0214. Better on what it saw, worse on what it
+did not — and the platform is half OOD.
+
+### 2. 🔴 The platform payload says our local cell diagnosis is INVERTED
+
+We now hold the full metrics payload for submission 03 **and for rank 1**. rung 42 ep4, the same
+checkpoint, scored by the two instruments:
+
+| celda | local | plataforma | Δ |
+|---|---|---|---|
+| `object_recognition_OOD` | 0.8285 | **0.4727** | **−0.356** |
+| `object_recognition_ID` | 0.8640 | 0.7001 | −0.164 |
+| `aggregation_ID` | 0.5966 | 0.5443 | −0.052 |
+| `aggregation_OOD` | 0.4086 | **0.6064** | **+0.198** |
+
+What we thought was our ceiling is our floor. **The two OOD axes are different things:** ours is
+**procedure** (`heico` = Sigmoid Resection, the only procedure with zero training videos); the
+platform's is **centre** (`challenge_design.txt:711`, ">5 centres not represented in the training
+data"). And the organizers' own `ood` column is `False` in **all 20,000** public questions — our
+OOD axis is a proxy we invented.
+
+🟢 **But the local eval still RANKS correctly**, 3 submissions for 3: local 0.5667 → 0.6496 →
+0.6744 gave platform 0.4767 → 0.5288 → 0.5809. Signs 3/3, magnitudes 0/3 (0.63× then 2.10×).
+⇒ **ordinal instrument, not a cardinal one.** Choose with it; never diagnose a cell with it, and
+never extrapolate it across model families — all three points are Qwen3-VL-8B.
+
+### 3. 🎯 The gap to rank 1 is 84 questions, and 67 of them are object_recognition
+
+Denominators recovered exactly from the accuracies: 553 / 188 / 747 / 512 = 2000.
+
+| celda | n | nosotros | rank 1 | preguntas | % del gap |
+|---|---:|---:|---:|---:|---:|
+| `object_recognition_OOD` | 512 | 242 | 278 | **36** | 41.2 % |
+| `object_recognition_ID` | 747 | 523 | 554 | **31** | 24.3 % |
+| `aggregation_OOD` | 188 | 114 | 122 | 8 | 24.9 % |
+| `aggregation_ID` | 553 | 301 | 310 | 9 | 9.5 % |
+
+**We are not bad at recognition — we are brittle.** Holding the procedure constant, a centre
+change costs `object_recognition` **−0.164** and `aggregation` only **−0.052**. And counting is a
+field-wide hard cell: rank 1 beats us on `aggregation_ID` by only **0.0163**.
+
+⚠️ `aggregation_OOD` holds 188 questions but 25 % of the score — one question there is worth 2.9×
+one in `agg_ID`, and it is also the noisiest cell on the board.
+
+### 4. 🔴 We spend 7.8 % of the compute allowance; rank 1 spends 2.45× more
+
+```
+permitido por lote (20 preguntas)   220.0 s   (120 setup + 20 × 5)
+nosotros                             17.17 s   7.8 %
+rank 1                               42.10 s  19.1 %
+```
+
+At our measured 0.515 s/q that is **~19.7 extra forward passes per question**. Capping at 80 % of
+the allowance because `saturation_fraction = 0.2` forfeits the WHOLE batch on a 20 % overrun:
+**k = 15 self-consistency fits, measured.** Levers closed on cost are open again.
+
+🔻 **This corrects how we describe rung 43.** Thinking at 9.888 s/q fits *exactly once* inside the
+budget — it was never a budget problem, it was a quality problem (0.4188 vs 0.6485).
+⚠️ `self-consistency-dead`, `max-pixels-not-a-lever` and `resolution-is-not-the-gap` were all
+measured on the local eval and several were closed on a cost that does not exist. Not refuted —
+their premise changed and they need re-reading.
+
+### 5. 🟢 The Strasbourg centre-shift probe is BUILT and waiting for a GPU
+
+We had no instrument for our biggest hole. There is one now, and it cost no labelling.
+CholecT50 = **University Hospital of Strasbourg**, cholecystectomy — same procedure as our
+lapchole ID, different centre, so it isolates the centre axis.
+
+```
+7 videos (rung 19b's held-out set) · 14,993 frames extracted, 7.1 GB
+994 positives: Clip 408 + Specimen bag 586  ·  7 clusters for RULES §13
+gates: 0 censored black frames in 60 sampled, 0 missing, 854x480
+```
+
+🟢 **Resolution is not a confound**: our own frames already span 960×540 / 1280×720 / 720×576 /
+640×360 / 720×480 / **854×480** — six capture systems, so our training set is already
+multi-system.
+
+🔴 **Recall-only by construction.** `clipper,clip,*` marks the frame where a clip is APPLIED and
+`specimen_bag` marks interaction, so a positive is reliable and an absent label is not evidence of
+absence. The metric must be **containment** (`gold ⊆ predicted`), never exact set — the
+challenge's most common template ("List all foreign objects…") would otherwise punish the model
+for correctly naming a sponge CholecT50 does not label.
+
+Manifest generator + the 994-row JSONL are in the session scratchpad; they belong in
+`experiments/48-*/_tools/` when the rung is created.
+
+### 6. 🔻 The 27B closure rests on evidence we now know is contaminated
+
+[[27b-is-a-teacher-not-a-candidate]] leaned on the 27B losing all four cells on the 1,283 —
+**including the two OOD ones**. But rung 42 trained on 8 of the 10 heico test videos, so its local
+OOD cells were not OOD, and the platform put `object_recognition_OOD` at 0.4727 rather than the
+0.8285 we read locally. The 27B's own case is symmetric and equally unproven: **every scrap of
+evidence that it "generalises better" measures COUNTING** (MISAW 0.391 vs 0.205, SurgSigma 0.491
+vs 0.403, Spearman 0.69 vs 0.50), and counting is the axis that does **not** decide the podium.
+
+⇒ **Neither the closure nor the reopening is established.** The probe in §5 is what decides it,
+and it runs without a submission.
+
+### 7. 🔻 A gate bug worth knowing about (fixed, `bc9c54d`)
+
+`assert_run_moved_weights` read progress fields off `logging.jsonl`'s **last line**. ms-swift
+appends two trailer lines when a run FINISHES that a running job does not have — a summary
+(`train_runtime`, `train_loss`) and a `model_parameter_info` line — and neither carries `loss` or
+`token_acc`. So the gate passed at ep3 and ep4 and died at ep5 on nothing but the run having
+ended. **Anything that reads the tail of a trainer log is reading a different schema before and
+after the last step.**
+
+### Box state
+
+UNAM is **idle** — both GPUs free, no tmux sessions, 15 TB free, the 17 GB merged checkpoint
+reclaimed and the chained-eval temporaries deleted (§IX). Per-question evidence for all three
+epochs is archived to a laptop at
+`experiments/47-epochs-vs-corpus/runs/47_a2_ep5_v1/eval/ep{3,4,5}_results.csv` (gitignored, as
+§VIII requires) — the loss of A2's own archive has cost us twice, so this one is kept.
+
+⚠️ Not yet in S3 under `evidence_47/` the way rung 42's is. That is the durable copy and it needs
+a deliberate write.
+
+---
+
 ## 🔴 2026-08-18 17:00 — rung 47 ep3 scored **0.6142**, the control is RED, and the control was MIS-DESIGNED
 
 **The number.** `checkpoint-2703` on the 8 held-out videos / 1,283 questions:
