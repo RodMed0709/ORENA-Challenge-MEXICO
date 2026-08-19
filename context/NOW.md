@@ -5,7 +5,10 @@
 Everything here is on `main` (`754d618`). The full verdict is
 [[rung42-gain-was-epochs-not-corpus]]; this is the operational summary.
 
-### 1. 🟢 rung 47 answered its question: it was EPOCHS, and four is the epoch
+### 1. 🟡 rung 47 answered its question: the EPOCH effect is established, the corpus is not ruled out
+
+🔻 **AMENDED 2026-08-19, hours after this section was first written. It said "it was EPOCHS" flat
+and that was too strong** — the arithmetic below was available and not done.
 
 | epoch | rung 47 (A2 corpus, clean) | rung 42 (merged) | 47 − 42 |
 |---|---|---|---|
@@ -13,10 +16,31 @@ Everything here is on `main` (`754d618`). The full verdict is
 | **4** | **0.6468** ← peak | **0.6744** ← peak | −0.0276 |
 | 5 | 0.6466 | 0.6592 | −0.0126 |
 
-The epoch step is large on **both** corpora (+0.0327 / +0.0482, DiD −0.0155) and that half is
-confound-free. At matched epoch the two corpora are **indistinguishable three times over** — at
-ep5 not one of six video-clustered cells excludes zero. **ep4 is the peak on both arms**, so
-rung 19b and everything after it select at four epochs, not three.
+```
+r47 ep3 -> r47 ep4   EPOCHS, corpus fixed   +0.0327   54 %
+r47 ep4 -> r42 ep4   CORPUS, epoch fixed    +0.0276   46 %
+                     sum                    +0.0602
+r47 ep3 -> r42 ep4   observed               +0.0602   <- additive to 4 decimals
+```
+
+**Two levers of nearly the same size.** What separates them is **how they were tested, not how big
+they are**: the corpus effect was handed a video-clustered CI and failed it; **the epoch effect
+was never given a CI at all.** Applying one instrument to both sides — ID cells only, because the
+OOD cells hold **2 videos** and a cluster bootstrap there has three possible outcomes — the epoch
+effect excludes zero in **both** arms (`obj_ID` +0.0480, `ALL_ID` +0.0290 on A2's corpus; `agg_ID`
++0.0815, `ALL_ID` +0.0538 on the merged) and the corpus effect in **no** cell.
+
+🔴 **Those intervals are NOT `frame.metrics`'.** `paired_ci_vs_42` reports −0.04759 for
+`aggregation_ID` where the raw cell difference is −0.0558, so it aggregates per **video**, not per
+question. **Re-run the within-arm epoch CI properly before quoting a number.** The ranking is the
+finding; the intervals are a signal to go measure.
+
+⚠️ **And a third factor is bundled into "corpus" and was never named:** at the same epoch rung 42
+takes **1.35× more optimiser steps** (4,848 vs 3,604), because 19,384 rows make 1,212 steps per
+epoch against 14,415 rows making 901. "More data" and "more updates" are not separated, and a
+corpus comparison at matched *steps* has never been run.
+
+**ep4 is the peak on both arms**, so rung 19b and everything after it select at four epochs.
 
 🔴 **The arm does NOT ship.** 0.6466 never reaches rung 42's 0.6744. The standing rule is that a
 candidate must beat the incumbent on the local instrument before it costs a submission.
