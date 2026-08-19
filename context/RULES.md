@@ -39,6 +39,24 @@
    definition. The empty `ood` column is a publication choice (they do not hand you the tag),
    not an absence of design. `split.py` records it as `organizer:heico-test(Sigmoid Resection)`.
 
+   🔻 **Amended 2026-08-19 — this axis is REAL but it is NOT the axis the leaderboard scores.**
+   The reconstruction above stands: `heico`=unseen procedure is exactly what the organizers
+   designed on the PUBLIC data. What was wrong is the inference we drew from it — that our
+   `*_OOD` cells predict the platform's OOD half. They do not. The platform's OOD is
+   **centre** (*">5 centres not represented"*), and the two disagree, measured on the same
+   rung-42 checkpoint: `aggregation_OOD` reads **0.4086 locally and 0.6064 on the platform**;
+   `object_recognition_OOD` **0.8285 locally and 0.4727**. ⇒ keep computing ID/OOD from the
+   qID prefix — the rule is unchanged — but **report it as UNSEEN PROCEDURE**, never as a
+   proxy for the platform's OOD half, and never diagnose a cell with it
+   ([[local-eval-is-ordinal-not-cardinal]], [[split-v2-by-video]]).
+
+   📌 **The frozen partition is now `experiments/splits/frame_split_v2.csv`** — four slices,
+   `train` 72 / `val_id` 24 / `test_id` 24 / `val_ood` 10. **Select on `val_id`, report on
+   `test_id`, touch `test_id` once.** `val_ood` keeps its name because `metrics.py:165`,
+   `delta.py:72` and `ledger.py:70` hardwire the literal string. `frame_ood_v1.csv` stays
+   committed and is what every result before 2026-08-19 was measured under — do not mix
+   numbers across the two.
+
 4. **Headline = `bucket_mean`** (mean over the 4 real buckets; drop `temporal_grounding`
    n=1). `pre_evaluation_score` is REFERENCE ONLY — it is broken on our split: an
    unweighted bucket mean that a single n=1 question inflates (it lifted rung-02 from an

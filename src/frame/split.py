@@ -46,7 +46,12 @@ logger = logging.getLogger(__name__)
 # can collide, so the dataset must be part of the key.
 VideoKey = tuple[str, str]
 
-_SPLITS = ("train", "val_id", "val_ood")
+_SPLITS = ("train", "val_id", "val_ood", "test_id")
+# v2 adds "test_id": a THIRD slice, touched once at the end, so "val_id" can be spent on
+# checkpoint/epoch selection without selecting on the set we report. "val_ood" keeps its
+# name on purpose — metrics._distribution, delta.py and ledger.py all hardwire the string,
+# and renaming it would silently label every video "ID". It means UNSEEN PROCEDURE
+# (Sigmoid), which is NOT the platform's OOD axis (centre); see decisions/split-v2-by-video.
 
 
 @dataclass
@@ -196,6 +201,97 @@ def build_official_split(items: list, ood_dataset: str = "heico") -> dict[VideoK
 
 # ── persistence (the manifest IS the source of truth) ────────────────────────
 
+def build_split_v2(
+    v1_manifest: Path | str,
+    *,
+    out_path: Path | str,
+    seed: int = 42,
+    ood_procedure: str = "Sigmoid Resection",
+    fracs: dict[str, float] | None = None,
+) -> pd.DataFrame:
+    """Build the v2 four-slice manifest FROM the v1 manifest — no dataset, no GPU.
+
+    v1 already lists every video with its ``procedure_type`` and ``n_questions``, which
+    is the whole input a video-level split needs. Building from it (rather than from
+    ``items``) means the partition can be regenerated on any machine, including ones
+    with no challenge data.
+
+    Why the slices are what they are:
+
+    - **Split by video count, not by question mass.** ``frame.metrics`` clusters its
+      bootstrap on video, so the CI width is set by the number of CLUSTERS. heico videos
+      carry 400 questions and lapchole ~80 — a 5:1 ratio — so a "60/20/20 of questions"
+      would put 3 heico videos against 50 lapchole ones in the same slice. Question mass
+      is used only to break ties.
+    - **``test_id`` is new**, and exists so ``val_id`` can be spent on epoch/checkpoint
+      selection without selecting on the set we report.
+    - **``ood_procedure`` leaves whole**, before the stratified pass touches anything.
+    - 🔴 **``val_ood`` keeps its name for compatibility, not for accuracy.**
+      ``metrics._distribution``, ``delta.py`` and ``ledger.py`` all hardwire the literal
+      string; renaming it would label every video "ID" in silence. It means UNSEEN
+      PROCEDURE. The platform's OOD axis is CENTRE (">5 centres not represented"), and
+      the two disagree — our Sigmoid cell read 0.4086 locally against 0.6064 on the
+      platform. Never report this slice as a proxy for the platform's OOD half.
+    """
+    fracs = fracs or {"train": 0.60, "val_id": 0.20, "test_id": 0.20}
+    v1 = pd.read_csv(v1_manifest, dtype={"dataset": str, "video_id": str})
+    assign: dict[VideoKey, str] = {}
+
+    ood = v1[v1.procedure_type == ood_procedure]
+    if ood.empty:
+        raise ValueError(f"no video has procedure_type={ood_procedure!r} in {v1_manifest}")
+    for _, r in ood.iterrows():
+        assign[(r.dataset, r.video_id)] = "val_ood"
+
+    rest = v1[v1.procedure_type != ood_procedure]
+    for _, g in rest.groupby("procedure_type", sort=True):
+        g = g.sample(frac=1.0, random_state=seed)
+        n = len(g)
+        quota = {k: int(round(n * f)) for k, f in fracs.items()}
+        quota["train"] += n - sum(quota.values())
+        got = {k: 0 for k in quota}
+        mass = {k: 0 for k in quota}
+        for _, r in g.sort_values("n_questions", ascending=False).iterrows():
+            cand = [k for k in quota if got[k] < quota[k]]
+            tgt = {k: fracs[k] / sum(fracs[c] for c in cand) for k in cand}
+            tot = sum(mass[k] for k in cand) + r.n_questions
+            pick = min(cand, key=lambda k: (mass[k] / tot) - tgt[k])
+            assign[(r.dataset, r.video_id)] = pick
+            got[pick] += 1
+            mass[pick] += r.n_questions
+
+    # ── guards: these are the whole point of freezing a manifest ──────────────
+    assert len(assign) == len(v1), f"{len(assign)} assigned vs {len(v1)} videos"
+    train = {k for k, s in assign.items() if s == "train"}
+    evals = {k for k, s in assign.items() if s != "train"}
+    assert not (train & evals), f"VIDEO LEAK: {sorted(train & evals)}"
+    ood_keys = {(r.dataset, r.video_id) for _, r in ood.iterrows()}
+    assert all(assign[k] == "val_ood" for k in ood_keys)
+    assert not any(s == "val_ood" for k, s in assign.items() if k not in ood_keys), \
+        "val_ood must be EXACTLY the unseen procedure"
+
+    out = pd.DataFrame([
+        {
+            "dataset": r.dataset, "video_id": r.video_id,
+            "procedure_type": r.procedure_type,
+            "split": assign[(r.dataset, r.video_id)],
+            "n_questions": r.n_questions, "seed": seed,
+            "ood_procedure": ood_procedure, "ood_dataset": "heico",
+            "val_frac": fracs["val_id"],
+            "ood_axis": "procedure",  # NOT the platform's axis, which is centre
+        }
+        for _, r in v1.iterrows()
+    ]).sort_values(["dataset", "video_id"])
+
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    digest = manifest_hash(assign)
+    Path(str(out_path) + ".sha256").write_text(digest + "\n")
+    logger.info("Wrote v2 manifest: %s (%d videos, sha256=%s…)", out_path, len(out), digest[:12])
+    return out
+
+
 def write_manifest(split: dict[VideoKey, str], vids: pd.DataFrame, cfg: SplitConfig) -> Path:
     """Write the frozen split manifest CSV + a ``.sha256`` sidecar. One row per video.
 
@@ -277,7 +373,7 @@ def assert_no_leak(video_split: dict[VideoKey, str], cfg: SplitConfig | None = N
     are ever assigned ``val_ood``, before the stratified pass touches the rest).
     """
     train = {k for k, s in video_split.items() if s == "train"}
-    evals = {k for k, s in video_split.items() if s in ("val_id", "val_ood")}
+    evals = {k for k, s in video_split.items() if s != "train"}
     overlap = train & evals
     assert not overlap, f"VIDEO LEAK: {sorted(overlap)} in train AND an eval split."
     logger.info(
