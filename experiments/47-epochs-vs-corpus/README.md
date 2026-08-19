@@ -63,11 +63,50 @@ say which one moved.
 `47_ep4 − 42_ep4` crosses the two stacks. The epoch effect **inside** each arm does not:
 
     rung 42, merged corpus:  ep4 − ep3 = +0.0482
-    rung 47, A2's corpus:    ep4 − ep3 = (this rung)
+    rung 47, A2's corpus:    ep4 − ep3 = +0.0327
+    DiD                                = −0.0155
 
 Both are internal to one arm on one stack, so stack, JPEG round-trip and GPU cancel inside
 each. A rung-47 rise of ≈ +0.048 ⇒ the epoch effect is corpus-independent ⇒ rung 42's
 advantage was **epochs**. This is the primary read.
+
+## 🎯 The answer (ep3 + ep4 scored 2026-08-18)
+
+**Mostly the epochs.** The epoch step is large on *both* corpora — +0.0327 on A2's own,
++0.0482 on the merged one. The merged corpus takes about a third of rung 42's step with it,
+but this arm cannot separate that third from noise:
+
+| | ep3 | ep4 |
+|---|---|---|
+| rung 47 `bucket_mean` | 0.6142 | **0.6468** |
+| rung 42 `bucket_mean` (archived) | 0.6262 | 0.6744 |
+| 47 − 42, matched epoch **and** schedule | −0.0120 | −0.0276 |
+
+`RESULTS_paired_ci.csv`, video-clustered on the 8 held-out videos: **six cells, not one
+excludes zero.** The widest is `ALL_ID` −0.046 [−0.108, +0.012] (34/56 wins, 6 videos);
+`ALL_OOD` is −0.009 [−0.035, +0.019]. ⇒ **at a matched epoch the two corpora are not
+distinguishable here**, and RULES §S1's acting threshold (|d| ~ 0.03) is not met. The point
+estimate favours the merged corpus at both epochs and grows with the epoch, which is
+suggestive and nothing more — 483 ID questions over 6 videos will not resolve it.
+
+ep4 rises as a block and the tail holds: macro-F1 0.845 → 0.888 pooled, **0 illegal
+`fo_class` tokens**, and OOD gains more than ID (+0.037 vs +0.029). No sign of the rung-45
+collapse-onto-`Clip` failure.
+
+### 🔴 The ep3 control was mis-designed — do not quote its −0.0200 as a stack effect
+
+ep3 came back **0.6142** against A2's 0.6342 and the notebook called RED. The verdict is
+real; the *reading* people will reach for is not. `--num_train_epochs` also sets what the
+cosine anneals over: at step 2703 this arm is at **LR 7.1e-05** (35 % of peak, half
+annealed) while A2 was at **≈ 0** (fully annealed). They are different models by
+construction, so the −0.0200 is stack **and** schedule and this arm separates neither.
+
+⇒ This also qualifies a number published in rung 42's write-up: **"at a matched epoch the
+corpus loses 0.0079" carries the same confound and was never clean.** The confound runs in
+our favour on what shipped — rung 42's ep4 was still at LR ~1.9e-05 and beat a fully
+annealed A2 by +0.0402 anyway.
+
+What survives is the schedule-matched pair above, because rung 42 also ran 5 epochs.
 
 ## 🔴 A2's per-question archive no longer exists
 
