@@ -1,0 +1,4 @@
+arm,eval_set,epoch,ckpt,aggregation_ID,object_recognition_ID,aggregation_OOD,object_recognition_OOD,bucket_mean,acc_ID,acc_OOD,margin_ID,margin_OOD
+47_C_epochs (A2 corpus),full 6252 (38 videos),3,checkpoint-2703,0.4743,0.7045,0.5893,0.7313,0.6249,0.6066,0.6647,0.2695,0.205
+47_C_epochs (A2 corpus),full 6252 (38 videos),4,checkpoint-3604,0.4817,0.7369,0.5947,0.7741,0.6468,0.6283,0.69,0.2913,0.2302
+47_C_epochs (A2 corpus),full 6252 (38 videos),5,checkpoint-4505,0.4869,0.7346,0.6075,0.7704,0.6498,0.6292,0.694,0.2922,0.2342
