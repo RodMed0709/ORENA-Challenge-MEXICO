@@ -1,0 +1,13 @@
+dataset,disposition,rule,n
+heico,excluded_situs,anatomy_relative,20
+lapchole,excluded_situs,anatomy_relative,3
+heico,invariant,closest_to_image_center,38
+lapchole,invariant,closest_to_image_center,10
+heico,invariant,non_spatial,646
+lapchole,invariant,non_spatial,391
+heico,transformable,all_object_positions,23
+lapchole,transformable,all_object_positions,17
+heico,transformable,fixed_quadrant_class,66
+lapchole,transformable,fixed_quadrant_class,31
+heico,transformable,object_center_quadrant,7
+lapchole,transformable,object_center_quadrant,31
