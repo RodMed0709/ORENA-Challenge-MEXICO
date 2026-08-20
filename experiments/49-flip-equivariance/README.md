@@ -109,23 +109,39 @@ prediction?
 | **both** | **78** | **87.2%** |
 
 🟢 **The model's answer moves with the pixels most of the time** — not what a purely
-memorised class→quadrant prior would produce. The single-object pick-one task
-(`object_center_quadrant`) tracks the flip almost perfectly; the harder multi-object
-enumeration task (`all_object_positions`) is where equivariance actually breaks down.
+memorised class→quadrant prior would produce.
+
+🔻 **Corrected the same day — the first version of this section said the "multi-object
+enumeration task is where equivariance breaks down." Checked, and that overclaims on two
+counts.** (1) **Fisher's exact test on the 2×2 (rule × pass/fail) gives p = 0.088** — not
+significant at conventional thresholds, and this project's own significance culture
+(`RULES §S1`) would not sign that off as an established gap. (2) **The "multi-object"
+framing mischaracterises what `all_object_positions` mostly contains**: 33 of its 40 rows
+(82.5%) have exactly ONE object in the gold answer — content-difficulty nearly identical to
+`object_center_quadrant`, just a different question template and answer format
+(`open_ended` free text vs. `multiple_choice`). Splitting the 8 failures by item count —
+6 in single-item rows, 2 in the 7 multi-item rows (18.2% vs 28.6%) — n=7 is far too small to
+trust that direction either way.
 
 🔑 **Of the 10 failures, only 2 are the "pure prior" pattern** — the prediction literally
 unchanged despite the flip (e.g. `heico__2244592`: both conditions answer `1. Clip:
-top/left`, expected `top/right`). **The other 8 changed, just not to the expected swap** —
-e.g. `heico__2595416` swaps the top/bottom axis instead of left/right (`bottom/right` →
-`top/right`, expected `bottom/left`), and several `all_object_positions` failures are list
-count/order churn rather than a directional error. So the 12.8% non-equivariant rate is
-mostly **noise on a hard task, not a memorised shortcut being exposed** — a materially
-different story than "13% ignores the image."
+top/left`, expected `top/right`). **The other 8 changed, mostly by drifting in object COUNT
+or CLASS, not by getting the left/right axis wrong** — e.g. `heico__2244558` (`"1. Sponge:
+bottom/left"` → `"1. Clip: bottom/left 2. Clip: bottom/left"`, a new class AND a duplicated
+item) and `lapchole__4669577` (`"1. Clip: top/right"` → three items, all `bottom/*`). One
+`object_center_quadrant` failure genuinely does swap the wrong axis (`heico__2595416`:
+`bottom/right` → `top/right`, expected `bottom/left`). **Best-supported read:**
+`all_object_positions`'s free-text format is noisier under this probe's strict
+exact-string check than `object_center_quadrant`'s constrained choice — plausibly a
+generation-format effect, not a spatial-reasoning gap — but this run cannot separate that
+from "genuinely worse at multi-item cases" with only 7 multi-item rows. Needs more data or
+a looser (per-item) match criterion to settle, not asserted here.
 
-⚠️ **Caveats, stated plainly:** n=78 (n=40 for the harder rule) over 8 videos is a small
-instrument, same class of limit as everything else scored on this held-out set
-(`RULES §13`). No CI was computed on the 87.2%/94.7%/80.0% point estimates. This is a
-diagnostic probe, not a leaderboard-comparable number.
+⚠️ **Caveats, stated plainly:** n=78 (n=40 for `all_object_positions`, of which only 7 are
+genuinely multi-object) over 8 videos is a small instrument, same class of limit as
+everything else scored on this held-out set (`RULES §13`). No CI was computed on the
+87.2%/94.7%/80.0% point estimates — the Fisher's-exact p-value above is the only formal test
+run against them. This is a diagnostic probe, not a leaderboard-comparable number.
 
 🔴 **Does NOT contradict rung 24's shortcut finding** (atypical-quadrant accuracy 8.5pts
 below typical, CI excluding zero, measured on the *old* rung-21-arm-A checkpoint,
