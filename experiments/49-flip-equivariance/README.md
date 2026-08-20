@@ -3,7 +3,7 @@
 | Notebook | Step | Metric | Verdict |
 |---|---:|---:|---|
 | `49_flip_audit_heldout8.ipynb` | 1 (audit) | transformable rows | **175 / 1,283 (13.6%)** — done |
-| `02_flip_pair_probe.ipynb` | 2 (paired GPU probe) | accuracy delta + literal equivariance | **built, not launched** — needs a pod |
+| `02_flip_pair_probe.ipynb` | 2 (paired GPU probe) | accuracy delta + literal equivariance | accuracy delta **unreadable** (−0.0076, below `RULES §S4`'s 0.01 floor); literal equivariance **87.2%** (n=78) — done |
 
 ## Objective
 
@@ -60,7 +60,7 @@ Full row-level audit: `RESULTS_flip_audit_heldout8.csv`. Disposition summary:
 workaround; an earlier attempt in a throwaway sandboxed venv silently dropped kernel
 stdout/file-writes, which `data_study` does not hit.
 
-## Step 2 — the paired GPU probe (`02_flip_pair_probe.ipynb`) — built, not launched
+## Step 2 — the paired GPU probe (`02_flip_pair_probe.ipynb`) — RUN, on a pod, 2026-08-21
 
 For the 175 transformable rows: merges rung 42 ep4's adapter (`merge_adapter`, imported
 unchanged from `experiments/48-centre-probe/_tools/probe_runner.py`), materializes an
@@ -73,20 +73,67 @@ documents. Scored through the SAME canonical path every other rung is scored thr
 model call is the canonical `frame.engine.QwenFrameEngine`, only the loop and the image
 source are this experiment's own, same philosophy as rung 48's `probe_runner.py`.
 
-Two reads: (1) paired accuracy delta (flip − original), video-clustered CI via
-`frame.metrics.paired_delta_ci`, same instrument rung 42's own eval notebook used; (2)
-literal answer equivariance — for `object_center_quadrant`/`all_object_positions` (the two
-rules whose *answer* carries a quadrant token), does
-`flip_audit.swap_left_right_quadrants(original_prediction)` actually equal the flipped
-prediction? `fixed_quadrant_class` has no quadrant token in its answer, so only its paired
-accuracy delta is meaningful.
+**Verified locally before launch** (no GPU/SDK needed): notebook JSON validity,
+`_tools/flip_pair_runner.py` syntax and its cross-experiment import of `merge_adapter`, the
+qID construction/uniqueness and `__flip`-suffix round-trip against the real 175-row audit,
+the SMOKE row-selection, and `flip_audit.swap_left_right_quadrants` behavior on realistic
+prediction text. Ran build → smoke (6 rows) → full (175 rows) on a pod per repo convention.
 
-**Verified locally** (no GPU/SDK needed): notebook JSON validity, `_tools/flip_pair_runner.py`
-syntax and its cross-experiment import of `merge_adapter`, the qID construction/uniqueness
-and `__flip`-suffix round-trip against the real 175-row audit, the SMOKE row-selection, and
-`flip_audit.swap_left_right_quadrants` behavior on realistic prediction text. **Not
-verified**: anything requiring the SDK (`focus`), the merged checkpoint, or a GPU — this
-machine has the parquets but not the source videos, so `FrameProvider` has nothing to
-decode. Needs: a pod with `orena-data`, the rung-42-ep4 adapter (path in the notebook's
-params cell, from `submissions/03-rung42-connector-ood/README.md`), and a SMOKE run first
-per repo convention (build → smoke → independent review → full).
+### Read 1 — paired accuracy delta: UNREADABLE, not just non-significant
+
+| | accuracy |
+|---|---:|
+| original frames | 0.9086 |
+| flipped frames | 0.9029 |
+
+`frame.metrics.paired_delta_ci` (video-clustered, `n_boot=4000`): **delta −0.0076**, 95% CI
+**[−0.107, +0.087]**, n=175 over 8 videos, 5 rows favour the flipped condition, 6 favour the
+original. The CI crosses zero, but more to the point: **|−0.0076| is below `RULES §S4`'s
+0.01 floor** — this delta is unreadable on magnitude alone, before the CI is even
+considered. With only 8 videos backing it, this instrument also has little power: a real
+3–5 point accuracy cost from flipping would likely not have been separable from noise
+either. **Not the informative read — see below.**
+
+### Read 2 — literal answer equivariance: 87.2%, and the failure split is informative
+
+For the 78 rows whose ANSWER carries a quadrant token (`object_center_quadrant`,
+`all_object_positions` — `fixed_quadrant_class`'s answer is a bare class name, so this
+check is a no-op there by construction): does
+`flip_audit.swap_left_right_quadrants(original_prediction)` literally equal the flipped
+prediction?
+
+| rule | n | literal equivariance |
+|---|---:|---:|
+| `object_center_quadrant` | 38 | **94.7%** |
+| `all_object_positions` | 40 | **80.0%** |
+| **both** | **78** | **87.2%** |
+
+🟢 **The model's answer moves with the pixels most of the time** — not what a purely
+memorised class→quadrant prior would produce. The single-object pick-one task
+(`object_center_quadrant`) tracks the flip almost perfectly; the harder multi-object
+enumeration task (`all_object_positions`) is where equivariance actually breaks down.
+
+🔑 **Of the 10 failures, only 2 are the "pure prior" pattern** — the prediction literally
+unchanged despite the flip (e.g. `heico__2244592`: both conditions answer `1. Clip:
+top/left`, expected `top/right`). **The other 8 changed, just not to the expected swap** —
+e.g. `heico__2595416` swaps the top/bottom axis instead of left/right (`bottom/right` →
+`top/right`, expected `bottom/left`), and several `all_object_positions` failures are list
+count/order churn rather than a directional error. So the 12.8% non-equivariant rate is
+mostly **noise on a hard task, not a memorised shortcut being exposed** — a materially
+different story than "13% ignores the image."
+
+⚠️ **Caveats, stated plainly:** n=78 (n=40 for the harder rule) over 8 videos is a small
+instrument, same class of limit as everything else scored on this held-out set
+(`RULES §13`). No CI was computed on the 87.2%/94.7%/80.0% point estimates. This is a
+diagnostic probe, not a leaderboard-comparable number.
+
+🔴 **Does NOT contradict rung 24's shortcut finding** (atypical-quadrant accuracy 8.5pts
+below typical, CI excluding zero, measured on the *old* rung-21-arm-A checkpoint,
+[[flip-narrows-shortcut-not-a-win]]) — different construct (natural-distribution
+typical/atypical gap vs. equivariance-under-flip) on a different checkpoint. Both can be
+true at once. Reading them as "the shortcut is gone in rung 42" would need the SAME
+construct measured on both checkpoints, which this rung does not do.
+
+Full results: `RESULTS_flip_pair_scored.csv` (per-row, judge-scored),
+`RESULTS_flip_pair_paired_ci.csv` (read 1), `RESULTS_flip_pair_equivariance.csv` (read 2,
+row-level), `RESULTS_flip_pair_summary.json` (headline numbers).
