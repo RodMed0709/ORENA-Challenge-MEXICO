@@ -150,3 +150,79 @@ Sampled 1:1 per video: **4,890 items** (2,445 pos + 2,445 neg), ~26 min per mode
 ⚠️ Still unmeasurable: whether `Sponge` on a CholecT50 frame is right. Scoring is **per class** —
 "did it say Clip?" — never as a set.
 ⚠️ Still 15 clusters. No metric fixes that.
+
+---
+
+# v2 — SCORED 2026-08-19. One cell is a ruler; the `Clip` cell is a result.
+
+Four models, 4,890 items, 15 videos. `_tools/probe_v2_report.py` → `RESULTS_probe_v2.csv`.
+
+| model | platform | **bag F1** | clip F1 | macro F1 | set_size |
+|---|---:|---:|---:|---:|---:|
+| rung 06 ep2 | 0.4767 | **0.8453** | 0.5929 | 0.7191 | 1.2207 |
+| A2 ep3 | 0.5288 | **0.8849** | 0.6156 | 0.7503 | 1.2188 |
+| rung 42 ep4 | 0.5809 | **0.8958** | 0.6048 | 0.7503 | 1.1202 |
+| rung 47 ep4 | — | 0.8785 | 0.6097 | 0.7441 | 1.1812 |
+
+**Leave-one-video-out, 15 folds** (`RESULTS_probe_v2_jackknife.csv`) — the question is not what a
+cell scores but whether it reproduces `r06 < A2 < r42`, and whether it does so on every fold:
+
+```
+bag_f1     orders 3/3 in 15/15 folds   r47 below r42 in 15/15
+set_size   orders 3/3 in  9/15
+macro_f1   orders 3/3 in  7/15         <- a coin flip
+clip_f1    orders 3/3 in  0/15         <- it does not fail, it INVERTS
+```
+
+## 🟢 The ruler is `Specimen bag` F1, alone
+
+Margins 0.040 and 0.011, never crossing on any fold. 📌 And it puts **rung 47 below rung 42 in
+15/15**, a third independent agreement with the local eval and with v1's `set_size`.
+
+## 🔴 The macro is not a ruler, and it is the number that looks like one
+
+A2 0.75028 vs rung 42 0.75030 — a **1.4e-5** tie where the platform separates them by **0.052**.
+Averaging a cell that orders with a cell that inverts reproduces exactly the error the rung-47
+CI made at the corpus level: *a real effect diluted to nothing by the company it is averaged
+with.* **Report the cell, never the macro.**
+
+## 🔴 `set_size` lost its v1 margin
+
+1.2207 / 1.2188 / 1.1202 — the r06–A2 gap is **0.0019**, and it orders on only 9 of 15 folds.
+v1's 3/3 was on the same near-tie (1.42 / 1.40) and should have been read as one usable point,
+not three. ⚠️ Its ordering test also runs the **other way** (lower is better); scored ascending
+like an F1 it reports 0/15 for a cell that is in fact ordering. Direction is per-metric.
+
+## The `Clip` cell: not an instrument, but the best result of the rung
+
+`_tools/clip_fp_anatomy.py` → `RESULTS_clip_fp_anatomy.csv`, `RESULTS_clip_fp_ramp.csv`.
+
+On the 1,332 frames where the clip provably does not exist yet, all four models answer the bare
+string `'Clip'` in **85–95 %** of them. The rate is **not flat** — it climbs with proximity to
+the clipping event (rung 42, and the other three have the same shape):
+
+```
+first decile of the negative window  0.567      gap > 300 frames   0.870  (n=808)
+half way                             0.977      gap 100-300        0.980  (n=358)
+last decile                          1.000      gap < 100          1.000  (n=166)
+```
+
+⇒ **the models are reading the surgical PHASE and inferring a clip that has not been placed.**
+Not a constant prior — a ramp, with a mechanism. It is consistent with step 4
+([[vcd-has-nothing-to-subtract]]): the model *does* look; the phase prior overrides what it sees.
+
+⚠️ The top of the ramp is where the label is weakest (a clip deposited just before the first
+annotated triplet), so that band is not interpretable. **`gap > 300` is 61 % of the negatives,
+its label is not in doubt, and it still runs 0.81–0.95.** The finding survives without it.
+
+🔴 **And this is why it stays a result.** Clip aggressiveness does not track the platform: A2 is
+the *least* aggressive of the three anchors and rung 42 beats it by 0.052. Every temporal cut
+inverts the pair. Anyone proposing "train on hard negatives so it stops over-calling `Clip`"
+must first show that fewer clip FPs buy score — the three anchors we have say the opposite.
+
+## What this licenses
+
+🟢 **Read arms on `bag_f1`**, with the fold table beside it.
+🔴 **Do not report `macro_f1`**, and do not rescue the `Clip` cell with a v3 — its problem is
+the models, not the corpus.
+📌 Rung 19b is the arm this exists to read: `experiments/19b-external-recognition/`.
