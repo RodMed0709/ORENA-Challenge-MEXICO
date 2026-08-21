@@ -1,0 +1,14 @@
+{
+  "checkpoint": "rung 42 ep4 (checkpoint-4848, submission 03)",
+  "population": "train.parquet, 92 videos, video-only-stratified sample",
+  "n_rows": 202,
+  "n_videos": 92,
+  "accuracy_original": 0.995049504950495,
+  "accuracy_flipped": 0.9405940594059405,
+  "literal_equivariance_rate": 0.8709677419354839,
+  "literal_equivariance_n": 93,
+  "held_out_comparison": {
+    "literal_equivariance_rate": 0.8717948717948718,
+    "n": 78
+  }
+}

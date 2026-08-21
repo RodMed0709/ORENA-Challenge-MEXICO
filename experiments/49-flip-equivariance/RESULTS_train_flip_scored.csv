@@ -1,0 +1,405 @@
+qID,video,ood,clinical,primary,answer_format,latency,timed_out,correctness
+heico__97999,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,1.5375432821456343,False,True
+heico__97999__flip,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,0.777377693913877,False,True
+heico__98001,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,0.7259984579868615,False,True
+heico__98001__flip,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,0.7120518661104143,False,True
+heico__102532,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.4652384268119931,False,True
+heico__102532__flip,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.4630913131404668,False,True
+heico__102534,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.46287685609422624,False,True
+heico__102534__flip,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.4629675887990743,False,True
+heico__102535,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.46402063500136137,False,True
+heico__102535__flip,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.46754046715795994,False,True
+heico__102543,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.4640909668523818,False,True
+heico__102543__flip,0000 - Heico - Prokto - 1.avi,True,False,object_identification,fo_class,0.4645314128138125,False,True
+heico__98342,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,0.7210414470173419,False,True
+heico__98342__flip,0000 - Heico - Prokto - 1.avi,True,False,spatial_localization_camera,open_ended,0.7143520261161029,False,False
+heico__151529,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7339986248407513,False,True
+heico__151529__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7232560140546411,False,True
+heico__151597,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7222414480056614,False,True
+heico__151597__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7231316291727126,False,True
+heico__155751,0001 - Heico - Prokto - 2.avi,True,False,object_identification,fo_class,0.5106100649572909,False,True
+heico__155751__flip,0001 - Heico - Prokto - 2.avi,True,False,object_identification,fo_class,0.5093568018637598,False,True
+heico__151612,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7342148220632225,False,True
+heico__151612__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7151928548701108,False,True
+heico__151615,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7221516750287265,False,True
+heico__151615__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7259154960047454,False,True
+heico__151616,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7271005760412663,False,True
+heico__151616__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7263812520541251,False,True
+heico__172215,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5059314230456948,False,True
+heico__172215__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5134834449272603,False,True
+heico__172225,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5094394041225314,False,True
+heico__172225__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5123452651314437,False,True
+heico__172234,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5130800500046462,False,True
+heico__172234__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5117920159827918,False,True
+heico__151720,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7650350669864565,False,True
+heico__151720__flip,0001 - Heico - Prokto - 2.avi,True,False,spatial_localization_camera,open_ended,0.7721160210203379,False,True
+heico__353248,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5117256029043347,False,True
+heico__353248__flip,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.509850649163127,False,True
+heico__304500,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.5739055930171162,False,True
+heico__304500__flip,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.5530012198723853,False,True
+heico__353251,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5096971939783543,False,True
+heico__353251__flip,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5101398990955204,False,False
+heico__353302,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5091039529070258,False,True
+heico__353302__flip,0002 - Heico - Prokto - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5121373180299997,False,True
+heico__304624,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.4680079130921513,False,True
+heico__304624__flip,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.46738917101174593,False,True
+heico__304963,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.5148762420285493,False,True
+heico__304963__flip,0002 - Heico - Prokto - 3.avi,True,False,object_identification,fo_class,0.5099002909846604,False,True
+heico__466829,0003 - Heico - Prokto - 4.avi,True,False,spatial_localization_camera,multiple_choice,0.510761080076918,False,True
+heico__466829__flip,0003 - Heico - Prokto - 4.avi,True,False,spatial_localization_camera,multiple_choice,0.512293322943151,False,True
+heico__423177,0003 - Heico - Prokto - 4.avi,True,False,spatial_localization_camera,open_ended,0.7313141920603812,False,True
+heico__423177__flip,0003 - Heico - Prokto - 4.avi,True,False,spatial_localization_camera,open_ended,0.7163220040965825,False,True
+heico__433615,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5179436078760773,False,True
+heico__433615__flip,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5117335040122271,False,True
+heico__433616,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5121072558686137,False,True
+heico__433616__flip,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5187960569746792,False,True
+heico__433637,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5547938819509,False,True
+heico__433637__flip,0003 - Heico - Prokto - 4.avi,True,False,object_identification,fo_class,0.5510861841030419,False,True
+heico__546473,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5163536330219358,False,True
+heico__546473__flip,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5126485859509557,False,True
+heico__546327,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5144497081637383,False,True
+heico__546327__flip,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5120350439101458,False,True
+heico__580146,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.526650259969756,False,True
+heico__580146__flip,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.5092371080536395,False,True
+heico__536287,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,open_ended,0.7159538110718131,False,True
+heico__536287__flip,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,open_ended,0.721105189062655,False,True
+heico__546593,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5505743061657995,False,True
+heico__546593__flip,0004 - Heico - Prokto - 5.avi,True,False,object_identification,fo_class,0.5532335778698325,False,True
+heico__580184,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.5250940460246056,False,True
+heico__580184__flip,0004 - Heico - Prokto - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.5101623500231653,False,True
+heico__660170,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.5130683600436896,False,True
+heico__660170__flip,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.5129915769211948,False,True
+heico__660111,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.5125919028650969,False,True
+heico__660111__flip,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.5137785840779543,False,True
+heico__660137,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.47371438005939126,False,True
+heico__660137__flip,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.512147048022598,False,False
+heico__689649,0005 - Heico - Prokto - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5190804768353701,False,True
+heico__689649__flip,0005 - Heico - Prokto - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5141245760023594,False,True
+heico__649559,0005 - Heico - Prokto - 6.avi,True,False,spatial_localization_camera,open_ended,1.4021001220680773,False,True
+heico__649559__flip,0005 - Heico - Prokto - 6.avi,True,False,spatial_localization_camera,open_ended,1.403179578948766,False,True
+heico__660168,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.5245395358651876,False,True
+heico__660168__flip,0005 - Heico - Prokto - 6.avi,True,False,object_identification,fo_class,0.516087933909148,False,True
+heico__775754,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.5515415500849485,False,True
+heico__775754__flip,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.5122402810957283,False,True
+heico__806357,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.510865603107959,False,True
+heico__806357__flip,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5229499121196568,False,True
+heico__775614,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.5125610518734902,False,True
+heico__775614__flip,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.557020328938961,False,False
+heico__806329,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.522909089922905,False,True
+heico__806329__flip,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5235017400700599,False,True
+heico__775590,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.5180439818650484,False,True
+heico__775590__flip,0006 - Heico - Prokto - 7.avi,True,False,object_identification,fo_class,0.5219145060982555,False,True
+heico__806343,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5201865560375154,False,True
+heico__806343__flip,0006 - Heico - Prokto - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.514038474066183,False,True
+heico__900114,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5550773520953953,False,True
+heico__900114__flip,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5544467789586633,False,True
+heico__934841,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5151051098946482,False,True
+heico__934841__flip,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5143969259224832,False,True
+heico__900157,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.556030134903267,False,True
+heico__900157__flip,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5571322729811072,False,True
+heico__934805,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5149310149718076,False,True
+heico__934805__flip,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.518303481163457,False,True
+heico__934807,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5189889741595834,False,True
+heico__934807__flip,0007 - Heico - Prokto - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5161565069574863,False,True
+heico__900201,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5140161931049079,False,True
+heico__900201__flip,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5589079840574414,False,False
+heico__900202,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5261687329038978,False,True
+heico__900202__flip,0007 - Heico - Prokto - 8.avi,True,False,object_identification,fo_class,0.5683796820230782,False,False
+heico__1018924,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5211143079213798,False,True
+heico__1018924__flip,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5267961740028113,False,True
+heico__1052291,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5226704319939017,False,True
+heico__1052291__flip,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5252448909450322,False,True
+heico__1018769,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.49509758898057044,False,True
+heico__1018769__flip,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.48413980985060334,False,True
+heico__1018963,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5255331008229405,False,True
+heico__1018963__flip,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5272614900022745,False,True
+heico__1008170,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,open_ended,0.7372624869458377,False,True
+heico__1008170__flip,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,open_ended,0.7279147040098906,False,True
+heico__1019129,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5591025711037219,False,True
+heico__1019129__flip,0008 - Heico - Prokto - 9.avi,True,False,object_identification,fo_class,0.5595409260131419,False,True
+heico__1052318,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5221423329785466,False,True
+heico__1052318__flip,0008 - Heico - Prokto - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5188146489672363,False,True
+heico__47514,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.5212086208630353,False,True
+heico__47514__flip,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.5180511220823973,False,True
+heico__42231,0009 - Heico - Prokto - 10.avi,True,False,spatial_localization_camera,open_ended,0.7270493048708886,False,True
+heico__42231__flip,0009 - Heico - Prokto - 10.avi,True,False,spatial_localization_camera,open_ended,0.7420264119282365,False,True
+heico__42234,0009 - Heico - Prokto - 10.avi,True,False,spatial_localization_camera,open_ended,0.7428698809817433,False,True
+heico__42234__flip,0009 - Heico - Prokto - 10.avi,True,False,spatial_localization_camera,open_ended,0.7377464540768415,False,True
+heico__47545,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.4848173838108778,False,True
+heico__47545__flip,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.48402851703576744,False,True
+heico__47549,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.5682835278566927,False,True
+heico__47549__flip,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.5652996350545436,False,True
+heico__47550,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.5665788589976728,False,True
+heico__47550__flip,0009 - Heico - Prokto - 10.avi,True,False,object_identification,fo_class,0.567709559109062,False,True
+heico__1162751,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.4821142901200801,False,True
+heico__1162751__flip,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.48110589501447976,False,True
+heico__1162803,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.5287363820243627,False,True
+heico__1162803__flip,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.539379748981446,False,True
+heico__1162900,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.5255257710814476,False,True
+heico__1162900__flip,0010 - Heico - Rektum - 1.avi,True,False,object_identification,fo_class,0.5251122259069234,False,True
+heico__1151872,0010 - Heico - Rektum - 1.avi,True,False,spatial_localization_camera,open_ended,0.7410727089736611,False,True
+heico__1151872__flip,0010 - Heico - Rektum - 1.avi,True,False,spatial_localization_camera,open_ended,0.7422547300811857,False,True
+heico__1195258,0010 - Heico - Rektum - 1.avi,True,False,spatial_localization_camera,multiple_choice,0.5291353550273925,False,True
+heico__1195258__flip,0010 - Heico - Rektum - 1.avi,True,False,spatial_localization_camera,multiple_choice,0.5290217918809503,False,True
+heico__1257944,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,open_ended,0.749880522955209,False,True
+heico__1257944__flip,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,open_ended,0.742480528075248,False,True
+heico__1258075,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,open_ended,1.0066072149202228,False,True
+heico__1258075__flip,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,open_ended,0.7867184670176357,False,True
+heico__1267524,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.48389923200011253,False,True
+heico__1267524__flip,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.4764023630414158,False,True
+heico__1267526,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.4815140690188855,False,True
+heico__1267526__flip,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.4783402099274099,False,True
+heico__1296320,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5189827838912606,False,True
+heico__1296320__flip,0011 - Heico - Rektum - 2.avi,True,False,spatial_localization_camera,multiple_choice,0.5171827420126647,False,False
+heico__1267535,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.5222448369022459,False,True
+heico__1267535__flip,0011 - Heico - Rektum - 2.avi,True,False,object_identification,fo_class,0.5285834968090057,False,True
+heico__1393693,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.521195141132921,False,True
+heico__1393693__flip,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5632445840165019,False,False
+heico__1393649,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5282688648439944,False,True
+heico__1393649__flip,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5199928800575435,False,True
+heico__1434600,0012 - Heico - Rektum - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5217269791755825,False,True
+heico__1434600__flip,0012 - Heico - Rektum - 3.avi,True,False,spatial_localization_camera,multiple_choice,0.5183684141375124,False,True
+heico__1393678,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5187883879989386,False,True
+heico__1393678__flip,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5232604220509529,False,True
+heico__1393510,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5250417841598392,False,True
+heico__1393510__flip,0012 - Heico - Rektum - 3.avi,True,False,object_identification,fo_class,0.5243786310311407,False,True
+heico__1486562,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.505014861933887,False,True
+heico__1486562__flip,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5022129651624709,False,True
+heico__1480374,0013 - Heico - Rektum - 4.avi,True,False,spatial_localization_camera,open_ended,0.7282294048927724,False,True
+heico__1480374__flip,0013 - Heico - Rektum - 4.avi,True,False,spatial_localization_camera,open_ended,0.7414307820145041,False,True
+heico__1486227,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.4805776970461011,False,True
+heico__1486227__flip,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.47988523403182626,False,True
+heico__1486533,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.518443695968017,False,True
+heico__1486533__flip,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5239691368769854,False,True
+heico__1486674,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5727070500142872,False,False
+heico__1486674__flip,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5269931610673666,False,False
+heico__1486296,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5379307391121984,False,True
+heico__1486296__flip,0013 - Heico - Rektum - 4.avi,True,False,object_identification,fo_class,0.5221715050283819,False,True
+heico__1574580,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5216839979402721,False,True
+heico__1574580__flip,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.518627961864695,False,True
+heico__1574581,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5230240740347654,False,True
+heico__1574581__flip,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5290254619903862,False,True
+heico__1574331,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5296765340026468,False,True
+heico__1574331__flip,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.529230338986963,False,True
+heico__1574284,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5273037019651383,False,True
+heico__1574284__flip,0014 - Heico - Rektum - 5.avi,True,False,object_identification,fo_class,0.5257441978901625,False,True
+heico__1600337,0014 - Heico - Rektum - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.5303688978310674,False,True
+heico__1600337__flip,0014 - Heico - Rektum - 5.avi,True,False,spatial_localization_camera,multiple_choice,0.5258376318961382,False,True
+heico__1565337,0014 - Heico - Rektum - 5.avi,True,False,spatial_localization_camera,open_ended,0.772203593980521,False,True
+heico__1565337__flip,0014 - Heico - Rektum - 5.avi,True,False,spatial_localization_camera,open_ended,0.7637804241385311,False,True
+heico__1649851,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,open_ended,0.7253755070269108,False,True
+heico__1649851__flip,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,open_ended,0.7478178220335394,False,True
+heico__1656552,0015 - Heico - Rektum - 6.avi,True,False,object_identification,fo_class,0.5289270379580557,False,True
+heico__1656552__flip,0015 - Heico - Rektum - 6.avi,True,False,object_identification,fo_class,0.520003278972581,False,True
+heico__1650047,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,open_ended,0.7617163830436766,False,True
+heico__1650047__flip,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,open_ended,0.7272874431218952,False,True
+heico__1675369,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5215875140856951,False,True
+heico__1675369__flip,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5225355981383473,False,True
+heico__1675386,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5208360289689153,False,True
+heico__1675386__flip,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5497578678186983,False,True
+heico__1656340,0015 - Heico - Rektum - 6.avi,True,False,object_identification,fo_class,0.5235425010323524,False,True
+heico__1656340__flip,0015 - Heico - Rektum - 6.avi,True,False,object_identification,fo_class,0.5286544691771269,False,True
+heico__1675405,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5275028378237039,False,True
+heico__1675405__flip,0015 - Heico - Rektum - 6.avi,True,False,spatial_localization_camera,multiple_choice,0.5420855330303311,False,True
+heico__1775750,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.48286746605299413,False,True
+heico__1775750__flip,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.47919966909103096,False,True
+heico__1810658,0016 - Heico - Rektum - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5405772910453379,False,True
+heico__1810658__flip,0016 - Heico - Rektum - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5325036919675767,False,True
+heico__1775777,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.5812219148501754,False,True
+heico__1775777__flip,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.5655576440040022,False,True
+heico__1776031,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.48095096996985376,False,True
+heico__1776031__flip,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.49297655606642365,False,True
+heico__1775797,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.5820875549688935,False,True
+heico__1775797__flip,0016 - Heico - Rektum - 7.avi,True,False,object_identification,fo_class,0.5757563661318272,False,True
+heico__1810686,0016 - Heico - Rektum - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5270357730332762,False,True
+heico__1810686__flip,0016 - Heico - Rektum - 7.avi,True,False,spatial_localization_camera,multiple_choice,0.5402758410200477,False,True
+heico__1854877,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,open_ended,0.7628026299644262,False,True
+heico__1854877__flip,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,open_ended,0.7481385129503906,False,True
+heico__1861562,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5185246679466218,False,True
+heico__1861562__flip,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.4923483240418136,False,True
+heico__1855106,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,open_ended,0.7362924239132553,False,True
+heico__1855106__flip,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,open_ended,1.0237414569128305,False,True
+heico__1876821,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5177460219711065,False,True
+heico__1876821__flip,0017 - Heico - Rektum - 8.avi,True,False,spatial_localization_camera,multiple_choice,0.5202915798872709,False,True
+heico__1861480,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5619786099996418,False,True
+heico__1861480__flip,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5616065980866551,False,True
+heico__1861517,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5622311390470713,False,True
+heico__1861517__flip,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5721898928750306,False,True
+heico__1861518,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5673801070079207,False,True
+heico__1861518__flip,0017 - Heico - Rektum - 8.avi,True,False,object_identification,fo_class,0.5766718180384487,False,True
+heico__1936845,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.48061226890422404,False,True
+heico__1936845__flip,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.47997464681975543,False,True
+heico__1936969,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5212320329155773,False,True
+heico__1936969__flip,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5200062899384648,False,True
+heico__1956136,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5201762758661062,False,True
+heico__1956136__flip,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5233669059816748,False,True
+heico__1956149,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5213788368273526,False,True
+heico__1956149__flip,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.53525768709369,False,True
+heico__1936907,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5358070859219879,False,True
+heico__1936907__flip,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5247192219831049,False,True
+heico__1936935,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5209073098376393,False,True
+heico__1936935__flip,0018 - Heico - Rektum - 9.avi,True,False,object_identification,fo_class,0.5224395138211548,False,True
+heico__1956214,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5455143309663981,False,True
+heico__1956214__flip,0018 - Heico - Rektum - 9.avi,True,False,spatial_localization_camera,multiple_choice,0.5248603669460863,False,True
+heico__1070526,0019 - Heico - Rektum - 10.avi,True,False,spatial_localization_camera,open_ended,0.7293125130236149,False,True
+heico__1070526__flip,0019 - Heico - Rektum - 10.avi,True,False,spatial_localization_camera,open_ended,0.7291308660060167,False,True
+heico__1072827,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.48220424400642514,False,True
+heico__1072827__flip,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.4813780449330807,False,True
+heico__1072830,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.48482901393435895,False,True
+heico__1072830__flip,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.4834176159929484,False,True
+heico__1072837,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.4842420029453933,False,True
+heico__1072837__flip,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.4852863799314946,False,True
+heico__1072842,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.48164300387725234,False,True
+heico__1072842__flip,0019 - Heico - Rektum - 10.avi,True,False,object_identification,fo_class,0.4807800140697509,False,True
+heico__1070552,0019 - Heico - Rektum - 10.avi,True,False,spatial_localization_camera,open_ended,1.0109777259640396,False,True
+heico__1070552__flip,0019 - Heico - Rektum - 10.avi,True,False,spatial_localization_camera,open_ended,1.0182915800251067,False,True
+lapchole__70489,0001 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.8306172930169851,False,True
+lapchole__70489__flip,0001 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7614351331721991,False,True
+lapchole__109383,0002 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7573107609059662,False,True
+lapchole__109383__flip,0002 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7789754790719599,False,True
+lapchole__230349,0005 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.204118920955807,False,True
+lapchole__230349__flip,0005 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1977754910476506,False,True
+lapchole__5026584,0006 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6771747909951955,False,True
+lapchole__5026584__flip,0006 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6918411070946604,False,True
+lapchole__311189,0007 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7243453809060156,False,True
+lapchole__311189__flip,0007 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7190982198808342,False,True
+lapchole__336883,0008 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.678074202965945,False,True
+lapchole__336883__flip,0008 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6826028388459235,False,True
+lapchole__377421,0009 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.68332405295223,False,True
+lapchole__377421__flip,0009 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6873585430439562,False,True
+lapchole__439638,0010 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7203015221748501,False,True
+lapchole__439638__flip,0010 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7225049780681729,False,True
+lapchole__465683,0011 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6790663260035217,False,True
+lapchole__465683__flip,0011 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6813571050297469,False,True
+lapchole__510683,0013 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.679195080883801,False,True
+lapchole__510683__flip,0013 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6795836049132049,False,True
+lapchole__576010,0014 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.4743445620406419,False,True
+lapchole__576010__flip,0014 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.4755493928678334,False,True
+lapchole__707319,0018 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.6408833768218756,False,True
+lapchole__707319__flip,0018 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9370372109115124,False,True
+lapchole__836913,0020 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.8965073300059885,False,True
+lapchole__836913__flip,0020 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9145994258578867,False,True
+lapchole__917386,0023 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9154706159606576,False,True
+lapchole__917386__flip,0023 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9132807201240212,False,True
+lapchole__981546,0024 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7663689530454576,False,True
+lapchole__981546__flip,0024 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7656452180817723,False,True
+lapchole__1240139,0029 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6808029168751091,False,True
+lapchole__1240139__flip,0029 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6852504210546613,False,True
+lapchole__1286514,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7244518951047212,False,True
+lapchole__1286514__flip,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7263134089298546,False,True
+lapchole__1286525,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7288631370756775,False,True
+lapchole__1286525__flip,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7209946450311691,False,True
+lapchole__1286572,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7226404719986022,False,True
+lapchole__1286572__flip,0030 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7321820219513029,False,True
+lapchole__1421170,0034 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7189664361067116,False,True
+lapchole__1421170__flip,0034 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7232292720582336,False,True
+lapchole__1480427,0036 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4622323929797858,False,True
+lapchole__1480427__flip,0036 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.44837469491176307,False,False
+lapchole__1513214,0037 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7231668410822749,False,True
+lapchole__1513214__flip,0037 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7210434768348932,False,True
+lapchole__1565344,0039 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7240265600848943,False,True
+lapchole__1565344__flip,0039 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7191398811992258,False,True
+lapchole__1621697,0040 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.721103860065341,False,True
+lapchole__1621697__flip,0040 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7233093150425702,False,True
+lapchole__1654114,0041 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6860022458713502,False,True
+lapchole__1654114__flip,0041 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6798223829828203,False,True
+lapchole__1696994,0042 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7218447842169553,False,True
+lapchole__1696994__flip,0042 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7324448612052947,False,True
+lapchole__1770243,0044 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.8956977818161249,False,True
+lapchole__1770243__flip,0044 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9001289759762585,False,True
+lapchole__5026785,0049 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7322662048973143,False,True
+lapchole__5026785__flip,0049 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7223115409724414,False,True
+lapchole__1970361,0050 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1758859751280397,False,True
+lapchole__1970361__flip,0050 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1751953710336238,False,True
+lapchole__2090742,0052 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7203569430857897,False,True
+lapchole__2090742__flip,0052 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7188356511760503,False,True
+lapchole__2111560,0053 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.8941467390395701,False,True
+lapchole__2111560__flip,0053 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.269352984847501,False,False
+lapchole__2150635,0054 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6859959061257541,False,True
+lapchole__2150635__flip,0054 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6791827708948404,False,True
+lapchole__2192122,0055 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7195112139452249,False,True
+lapchole__2192122__flip,0055 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7206846137996763,False,True
+lapchole__2250061,0056 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7184878180269152,False,True
+lapchole__2250061__flip,0056 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.758359847124666,False,False
+lapchole__2337412,0057 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7786629782058299,False,True
+lapchole__2337412__flip,0057 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.76080422103405,False,True
+lapchole__2377281,0058 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6856905249878764,False,True
+lapchole__2377281__flip,0058 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6791005870327353,False,True
+lapchole__2395363,0059 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1815479011274874,False,True
+lapchole__2395363__flip,0059 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.4671671809628606,False,True
+lapchole__2606745,0062 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1717722229659557,False,True
+lapchole__2606745__flip,0062 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.16970236110501,False,True
+lapchole__2649855,0063 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4065380091778934,False,True
+lapchole__2649855__flip,0063 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.3974723960272968,False,True
+lapchole__2784747,0068 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7215570039115846,False,True
+lapchole__2784747__flip,0068 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.719489203998819,False,True
+lapchole__2879207,0071 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4669851481448859,False,True
+lapchole__2879207__flip,0071 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4624875420704484,False,True
+lapchole__3006699,0073 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7153492399957031,False,True
+lapchole__3006699__flip,0073 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7195269439835101,False,True
+lapchole__3129691,0076 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.38006102410145104,False,True
+lapchole__3129691__flip,0076 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4014569530263543,False,True
+lapchole__3258217,0081 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6873849739786237,False,True
+lapchole__3258217__flip,0081 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6798454029485583,False,True
+lapchole__3294955,0082 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.8949456259142607,False,True
+lapchole__3294955__flip,0082 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9020642819814384,False,True
+lapchole__3328894,0083 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4509071218781173,False,True
+lapchole__3328894__flip,0083 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4541501139756292,False,True
+lapchole__3328990,0083 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4568123761564493,False,True
+lapchole__3328990__flip,0083 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.46320038684643805,False,True
+lapchole__3396035,0086 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7310233719181269,False,True
+lapchole__3396035__flip,0086 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7376728118397295,False,True
+lapchole__3488161,0092 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7259163048584014,False,True
+lapchole__3488161__flip,0092 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7267479340080172,False,True
+lapchole__3579197,0094 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7459134159144014,False,True
+lapchole__3579197__flip,0094 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7339661731384695,False,True
+lapchole__3650336,0096 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.3642159360460937,False,True
+lapchole__3650336__flip,0096 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.3620674810372293,False,True
+lapchole__3709064,0097 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7326544381212443,False,True
+lapchole__3709064__flip,0097 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7435244338121265,False,True
+lapchole__3739909,0099 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7356838129926473,False,True
+lapchole__3739909__flip,0099 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7201902670785785,False,True
+lapchole__3854081,0101 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7383199238684028,False,True
+lapchole__3854081__flip,0101 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.7278619119897485,False,True
+lapchole__3882096,0102 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9196425799746066,False,True
+lapchole__3882096__flip,0102 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.2220339889172465,False,True
+lapchole__3926996,0105 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9909109929576516,False,True
+lapchole__3926996__flip,0105 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.0047109599690884,False,True
+lapchole__3969560,0106 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.6765408790670335,False,True
+lapchole__3969560__flip,0106 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.6621541120111942,False,True
+lapchole__4032678,0107 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.5257076870184392,False,True
+lapchole__4032678__flip,0107 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.5276196331251413,False,True
+lapchole__4094919,0108 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6763957440853119,False,True
+lapchole__4094919__flip,0108 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6917923558503389,False,True
+lapchole__4134591,0114 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.5226883098948747,False,True
+lapchole__4134591__flip,0114 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.2255351210478693,False,True
+lapchole__4194001,0115 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9034898011013865,False,True
+lapchole__4194001__flip,0115 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9114683480001986,False,True
+lapchole__4266027,0128 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.6019679019227624,False,True
+lapchole__4266027__flip,0128 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.6033040180336684,False,True
+lapchole__4342288,0129 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6752323638647795,False,True
+lapchole__4342288__flip,0129 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6770683070644736,False,True
+lapchole__4414496,0133 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.4606300280429423,False,True
+lapchole__4414496__flip,0133 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,multiple_choice,0.4626951301470399,False,True
+lapchole__4466163,0137 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.47215015604160726,False,True
+lapchole__4466163__flip,0137 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.4625880860257894,False,True
+lapchole__4514776,0138 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6804662749636918,False,True
+lapchole__4514776__flip,0138 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6786027399357408,False,True
+lapchole__4546462,0144 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.4883163620252162,False,True
+lapchole__4546462__flip,0144 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.199897794984281,False,True
+lapchole__4596762,0146 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.681258472846821,False,True
+lapchole__4596762__flip,0146 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6828081058338284,False,True
+lapchole__4634080,0147 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7633089781738818,False,True
+lapchole__4634080__flip,0147 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7666154319886118,False,True
+lapchole__4755570,0160 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.681816411903128,False,True
+lapchole__4755570__flip,0160 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.6828056359663606,False,True
+lapchole__4774510,0167 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.8973288489505649,False,True
+lapchole__4774510__flip,0167 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.914110359037295,False,True
+lapchole__4817478,0169 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7206333219073713,False,True
+lapchole__4817478__flip,0169 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7298617209307849,False,True
+lapchole__4851551,0180 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7468996299430728,False,True
+lapchole__4851551__flip,0180 - Laparoscopic Cholecystectomy.mp4,False,False,object_identification,fo_class,0.7232998050749302,False,True
+lapchole__4888353,0182 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9462391389533877,False,True
+lapchole__4888353__flip,0182 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,0.9024008938577026,False,True
+lapchole__5001049,0184 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1989625620190054,False,True
+lapchole__5001049__flip,0184 - Laparoscopic Cholecystectomy.mp4,False,False,spatial_localization_camera,open_ended,1.1956962100230157,False,True
