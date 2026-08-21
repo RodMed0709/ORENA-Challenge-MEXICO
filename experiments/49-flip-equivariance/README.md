@@ -4,7 +4,10 @@
 |---|---:|---:|---|
 | `49_flip_audit_heldout8.ipynb` | 1 (audit) | transformable rows | **175 / 1,283 (13.6%)** — done |
 | `02_flip_pair_probe.ipynb` | 2 (paired GPU probe) | accuracy delta + literal equivariance | accuracy delta **unreadable** (−0.0076, below `RULES §S4`'s 0.01 floor); literal equivariance **87.2%** (n=78) — done |
-| `03_train_flip_probe.ipynb` | 3 (memorised-data probe) | same two reads, on `train.parquet` | **built, not launched** — needs a pod |
+| `03_train_flip_probe.ipynb` | 3 (memorised-data probe) | same two reads, on `train.parquet` | accuracy delta **significant** (−0.0467, CI [−0.088,−0.013]); literal equivariance **87.1%** (n=93) — done |
+
+**Verdict: [[flip-equivariance-holds-small-residual-cost]] — MEASURED.** See the closing
+section at the bottom of this file, or the decision note for the indexed version.
 
 ## Objective
 
@@ -200,3 +203,43 @@ boundary — no GPU, no video files, no `torch` with CUDA on this machine.
 
 Read alongside step 2's held-out numbers once scored: 87.2% literal equivariance (n=78),
 accuracy delta unreadable — same two metrics, same checkpoint, different population.
+
+**Scored 2026-08-21.** Accuracy delta flip vs original: **−0.0467, CI [−0.088, −0.013],
+excludes zero** — unlike held-out (n=8 videos never had the power to see an effect this
+size), n=92 videos does. Checked live rather than assumed: per-rule breakdown
+(`RESULTS_train_flip_accuracy_by_rule.csv`) shows the drop is **roughly uniform across all
+three rules** (−4.3 to −6.4pts), not concentrated in `fixed_quadrant_class` as the
+question-changes-under-flip hypothesis predicted. Literal equivariance: **87.1% (n=93)** —
+essentially identical to held-out's 87.2%.
+
+**A second live check found the literal-equivariance metric itself overstates the true error
+rate for one rule.** Cross-referenced literal-equivariance failures against judge
+correctness (`RESULTS_train_flip_equivariance_vs_correctness.csv`, replicated on held-out via
+`RESULTS_flip_pair_equivariance_vs_correctness.csv`): **80% (train) / 87.5% (held-out)** of
+`all_object_positions`' literal-check failures are still judged CORRECT — the strict
+string-match check penalises benign rephrasing on the open-ended rule, not real directional
+error. `object_center_quadrant` (multiple-choice, no format slack) has almost no such gap.
+**True error rate under flip, corrected: ~2.5–4.3% on both rules, both populations.**
+
+## Verdict — [[flip-equivariance-holds-small-residual-cost]], MEASURED, 2026-08-21
+
+**The shipped checkpoint tracks a transformation it was never trained on, at a small real
+cost.** Never trained on a single flipped image, yet the true error rate under a horizontal
+flip is consistently ~2.5–4.3% — on data it's never seen and on data it was trained to
+answer alike. That's genuine evidence against "the position answer is a purely memorised
+prior." At the same time, the cost is real, not zero: a ~4.7-point accuracy drop that only
+became statistically visible once measured with enough video-level power (92 videos, not 8).
+
+**Does not license a flip-augmentation training run.** Converges with
+[[flip-narrows-shortcut-not-a-win]] — an independent measurement on the *older*
+rung-21-arm-A checkpoint, where training *with* flip augmentation was NOT a win on headline
+accuracy and only narrowed a separate, narrower shortcut metric. Two probes, two
+checkpoints, same direction: the residual gap flip augmentation would need to close is
+small, on a model that already generalises to the transformation reasonably well.
+
+**What would change this verdict:** the ~4.7pt cost measured on the full transformable
+population rather than a ~200-row sample; the cost concentrating in a subgroup that matters
+disproportionately for the leaderboard score (OOD-heavy, or a high-weight capability); or a
+much larger position-question share of the eval set than the measured 13.6% this rung's
+scope was bounded by. None of these were measured here — see the decision note for the full
+writeup and sources.
