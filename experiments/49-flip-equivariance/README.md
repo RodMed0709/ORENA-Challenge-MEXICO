@@ -4,6 +4,7 @@
 |---|---:|---:|---|
 | `49_flip_audit_heldout8.ipynb` | 1 (audit) | transformable rows | **175 / 1,283 (13.6%)** — done |
 | `02_flip_pair_probe.ipynb` | 2 (paired GPU probe) | accuracy delta + literal equivariance | accuracy delta **unreadable** (−0.0076, below `RULES §S4`'s 0.01 floor); literal equivariance **87.2%** (n=78) — done |
+| `03_train_flip_probe.ipynb` | 3 (memorised-data probe) | same two reads, on `train.parquet` | **built, not launched** — needs a pod |
 
 ## Objective
 
@@ -153,3 +154,49 @@ construct measured on both checkpoints, which this rung does not do.
 Full results: `RESULTS_flip_pair_scored.csv` (per-row, judge-scored),
 `RESULTS_flip_pair_paired_ci.csv` (read 1), `RESULTS_flip_pair_equivariance.csv` (read 2,
 row-level), `RESULTS_flip_pair_summary.json` (headline numbers).
+
+## Step 3 — does equivariance hold on MEMORISED data? (`03_train_flip_probe.ipynb`) — built, not launched
+
+Step 2 measured the held-out (never-seen-in-any-form) case. This asks the sharper version
+of the same question on `train.parquet` — **92 videos, real training supervision** (rung
+18's base corpus, before rung 42's promoted-video extras). A row that stays equivariant
+under a flip it was never shown, despite being data the model was trained to answer, is
+stronger evidence against "it's leaning on memorisation" than the held-out result alone.
+Framed as a **ceiling check, not a mechanism claim** — a non-equivariant row here is
+ambiguous by construction (reciting the memorised answer vs. simply being wrong the same
+way it would be on any hard row); this notebook alone can't tell those apart.
+
+**Scope, agreed before building:** not the full 2,170 transformable train rows — a
+~200-row sample, **stratified by VIDEO only**, every one of the 92 videos represented at
+least once. Checked first, not assumed: stratifying by `(video, rule)` instead floors at
+**261 rows minimum** (92 videos × up to 3 rules, every non-empty cell keeps ≥1) — already
+past target. Video-only stratification floors at 92 and lands at 202. This does **not**
+force rule-mix proportionality the way `(video, rule)` would; `_tools/video_subsample.py`
+reports the drift rather than assuming it away.
+
+**Built on `src/frame/subsample.py`'s existing machinery** (`freeze`/`load`, its manifest +
+sha256-sidecar pattern — same discipline every other subsample in this repo uses) with one
+new piece, `_tools/video_subsample.py`'s `choose_by_video`, since `subsample.choose`'s own
+`(video, answer_format)` key is the thing that floors too high here. Reuses
+`_tools/flip_pair_runner.py` (`merge_adapter`, `materialize_flip_pairs`, `answer_paired`)
+unchanged from step 2 — same checkpoint, same merged-model cache path on purpose (skips
+re-merging a 17GB checkpoint step 2 already produced), same one-session-per-condition
+discipline, same canonical `Evaluator` + real-judge scoring path.
+
+**Verified locally before launch** — further than step 2's pre-launch check, since the SDK
+(`focus`) turned out to be importable here with `torch`/`transformers` (CPU-only) added to
+`data_study`: not just syntax, but the REAL `load_frame_items` → `flip_audit.audit_dataframe`
+→ `choose_by_video` → `freeze_manifest` → reload-and-verify pipeline, end to end, against
+the actual local parquets (via a symlinked directory matching the pod's nested layout).
+**Caught and fixed a real bug this way** — `report_drift`'s first version merged two frames
+that both carried an `answer_format` column, which pandas silently resolves to `_x`/`_y`
+suffixes instead of raising, so the drift report would have crashed on the pod after the
+expensive part (merge + inference + judge-scoring) was already paid for. Fixed to read the
+column directly off `transformable` (which already carries it from `flip_audit`'s own
+output), no merge needed. Confirmed with real data: **202 rows, 92 of 92 videos**, manifest
+round-trips through its sha256, SMOKE-path (8 rows) resolves and cross-checks question text
+against the audit. Still not verified: anything past the merge/frame-fetch/inference/judge
+boundary — no GPU, no video files, no `torch` with CUDA on this machine.
+
+Read alongside step 2's held-out numbers once scored: 87.2% literal equivariance (n=78),
+accuracy delta unreadable — same two metrics, same checkpoint, different population.
