@@ -43,6 +43,21 @@
   shortcut** (matching ["Your other Left!"](https://arxiv.org/abs/2508.00549), MICCAI 2025) and
   the augmentation **significantly narrows it** (paired interaction CI excludes zero), just not
   enough to win on raw accuracy at this dose. `p=0.50` NOT pursued as a blind scale-up.
+- [[flip-equivariance-holds-small-residual-cost]] — 🟢 **rung 49: the SHIPPED checkpoint (rung 42
+  ep4) tracks a horizontal flip it was never trained on, at a small real cost.** Two populations,
+  same paired same-session protocol, same canonical Evaluator+judge: held-out (175 rows, 8
+  videos) and the model's own `train.parquet` (202 rows, all 92 videos). 🔴 **Paired accuracy
+  delta is unreadable at n=8 videos (−0.0076) and SIGNIFICANT at n=92 (−0.0467, CI
+  [−0.088,−0.013])** — the held-out CI never had the power to see an effect this size, not
+  because it wasn't there. 🔑 **Literal answer equivariance is flat across populations (87.2%
+  vs 87.1%) — but the metric itself overstates the true error rate** for the open-ended rule:
+  cross-checked against judge correctness, most literal-equivariance "failures" on
+  `all_object_positions` are still judged CORRECT (80-87.5%, replicated both populations) —
+  benign rephrasing, not directional confusion. `object_center_quadrant` (multiple-choice, no
+  format slack) has almost no such gap. **True error rate under flip, corrected: ~2.5-4.3% on
+  both rules, both populations.** ⇒ **Does NOT license a flip-augmentation run** — converges
+  with [[flip-narrows-shortcut-not-a-win]]'s independent null on the older checkpoint: two
+  probes, two checkpoints, same direction.
 - [[multimodal-optimizer-is-an-identity]] — 🟢 **Step 3 is answered without a GPU.** At `vit_lr == learning_rate` and **0 orphaned params** (A2: 720 = 216 vit + 0 aligner + 504 llm), `MultimodalOptimizerCallback` builds a **mathematically identical** optimizer to the default — same `optimizer_cls`, same kwargs, same weight-decay split, no scheduler. ⇒ `A3_vitlr`'s **−0.0278 is the `vit_lr` change alone**; the arm is single-variable. 🔻 **RETRACTS "`--vit_lr` is a silent no-op without `--optimizer multimodal`"** — `swift/trainers/arguments.py:249-250` auto-selects it, so you **cannot** set `vit_lr` without switching optimizer; the confound was structural. 🔴 Does **not** restore *"the tower wants the high LR"* — three audit objections survive; [[vit-lora-partial]] stays OPEN, rung 27 stays CLOSED-UNRUN.
 - [[ms-swift-cannot-train-gen35]] — 🔴 **MEASURED: ms-swift 4.4.1/4.4.2 cannot fine-tune ANY gen-3.5/3.6 model with our recipe.** They register `qwen3_5` as a model type but have **no `MODEL_ARCH_MAPPING` entry**, which is the table supplying `vision_tower`/`aligner`/`language_model` — so `--freeze_vit false` (our recipe since rung 06) has nothing to point at. Control `qwen3_vl` returns its three prefixes; the subject returns none. Not transformers (5.5–5.15 all ship `qwen3_5`), not the `<5.13.0` cap (5.9–5.12 satisfies both), not size — **every** gen-3.5/3.6 config is `model_type=qwen3_5`. Cost: ~1 h, zero training GPU.
 - [[unsloth-is-the-route-to-gen35]] — 🟡 **the Unsloth NO-GO is AMENDED, not reversed** (raised by legokna, proposed three times before). *"Lagging Qwen3-VL multimodal support"* is **FALSE** — Unsloth documents SFT + vision RL up to 32B/235B and is the only known trainer for gen-3.5/3.6 with the vision tower; single-GPU is mitigated. 🔑 **The reproducibility leg STANDS and is now binding**: rungs 02–35 are ms-swift artifacts, so an Unsloth arm confounds framework — which **binds on attribution, not on a candidate search**. Six-stage pipeline smoke passed on `Qwen3.5-2B`. Carries the operational traps: `import unsloth` first, their documented install is `uv … --torch-backend=auto` in a **venv** ("do NOT use with Conda"), FA2 off, default image size 512 vs our 1280×720, and 4-bit training discouraged — which contradicts the CONSTITUTION's QLoRA plan for the 32B.
