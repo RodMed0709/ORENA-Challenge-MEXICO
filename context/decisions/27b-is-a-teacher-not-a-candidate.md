@@ -1,7 +1,8 @@
 ---
 question: Rung 45 asked whether the 27B gains from rung 42's merged corpus. It does not — it is harmed. So does the 27B line continue as a model we might SHIP?
 verdict: NO as a shipped candidate, YES as a teacher. The merged corpus HARMS the 27B (paired ALL_ID -0.1366 [-0.1906, -0.0788], four cells vetoed including the pre-declared veto cell), while the SAME corpus gained the 8B +0.0402. And on the clean 1,283 the 8B leads every 27B arm we have by a margin larger than every confound combined. 🔴 The closure is on TIME AND RESOURCES, not on proof — the 27B has NEVER been tuned for its own size, so "the 27B backbone loses" is STILL NOT ESTABLISHED
-status: MEASURED (data axis) + TEAM CALL (the stop)
+status: MEASURED
+status_note: 'was `MEASURED (data axis) + TEAM CALL (the stop)`, which the indexer rejects — it accepts one bare value. Normalised 2026-08-22 so `MEASURED.md` can be rebuilt; the note''s content and its two-part reading are unchanged, and the TEAM CALL half is stated in the verdict above.'
 caveat: the backbone question is UNANSWERED and this note must not be cited as answering it — see [[gen36-fails-the-8b-recipe-not-the-backbone-test]]. Every 27B arm ever run inherited hyperparameters swept on an 8B
 date: 2026-08-17
 measured_in: experiments/45-gen36-data-and-reg/ — RESULTS.csv, RESULTS_paired_ci.csv, RESULTS_class_f1.csv, RESULTS_bridge_ci.csv, RESULTS_bridge_flips.csv · experiments/19-external-count/RESULTS_19a_*.json
