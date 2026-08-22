@@ -254,6 +254,16 @@ def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
             return False
         return CLIP in r.pred_set and CLIP not in r.gold_set
 
+    def _multi(r):
+        """The gold names MORE THAN ONE class. Not a Clip story at all.
+
+        Accuracy against gold set size collapses 0.801 / 0.616 / 0.175 / 0.000 for 1/2/3/4
+        classes, and across videos accuracy correlates -0.69 with the mean gold size. Under
+        exact-set scoring a multi-class gold is a conjunction the model has to get entirely
+        right, and this prices that as a lever beside the attractor rather than inside it.
+        """
+        return r.gold_set is not None and len(r.gold_set) > 1
+
     out = {
         "bucket_mean_before": round(float(base["bucket_mean"]), 4),
         "acc_ID_before": round(float(base["acc_ID"]), 4),
@@ -261,7 +271,8 @@ def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
     }
     for tag, pred in (("loose", _inv), ("mid", _mid), ("strict", _strict),
                       ("declip", _declip), ("addclip", _addclip),
-                      ("clip_fp_any", _clip_fp_any)):
+                      ("clip_fp_any", _clip_fp_any),
+                      ("multiclass_gold", _multi)):
         ids = set(err[err.apply(pred, axis=1)].qID) if len(err) else set()
         fixed = results_df.copy()
         fixed.loc[fixed.qID.isin(ids), "correct"] = True

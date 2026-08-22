@@ -330,3 +330,71 @@ remaining data route"*. That reading stands on this rung's own axis — **but 49
 is wrong**: on the data we are actually scored on, the attractor is 0.14–0.25 and lives in two
 videos, not 0.86 across a corpus. **Do not fund the negative-supervision arm on this result.**
 The open question is 49a's: *what is different about `Sigma-5`*.
+
+---
+
+# 49d — the bigger lever is NOT the attractor. It is the multi-class gold.
+
+Zero GPU, same six arms. Found while testing an alternative explanation for `Sigma-5`, and it
+outgrew it.
+
+## Exact-set scoring collapses on conjunctions
+
+Accuracy against the number of classes in the gold, rung 19b ep4, all 38 videos:
+
+| classes in gold | n | accuracy |
+|---:|---:|---:|
+| 1 | 2065 | **0.801** |
+| 2 | 547 | 0.616 |
+| 3 | 57 | **0.175** |
+| 4 | 6 | **0.000** |
+
+And across videos, **accuracy correlates −0.694 with the mean gold set size** (−0.646 with the
+fraction of multi-class golds). Most of what makes a video hard is how often its gold names more
+than one thing. `fo_class` is scored by exact set equality, so a two-class gold is a conjunction
+the model must get entirely right, and a three-class gold is very nearly a guaranteed zero.
+
+## It is worth MORE than the attractor, on every arm
+
+| arm | multi-class gold | rows | Clip attractor | rows |
+|---|---:|---:|---:|---:|
+| 19b ep3 | **+0.0458** | 287 | +0.0442 | 335 |
+| **19b ep4** | **+0.0421** | 263 | +0.0387 | 296 |
+| 19b ep5 | **+0.0425** | 262 | +0.0270 | 202 |
+| 47 ep3 | **+0.0470** | 298 | +0.0325 | 253 |
+| 47 ep4 | **+0.0409** | 255 | +0.0360 | 268 |
+| 47 ep5 | **+0.0403** | 251 | +0.0308 | 230 |
+
+More headline from fewer rows, in six of six.
+
+## 🔑 And it is 3× less concentrated — which is what actually decides it
+
+| error class | n | videos touched | videos holding HALF |
+|---|---:|---:|---:|
+| Clip false positives | 296 | 29 / 38 | **2** |
+| **multi-class gold errors** | **263** | **32 / 38** | **6** |
+
+Both peak on `Sigma-5`, but the multi-class failure is spread: **32 of 38 videos, half of it
+across six**, and present in **both** `lapchole` and `heico` — so it is not a domain-shift
+artefact the way the attractor is. Under `RULES` §13's video clustering, six clusters is a
+claim that can survive; two is the shape rung 47's corpus effect died in.
+
+⇒ 🎯 **On size, on spread and on robustness, the multi-class gold beats the Clip attractor.**
+The front is right and the target inside it was wrong.
+
+## What it probably IS, and why that matters
+
+📌 This is very likely **[[naming-equals-counting]] seen in the naming format**. The campaign
+established that asked to *count* or asked to *name*, the model fails the same multiplicity;
+here the `fo_class` accuracy curve against gold size (0.801 → 0.616 → 0.175 → 0.000) has the
+same shape as the `number` curve against gold value (0.886 → 0.507 → 0.200 → 0.161 → 0.056).
+**`fo_class` and `number` may not be two fronts.** If they are one, a lever on set enumeration
+pays in both, which no lever considered so far has done.
+
+⚠️ **Not yet established.** The two curves being the same shape is suggestive, not a mechanism.
+The pre-registered test is whether the per-question errors CO-OCCUR — do the frames whose
+`fo_class` conjunction fails also fail their `number` question? That is zero GPU on the data
+already here, and it is the next thing to run.
+
+⚠️ And the ceiling caveat stands: +0.0421 is an ORACLE that assumes fixing conjunctions costs
+nothing on the 2,065 single-class rows, which currently score 0.801.
