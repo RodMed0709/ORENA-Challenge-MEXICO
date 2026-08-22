@@ -1,0 +1,23 @@
+{
+ "videos": 13,
+ "spec_frac": {
+  "mean_delta": -0.005,
+  "videos_positive": 5,
+  "sign_test_p_two_sided": 0.5811
+ },
+ "blob_count": {
+  "mean_delta": 17.72818,
+  "videos_positive": 10,
+  "sign_test_p_two_sided": 0.0923
+ },
+ "mean_v": {
+  "mean_delta": 0.92787,
+  "videos_positive": 10,
+  "sign_test_p_two_sided": 0.0923
+ },
+ "sat_low": {
+  "mean_delta": 0.00523,
+  "videos_positive": 5,
+  "sign_test_p_two_sided": 0.5811
+ }
+}

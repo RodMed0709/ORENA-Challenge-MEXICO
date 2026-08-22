@@ -1,0 +1,14 @@
+video,dataset,n_fp,n_ok,d_spec_frac,d_blob_count,d_mean_v,d_sat_low
+0017 - Laparoscopic Cholecystectomy.mp4,lapchole,6,14,-0.02415,70.83333,2.54762,-0.09009
+0019 - Laparoscopic Cholecystectomy.mp4,lapchole,6,27,-0.02485,26.72222,3.51349,-0.01822
+0020 - Heico - Sigma - 1.avi,heico,65,155,0.00076,22.30074,0.17569,-0.01825
+0022 - Heico - Sigma - 3.avi,heico,13,77,0.00689,16.51748,1.64543,-0.00663
+0023 - Heico - Sigma - 4.avi,heico,14,52,0.01825,-4.3022,0.27421,-0.01126
+0024 - Heico - Sigma - 5.avi,heico,91,74,-0.00975,21.70359,1.89434,-0.02426
+0025 - Heico - Sigma - 6.avi,heico,9,92,-0.0004,9.74034,-1.60706,0.02313
+0026 - Heico - Sigma - 7.avi,heico,10,90,0.01433,-11.75556,-7.35055,0.01861
+0027 - Heico - Sigma - 8.avi,heico,6,112,-0.02281,14.92857,7.23291,-0.07035
+0027 - Laparoscopic Cholecystectomy.mp4,lapchole,8,17,-0.03551,61.81618,6.66209,0.25658
+0028 - Heico - Sigma - 9.avi,heico,28,90,-0.00099,-2.48333,1.70085,0.00322
+0029 - Heico - Sigma - 10.avi,heico,8,62,0.01428,2.20968,0.36024,-0.00349
+0158 - Laparoscopic Cholecystectomy.mp4,lapchole,6,17,-0.0011,2.23529,-4.98691,0.00895

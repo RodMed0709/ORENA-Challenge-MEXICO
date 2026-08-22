@@ -221,3 +221,43 @@ question, costs nothing, and it is the one thing that would tell a data lever wh
 The rate is **4× higher when the question asks for a COMBINATION than when it presupposes a
 single object.** Being asked for a set is itself part of the trigger — consistent with `Clip`
 being the default filler once the model has decided to name more than one thing.
+
+---
+
+# 49b — the specular / metallic hypothesis is a FAITHFUL NEGATIVE
+
+Three `Sigma-5` false positives were opened and looked at first. Two things stood out, neither
+a clip: one frame is dominated by a large metallic instrument shaft — **sigmoid resection uses
+staplers and our training set is cholecystectomy-heavy, so the model has barely seen one** —
+and two are covered in small bright specular highlights on wet, bloody tissue. A placed clip is
+*a small bright metallic blob*, so both reduce to one shortcut: **brightness read as `Clip`**.
+
+Measured on 2,676 scored frames, **within video** (pooled would only restate that Sigma videos
+are bloodier — [[pooled-screening-manufactures-winners]]), on clip-free rows only, 13 videos
+with ≥5 frames on each side. Exact two-sided sign test over videos.
+
+| statistic | mean Δ (FP − non-FP) | videos positive | sign-test p |
+|---|---:|---:|---:|
+| `spec_frac` — specular highlight mass | **−0.005** | 5 / 13 | **0.58** |
+| `sat_low` — low-saturation (grey/metal) pixels | +0.005 | 5 / 13 | **0.58** |
+| `blob_count` — small bright clip-shaped blobs | +17.7 | 10 / 13 | 0.092 |
+| `mean_v` — overall brightness | +0.93 | 10 / 13 | 0.092 |
+
+🔴 **The hypothesis as stated is refuted.** Specular mass and greyness are exactly null — 5 of
+13, which is the coin. Whatever draws the spurious `Clip`, it is **not** highlight density and
+it is **not** "the frame looks metallic".
+
+🟡 What survives is weaker and is one signal, not two: frames that draw a spurious `Clip` carry
+more small bright blobs and are slightly brighter, in 10 of 13 videos. `blob_count` and `mean_v`
+are correlated by construction, so this is a single hint at **p = 0.092 over 13 clusters** — it
+does not clear a sign test and must not be quoted as a finding.
+
+⇒ 📌 **This closes the cheap input-side idea before it was built.** Desaturating, despeckling or
+suppressing highlights has no measured target here, which is consistent with rung 12 having
+already found the transform bank is not a lever. The eyeball was wrong and the measurement is
+what says so — three frames are a hypothesis generator, never evidence.
+
+⚠️ **The stapler observation is NOT tested by this.** `sat_low` asks whether the frame is grey
+overall, which a single instrument in one corner barely moves. *"Sigma contains an instrument
+class our training set does not"* stays open, and it is a better-shaped hypothesis than
+brightness because it explains the **per-video concentration** that brightness cannot.
