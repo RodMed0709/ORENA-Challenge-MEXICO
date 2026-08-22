@@ -143,6 +143,50 @@ def per_class(d: pd.DataFrame, valid: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def concentration(d: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    """Where the spurious `Clip` lives — by video and by question template.
+
+    A defect spread evenly over 38 videos and one concentrated in two are the same number
+    and completely different problems. The first is a class prior and a global suppression
+    lever is the right shape; the second is a per-video collapse, a global lever would pay
+    36 videos to fix 2, and — decisively — an effect carried by two clusters cannot survive
+    the video-clustered CI the final ranking uses (`RULES` §13).
+
+    Templates are keyed on the question's first seven words, which is coarse but stable;
+    `metrics.template_of` exists for the exact form and is deliberately not used here
+    because this is a locator, not a scored quantity.
+    """
+    d = d[d.gold_set.notna() & d.pred_set.notna()].copy()
+    d["gold_clip"] = d.gold_set.map(lambda s: CLIP in s)
+    d["fp"] = (~d.gold_clip) & d.pred_set.map(lambda s: CLIP in s)
+
+    by_video = (d.groupby(["dataset", "video"])
+                .agg(n=("fp", "size"), fp=("fp", "sum"), n_no_clip=("gold_clip", lambda s: (~s).sum()))
+                .reset_index())
+    by_video["fp_rate"] = (by_video.fp / by_video.n_no_clip).round(4)
+    by_video = by_video.sort_values("fp", ascending=False).reset_index(drop=True)
+
+    d["template"] = d.question.map(lambda q: " ".join(str(q).split()[:7]))
+    by_tmpl = (d.groupby("template")
+               .agg(n=("fp", "size"), fp=("fp", "sum"), n_no_clip=("gold_clip", lambda s: (~s).sum()))
+               .reset_index())
+    by_tmpl["fp_rate"] = (by_tmpl.fp / by_tmpl.n_no_clip).round(4)
+    by_tmpl = by_tmpl.sort_values("fp", ascending=False).reset_index(drop=True)
+
+    total = int(d.fp.sum())
+    cum, n_half = 0, None
+    for i, row in by_video.iterrows():
+        cum += row.fp
+        if n_half is None and cum >= total / 2:
+            n_half = i + 1
+    return by_video, by_tmpl, {
+        "total_clip_fp": total, "n_videos": int(d.video.nunique()),
+        "videos_holding_half": n_half,
+        "top_video": str(by_video.iloc[0].video) if len(by_video) else None,
+        "top_video_fp": int(by_video.iloc[0].fp) if len(by_video) else None,
+    }
+
+
 def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
     """`bucket_mean` if the Clip/Sponge errors were correct — through frame.metrics.
 
@@ -231,7 +275,7 @@ def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
 
 def run(arms: dict, out: Path, metrics, gold=None) -> None:
     valid = _fo(metrics)
-    tax, ramps, heads, conf, pcs = [], [], {}, [], []
+    tax, ramps, heads, conf, pcs, cvs, cts = [], [], {}, [], [], [], []
     for name, insp in arms.items():
         raw = pd.read_csv(insp)
         raw["correct"] = raw.correct.astype(str).str.lower().isin(("true", "1", "yes"))
@@ -242,10 +286,12 @@ def run(arms: dict, out: Path, metrics, gold=None) -> None:
             if len(sub):
                 tax.append({"arm": name, "slice": dist, **taxonomy(sub)})
         pcs.append(per_class(fo, valid).assign(arm=name))
+        bv, bt, csum = concentration(fo)
+        cvs.append(bv.assign(arm=name)); cts.append(bt.assign(arm=name))
         bands, summ = clip_fp_ramp(fo)
         if len(bands):
             ramps.append(bands.assign(arm=name))
-        heads[name] = {"clip_fp": summ}
+        heads[name] = {"clip_fp": summ, "concentration": csum}
         s = fo[fo.gold_set.map(lambda x: bool(x) and len(x) == 1)]
         for g, grp in s.groupby(s.gold_set.map(lambda x: next(iter(x)))):
             counts = grp.pred_set.map(
@@ -268,6 +314,10 @@ def run(arms: dict, out: Path, metrics, gold=None) -> None:
     pd.DataFrame(tax).to_csv(out / "RESULTS_fo_class_anatomy.csv", index=False)
     pd.concat(pcs, ignore_index=True).to_csv(
         out / "RESULTS_fo_class_per_class.csv", index=False)
+    pd.concat(cvs, ignore_index=True).to_csv(
+        out / "RESULTS_clip_fp_by_video.csv", index=False)
+    pd.concat(cts, ignore_index=True).to_csv(
+        out / "RESULTS_clip_fp_by_template.csv", index=False)
     if ramps:
         pd.concat(ramps, ignore_index=True).to_csv(
             out / "RESULTS_clip_fp_ramp_ours.csv", index=False)

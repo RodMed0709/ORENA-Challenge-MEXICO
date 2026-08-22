@@ -170,3 +170,54 @@ the exact error rung 42 made against rung 47 ([[rung42-gain-was-epochs-not-corpu
 
 ⚠️ And ep5 shows the price: `Clip` recall falls 0.845 → 0.789 as its precision rises. The
 attractor is not free to switch off. **The lever is calibration, not deletion.**
+
+## 🔴 …but the attractor is TWO VIDEOS, and that is what decides the branch
+
+`RESULTS_clip_fp_by_video.csv`. Where the spurious `Clip` actually lives, all six arms:
+
+| arm | total Clip FP | videos holding HALF of it | worst video | its FP |
+|---|---:|---:|---|---:|
+| 19b ep3 | 335 | **3** of 38 | `0024 - Heico - Sigma - 5` | 87 |
+| **19b ep4** | 296 | **2** of 38 | `0024 - Heico - Sigma - 5` | **91** |
+| 19b ep5 | 202 | **2** of 38 | `0024 - Heico - Sigma - 5` | 64 |
+| 47 ep3 | 253 | **2** of 38 | `0024 - Heico - Sigma - 5` | 69 |
+| 47 ep4 | 268 | **3** of 38 | `0024 - Heico - Sigma - 5` | 76 |
+| 47 ep5 | 230 | **3** of 38 | `0024 - Heico - Sigma - 5` | 62 |
+
+**The same video is the worst offender in every arm**, across two corpora and three epochs
+each. On `Sigma-5` the model names a clip on **55.2 %** of the frames whose gold has none
+(91 of 165); on `Sigma-1`, 29.5 %. Every video in the top eight is `heico`/**Sigma** — the
+procedure with **zero training videos**.
+
+🔴 **This reshapes the lever, and it is the finding that should govern the branch:**
+
+1. **It is a per-video collapse, not a class prior.** A global `Clip`-suppression arm would
+   pay 36 videos to fix 2. The calibration table above is real, but the 127 net `Clip`
+   predictions are not spread over the eval — they are mostly two rooms.
+2. **It cannot survive the instrument that decides the ranking.** `RULES` §13 clusters on
+   VIDEO and the final ranking is Copeland with pairwise significance. An effect carried by
+   2–3 clusters of 38 has an effective n of 2–3. **The +0.0387 headroom is real as accuracy
+   and fragile as a claim** — precisely the shape rung 47's corpus effect had when it failed
+   its CI.
+3. **It is the Sigma domain shift again, seen from the emission side.** Not a new defect —
+   the same one, now with a per-video magnitude and a reproducible worst case to work on.
+
+⇒ 🎯 **Before any GPU is spent on this front, the question to answer is not "how do we
+suppress Clip" but "what is different about `Sigma-5`".** That is a frames-on-screen
+question, costs nothing, and it is the one thing that would tell a data lever what to buy.
+
+## By template — the compound questions are the exposed ones
+
+`RESULTS_clip_fp_by_template.csv`, rung 19b ep4, FP rate over rows whose gold has no Clip:
+
+| question opens | FP | rows w/o Clip | rate |
+|---|---:|---:|---:|
+| *"Which combination of foreign object classes is…"* | 57 | 139 | **0.410** |
+| *"Which of the visible foreign objects has…"* | 31 | 123 | 0.252 |
+| *"List all foreign objects that are visible…"* | 121 | 552 | 0.219 |
+| *"What class is the foreign object located…"* | 36 | 301 | 0.120 |
+| *"There is one surgical foreign object visible…"* | 51 | 471 | 0.108 |
+
+The rate is **4× higher when the question asks for a COMBINATION than when it presupposes a
+single object.** Being asked for a set is itself part of the trigger — consistent with `Clip`
+being the default filler once the model has decided to name more than one thing.

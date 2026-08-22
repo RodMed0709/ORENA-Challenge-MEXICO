@@ -8,6 +8,13 @@
    "fp_last_decile": 0.2,
    "recall_when_present": 0.8411
   },
+  "concentration": {
+   "total_clip_fp": 335,
+   "n_videos": 38,
+   "videos_holding_half": 3,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 87
+  },
   "headroom": {
    "bucket_mean_before": 0.6321,
    "acc_ID_before": 0.6115,
@@ -40,6 +47,13 @@
    "fp_first_decile": 0.2727,
    "fp_last_decile": 0.2333,
    "recall_when_present": 0.8448
+  },
+  "concentration": {
+   "total_clip_fp": 296,
+   "n_videos": 38,
+   "videos_holding_half": 2,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 91
   },
   "headroom": {
    "bucket_mean_before": 0.6479,
@@ -74,6 +88,13 @@
    "fp_last_decile": 0.1,
    "recall_when_present": 0.7888
   },
+  "concentration": {
+   "total_clip_fp": 202,
+   "n_videos": 38,
+   "videos_holding_half": 2,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 64
+  },
   "headroom": {
    "bucket_mean_before": 0.6557,
    "acc_ID_before": 0.635,
@@ -106,6 +127,13 @@
    "fp_first_decile": 0.0,
    "fp_last_decile": 0.1,
    "recall_when_present": 0.7686
+  },
+  "concentration": {
+   "total_clip_fp": 253,
+   "n_videos": 38,
+   "videos_holding_half": 2,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 69
   },
   "headroom": {
    "bucket_mean_before": 0.6249,
@@ -140,6 +168,13 @@
    "fp_last_decile": 0.1667,
    "recall_when_present": 0.8237
   },
+  "concentration": {
+   "total_clip_fp": 268,
+   "n_videos": 38,
+   "videos_holding_half": 3,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 76
+  },
   "headroom": {
    "bucket_mean_before": 0.6468,
    "acc_ID_before": 0.6283,
@@ -172,6 +207,13 @@
    "fp_first_decile": 0.0,
    "fp_last_decile": 0.1333,
    "recall_when_present": 0.8017
+  },
+  "concentration": {
+   "total_clip_fp": 230,
+   "n_videos": 38,
+   "videos_holding_half": 3,
+   "top_video": "0024 - Heico - Sigma - 5.avi",
+   "top_video_fp": 62
   },
   "headroom": {
    "bucket_mean_before": 0.6498,
