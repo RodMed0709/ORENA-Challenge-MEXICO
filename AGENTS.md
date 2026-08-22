@@ -25,7 +25,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 | Component | Pin | Why this exact floor |
 |---|---|---|
 | Python | `>=3.10,<3.13` | SDK requires ≥3.10; vLLM 0.11 wheels cover 3.10–3.12 |
-| `transformers` | `==4.57.*` | **Hard floor for Qwen3-VL = 4.57.0.** ms-swift caps `<5.13`; stay on the 4.57 line — do NOT jump to transformers 5.x (breaks `qwen-vl-utils`/SDK). |
+| `transformers` | **8B line:** `==4.57.*` · **gen-3.6 line:** `>=5.5,<5.13` | **Two lines, two pins** ([[transformers-pin-is-per-tool-not-global]], 2026-08-16). 4.57.0 is the hard floor for Qwen3-VL and stands for everything we ship. It **cannot load gen-3.6 at all** (`Qwen3_5ForConditionalGeneration`), so rungs 38/40/43/44 run 5.x — `ms_swift 4.4.1` sits at **5.12.1**, inside its own `<5.13` cap. The frozen truth is `requirements/unam-*.lock`. |
 | `qwen-vl-utils` | `>=0.0.14` | Required companion for Qwen3-VL vision processing; the SDK's `inference.py` imports `process_vision_info`. |
 | `torch` | `>=2.5` (let vLLM pin) | Ada Lovelace (L40S, CC 8.9) FP8 path needs recent CUDA/torch. |
 | `accelerate` | `>=1.0` | Training launcher + `device_map`. |
@@ -41,7 +41,28 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 | **Serve 8B** | **bf16 first; FP8 only if p99 needs headroom** | 8B bf16 is far under 48 GB (PLAN risk #1) — no quant needed for memory. L40S is Ada (CC 8.9) → **native FP8 w8a8** (`vllm serve … --quantization fp8` or a prebuilt `-FP8` checkpoint) roughly halves memory / lifts throughput at small quality cost. |
 ## Serving — **vLLM `>=0.11.0` (target 0.11.2 with transformers 4.57)** [HIGH]
 - **Merge LoRA → base, then serve the merged checkpoint** (`swift export --merge_lora true`). Simpler and faster than `--enable-lora` for a single offline adapter.
-- **Latency levers (5 s hard cap, Constitution §II):** `max_new_tokens ≤ 32`, greedy (no beam), cap `max_pixels`/`limit_mm_per_prompt`, `enforce_eager=false` (CUDA graphs). **Measure p99 on L40S, not mean** (§IV.7).
+- **Latency levers (5 s hard cap, Constitution §II):** `max_new_tokens ≤ 32`, greedy (no beam), cap `max_pixels`/`limit_mm_per_prompt`, **`enforce_eager=TRUE` for the 27B** (see below). **Measure p99 on L40S, not mean** (§IV.7).
+  - 🔻 **Changed 2026-08-15. This said `enforce_eager=false` "(CUDA graphs)", and for the 27B that
+    is backwards.** CUDA-graph capture is a **per-process startup cost that no container can
+    pre-bake**, and it is what dominates vLLM's cold start — proven by four starts measuring
+    226.1 / 227.1 / 231.1 / 225.6 s across *very* different configurations (52 GB bf16 on two GPUs
+    vs 33 GB FP8 on one), which rules out weight loading, plus a 2.4 GB `torch_compile_cache` that
+    made the 4th start no faster than the 1st, which rules out compilation.
+    Measured on our own checkpoint (`experiments/44-fp8-deployability/RESULTS_fp8_eager.json`):
+
+    | | `enforce_eager=false` | **`=true`** |
+    |---|---|---|
+    | startup vs the **120 s** allowance | 225.6 s (88 % over) | **126.7 s (5.6 % over)** |
+    | latency vs the **5 s** budget | 0.454 s/q | **0.498 s/q** (10× headroom) |
+    | exact match vs gold | 30/50 | **30/50** |
+
+    ⇒ The old setting **optimised the resource we have 10× spare of, at the cost of the one we
+    were 2× short on.** It was right for the 8B, whose startup was 31.9 s; it is wrong for a
+    quantized 27B. Keep `false` for the 8B, use `true` for the 27B.
+  - 🔴 **`max_model_len` must be set explicitly for the 27B.** FP8 weights are 33.46 GiB of a
+    47.4 GiB card, leaving ~14 GiB for KV cache, activations and vLLM's profiling pass. At the
+    default the engine OOMs *after* loading — a model that "fits" and still will not start.
+    FRAME needs 2048 at most (one image, short question, ≤64 output tokens).
 - **FRAME serving shortcut — sample frames, don't decode video.** The SDK hands `predict()` a temp MP4 clip + `fps`; feeding the whole clip at fps explodes visual tokens and latency. Our `predict()` samples **1–3 representative frames** (decord/cv2) and passes them as **images** to vLLM. Massive latency win, negligible signal loss for single-frame FRAME questions.
 ## orena-focus SDK integration points [HIGH — read from cloned source]
 ## Pinned dependency set
@@ -51,7 +72,7 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 ## What NOT to use (and why)
 | Avoid | Reason |
 |---|---|
-| `transformers` 5.x / bleeding main | Breaks ms-swift cap (`<5.13`) and `qwen-vl-utils`; Qwen3-VL is stable on the 4.57 line. |
+| `transformers` **>=5.13** / bleeding main | Breaks the ms-swift cap. 🔻 **Corrected 2026-08-16 — this row used to forbid all of 5.x, and that was wrong**: the cap is `<5.13`, so 5.12.1 satisfies it; `qwen-vl-utils` is installed nowhere we run; and the SDK imports clean under 5.15.0. Keep the 8B on 4.57 because it ships there, not because 5.x breaks it ([[transformers-pin-is-per-tool-not-global]]). |
 | Raw `trl` for training | Excess multimodal plumbing; no `max_pixels`/vision-freeze ergonomics. |
 | Unsloth (primary) | Lagging Qwen3-VL multimodal support, single-GPU, reproducibility risk. |
 | NF4/QLoRA to **serve** the 8B | 8B bf16 already fits 48 GB; dequant only adds latency. |
@@ -62,7 +83,8 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 ## Confidence
 | Area | Level | Note |
 |---|---|---|
-| Version floors (transformers 4.57 / vllm 0.11 / qwen-vl-utils 0.0.14) | HIGH | Verified in vLLM + ms-swift + Qwen docs. |
+| Version floors — **8B line** (transformers 4.57 / vllm 0.11) | HIGH | Verified in vLLM + ms-swift + Qwen docs, and it is what the shipped submission is built on. |
+| Version floors — **gen-3.6 line** (transformers 5.5–5.12 / vllm 0.27.1) | HIGH | Not from docs: `pip freeze` of the four environments that actually produced every gen-3.6 result, in `requirements/unam-*.lock`. |
 | ms-swift as framework | HIGH | Official Qwen3-VL best-practice recipe. |
 | FP8-on-L40S serving path | HIGH | Ada CC 8.9 native w8a8 confirmed in vLLM FP8 docs. |
 | SDK integration points | HIGH | Read directly from cloned `orena-focus` source. |
