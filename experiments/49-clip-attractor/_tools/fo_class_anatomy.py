@@ -113,6 +113,36 @@ def clip_fp_ramp(d: pd.DataFrame, n_bins: int = 10) -> tuple[pd.DataFrame, dict]
     return bands, summary
 
 
+def per_class(d: pd.DataFrame, valid: dict) -> pd.DataFrame:
+    """Per-class emission ratio, precision and recall — the attractor as CALIBRATION.
+
+    The taxonomy above counts errors; this asks the question that decides whether a lever
+    exists: does the model emit a class MORE often than the gold contains it? A class that
+    is confused but calibrated (`pred == gold` in total) cannot be helped by suppressing
+    it — every false positive removed costs a true positive. A class that is genuinely
+    over-emitted can.
+
+    Membership, not set equality, so a row contributes to several classes. That is the
+    right unit here: the challenge scores the set, but the defect lives in the decision
+    about one class at a time.
+    """
+    rows = []
+    for c in sorted(valid.values()):
+        gp = d.gold_set.map(lambda s: bool(s) and c in s)
+        pp = d.pred_set.map(lambda s: bool(s) and c in s)
+        tp, fp, fn = int((gp & pp).sum()), int((~gp & pp).sum()), int((gp & ~pp).sum())
+        if not (tp + fp + fn):
+            continue
+        rows.append({
+            "fo_class": c, "gold": int(gp.sum()), "pred": int(pp.sum()),
+            "emission_ratio": round(float(pp.sum() / gp.sum()), 4) if gp.sum() else None,
+            "TP": tp, "FP": fp, "FN": fn,
+            "precision": round(tp / (tp + fp), 4) if tp + fp else None,
+            "recall": round(tp / (tp + fn), 4) if tp + fn else None,
+        })
+    return pd.DataFrame(rows)
+
+
 def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
     """`bucket_mean` if the Clip/Sponge errors were correct — through frame.metrics.
 
@@ -201,7 +231,7 @@ def headroom(results_df: pd.DataFrame, d: pd.DataFrame, metrics, gold) -> dict:
 
 def run(arms: dict, out: Path, metrics, gold=None) -> None:
     valid = _fo(metrics)
-    tax, ramps, heads, conf = [], [], {}, []
+    tax, ramps, heads, conf, pcs = [], [], {}, [], []
     for name, insp in arms.items():
         raw = pd.read_csv(insp)
         raw["correct"] = raw.correct.astype(str).str.lower().isin(("true", "1", "yes"))
@@ -211,6 +241,7 @@ def run(arms: dict, out: Path, metrics, gold=None) -> None:
                           ("OOD", fo[fo.dataset == "heico"])):
             if len(sub):
                 tax.append({"arm": name, "slice": dist, **taxonomy(sub)})
+        pcs.append(per_class(fo, valid).assign(arm=name))
         bands, summ = clip_fp_ramp(fo)
         if len(bands):
             ramps.append(bands.assign(arm=name))
@@ -235,6 +266,8 @@ def run(arms: dict, out: Path, metrics, gold=None) -> None:
 
     out.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(tax).to_csv(out / "RESULTS_fo_class_anatomy.csv", index=False)
+    pd.concat(pcs, ignore_index=True).to_csv(
+        out / "RESULTS_fo_class_per_class.csv", index=False)
     if ramps:
         pd.concat(ramps, ignore_index=True).to_csv(
             out / "RESULTS_clip_fp_ramp_ours.csv", index=False)

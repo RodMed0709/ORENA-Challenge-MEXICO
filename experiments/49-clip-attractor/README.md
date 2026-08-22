@@ -130,3 +130,43 @@ are scored on than on CholecT50**, so a CholecT50-sized effect cannot be assumed
 ⇒ The negative-supervision arm — 12,281 clip negatives, 23,331 bag negatives — was sized
 against the CholecT50 rate. On our own axis the target is 0.14–0.25, not 0.85. **That arm
 needs re-costing before it is worth a 60 GB re-acquisition and ~36 h of GPU.**
+
+## 🟢 The attractor is a CALIBRATION defect, and it is arithmetically attackable
+
+`RESULTS_fo_class_per_class.csv` — membership, not set equality, so a row counts for every
+class it names. This is the table that decides whether a suppression lever can exist at all:
+a class that is confused but *calibrated* cannot be helped by suppressing it, because every
+false positive removed costs a true positive.
+
+**rung 19b ep4**
+
+| class | gold | pred | ratio | precision | recall |
+|---|---:|---:|---:|---:|---:|
+| **Clip** | 1089 | **1216** | **1.117** | **0.757** ← worst | 0.845 |
+| Sponge | 867 | 825 | 0.952 | 0.891 | 0.848 |
+| Specimen | 398 | 412 | 1.035 | 0.811 | 0.839 |
+| External Drain | 362 | 346 | 0.956 | 0.960 | 0.917 |
+| Specimen Bag | 327 | 325 | 0.994 | 0.871 | 0.865 |
+| **Needle** | 283 | **194** | **0.686** | 0.887 | **0.608** ← worst |
+
+🔑 **`Clip` is over-emitted by 11.7 % and carries the worst precision on the board; `Needle` is
+its mirror, under-emitted by 31 %.** Every other class sits within ±5 % of calibration. ⇒ the
+old *"the marginal emission is calibrated, so this is not a suppression problem"* reading does
+**not** hold for this arm — 127 net predictions of `Clip` have nowhere legitimate to go.
+
+## 📌 Epoch 5 already does half the job, and that is a trap for any future arm
+
+**rung 19b ep5**, same table, same eval:
+
+| class | ratio | precision | recall |
+|---|---:|---:|---:|
+| Clip | 1.117 → **0.974** | 0.757 → **0.810** | 0.845 → 0.789 |
+| Needle | 0.686 → **0.820** | 0.887 → 0.862 | 0.608 → **0.707** |
+
+One more epoch moves `Clip` to calibration and buys back a tenth of `Needle`'s recall — and
+ep5 is the better arm on the headline too (**0.6557** vs 0.6479). 🔴 **Any Clip-suppression arm
+must be measured against ep5, or it will claim an effect the epoch had already produced** —
+the exact error rung 42 made against rung 47 ([[rung42-gain-was-epochs-not-corpus]]).
+
+⚠️ And ep5 shows the price: `Clip` recall falls 0.845 → 0.789 as its precision rises. The
+attractor is not free to switch off. **The lever is calibration, not deletion.**
