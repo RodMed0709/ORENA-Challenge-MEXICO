@@ -459,3 +459,25 @@ is two and eleven frames. Read the direction, not the endpoints.
 ⚠️ It does not name a lever. It says where one would have to act — **before the output format
 splits** — which is exactly where [[hidden-states-hold-the-count]] already found the count
 present at layer 24 and lost by the head.
+
+## Replicated on all six arms — a one-arm claim is not a claim
+
+| arm | P(num ✗ \| fo ✗) | P(num ✗ \| fo ✓) | odds ratio | z | `number` acc, gold=1 | gold≥2 |
+|---|---:|---:|---:|---:|---:|---:|
+| 19b ep3 | 0.584 | 0.468 | 1.599 | **1.05** | 0.575 | 0.465 |
+| 19b ep4 | 0.687 | 0.479 | 2.384 | 3.01 | 0.580 | 0.411 |
+| 19b ep5 | 0.643 | 0.451 | 2.190 | 2.30 | 0.628 | 0.406 |
+| 47 ep3 | 0.653 | 0.451 | 2.284 | 3.41 | 0.614 | 0.347 |
+| 47 ep4 | 0.707 | 0.496 | 2.443 | 2.74 | 0.565 | 0.411 |
+| 47 ep5 | 0.722 | 0.427 | 3.480 | 4.03 | 0.616 | 0.426 |
+
+**Direction: 6 of 6.** Every arm puts the odds ratio above 1 and every arm answers the `number`
+question better on frames whose `fo_class` gold names one class than on frames whose gold names
+several — a gap of **0.11 to 0.27**, in all six.
+
+⚠️ **Significance: 5 of 6.** `19b ep3` reaches z = 1.05 and does not clear. It is also the
+weakest arm on the headline (0.6321), so the honest reading is that the effect is present
+throughout and its size tracks the checkpoint — not that it is absent in one.
+
+⇒ The claim that survives: **scene multiplicity costs both formats, in every arm measured, and
+the effect is not carried by any single checkpoint or corpus.**
