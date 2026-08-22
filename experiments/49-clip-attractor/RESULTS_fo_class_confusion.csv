@@ -1,0 +1,350 @@
+arm,gold,pred,n
+19b_ep3,Clip,Clip,605
+19b_ep3,Clip,Sponge,67
+19b_ep3,Clip,Needle,15
+19b_ep3,Clip,"Clip,Sponge",11
+19b_ep3,Clip,Specimen,8
+19b_ep3,Clip,"Clip,Specimen",3
+19b_ep3,Clip,External Drain,3
+19b_ep3,Clip,Specimen Bag,3
+19b_ep3,Clip,"Clip,Needle",2
+19b_ep3,Clip,Silicone Loop,2
+19b_ep3,Clip,"Clip,Specimen Bag",1
+19b_ep3,External Drain,External Drain,279
+19b_ep3,External Drain,"Clip,External Drain",24
+19b_ep3,External Drain,Clip,15
+19b_ep3,External Drain,Sponge,9
+19b_ep3,External Drain,Specimen Bag,6
+19b_ep3,External Drain,"Clip,External Drain,Silicone Loop",6
+19b_ep3,External Drain,Specimen,4
+19b_ep3,External Drain,"External Drain,Silicone Loop",2
+19b_ep3,External Drain,"External Drain,Sponge",1
+19b_ep3,External Drain,"Clip,External Drain,Needle",1
+19b_ep3,External Drain,"Specimen,Specimen Bag",1
+19b_ep3,Gallstone,Clip,4
+19b_ep3,Gallstone,"Clip,Sponge",1
+19b_ep3,Needle,Needle,119
+19b_ep3,Needle,Clip,55
+19b_ep3,Needle,"Clip,Needle",7
+19b_ep3,Needle,Sponge,5
+19b_ep3,Needle,Silicone Loop,5
+19b_ep3,Needle,Specimen Bag,3
+19b_ep3,Needle,"Clip,Needle,Sponge",1
+19b_ep3,Needle,External Drain,1
+19b_ep3,Needle,"Clip,Sponge",1
+19b_ep3,Needle,"Clip,Silicone Loop",1
+19b_ep3,Needle,Gallstone,1
+19b_ep3,Specimen,Specimen,108
+19b_ep3,Specimen,Clip,27
+19b_ep3,Specimen,Specimen Bag,10
+19b_ep3,Specimen,Sponge,7
+19b_ep3,Specimen,"Clip,Specimen",6
+19b_ep3,Specimen,"Clip,Sponge",1
+19b_ep3,Specimen,External Drain,1
+19b_ep3,Specimen Bag,Specimen Bag,100
+19b_ep3,Specimen Bag,"Specimen,Specimen Bag",20
+19b_ep3,Specimen Bag,Sponge,12
+19b_ep3,Specimen Bag,Clip,7
+19b_ep3,Specimen Bag,Specimen,3
+19b_ep3,Specimen Bag,"Clip,Specimen Bag",2
+19b_ep3,Specimen Bag,"Clip,Specimen,Specimen Bag",2
+19b_ep3,Specimen Bag,"Clip,Silicone Loop,Specimen Bag",1
+19b_ep3,Specimen Bag,"Clip,Silicone Loop,Specimen,Specimen Bag",1
+19b_ep3,Specimen Bag,"Clip,Silicone Loop",1
+19b_ep3,Specimen Bag,"Clip,Specimen,Specimen Bag,Sponge",1
+19b_ep3,Specimen Bag,Silicone Loop,1
+19b_ep3,Specimen Bag,External Drain,1
+19b_ep3,Sponge,Sponge,389
+19b_ep3,Sponge,Clip,48
+19b_ep3,Sponge,"Clip,Sponge",25
+19b_ep3,Sponge,Specimen Bag,4
+19b_ep3,Sponge,"Needle,Sponge",3
+19b_ep3,Sponge,External Drain,3
+19b_ep3,Sponge,Specimen,3
+19b_ep3,Sponge,"Specimen,Sponge",2
+19b_ep3,Sponge,Needle,2
+19b_ep3,Sponge,"Clip,Needle",1
+19b_ep3,Sponge,"Clip,External Drain",1
+19b_ep4,Clip,Clip,609
+19b_ep4,Clip,Sponge,46
+19b_ep4,Clip,Needle,18
+19b_ep4,Clip,Specimen,15
+19b_ep4,Clip,"Clip,Sponge",9
+19b_ep4,Clip,Specimen Bag,7
+19b_ep4,Clip,"Clip,Specimen",6
+19b_ep4,Clip,External Drain,5
+19b_ep4,Clip,Gallstone,2
+19b_ep4,Clip,"Clip,Specimen Bag",1
+19b_ep4,Clip,"Clip,Needle",1
+19b_ep4,Clip,Silicone Loop,1
+19b_ep4,External Drain,External Drain,310
+19b_ep4,External Drain,"Clip,External Drain",11
+19b_ep4,External Drain,Clip,8
+19b_ep4,External Drain,Specimen Bag,7
+19b_ep4,External Drain,Sponge,7
+19b_ep4,External Drain,Specimen,2
+19b_ep4,External Drain,"External Drain,Silicone Loop",2
+19b_ep4,External Drain,"Clip,External Drain,Silicone Loop",1
+19b_ep4,Gallstone,Clip,4
+19b_ep4,Gallstone,"Clip,Specimen",1
+19b_ep4,Needle,Needle,126
+19b_ep4,Needle,Clip,49
+19b_ep4,Needle,"Clip,Needle",6
+19b_ep4,Needle,Sponge,5
+19b_ep4,Needle,Silicone Loop,5
+19b_ep4,Needle,External Drain,3
+19b_ep4,Needle,"Clip,Sponge",1
+19b_ep4,Needle,"Needle,Sponge",1
+19b_ep4,Needle,Gallstone,1
+19b_ep4,Needle,Specimen,1
+19b_ep4,Needle,Specimen Bag,1
+19b_ep4,Specimen,Specimen,122
+19b_ep4,Specimen,Clip,20
+19b_ep4,Specimen,Specimen Bag,9
+19b_ep4,Specimen,"Clip,Specimen",7
+19b_ep4,Specimen,"Specimen,Specimen Bag",1
+19b_ep4,Specimen,External Drain,1
+19b_ep4,Specimen Bag,Specimen Bag,112
+19b_ep4,Specimen Bag,"Specimen,Specimen Bag",10
+19b_ep4,Specimen Bag,Specimen,8
+19b_ep4,Specimen Bag,Sponge,7
+19b_ep4,Specimen Bag,Clip,5
+19b_ep4,Specimen Bag,"Clip,Specimen Bag",4
+19b_ep4,Specimen Bag,Silicone Loop,3
+19b_ep4,Specimen Bag,"Clip,Silicone Loop,Specimen Bag",2
+19b_ep4,Specimen Bag,"Clip,Sponge",1
+19b_ep4,Sponge,Sponge,375
+19b_ep4,Sponge,Clip,64
+19b_ep4,Sponge,"Clip,Sponge",29
+19b_ep4,Sponge,Specimen Bag,4
+19b_ep4,Sponge,Specimen,4
+19b_ep4,Sponge,Needle,2
+19b_ep4,Sponge,External Drain,2
+19b_ep4,Sponge,"Needle,Sponge",1
+19b_ep5,Clip,Clip,575
+19b_ep5,Clip,Sponge,83
+19b_ep5,Clip,Needle,24
+19b_ep5,Clip,Specimen,17
+19b_ep5,Clip,"Clip,Sponge",5
+19b_ep5,Clip,Specimen Bag,4
+19b_ep5,Clip,External Drain,4
+19b_ep5,Clip,"Clip,Specimen",4
+19b_ep5,Clip,"Clip,Specimen Bag",1
+19b_ep5,Clip,"Clip,Needle",1
+19b_ep5,Clip,Silicone Loop,1
+19b_ep5,Clip,Gallstone,1
+19b_ep5,External Drain,External Drain,310
+19b_ep5,External Drain,Sponge,10
+19b_ep5,External Drain,Specimen Bag,9
+19b_ep5,External Drain,"Clip,External Drain",9
+19b_ep5,External Drain,Clip,5
+19b_ep5,External Drain,Specimen,2
+19b_ep5,External Drain,"External Drain,Silicone Loop",1
+19b_ep5,External Drain,"Clip,External Drain,Silicone Loop",1
+19b_ep5,External Drain,Needle,1
+19b_ep5,Gallstone,Clip,5
+19b_ep5,Needle,Needle,140
+19b_ep5,Needle,Clip,32
+19b_ep5,Needle,Sponge,8
+19b_ep5,Needle,"Clip,Needle",6
+19b_ep5,Needle,Silicone Loop,4
+19b_ep5,Needle,Specimen,4
+19b_ep5,Needle,Specimen Bag,2
+19b_ep5,Needle,"Needle,Sponge",1
+19b_ep5,Needle,Gallstone,1
+19b_ep5,Needle,External Drain,1
+19b_ep5,Specimen,Specimen,113
+19b_ep5,Specimen,Clip,22
+19b_ep5,Specimen,Specimen Bag,15
+19b_ep5,Specimen,"Clip,Specimen",6
+19b_ep5,Specimen,Sponge,2
+19b_ep5,Specimen,External Drain,1
+19b_ep5,Specimen,"Specimen,Specimen Bag",1
+19b_ep5,Specimen Bag,Specimen Bag,115
+19b_ep5,Specimen Bag,"Specimen,Specimen Bag",12
+19b_ep5,Specimen Bag,Sponge,7
+19b_ep5,Specimen Bag,Clip,5
+19b_ep5,Specimen Bag,Specimen,5
+19b_ep5,Specimen Bag,"Clip,Specimen Bag",3
+19b_ep5,Specimen Bag,"Clip,Silicone Loop,Specimen Bag",2
+19b_ep5,Specimen Bag,Silicone Loop,2
+19b_ep5,Specimen Bag,"Clip,Sponge",1
+19b_ep5,Sponge,Sponge,417
+19b_ep5,Sponge,Clip,37
+19b_ep5,Sponge,"Clip,Sponge",12
+19b_ep5,Sponge,Needle,5
+19b_ep5,Sponge,Specimen,4
+19b_ep5,Sponge,Specimen Bag,4
+19b_ep5,Sponge,External Drain,1
+19b_ep5,Sponge,"Needle,Sponge",1
+47_ep3,Clip,Clip,545
+47_ep3,Clip,Sponge,106
+47_ep3,Clip,Specimen,24
+47_ep3,Clip,Needle,15
+47_ep3,Clip,"Clip,Specimen",12
+47_ep3,Clip,External Drain,6
+47_ep3,Clip,"Clip,Sponge",5
+47_ep3,Clip,Silicone Loop,2
+47_ep3,Clip,Specimen Bag,2
+47_ep3,Clip,"Clip,Needle",1
+47_ep3,Clip,"Clip,Specimen,Sponge",1
+47_ep3,Clip,Gallstone,1
+47_ep3,External Drain,External Drain,303
+47_ep3,External Drain,Sponge,15
+47_ep3,External Drain,Specimen Bag,10
+47_ep3,External Drain,"Clip,External Drain",9
+47_ep3,External Drain,Clip,8
+47_ep3,External Drain,Specimen,1
+47_ep3,External Drain,"External Drain,Silicone Loop",1
+47_ep3,External Drain,Gallstone,1
+47_ep3,Gallstone,Clip,3
+47_ep3,Gallstone,Specimen,1
+47_ep3,Gallstone,"Clip,Specimen",1
+47_ep3,Needle,Needle,95
+47_ep3,Needle,Clip,52
+47_ep3,Needle,Sponge,19
+47_ep3,Needle,"Clip,Needle",12
+47_ep3,Needle,Silicone Loop,8
+47_ep3,Needle,Specimen,5
+47_ep3,Needle,External Drain,4
+47_ep3,Needle,"Needle,Silicone Loop",1
+47_ep3,Needle,"Clip,Specimen",1
+47_ep3,Needle,"Clip,Silicone Loop",1
+47_ep3,Needle,Specimen Bag,1
+47_ep3,Specimen,Specimen,125
+47_ep3,Specimen,Clip,15
+47_ep3,Specimen,Specimen Bag,13
+47_ep3,Specimen,Sponge,4
+47_ep3,Specimen,External Drain,2
+47_ep3,Specimen,"Clip,Specimen",1
+47_ep3,Specimen Bag,Specimen Bag,117
+47_ep3,Specimen Bag,Sponge,9
+47_ep3,Specimen Bag,Specimen,8
+47_ep3,Specimen Bag,Clip,7
+47_ep3,Specimen Bag,"Specimen,Specimen Bag",7
+47_ep3,Specimen Bag,External Drain,1
+47_ep3,Specimen Bag,"Specimen Bag,Sponge",1
+47_ep3,Specimen Bag,"Clip,Specimen Bag",1
+47_ep3,Specimen Bag,Gallstone,1
+47_ep3,Sponge,Sponge,414
+47_ep3,Sponge,Clip,44
+47_ep3,Sponge,"Clip,Sponge",8
+47_ep3,Sponge,Specimen,8
+47_ep3,Sponge,External Drain,3
+47_ep3,Sponge,Needle,2
+47_ep3,Sponge,Specimen Bag,2
+47_ep4,Clip,Clip,595
+47_ep4,Clip,Sponge,71
+47_ep4,Clip,Needle,18
+47_ep4,Clip,External Drain,14
+47_ep4,Clip,Specimen,9
+47_ep4,Clip,"Clip,Sponge",6
+47_ep4,Clip,"Clip,Specimen",3
+47_ep4,Clip,Silicone Loop,2
+47_ep4,Clip,Gallstone,2
+47_ep4,External Drain,External Drain,299
+47_ep4,External Drain,Clip,17
+47_ep4,External Drain,"Clip,External Drain",13
+47_ep4,External Drain,Sponge,9
+47_ep4,External Drain,Specimen Bag,7
+47_ep4,External Drain,"External Drain,Silicone Loop",1
+47_ep4,External Drain,Specimen,1
+47_ep4,External Drain,Silicone Loop,1
+47_ep4,Gallstone,Clip,4
+47_ep4,Gallstone,"Clip,Sponge",1
+47_ep4,Needle,Needle,127
+47_ep4,Needle,Clip,40
+47_ep4,Needle,"Clip,Needle",13
+47_ep4,Needle,Sponge,10
+47_ep4,Needle,Silicone Loop,2
+47_ep4,Needle,"Needle,Silicone Loop",2
+47_ep4,Needle,"Clip,Sponge",1
+47_ep4,Needle,"Needle,Sponge",1
+47_ep4,Needle,External Drain,1
+47_ep4,Needle,"Clip,Silicone Loop",1
+47_ep4,Needle,Specimen,1
+47_ep4,Specimen,Specimen,107
+47_ep4,Specimen,Clip,30
+47_ep4,Specimen,Specimen Bag,10
+47_ep4,Specimen,External Drain,7
+47_ep4,Specimen,Sponge,2
+47_ep4,Specimen,"Clip,Specimen",2
+47_ep4,Specimen,"Clip,Sponge",1
+47_ep4,Specimen,"Clip,Specimen,Specimen Bag",1
+47_ep4,Specimen Bag,Specimen Bag,115
+47_ep4,Specimen Bag,"Specimen,Specimen Bag",11
+47_ep4,Specimen Bag,Clip,9
+47_ep4,Specimen Bag,Sponge,8
+47_ep4,Specimen Bag,Silicone Loop,3
+47_ep4,Specimen Bag,Specimen,3
+47_ep4,Specimen Bag,"Clip,Specimen Bag,Sponge",1
+47_ep4,Specimen Bag,"Clip,Sponge",1
+47_ep4,Specimen Bag,"Clip,Specimen Bag",1
+47_ep4,Sponge,Sponge,413
+47_ep4,Sponge,Clip,44
+47_ep4,Sponge,"Clip,Sponge",13
+47_ep4,Sponge,Needle,5
+47_ep4,Sponge,Specimen,4
+47_ep4,Sponge,Specimen Bag,2
+47_ep5,Clip,Clip,571
+47_ep5,Clip,Sponge,86
+47_ep5,Clip,Needle,18
+47_ep5,Clip,External Drain,14
+47_ep5,Clip,Specimen,13
+47_ep5,Clip,"Clip,Sponge",4
+47_ep5,Clip,"Clip,Specimen",4
+47_ep5,Clip,Silicone Loop,2
+47_ep5,Clip,Specimen Bag,2
+47_ep5,Clip,Gallstone,2
+47_ep5,Clip,"Clip,External Drain",2
+47_ep5,Clip,"Clip,Specimen Bag",1
+47_ep5,Clip,"Clip,Needle",1
+47_ep5,External Drain,External Drain,302
+47_ep5,External Drain,"Clip,External Drain",18
+47_ep5,External Drain,Specimen Bag,9
+47_ep5,External Drain,Clip,9
+47_ep5,External Drain,Sponge,7
+47_ep5,External Drain,Specimen,1
+47_ep5,External Drain,"External Drain,Silicone Loop",1
+47_ep5,External Drain,Needle,1
+47_ep5,Gallstone,Clip,4
+47_ep5,Gallstone,"Clip,Specimen,Sponge",1
+47_ep5,Needle,Needle,138
+47_ep5,Needle,Clip,34
+47_ep5,Needle,Sponge,9
+47_ep5,Needle,"Clip,Needle",8
+47_ep5,Needle,"Needle,Silicone Loop",2
+47_ep5,Needle,External Drain,2
+47_ep5,Needle,Silicone Loop,2
+47_ep5,Needle,"Needle,Sponge",1
+47_ep5,Needle,"Clip,Silicone Loop",1
+47_ep5,Needle,Specimen,1
+47_ep5,Needle,Specimen Bag,1
+47_ep5,Specimen,Specimen,110
+47_ep5,Specimen,Clip,22
+47_ep5,Specimen,Specimen Bag,12
+47_ep5,Specimen,External Drain,8
+47_ep5,Specimen,Sponge,3
+47_ep5,Specimen,"Clip,Specimen,Specimen Bag",2
+47_ep5,Specimen,"Clip,Specimen",2
+47_ep5,Specimen,"Clip,Sponge",1
+47_ep5,Specimen Bag,Specimen Bag,112
+47_ep5,Specimen Bag,"Specimen,Specimen Bag",12
+47_ep5,Specimen Bag,Clip,9
+47_ep5,Specimen Bag,Sponge,9
+47_ep5,Specimen Bag,Specimen,4
+47_ep5,Specimen Bag,"Clip,Specimen Bag,Sponge",1
+47_ep5,Specimen Bag,"Specimen Bag,Sponge",1
+47_ep5,Specimen Bag,"Clip,Specimen Bag",1
+47_ep5,Specimen Bag,"Clip,Sponge",1
+47_ep5,Specimen Bag,Silicone Loop,1
+47_ep5,Specimen Bag,External Drain,1
+47_ep5,Sponge,Sponge,414
+47_ep5,Sponge,Clip,39
+47_ep5,Sponge,"Clip,Sponge",12
+47_ep5,Sponge,Needle,6
+47_ep5,Sponge,Specimen,4
+47_ep5,Sponge,Specimen Bag,3
+47_ep5,Sponge,External Drain,1
+47_ep5,Sponge,"Clip,Specimen,Sponge",1
+47_ep5,Sponge,"Specimen,Sponge",1

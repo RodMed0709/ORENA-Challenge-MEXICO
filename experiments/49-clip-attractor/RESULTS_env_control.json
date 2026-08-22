@@ -1,0 +1,6 @@
+{
+ "n": 20,
+ "agreement": 1.0,
+ "env": "/mnt/storage/uaq_user/envs/orena-train/bin/python",
+ "transformers": "5.12.1"
+}

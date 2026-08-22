@@ -1,0 +1,7 @@
+model,cell,n,n_videos,tp,fp,fn,tn,precision,recall,f1,mean_set_size
+19b_ep4,Clip,20,1,0.0,7.0,0.0,13.0,0.0,,,
+19b_ep4,Specimen bag,20,1,0.0,13.0,0.0,7.0,0.0,,,
+19b_ep4,MACRO,20,1,,,,,,,,1.0
+19b_ep5,Clip,20,1,0.0,6.0,0.0,14.0,0.0,,,
+19b_ep5,Specimen bag,20,1,0.0,14.0,0.0,6.0,0.0,,,
+19b_ep5,MACRO,20,1,,,,,,,,1.0
