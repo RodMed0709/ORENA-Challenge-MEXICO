@@ -30,7 +30,8 @@ A competition entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICC
 | `torch` | `>=2.5` (let vLLM pin) | Ada Lovelace (L40S, CC 8.9) FP8 path needs recent CUDA/torch. |
 | `accelerate` | `>=1.0` | Training launcher + `device_map`. |
 ## Fine-tuning framework — **ms-swift (ModelScope Swift) `>=4.2`** [HIGH]
-- **Native Qwen3-VL recipe** (official `Qwen3-VL-Best-Practice`): `--model Qwen/Qwen3-VL-8B-Instruct --train_type lora`, ShareGPT-style multimodal JSON. **[HIGH]**
+- **Native Qwen3-VL recipe** (official `Qwen3-VL-Best-Practice`): `--model Qwen/Qwen3-VL-8B-Instruct --tuner_type lora`, ShareGPT-style multimodal JSON. **[HIGH]**
+  - 🔻 **Corrected 2026-08-18. This said `--train_type lora`, and that flag DOES NOT EXIST.** Zero occurrences in the whole installed package (`ms_swift 4.4.1`, `~/storage/envs/orena-gen36`); the v4.4 parameter reference lists **`tuner_type`**, default `'lora'`. The repo has known this since 2026-07-17 — `context/NOW.md:1022`, `experiments/30-grpo-number/README.md:110`, `_models/grpo_train.py:280`, `experiments/32-aligner-unfreeze/_tools/reachability_smoke.py:116` all carry the correction and the code always used the right flag. **Only this line stayed wrong**, for a month, in the file everyone reads first. Pin the doc you cite: `swift.readthedocs.io/en/v4.4/`, not `/en/latest/`.
 - **First-class controls we depend on:** `MAX_PIXELS`/`--max_pixels` (caps visual tokens → protects the 5 s budget), and `--freeze_vit true --freeze_aligner true` to freeze the vision encoder + merger on pass 1 (PLAN §2.1). trl needs hand-rolled plumbing for both.
 - **QLoRA/DeepSpeed/Flash-Attn** built in; one CLI flag flips NF4 on for the 32B wildcard.
 ## Quantization [HIGH]

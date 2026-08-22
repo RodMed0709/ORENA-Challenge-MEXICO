@@ -1,0 +1,82 @@
+{
+  "question": "rung 42's +0.0402 \u2014 corpus or epochs? Same corpus as A2 (14,415), 5 epochs, so ep4 vs ep4 has the corpus as its only difference.",
+  "single_variable": {
+    "--num_train_epochs": [
+      "3",
+      "5"
+    ]
+  },
+  "eval_set": {
+    "videos": [
+      "heico/0023 - Heico - Sigma - 4.avi",
+      "heico/0027 - Heico - Sigma - 8.avi",
+      "lapchole/0032 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0043 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0045 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0061 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0065 - Laparoscopic Cholecystectomy.mp4",
+      "lapchole/0149 - Laparoscopic Cholecystectomy.mp4"
+    ],
+    "n_questions": 1283,
+    "n_heico_videos": 2
+  },
+  "stack_control": {
+    "ep3_bucket_mean": 0.6141529768193971,
+    "a2_ep3_bucket_mean": 0.6342,
+    "delta": -0.02004702318060292,
+    "tolerance": 0.01,
+    "verdict": "RED",
+    "confounded_with": [
+      "eval stack (transformers 5.12.1 / JPEG frame cache / RTX 6000)",
+      "LR schedule (cosine over 5 epochs vs over 3)"
+    ],
+    "means": "ep3 does NOT reproduce A2. This says nothing about WHICH of the two confounds moved it \u2014 stack and LR schedule are both in play and this arm cannot separate them. Do NOT quote it as a stack effect. Use the schedule-matched 47_epN \u2212 42_epN and the difference-in-differences."
+  },
+  "difference_in_differences": {
+    "d47_ep4_minus_ep3": 0.03268451975478448,
+    "d42_ep4_minus_ep3": 0.04820000000000002,
+    "did": -0.01551548024521554,
+    "reads": "the epoch effect differs by corpus \u21d2 the two are not separable this cheaply; the paired CI against rung 42's ep4 is the next instrument"
+  },
+  "stack_confounds_vs_A2": [
+    "transformers 4.57 -> 5.12.1",
+    "FrameProvider (decord/mp4) -> CachedFrameProvider (JPEG q95)",
+    "A100/L40S -> RTX 6000 Ada"
+  ],
+  "a2_per_question_archive": "GONE \u2014 searched S3 and UNAM 2026-08-18; control is scalar",
+  "per_epoch": {
+    "3": {
+      "aggregation_ID": 0.5321888412017167,
+      "object_recognition_ID": 0.78,
+      "aggregation_OOD": 0.36342042755344417,
+      "object_recognition_OOD": 0.7810026385224275,
+      "bucket_mean": 0.6141529768193971,
+      "acc_ID": 0.660455486542443,
+      "acc_OOD": 0.56125,
+      "margin_ID": 0.26708074534161486,
+      "margin_OOD": 0.16875
+    },
+    "4": {
+      "aggregation_ID": 0.5407725321888412,
+      "object_recognition_ID": 0.828,
+      "aggregation_OOD": 0.4085510688836104,
+      "object_recognition_OOD": 0.8100263852242744,
+      "bucket_mean": 0.6468374965741815,
+      "acc_ID": 0.6894409937888198,
+      "acc_OOD": 0.59875,
+      "margin_ID": 0.2960662525879917,
+      "margin_OOD": 0.20625
+    },
+    "5": {
+      "aggregation_ID": 0.5665236051502146,
+      "object_recognition_ID": 0.828,
+      "aggregation_OOD": 0.38717339667458434,
+      "object_recognition_OOD": 0.8047493403693932,
+      "bucket_mean": 0.646611585548548,
+      "acc_ID": 0.7018633540372671,
+      "acc_OOD": 0.585,
+      "margin_ID": 0.3084886128364389,
+      "margin_OOD": 0.19249999999999995
+    }
+  }
+}

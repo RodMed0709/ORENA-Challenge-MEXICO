@@ -47,8 +47,16 @@ try:
 
     R["capability"] = list(torch.cuda.get_device_capability(0))
 
-    print("=== 1. cargar el merge en bf16 ===")
-    model = AutoModelForImageTextToText.from_pretrained(str(SRC), dtype="auto")
+    print("=== 1. cargar el merge en bf16 (en CPU, a proposito) ===")
+    # 🔴 `device_map="cpu"` EXPLICITO. Esta linea no lo decia y dependia del default de
+    # transformers, que SE MOVIO: en 5.14.1 `from_pretrained` coloca en el acelerador, asi
+    # que el merge bf16 de 52 GB intenta entrar en una tarjeta de 47.37 GiB y muere con
+    # `torch.OutOfMemoryError` en `_materialize_copy` (medido en UNAM 2026-08-17, rung 45).
+    # Rung 44 midio 33.4 s y 51.75 → 33.46 GiB con este mismo archivo, o sea que entonces
+    # cargaba en CPU: el comportamiento que funciono es el que ahora queda escrito.
+    # La caja tiene 502 GB de RAM; el paso 4 recarga el FP8 en `cuda:0`, donde ya cabe.
+    model = AutoModelForImageTextToText.from_pretrained(
+        str(SRC), dtype="auto", device_map="cpu")
     proc = AutoProcessor.from_pretrained(str(SRC))
     print("   ", type(model).__name__)
 

@@ -18,7 +18,7 @@ from focus.enums import Track
 from focus.evaluation.evaluator import Evaluator
 from focus.evaluation.judges import TransformersJudge
 
-from frame.data import FrameProvider, load_frame_items
+from frame.data import CachedFrameProvider, FrameProvider, load_frame_items
 from frame.engine import QwenFrameEngine
 from frame.metrics import (
     assert_all_rows_grouped,
@@ -215,11 +215,47 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
     # newer-generation backbone (`Qwen3_5ForConditionalGeneration`) needs a different
     # model class and cannot load under the transformers 4.57 pin at all, so the
     # alternative is forking this whole function to swap one line.
-    factory = getattr(cfg, "engine_factory", None) or QwenFrameEngine
-    engine = factory(cfg)
-    engine.load()
-    provider = FrameProvider(cfg)
-    responses = _infer_all(cfg, items, engine, provider)
+    # rung 45: serve frames from the shared cache when the box has no source videos.
+    # DEFAULT OFF IS BYTE-IDENTICAL — `frames_cache` unset builds the same decord
+    # FrameProvider as always. Both classes share a surface, so nothing below changes.
+    provider = CachedFrameProvider(cfg) if getattr(cfg, "frames_cache", None) else FrameProvider(cfg)
+
+    # rung 45: answer the whole list at once instead of item by item.
+    # DEFAULT OFF IS BYTE-IDENTICAL — no `batch_infer` and the `else` below is the
+    # engine_factory path exactly as rungs 23/38/40 ran it.
+    #
+    # 🔴 Why a BATCH hook and not another `engine_factory`. vLLM's entire advantage is
+    # the batch: `_infer_all` calls `engine.predict(image, question)` once per item, and
+    # feeding vLLM one question at a time reproduces the 1.1x that HF batching measured,
+    # because the cost is the vision encoder and not per-call overhead. A drop-in engine
+    # would therefore be a slower way to run the same thing.
+    #
+    # ⚠️ ONE SEMANTIC DIFFERENCE, and a caller must know it. `Response.latency` drives
+    # `timed_out` (>5 s ⇒ scored INCORRECT). Batched, a per-question latency does not
+    # exist — the batch has one wall clock — so a batch path reports the AMORTISED
+    # `wall / n`. `timed_out` from a batched run is NOT comparable to a sequential one,
+    # and a single run must never mix the two.
+    batch_infer = getattr(cfg, "batch_infer", None)
+    if batch_infer is not None:
+        engine = None
+        logger.info("batch_infer supplied — bypassing the per-item engine path")
+        responses = batch_infer(cfg, items, provider)
+        if len(responses) != len(items):
+            raise AssertionError(
+                f"batch_infer returned {len(responses)} responses for {len(items)} items"
+            )
+        got, want = {r.qID for r in responses}, set(qids)
+        if got != want:
+            raise AssertionError(
+                f"batch_infer returned {len(got - want)} unknown and dropped "
+                f"{len(want - got)} qIDs — a positional pairing slipped, so every answer "
+                "would be scored against the wrong question."
+            )
+    else:
+        factory = getattr(cfg, "engine_factory", None) or QwenFrameEngine
+        engine = factory(cfg)
+        engine.load()
+        responses = _infer_all(cfg, items, engine, provider)
     provider.close()
 
     # Free the inference model before the judge loads: the 8B VLM + the Qwen3-4B
@@ -229,7 +265,7 @@ def run_baseline(cfg, video_filter: set | None = None, qid_filter: set | None = 
 
     import torch
 
-    del engine
+    del engine          # None on the batch path; the batch engine frees itself there
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()

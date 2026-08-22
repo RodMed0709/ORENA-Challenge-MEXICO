@@ -11,6 +11,7 @@ measured_in: experiments/32-aligner-unfreeze/RESULTS_reachability.csv (ms-swift)
 
 - **Status:** SETTLED · 2026-08-12 · **zero training GPU**.
 - **Applies when:** designing any rung that intends to train the merger / aligner / connector.
+- 🔻 **Amended 2026-08-18 — a source read now CONFLICTS with the ms-swift leg of this note.** In `ms_swift 4.4.1` the connector IS registered as `model_arch.aligner` and `--freeze_aligner false` is supposed to append it to the LoRA target regex, and the leaf matcher carries no `attn`/`mlp` requirement — so the structural cause below explains `all-linear`, but not the zero measured in rung 32. The measurement stands and the explicit `target_modules` stays the only proven route. Open question, mechanism and the zero-GPU check that settles it: [[aligner-flag-reads-reachable-but-measured-zero]]. The **Unsloth** leg is untouched.
 
 ## Two independent measurements, same answer
 

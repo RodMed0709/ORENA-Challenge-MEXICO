@@ -5,7 +5,9 @@
 > was designed. If you find a rung-45 *outcome* in this file, it was added after the fact and the
 > rung is void.
 >
-> Pre-registered 2026-08-17 · status **NOT RUN**.
+> Pre-registered 2026-08-17 · status **R00 + R0 RUN AND SCORED 2026-08-17 · R1 NOT RUN**.
+> Outcome in `RESULTS.csv` / `RESULTS_paired_ci.csv`, never edited into the sections below —
+> everything from §1 down is the pre-registration and stays as written.
 > Design evidence: [[merged-corpus-buys-the-id-half]] · [[the-recipe-lever-is-alpha-over-rank]] ·
 > [[backbone-generation-is-not-the-lever]].
 
@@ -122,10 +124,31 @@ own LR **4e-5** · `learning_rate 2e-4` · `cosine` · `warmup_ratio 0.03` · `m
 2 GPUs`. A DDP run at the single-GPU `grad_accum 16` would silently train at effective batch 32 and
 make R00 incomparable to rung 40 *and* to itself.
 
-**Newly declared (rung 40 left these unarchived and they are unrecoverable after the fact):**
-`optim adamw_8bit` · `weight_decay 0.1` · `max_grad_norm 1.0`. The 8B ladder's values, chosen so the
-only deliberate departures from A2 remain the ones this rung is about. **All three are written into
-each run's `args.json`**, so rung 46 does not inherit the same hole.
+**Newly declared:** `optim adamw_8bit` · `weight_decay 0.1` · `max_grad_norm 1.0`. The 8B ladder's
+values, chosen so the only deliberate departures from A2 remain the ones this rung is about. **All
+three are written into each run's `args.json`**, so rung 46 does not inherit the same hole.
+
+🔻 **CORRECTED 2026-08-17 — the sentence that used to introduce that line was FALSE.** It read
+*"rung 40 left these unarchived and they are unrecoverable after the fact"*. They are archived, in
+rung 40's own `RESULTS_arm.json`, recoverable from S3 in seconds. Only `RESULTS.csv` omits them,
+and that is what was checked. The real values:
+
+| | `40_B_connector_v1` | this rung |
+|---|---|---|
+| `optim` | `adamw_8bit` | `adamw_8bit` ✅ |
+| `max_grad_norm` | 1.0 | 1.0 ✅ |
+| **`weight_decay`** | **0.0** | **0.1** 🔴 |
+| effective batch | `per_device 1 × grad_accum 16` = 16 | 16 ✅ |
+
+⇒ **R00 was given 0.1 believing rung 40's value was unknown; it was 0.0.** So R00 is not the
+precision-only re-anchor §3 describes — it moves precision *and* regularisation against rung 40.
+That does not touch the primary (R0 − R00 share every hyperparameter; verified in
+`diff_vs_R00`, which lists exactly two fields: `arm` and `corpus`). It bites the **bridge only**,
+and it is why `_tools/bridge_flips.py` exists rather than a new arm: an archived difference in the
+weights cannot be re-run away.
+
+**The lesson for rung 46: check `RESULTS_arm.json`, not `RESULTS.csv`.** A parameter absent from
+the summary table is not a parameter that was never recorded.
 
 ---
 

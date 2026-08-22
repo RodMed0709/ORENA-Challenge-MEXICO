@@ -1,0 +1,17 @@
+comparison,cell,n,videos,delta,ci_low,ci_high,excludes_0,wins_b,wins_a
+ep4 - ep3,aggregation_ID,955,28,0.0048,-0.032,0.0401,False,86,79
+ep4 - ep3,object_recognition_ID,1296,28,0.0369,0.0028,0.0736,True,117,75
+ep4 - ep3,temporal_grounding_ID,1,1,0.0,0.0,0.0,False,0,0
+ep4 - ep3,ALL_ID,2252,28,0.0218,-0.0017,0.0445,False,203,154
+ep4 - ep3,aggregation_OOD,1875,10,0.0113,-0.0245,0.0492,False,137,127
+ep4 - ep3,object_recognition_OOD,2125,10,0.0413,0.0223,0.0617,True,146,55
+ep4 - ep3,temporal_grounding_OOD,0,0,,,,False,0,0
+ep4 - ep3,ALL_OOD,4000,10,0.0253,0.0005,0.0473,True,283,182
+ep5 - ep4,aggregation_ID,955,28,0.0059,-0.0141,0.0304,False,39,34
+ep5 - ep4,object_recognition_ID,1296,28,-0.0044,-0.0243,0.0145,False,32,35
+ep5 - ep4,temporal_grounding_ID,1,1,0.0,0.0,0.0,False,0,0
+ep5 - ep4,ALL_ID,2252,28,0.0009,-0.0125,0.0145,False,71,69
+ep5 - ep4,aggregation_OOD,1875,10,0.0111,-0.011,0.031,False,72,48
+ep5 - ep4,object_recognition_OOD,2125,10,-0.0048,-0.0172,0.0074,False,46,54
+ep5 - ep4,temporal_grounding_OOD,0,0,,,,False,0,0
+ep5 - ep4,ALL_OOD,4000,10,0.004,-0.0083,0.0163,False,118,102

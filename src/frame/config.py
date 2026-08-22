@@ -123,6 +123,26 @@ class BaselineConfig:
     # is what makes two arms a paired manipulation instead of two different evals.
     question_rewriter: Callable[[str, str], str] | None = None
 
+    # ── rung 45: read frames from the shared cache, not the source video ─
+    # DEFAULT OFF IS BYTE-IDENTICAL: None and `run_baseline` builds the same
+    # decord-backed `FrameProvider` it always did (run.py). Set it to the
+    # frames_cache directory to serve the SAME frames — the store is keyed on
+    # `data.frame_cache_name`, the (dataset, video_id, frame_index) identity — on a
+    # machine that has the frames but not the videos. UNAM is exactly that machine:
+    # measured 2026-08-17, it holds all 6252 test frames and zero `.mp4`.
+    # A cache miss RAISES; it never falls back to decord (see CachedFrameProvider).
+    frames_cache: Path | None = None
+
+    # ── rung 45: answer the whole list at once (vLLM) ────────────────
+    # DEFAULT OFF IS BYTE-IDENTICAL: None and `run_baseline` takes the engine_factory
+    # path exactly as before. Called as `fn(cfg, items, provider) -> list[Response]`.
+    # It replaces ONLY the inference stage — data loading, the judge, and every metric
+    # stay in `run_baseline`, so a batched run is scored by the same code as a
+    # sequential one (RULES §EVAL 1).
+    # ⚠️ A batch path reports AMORTISED per-question latency; see the note at the call
+    # site. `timed_out` is not comparable across the two paths.
+    batch_infer: Callable[["BaselineConfig", list, object], list] | None = None
+
     # ── run scope ────────────────────────────────────────────────────
     # None = full test set; an int caps total questions (SMOKE / sample).
     n_eval: int | None = None

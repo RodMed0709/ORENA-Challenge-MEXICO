@@ -3,7 +3,9 @@
 Reads the challenge parquet QA directly (offline-safe; bypasses HF Hub
 ``load_dataset``) and builds SDK ``Request``/``Reference`` pairs using the same
 parsing rules as ``focus.data.base_dataset.FocusDataset._parse_row``. Frames are
-sampled on-the-fly from the source videos via decord, one reader per video.
+sampled on-the-fly from the source videos via decord, one reader per video
+(``FrameProvider``) — or served from the shared frames_cache by identity key on a
+box that has the frames but not the videos (``CachedFrameProvider``).
 """
 
 from __future__ import annotations
@@ -160,3 +162,66 @@ class FrameProvider:
     def close(self) -> None:
         self._reader = None
         self._reader_key = None
+
+
+class CachedFrameProvider:
+    """Serve frames from the shared frames_cache instead of decoding the source video.
+
+    Same public surface as ``FrameProvider`` (``ensure_reader`` / ``get_frame`` /
+    ``close``), so ``run_baseline`` cannot tell them apart. Selected by setting
+    ``BaselineConfig.frames_cache``; unset = ``FrameProvider``, byte-identical.
+
+    🔴 The frame this returns is the SAME frame the decord path would return, because
+    both are addressed by ``frame_cache_name`` — the identity key
+    ``(dataset, video_id, frame_index)``, where ``frame_index`` is derived once in
+    ``load_frame_items`` as ``round(start_time * base_fps)``. This provider therefore
+    changes the SOURCE of the pixels, not WHICH pixels. The one difference it can
+    introduce is JPEG requantization of an already-decoded frame, which is why the
+    cache is written at quality 95 (``qualitative.py:54``).
+
+    Exists because UNAM has the QA parquets and the frames_cache but **no video files
+    at all** — measured 2026-08-17, ``find ~/storage -name '*.mp4'`` returns 0. On that
+    box ``FrameProvider`` cannot open a reader, so the alternative to this class is
+    moving the source videos onto a shared machine to re-derive frames that are
+    already sitting there.
+
+    🔴 MISSES RAISE (RULES §7). A cache miss must not fall back to decord and must not
+    yield a blank image: the first would fail on a box with no videos, and the second
+    would score a real question against an empty frame and report it as a wrong answer
+    rather than as a broken run. Gate coverage BEFORE the GPU — a miss discovered
+    mid-eval has already paid for the eval.
+    """
+
+    def __init__(self, cfg) -> None:
+        self._cfg = cfg
+        root = getattr(cfg, "frames_cache", None)
+        if root is None:
+            raise ValueError(
+                "CachedFrameProvider needs cfg.frames_cache set — with it unset the "
+                "run should be using FrameProvider (decord) instead."
+            )
+        self._root = Path(root)
+        if not self._root.is_dir():
+            raise FileNotFoundError(f"frames_cache is not a directory: {self._root}")
+
+    def path_for(self, item: FrameItem) -> Path:
+        """The file this item resolves to. Public so a gate can check it without I/O."""
+        return self._root / frame_cache_name(item)
+
+    def ensure_reader(self, item: FrameItem) -> None:
+        """No-op: there is no reader to open. Kept so the surface matches."""
+
+    def get_frame(self, item: FrameItem) -> Image.Image:
+        p = self.path_for(item)
+        if not p.exists():
+            raise FileNotFoundError(
+                f"frames_cache miss for {item.dataset}/{item.video_id} "
+                f"@ frame {item.frame_index} -> {p.name}. Not falling back to decord: "
+                "a silent fallback is how a partially-cached eval reports a broken run "
+                "as a set of wrong answers. Run the coverage gate before the GPU."
+            )
+        with Image.open(p) as im:
+            return im.convert("RGB")
+
+    def close(self) -> None:
+        """No-op: nothing is held open."""
