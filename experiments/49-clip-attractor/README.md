@@ -398,3 +398,64 @@ already here, and it is the next thing to run.
 
 ⚠️ And the ceiling caveat stands: +0.0421 is an ORACLE that assumes fixing conjunctions costs
 nothing on the 2,065 single-class rows, which currently score 0.801.
+
+---
+
+# 49e — `fo_class` and `number` fail on the SAME FRAMES. They are one front.
+
+Zero GPU. 364 frames carry both an `fo_class` and a `number` question, which makes the
+co-occurrence directly measurable on rung 19b ep4's own eval.
+
+|  | number right | number wrong |
+|---|---:|---:|
+| **fo_class right** | 138 | 127 |
+| **fo_class wrong** | 31 | **68** |
+
+```
+P(number wrong | fo_class wrong) = 0.687
+P(number wrong | fo_class right) = 0.479
+odds ratio                       = 2.384
+co-failure 0.1868 vs within-video null 0.1552 ± 0.0105   ⇒  z = 3.01
+```
+
+The null permutes `number` correctness **within video**, so video-level difficulty is
+controlled and the excess is not "some videos are hard".
+
+## And the gradient is the mechanism, not just the correlation
+
+By the number of classes in the frame's `fo_class` gold — a property of the **scene**, not of
+either question:
+
+| classes in gold | frames | `fo_class` acc | `number` acc |
+|---:|---:|---:|---:|
+| 1 | 263 | 0.852 | 0.580 |
+| 2 | 88 | 0.578 | 0.449 |
+| 3 | 11 | 0.091 | 0.182 |
+| 4 | 2 | 0.000 | 0.000 |
+
+**Scene multiplicity degrades both formats together.** And the `fo_class` curve against gold
+size (0.801 → 0.616 → 0.175 → 0.000 on the full set) has the same shape as the `number` curve
+against gold value that [[number-is-an-annotation-ceiling]] re-measured on three models
+(0.886 → 0.507 → 0.200 → 0.161 → 0.056).
+
+⇒ 🎯 **This is [[naming-equals-counting]], now with a per-frame test behind it.** `fo_class` and
+`number` are not two fronts with two budgets. They are **one deficit — enumeration — wearing two
+output formats**, and `number` is 2,094 rows plus `fo_class`'s 2,675 = **4,769 of 6,252**.
+
+🔑 **A lever on set enumeration is the only one identified that pays in both.** Every lever the
+campaign has costed so far bought one format and was priced against one bucket.
+
+## What this does NOT establish
+
+⚠️ **A shared cause is not the same as the cause being multiplicity.** A frame that is cluttered,
+bloody or badly lit is harder for both questions, and the within-video null does not remove that
+— it removes the video, not the frame. The gradient makes multiplicity the more parsimonious
+reading, because gold set size is *itself* a count of the scene, but a frame-difficulty
+confound is not excluded by this test.
+
+⚠️ **n = 364 frames**, and only 13 of them carry a gold of 3+ classes. The tail of the gradient
+is two and eleven frames. Read the direction, not the endpoints.
+
+⚠️ It does not name a lever. It says where one would have to act — **before the output format
+splits** — which is exactly where [[hidden-states-hold-the-count]] already found the count
+present at layer 24 and lost by the head.
