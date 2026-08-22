@@ -1,5 +1,60 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 🎯 2026-08-22 — FOR THE TEAM: rung 19b is a wash, the `fo_class` front is half its price, and the real lever is ENUMERATION
+
+Everything here is on `main` (`80fa0e1`…). Two decision notes:
+[[clip-attractor-is-two-videos]] and [[fo-class-and-number-are-one-front]]. Rung
+`experiments/49-clip-attractor/`. **49a/49b/49d/49e cost zero GPU; 49c cost ~50 min on one card.**
+
+**1. 🟢 Rung 19b FINISHED on 2026-08-21 and its result had not been read.** 28.25 h, five
+epochs, chained eval complete. **It is a WASH:** `ALL_ID` −0.0089, `ALL_OOD` +0.0075 against
+rung 47 ep4, neither excluding zero, and its best epoch (ep5, **0.6557**) never reaches rung 42
+ep4's **0.6744**. The results were sitting in `repo_leo` and are now in git.
+
+**2. 🔻 The `+0.0702` that has ranked the `fo_class` front since 2026-08-10 is a LOOSE
+CEILING.** It counts every error that *involves* Clip or Sponge — **90.7 % of all `fo_class`
+errors** — so it says little more than "fix `fo_class`". Rebuilt through `frame.metrics` on six
+arms, the attractor's own mass is **+0.0387**. Still over the ship bar; half what it was ranked on.
+Rung 36's README had already recorded that the figure **had no artifact**. It has one now.
+
+**3. 🔴 And the attractor is TWO VIDEOS.** Half the spurious `Clip` sits in 2–3 of 38
+videos, and `0024 - Heico - Sigma - 5` is the worst offender in **all six arms** across two
+corpora — 55.2 % of its clip-free frames draw a Clip, and it scores **0.416** against 0.748
+overall. Under `RULES` §13's video clustering that is effective n = 2–3 ⇒ **real as accuracy,
+fragile as a claim.** It is also not a Clip↔Sponge pair: **`Needle` loses 24.6 %** of its rows to
+Clip against Sponge's 13.3 %.
+
+**4. 🔴 Rung 19b's external positives do NOT move it (49c).** `fp_rate` 0.8619 vs rung 47's
+0.9024 — **−0.0405, missing the pre-registered 0.05 line**; −0.0730 on the clean band, which would
+clear it. Both recorded, threshold not moved. Moot anyway: **`a2`, with zero CholecT50 rows, lands
+within 0.008 of the arm built for this.** `Clip` recall is **1.0000 on all six models** at
+precision 0.4499 — near-unconditional, not a confusion.
+
+**5. 🎯 THE FINDING: the bigger lever is the MULTI-CLASS GOLD, and it is the same deficit as
+`number`.** Accuracy by classes-in-gold: **0.801 / 0.616 / 0.175 / 0.000**. Worth **+0.0421 from
+263 rows** (beats the attractor on 6/6 arms) and **3× less concentrated** — 32 of 38 videos, half
+across six. And on the 364 frames carrying both question types the two formats **fail together**:
+odds ratio **2.38**, **z = 3.01** against a within-video null, replicating **6/6** in direction.
+⇒ `fo_class` and `number` are **one enumeration deficit in two formats, 4,769 of 6,252 rows.**
+**A set-enumeration lever is the only one identified that pays in both.**
+
+**6. 🔴 Two blockers found while costing the data route.** The **CholecT50 source is no
+longer on the box** — only extracted frames survive, so negative supervision needs a 60 GB
+re-acquisition. **HeiSurF is near-dead on volume** (581 annotated frames against a 300 kill line)
+and blocked on a Synapse ACL. Neither should be paid for on rung 48's number: the phase ramp does
+**not** reproduce on our own eval (0.14–0.25, flat) — underpowered at 190 rows, but 4× off the
+rate the arm was sized against.
+
+**7. 📌 Housekeeping.** `assert_decisions_indexed` was RED again — `27b-is-a-teacher-not-a-candidate.md`
+carried `status: MEASURED (data axis) + TEAM CALL (the stop)` and the indexer takes one bare
+value, so `MEASURED.md` could not be rebuilt at all. Normalised with a `status_note`; content
+untouched. Also: the specular/metallic hypothesis for `Sigma-5` was measured and **refuted**
+(5/13 videos, p=0.58) — the **stapler** version stays open and is better shaped, because it
+explains the per-video concentration that brightness cannot.
+
+---
+
+
 ## 🟢 2026-08-19 01:30 — FOR THE TEAM: rung 47 is CLOSED, and the platform payload moved the target
 
 Everything here is on `main` (`754d618`). The full verdict is
