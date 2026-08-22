@@ -261,3 +261,72 @@ what says so — three frames are a hypothesis generator, never evidence.
 overall, which a single instrument in one corner barely moves. *"Sigma contains an instrument
 class our training set does not"* stays open, and it is a better-shaped hypothesis than
 brightness because it explains the **per-video concentration** that brightness cannot.
+
+---
+
+# 49c — SCORED 2026-08-22. No attributable effect, and the anchor is what says so.
+
+Two arms × 4,890 items, 24.8 min each, GPU 0. `env control: agreement 1.0` on 20 re-answered
+r42 items, so the anchors' env is not a confound. `RESULTS_clip_fp_anatomy_49.csv`,
+`RESULTS_probe_19b.csv`.
+
+## The `Clip` false-positive rate on the 1,332 provable negatives
+
+| model | `fp_rate` | `gap>300` (clean band) | Δ vs r47 | Δ `gap>300` |
+|---|---:|---:|---:|---:|
+| r06 | 0.9662 | 0.9542 | +0.0638 | +0.0928 |
+| **a2** | **0.8701** | **0.8131** | **−0.0323** | **−0.0483** |
+| r42 | 0.9159 | 0.8700 | +0.0135 | +0.0086 |
+| r47 *(control)* | 0.9024 | 0.8614 | — | — |
+| **19b ep4** | **0.8619** | **0.7884** | **−0.0405** | **−0.0730** |
+| 19b ep5 | 0.8581 | 0.7871 | −0.0443 | −0.0743 |
+
+## The verdict, in the order the pre-registration demands
+
+1. **The pre-registered line is ≥ 0.05 on `fp_rate`. It reads −0.0405. It MISSES**, by 0.0095.
+   That is the declared statistic and it is reported first on purpose.
+2. On the interpretable band — `gap>300`, 61 % of the negatives, the half whose label is not in
+   doubt — the drop is **−0.0730** and would clear the line. **Both are reported; the threshold
+   is not moved to the statistic that passes.**
+3. 🔴 **And it does not matter, because `a2` reaches −0.0323 / −0.0483 with ZERO Strasbourg
+   rows.** A checkpoint trained on a different corpus, months earlier, with no CholecT50 data
+   of any kind, lands within **0.008** of the arm built to move this number. 19b's margin over
+   the anchor that shares its variable is nothing; its margin over an anchor that does not
+   share it is almost the whole effect.
+
+⇒ **FAITHFUL NEGATIVE. External recognition positives have no attributable effect on the phase
+attractor.** Clip aggressiveness varies across checkpoints for reasons unrelated to this
+corpus — rung 48 said so from the other direction (*"every temporal cut inverts the pair"*) —
+and this rung now prices that variation at ±0.03–0.06, which swamps the arm.
+
+📌 **`Clip` recall is 1.0000 on every one of the six models.** They name a clip on **100 %** of
+the frames that contain one and on **86 %** of the frames that provably cannot. Precision
+0.4499. This is not a confusion, it is a **near-unconditional answer**.
+
+## The ruler cell, and why it does not promote anything
+
+`Specimen bag` F1 — the only cell rung 48 gave ordinal validity (3/3 in 15/15 folds):
+
+| model | bag F1 |
+|---|---:|
+| **19b ep5** | **0.9043** |
+| **19b ep4** | **0.9015** |
+| r42 | 0.8958 |
+| a2 | 0.8849 |
+| r47 | 0.8785 |
+| r06 | 0.8453 |
+
+🔴 **19b tops the ruler and the ruler is contaminated for it.** For the anchors these 15 videos
+are *unseen centre*; 19b trained on the other 35 CholecT50 videos, so for it they are *unseen
+scene*. The pre-registration said to say which one is being reported, and this is the case it
+existed for. **It is not evidence that 19b is the better model**, and its own headline
+(`bucket_mean` 0.6557 at ep5) is still below rung 42 ep4's **0.6744**, so nothing here reaches
+the standing bar for a submission.
+
+## What 49c licenses next
+
+Its pre-registered map said a flat `fp_rate` licenses *"negative supervision is the only
+remaining data route"*. That reading stands on this rung's own axis — **but 49a says the axis
+is wrong**: on the data we are actually scored on, the attractor is 0.14–0.25 and lives in two
+videos, not 0.86 across a corpus. **Do not fund the negative-supervision arm on this result.**
+The open question is 49a's: *what is different about `Sigma-5`*.
