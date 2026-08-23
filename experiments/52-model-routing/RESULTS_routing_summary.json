@@ -1,0 +1,16 @@
+{
+ "n_scored": 1008,
+ "note": "fo_class + number only; judge formats excluded",
+ "acc_27B_alone": 0.5198,
+ "acc_8B_alone": 0.6131,
+ "acc_routed_by_format": 0.6131,
+ "route_choice": {
+  "fo_class": "8B",
+  "number": "8B"
+ },
+ "gain_vs_best_single": 0.0,
+ "acc_oracle_per_question": 0.6766,
+ "oracle_headroom_over_best_single": 0.0635,
+ "only_27B_right": 64,
+ "only_8B_right": 158
+}
