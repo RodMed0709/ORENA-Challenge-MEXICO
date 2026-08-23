@@ -68,30 +68,36 @@ def dump(cfg: Config, manifest: "pd.DataFrame") -> Path:
     eng = QwenFrameEngine(BaselineConfig(model_path=cfg.model_path, max_pixels=cfg.max_pixels))
     eng.load()
 
-    feats, meta, kept = [], [], None
-    for i, r in enumerate(df.itertuples(), 1):
-        fp = Path(r.image_path)
-        if not fp.exists():
-            raise FileNotFoundError(f"{fp} -- missing frame for {r.qID}")
-        with Image.open(fp) as im:
-            image = im.convert("RGB")
-        messages = eng._messages(image, r.question)  # byte-identical to the real eval path
-        text = eng.processor.apply_chat_template(messages, tokenize=False,
-                                                 add_generation_prompt=True)
-        im_in, vid_in = process_vision_info(messages)
-        inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
-                               return_tensors="pt").to(eng.model.device)
-        with torch.no_grad():
-            out = eng.model(**inputs, output_hidden_states=True, use_cache=False)
-        hs = out.hidden_states
-        if kept is None:
-            kept = _kept_layers(len(hs), cfg)
-            print(f"kept layers ({len(kept)} of {len(hs)}): {kept}")
-        feats.append(np.stack([hs[l][0, -1].float().cpu().numpy() for l in kept]).astype("float16"))
-        meta.append({"qID": r.qID, "answer_format": r.answer_format})
-        if i % 200 == 0:
-            print(f"{i}/{len(df)}", flush=True)
-    eng.unload()
+    # 🔴 unload() MUST run even if a row raises mid-loop -- otherwise the loaded model (and
+    # every GPU tensor pinned by the exception's own traceback, which Jupyter/papermill keep
+    # alive for display) stays resident, and the NEXT dump() call in the same kernel piles a
+    # second full model on top and OOMs almost immediately. Cost a smoke-pool OOM to find.
+    try:
+        feats, meta, kept = [], [], None
+        for i, r in enumerate(df.itertuples(), 1):
+            fp = Path(r.image_path)
+            if not fp.exists():
+                raise FileNotFoundError(f"{fp} -- missing frame for {r.qID}")
+            with Image.open(fp) as im:
+                image = im.convert("RGB")
+            messages = eng._messages(image, r.question)  # byte-identical to the real eval path
+            text = eng.processor.apply_chat_template(messages, tokenize=False,
+                                                     add_generation_prompt=True)
+            im_in, vid_in = process_vision_info(messages)
+            inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
+                                   return_tensors="pt").to(eng.model.device)
+            with torch.no_grad():
+                out = eng.model(**inputs, output_hidden_states=True, use_cache=False)
+            hs = out.hidden_states
+            if kept is None:
+                kept = _kept_layers(len(hs), cfg)
+                print(f"kept layers ({len(kept)} of {len(hs)}): {kept}")
+            feats.append(np.stack([hs[l][0, -1].float().cpu().numpy() for l in kept]).astype("float16"))
+            meta.append({"qID": r.qID, "answer_format": r.answer_format})
+            if i % 200 == 0:
+                print(f"{i}/{len(df)}", flush=True)
+    finally:
+        eng.unload()
 
     out_dir = Path(cfg.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

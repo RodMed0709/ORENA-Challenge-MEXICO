@@ -50,50 +50,55 @@ def dump_number_distribution(model_path, manifest, *, max_pixels: int = 1280 * 7
     eng = QwenFrameEngine(BaselineConfig(model_path=model_path, max_pixels=max_pixels,
                                          max_new_tokens=2))
     eng.load()
-    tk = eng.processor.tokenizer
-    dig = {d: _single_token(tk, str(d)) for d in range(10)}
-    dig_ids = torch.tensor([dig[d] for d in range(10)], device=eng.model.device)
+    # 🔴 unload() MUST run even if a row raises -- see hidden_dump.dump()'s identical fix:
+    # an uncaught exception here leaves the model resident (pinned by the traceback Jupyter/
+    # papermill keep for display), and the next GPU call in the same kernel OOMs on top of it.
+    try:
+        tk = eng.processor.tokenizer
+        dig = {d: _single_token(tk, str(d)) for d in range(10)}
+        dig_ids = torch.tensor([dig[d] for d in range(10)], device=eng.model.device)
 
-    rows = []
-    for i, r in enumerate(manifest.itertuples(), 1):
-        with Image.open(r.image_path) as im:
-            image = im.convert("RGB")
-        messages = eng._messages(image, r.question)
-        text = eng.processor.apply_chat_template(messages, tokenize=False,
-                                                 add_generation_prompt=True)
-        im_in, vid_in = process_vision_info(messages)
-        inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
-                               return_tensors="pt").to(eng.model.device)
-        with torch.no_grad():
-            g = eng.model.generate(**inputs, max_new_tokens=2, do_sample=False,
-                                   output_scores=True, return_dict_in_generate=True)
-        p1 = torch.softmax(g.scores[0][0].float(), dim=-1)
-        first = int(g.sequences[0, inputs.input_ids.shape[1]])
-        pv = {d: float(p1[dig[d]]) for d in range(10)}
-        p_one = pv[1]
-        one_split_exact = first == dig[1]
-        if one_split_exact:
-            p2 = torch.softmax(g.scores[1][0].float(), dim=-1)
-            cont = float(p2[dig_ids].sum())
-            pv[1] = p_one * (1.0 - cont)
-            for d in (0, 1, 2):
-                pv[10 + d] = p_one * float(p2[dig[d]])
-        else:
-            for d in (0, 1, 2):
-                pv[10 + d] = 0.0
-        tot = sum(pv[v] for v in VALUES)
-        legal = [v for v in VALUES if v != 0]
-        ranked_legal = sorted(legal, key=lambda v: -pv[v])
-        rows.append({
-            "qID": r.qID,
-            "token_head_pred": ranked_legal[0],
-            "token_head_conf": pv[ranked_legal[0]] / max(tot, 1e-9),
-            "one_split_exact": one_split_exact,
-            **{f"p{v}": pv[v] for v in VALUES},
-        })
-        if i % 200 == 0:
-            print(f"{i}/{len(manifest)}", flush=True)
-    eng.unload()
+        rows = []
+        for i, r in enumerate(manifest.itertuples(), 1):
+            with Image.open(r.image_path) as im:
+                image = im.convert("RGB")
+            messages = eng._messages(image, r.question)
+            text = eng.processor.apply_chat_template(messages, tokenize=False,
+                                                     add_generation_prompt=True)
+            im_in, vid_in = process_vision_info(messages)
+            inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
+                                   return_tensors="pt").to(eng.model.device)
+            with torch.no_grad():
+                g = eng.model.generate(**inputs, max_new_tokens=2, do_sample=False,
+                                       output_scores=True, return_dict_in_generate=True)
+            p1 = torch.softmax(g.scores[0][0].float(), dim=-1)
+            first = int(g.sequences[0, inputs.input_ids.shape[1]])
+            pv = {d: float(p1[dig[d]]) for d in range(10)}
+            p_one = pv[1]
+            one_split_exact = first == dig[1]
+            if one_split_exact:
+                p2 = torch.softmax(g.scores[1][0].float(), dim=-1)
+                cont = float(p2[dig_ids].sum())
+                pv[1] = p_one * (1.0 - cont)
+                for d in (0, 1, 2):
+                    pv[10 + d] = p_one * float(p2[dig[d]])
+            else:
+                for d in (0, 1, 2):
+                    pv[10 + d] = 0.0
+            tot = sum(pv[v] for v in VALUES)
+            legal = [v for v in VALUES if v != 0]
+            ranked_legal = sorted(legal, key=lambda v: -pv[v])
+            rows.append({
+                "qID": r.qID,
+                "token_head_pred": ranked_legal[0],
+                "token_head_conf": pv[ranked_legal[0]] / max(tot, 1e-9),
+                "one_split_exact": one_split_exact,
+                **{f"p{v}": pv[v] for v in VALUES},
+            })
+            if i % 200 == 0:
+                print(f"{i}/{len(manifest)}", flush=True)
+    finally:
+        eng.unload()
     return pd.DataFrame(rows)
 
 
@@ -111,7 +116,7 @@ def dump_foclass_confidence(model_path, manifest, *, max_pixels: int = 1280 * 72
     token-head-confidence) needs and all it is claimed to provide.
     """
     import sys
-    for p in ("/workspace/repo/src", "/workspace/repo/vendor/orena-focus/src"):
+    for p in ("/workspace/repo_yyy/src", "/workspace/repo_yyy/vendor/orena-focus/src"):
         if p not in sys.path:
             sys.path.insert(0, p)
 
@@ -127,44 +132,47 @@ def dump_foclass_confidence(model_path, manifest, *, max_pixels: int = 1280 * 72
                                          max_new_tokens=max_new_tokens))
     eng.load()
 
-    rows = []
-    for i, r in enumerate(manifest.itertuples(), 1):
-        with Image.open(r.image_path) as im:
-            image = im.convert("RGB")
-        messages = eng._messages(image, r.question)
-        text = eng.processor.apply_chat_template(messages, tokenize=False,
-                                                 add_generation_prompt=True)
-        im_in, vid_in = process_vision_info(messages)
-        inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
-                               return_tensors="pt").to(eng.model.device)
-        with torch.no_grad():
-            g = eng.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False,
-                                   output_scores=True, return_dict_in_generate=True)
-        prompt_len = inputs.input_ids.shape[1]
-        gen_ids = g.sequences[0, prompt_len:]
-        # per-step P(the token actually chosen) -- `g.scores[t]` is the logits for step t,
-        # BEFORE any EOS-trim, so this only walks as many steps as were actually generated
-        step_probs = []
-        for t, tok_id in enumerate(gen_ids.tolist()):
-            if t >= len(g.scores):
-                break
-            p_t = torch.softmax(g.scores[t][0].float(), dim=-1)[tok_id]
-            step_probs.append(float(p_t))
-            if tok_id == eng.processor.tokenizer.eos_token_id:
-                break
-        answer = eng.processor.decode(gen_ids, skip_special_tokens=True).strip()
-        log_probs = np.log(np.clip(step_probs, 1e-12, 1.0))
-        rows.append({
-            "qID": r.qID,
-            "token_head_answer": answer[: 300],  # same char cap the SDK enforces downstream
-            "token_head_joint_logprob": float(log_probs.sum()),
-            "token_head_mean_logprob": float(log_probs.mean()) if len(log_probs) else float("nan"),
-            "token_head_conf": float(np.exp(log_probs.mean())) if len(log_probs) else float("nan"),
-            "n_gen_tokens": len(step_probs),
-        })
-        if i % 200 == 0:
-            print(f"{i}/{len(manifest)}", flush=True)
-    eng.unload()
+    # 🔴 unload() MUST run even if a row raises -- see hidden_dump.dump()'s identical fix.
+    try:
+        rows = []
+        for i, r in enumerate(manifest.itertuples(), 1):
+            with Image.open(r.image_path) as im:
+                image = im.convert("RGB")
+            messages = eng._messages(image, r.question)
+            text = eng.processor.apply_chat_template(messages, tokenize=False,
+                                                     add_generation_prompt=True)
+            im_in, vid_in = process_vision_info(messages)
+            inputs = eng.processor(text=[text], images=im_in, videos=vid_in, padding=True,
+                                   return_tensors="pt").to(eng.model.device)
+            with torch.no_grad():
+                g = eng.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False,
+                                       output_scores=True, return_dict_in_generate=True)
+            prompt_len = inputs.input_ids.shape[1]
+            gen_ids = g.sequences[0, prompt_len:]
+            # per-step P(the token actually chosen) -- `g.scores[t]` is the logits for step t,
+            # BEFORE any EOS-trim, so this only walks as many steps as were actually generated
+            step_probs = []
+            for t, tok_id in enumerate(gen_ids.tolist()):
+                if t >= len(g.scores):
+                    break
+                p_t = torch.softmax(g.scores[t][0].float(), dim=-1)[tok_id]
+                step_probs.append(float(p_t))
+                if tok_id == eng.processor.tokenizer.eos_token_id:
+                    break
+            answer = eng.processor.decode(gen_ids, skip_special_tokens=True).strip()
+            log_probs = np.log(np.clip(step_probs, 1e-12, 1.0))
+            rows.append({
+                "qID": r.qID,
+                "token_head_answer": answer[: 300],  # same char cap the SDK enforces downstream
+                "token_head_joint_logprob": float(log_probs.sum()),
+                "token_head_mean_logprob": float(log_probs.mean()) if len(log_probs) else float("nan"),
+                "token_head_conf": float(np.exp(log_probs.mean())) if len(log_probs) else float("nan"),
+                "n_gen_tokens": len(step_probs),
+            })
+            if i % 200 == 0:
+                print(f"{i}/{len(manifest)}", flush=True)
+    finally:
+        eng.unload()
     return pd.DataFrame(rows)
 
 
