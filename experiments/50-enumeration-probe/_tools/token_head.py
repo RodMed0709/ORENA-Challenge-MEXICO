@@ -35,7 +35,7 @@ def dump_number_distribution(model_path, manifest, *, max_pixels: int = 1280 * 7
     `manifest` needs `qID`, `image_path`, `question`. Mirrors rung 33's `logit_dump.run`.
     """
     import sys
-    for p in ("/workspace/repo/src", "/workspace/repo/vendor/orena-focus/src"):
+    for p in ("/workspace/repo_yyy/src", "/workspace/repo_yyy/vendor/orena-focus/src"):
         if p not in sys.path:
             sys.path.insert(0, p)
 

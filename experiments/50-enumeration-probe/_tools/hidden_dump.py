@@ -48,7 +48,7 @@ def dump(cfg: Config, manifest: "pd.DataFrame") -> Path:
     sibling pattern, or a plain FrameProvider dump -- this module only runs the model).
     """
     import sys
-    for p in ("/workspace/repo/src", "/workspace/repo/vendor/orena-focus/src"):
+    for p in ("/workspace/repo_yyy/src", "/workspace/repo_yyy/vendor/orena-focus/src"):
         if p not in sys.path:
             sys.path.insert(0, p)
 
