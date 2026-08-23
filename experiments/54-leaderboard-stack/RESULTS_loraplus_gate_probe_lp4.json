@@ -1,0 +1,27 @@
+{
+ "n_groups": 4,
+ "lrs": [
+  0.0002,
+  1e-06,
+  0.0008,
+  0.0008
+ ],
+ "n_params_per_group": [
+  368,
+  0,
+  368,
+  0
+ ],
+ "distinct_lrs": [
+  1e-06,
+  0.0002,
+  0.0008
+ ],
+ "is_identity": false,
+ "high_lr_group_is_lora_B": true,
+ "low_lr_group_has_lora_A": false,
+ "fast_group_example": "base_model.model.model.visual.blocks.0.attn.qkv.lora_B.default.weight",
+ "slow_group_example": null,
+ "loraplus_lr_ratio": 4.0,
+ "base_lr": 0.0002
+}
