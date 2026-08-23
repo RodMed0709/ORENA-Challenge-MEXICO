@@ -1,0 +1,294 @@
+{
+ "n_pairs": 218,
+ "n_discordant": 24,
+ "fo_templates_in_DISCORDANT": [
+  [
+   "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   18
+  ],
+  [
+   "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   4
+  ],
+  [
+   "What class is the foreign object located in the top/right relative to the image center? Please provide a class name.",
+   1
+  ],
+  [
+   "What class is the foreign object located in the bottom/right relative to the image center? Please provide a class name.",
+   1
+  ]
+ ],
+ "fo_templates_in_CONCORDANT": [
+  [
+   "List all foreign objects that are visible in this video frame. Please provide the class names or answer with none.",
+   89
+  ],
+  [
+   "Which combination of foreign object classes is visible in this frame? Please provide the class names or answer with none.",
+   71
+  ],
+  [
+   "There is one surgical foreign object visible in the frame. What surgical foreign object is visible in this video frame? Please provide a class name.",
+   17
+  ],
+  [
+   "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   6
+  ]
+ ],
+ "cnt_templates_in_DISCORDANT": [
+  [
+   "How many different foreign object classes appear in this frame? Please provide a number.",
+   13
+  ],
+  [
+   "How many different foreign object classes are visible in this frame? Please provide a number.",
+   3
+  ],
+  [
+   "How many different foreign object classes appear in this frame?",
+   3
+  ],
+  [
+   "In this frame, how many different foreign object classes appear? Please provide a number.",
+   2
+  ]
+ ],
+ "cnt_templates_in_CONCORDANT": [
+  [
+   "How many different foreign object classes appear in this frame? Please provide a number.",
+   79
+  ],
+  [
+   "How many different foreign object classes appear in this frame?",
+   31
+  ],
+  [
+   "What is the total number of different foreign object classes that appear in this frame? Please provide a number.",
+   14
+  ],
+  [
+   "How many different foreign object classes are visible in this frame? Please provide a number.",
+   14
+  ]
+ ],
+ "rows": [
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "External drain",
+   "cnt_q": "In this frame, how many different foreign object classes appear? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0004_Heico_Prokto_5_avi__298725.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 3,
+   "set_size": 1,
+   "delta": -2,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0005_Heico_Prokto_6_avi__186725.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes are visible in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0005_Heico_Prokto_6_avi__187375.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Needle",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 3,
+   "set_size": 1,
+   "delta": -2,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0006_Heico_Prokto_7_avi__210875.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0007_Heico_Prokto_8_avi__255250.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0008_Heico_Prokto_9_avi__302400.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes are visible in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0010_Heico_Rektum_1_avi__83350.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Clip",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0010_Heico_Rektum_1_avi__155300.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   "fo_a": "External drain",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0010_Heico_Rektum_1_avi__371800.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "In this frame, how many different foreign object classes appear? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0011_Heico_Rektum_2_avi__337025.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes appear in this frame?",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0013_Heico_Rektum_4_avi__81375.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the top/right relative to the image center? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0013_Heico_Rektum_4_avi__166300.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the bottom/right relative to the image center? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes appear in this frame?",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0014_Heico_Rektum_5_avi__29950.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Clip",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0015_Heico_Rektum_6_avi__49125.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "External drain",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0015_Heico_Rektum_6_avi__402675.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0017_Heico_Rektum_8_avi__104150.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Silicone loop",
+   "cnt_q": "What is the total number of different foreign object classes that appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0017_Heico_Rektum_8_avi__106125.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Clip",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/heico__0018_Heico_Rektum_9_avi__355525.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Specimen bag",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0001_Laparoscopic_Cholecystectomy_mp4__124890.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   "fo_a": "Specimen",
+   "cnt_q": "How many different foreign object classes are visible in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0007_Laparoscopic_Cholecystectomy_mp4__43260.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   "fo_a": "Sponge",
+   "cnt_q": "How many different foreign object classes are visible in this frame?",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0041_Laparoscopic_Cholecystectomy_mp4__17970.jpg"
+  },
+  {
+   "fo_q": "What class is the foreign object located in the bottom/left relative to the image center? Please provide a class name.",
+   "fo_a": "Specimen",
+   "cnt_q": "How many different foreign object classes appear in this frame?",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0068_Laparoscopic_Cholecystectomy_mp4__22140.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Specimen",
+   "cnt_q": "What is the total number of different foreign object classes that appear in this frame?",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0144_Laparoscopic_Cholecystectomy_mp4__32370.jpg"
+  },
+  {
+   "fo_q": "Which of the visible foreign objects has its centre closest to the centre of the image? Please provide a class name.",
+   "fo_a": "Specimen",
+   "cnt_q": "How many different foreign object classes appear in this frame? Please provide a number.",
+   "cnt_a": 2,
+   "set_size": 1,
+   "delta": -1,
+   "frame": "/mnt/storage/uaq_user/frames_cache/lapchole__0144_Laparoscopic_Cholecystectomy_mp4__32580.jpg"
+  }
+ ]
+}
