@@ -65,14 +65,13 @@ def dump(cfg: Config, manifest: "pd.DataFrame") -> Path:
     for col in ("qID", "image_path", "question", "answer_format"):
         assert col in df.columns, f"manifest missing required column {col!r}"
 
-    eng = QwenFrameEngine(BaselineConfig(model_path=cfg.model_path, max_pixels=cfg.max_pixels))
-    eng.load()
-
-    # 🔴 unload() MUST run even if a row raises mid-loop -- otherwise the loaded model (and
+    # 🔴 unload() MUST run even if load() or a row raises -- otherwise the loaded model (and
     # every GPU tensor pinned by the exception's own traceback, which Jupyter/papermill keep
     # alive for display) stays resident, and the NEXT dump() call in the same kernel piles a
     # second full model on top and OOMs almost immediately. Cost a smoke-pool OOM to find.
+    eng = QwenFrameEngine(BaselineConfig(model_path=cfg.model_path, max_pixels=cfg.max_pixels))
     try:
+        eng.load()
         feats, meta, kept = [], [], None
         for i, r in enumerate(df.itertuples(), 1):
             fp = Path(r.image_path)

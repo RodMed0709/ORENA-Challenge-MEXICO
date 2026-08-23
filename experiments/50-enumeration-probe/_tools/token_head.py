@@ -47,13 +47,14 @@ def dump_number_distribution(model_path, manifest, *, max_pixels: int = 1280 * 7
     from frame.config import BaselineConfig
     from frame.engine import QwenFrameEngine
 
+    # 🔴 unload() MUST run even if load() or a row raises -- see hidden_dump.dump()'s
+    # identical fix: an uncaught exception here leaves the model resident (pinned by the
+    # traceback Jupyter/papermill keep for display), and the next GPU call in the same
+    # kernel OOMs on top of it.
     eng = QwenFrameEngine(BaselineConfig(model_path=model_path, max_pixels=max_pixels,
                                          max_new_tokens=2))
-    eng.load()
-    # 🔴 unload() MUST run even if a row raises -- see hidden_dump.dump()'s identical fix:
-    # an uncaught exception here leaves the model resident (pinned by the traceback Jupyter/
-    # papermill keep for display), and the next GPU call in the same kernel OOMs on top of it.
     try:
+        eng.load()
         tk = eng.processor.tokenizer
         dig = {d: _single_token(tk, str(d)) for d in range(10)}
         dig_ids = torch.tensor([dig[d] for d in range(10)], device=eng.model.device)
@@ -128,12 +129,12 @@ def dump_foclass_confidence(model_path, manifest, *, max_pixels: int = 1280 * 72
     from frame.config import BaselineConfig
     from frame.engine import QwenFrameEngine
 
+    # 🔴 unload() MUST run even if load() or a row raises -- see hidden_dump.dump()'s
+    # identical fix.
     eng = QwenFrameEngine(BaselineConfig(model_path=model_path, max_pixels=max_pixels,
                                          max_new_tokens=max_new_tokens))
-    eng.load()
-
-    # 🔴 unload() MUST run even if a row raises -- see hidden_dump.dump()'s identical fix.
     try:
+        eng.load()
         rows = []
         for i, r in enumerate(manifest.itertuples(), 1):
             with Image.open(r.image_path) as im:
