@@ -481,3 +481,53 @@ throughout and its size tracks the checkpoint — not that it is absent in one.
 
 ⇒ The claim that survives: **scene multiplicity costs both formats, in every arm measured, and
 the effect is not carried by any single checkpoint or corpus.**
+
+---
+
+# 51f — the cardinality curve, cleaned of SELECTION questions. It survives.
+
+Prompted by rung 53's audit, which found the 24 "inconsistent" gold pairs were **not** label
+noise: 18 of them ask *"which object is closest to the centre?"* and 6 ask *"what class is in the
+bottom/left?"*. Those are **selection** questions — they request exactly one object, so their gold
+is size 1 **by construction**, whatever the frame holds.
+
+🔴 That put §51d's headline curve at risk, because it pooled two populations. **66 % of the
+gold-size-1 bucket is selection.** If selection is simply easier, "accuracy falls with gold size"
+would partly restate "picking is easier than listing" — a different claim, and one that would NOT
+license rung 50 arm A, which was already 5 h into training when this was checked.
+
+| curve | gold 1 | gold 2 | gold 3 | gold 4 |
+|---|---:|---:|---:|---:|
+| pooled — **as published in §51d** | 0.8010 (n=2065) | 0.6161 | 0.1754 | 0.000 |
+| **enumeration templates only** | **0.7624** (n=703) | 0.6161 | 0.1754 | 0.000 |
+
+🟢 **It survives.** The size-1 point falls **0.801 → 0.7624**, and nothing else moves — gold 2/3/4
+are enumeration-only already, since a selection question cannot have a multi-class gold. The
+collapse **0.762 → 0.616 → 0.175 → 0.000** is now measured across questions that all ask the same
+thing, so cardinality is the variable and not the template.
+
+📌 **The `multiclass_gold` headroom (+0.0421) is untouched**: it flips rows whose gold has ≥2
+classes, and every such row is enumeration by construction.
+
+🔻 **Correction to §51d as published.** The pooled size-1 figure of **0.801 overstates by
++0.0386**. The honest curve starts at **0.7624**. The conclusion does not change; the number
+does, and the number was quoted in a decision note.
+
+## 🔑 And the sharper statement of the deficit
+
+Same format, same classes, same frames — the only difference is whether the answer is a **set**
+or a **single pick**:
+
+| question kind | n | accuracy |
+|---|---:|---:|
+| **selection** — *"closest to the centre"*, *"in the bottom/left"*, *"there is one object"* | 1,362 | **0.8209** |
+| **enumeration** — *"list all"*, *"which combination"* | 1,313 | **0.6725** |
+| | | **−0.1484** |
+
+**Asking the model to LIST costs 0.148 against asking it to PICK.** It is not failing to see the
+objects — at 0.82 it sees them. It fails to **produce the set**. That is
+[[fo-class-and-number-are-one-front]] stated without needing a cardinality curve at all, and it is
+the cleanest single number this rung has produced.
+
+⚠️ Not a controlled comparison: the two populations are different questions on different frames,
+so scene difficulty is not held fixed. It bounds nothing — it points.
