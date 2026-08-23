@@ -3,7 +3,7 @@ question: Inside `fo_class`, which error class is the biggest and most robust le
 verdict: The biggest lever is NOT the Clip attractor but the MULTI-CLASS GOLD. It is worth more on all six arms (+0.0421 vs +0.0387 on rung 19b ep4) from fewer rows, and it is 3x less concentrated (32 of 38 videos, half across six, against 29 videos with half in two), so unlike the attractor it can survive a video-clustered CI. And it is not an `fo_class` problem: on the 364 frames carrying both question types, `fo_class` and `number` fail TOGETHER (odds ratio 2.38, z=3.01 against a within-video null), and scene multiplicity degrades both — direction replicates 6/6 arms, significance 5/6. They are one enumeration deficit in two output formats, 4,769 of 6,252 rows
 status: MEASURED
 date: 2026-08-22
-measured_in: experiments/49-clip-attractor/ — RESULTS_fo_class_headroom.json (multiclass_gold bound) · RESULTS_clip_fp_by_video.csv · README.md §49d, §49e (six-arm replication)
+measured_in: experiments/51-clip-attractor/ — RESULTS_fo_class_headroom.json (multiclass_gold bound) · RESULTS_clip_fp_by_video.csv · README.md §51d, §51e (six-arm replication)
 ---
 
 # Decision: the lever is set enumeration, and it pays in two formats
@@ -74,6 +74,26 @@ wearing two output formats, over **4,769 of 6,252** rows. The `fo_class` curve a
 so far bought one format and was priced against one bucket. And it points where
 rung 34's hidden-state probe already pointed: **before the output format splits** — the
 count is present at layer 24 and lost by the head.
+
+
+## 🟢 Independent corroboration, from a probe aimed somewhere else entirely
+
+[[flip-equivariance-holds-small-residual-cost]] (Yingyu, 2026-08-21) asked whether the shipped
+checkpoint tracks object POSITION under a horizontal flip. It is a spatial question on a
+different eval set, and the answer to it is "mostly yes". But its failure analysis is about us:
+
+> *"The other 8 changed, mostly by drifting in object COUNT or CLASS, not by getting the
+> left/right axis wrong — e.g. `heico__2244558` (`"1. Sponge: bottom/left"` → `"1. Clip:
+> bottom/left 2. Clip: bottom/left"`, a new class AND a duplicated item)."*
+
+One row, both defects: a **Sponge → Clip** substitution ([[clip-attractor-is-two-videos]]) and a
+**1 → 2 item inflation** (this note). ⇒ when a perturbation breaks this model's answer, what
+breaks is **which things and how many**, not where they are — measured by someone who was not
+looking for it, on a population this note never touched.
+
+⚠️ It is corroboration, not a second measurement: n=8 changed rows, and her own rung retracted a
+stronger enumeration claim over it (Fisher p = 0.088) before publishing. Cite the direction, not
+a magnitude.
 
 ## What this does NOT establish
 

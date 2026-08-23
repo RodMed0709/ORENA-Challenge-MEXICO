@@ -1,4 +1,4 @@
-"""Rung 49c — read rung 19b through rung 48's probe: did external POSITIVES move the attractor?
+"""Rung 51c — read rung 19b through rung 48's probe: did external POSITIVES move the attractor?
 
 Folder-private glue. Answers the 4,890 v2 probe items with 19b's epoch-4 and epoch-5
 checkpoints, then scores them with the SAME two functions that produced the four anchors
@@ -10,7 +10,7 @@ construction rather than by claim.
 every rung on the ladder. A probe answered another way would price the path, not the arm.
 
 ⚠️ The anchors' predictions are COPIED into this rung's runs dir rather than read in place.
-Rung 49 owns its artifacts; nothing here writes inside `rung48/`.
+Rung 51 owns its artifacts; nothing here writes inside `rung48/`.
 """
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ from pathlib import Path
 STORAGE = Path("/mnt/storage/uaq_user")
 REPO = STORAGE / "repo_rod"
 WORK48 = STORAGE / "rung48"
-WORK = STORAGE / "rung49"
-GPU = os.environ.get("RUNG49_GPU", "0")
-LIMIT = int(os.environ["RUNG49_LIMIT"]) if os.environ.get("RUNG49_LIMIT") else None
+WORK = STORAGE / "rung51"
+GPU = os.environ.get("RUNG51_GPU", "0")
+LIMIT = int(os.environ["RUNG51_LIMIT"]) if os.environ.get("RUNG51_LIMIT") else None
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU
 os.environ["HF_HOME"] = str(STORAGE / "hf_cache")
@@ -53,7 +53,7 @@ BASE = next((STORAGE / "hf_cache/hub/models--Qwen--Qwen3-VL-8B-Instruct/snapshot
 CKPT_ROOT = next((STORAGE / "rung19b/runs/19b_merged_ep5_v1/ckpt").glob("v0-*"))
 ARMS = {"19b_ep4": CKPT_ROOT / "checkpoint-5036", "19b_ep5": CKPT_ROOT / "checkpoint-6295"}
 ANCHORS = ["r06", "a2", "r42", "r47"]
-OUT = REPO / "experiments/49-clip-attractor"
+OUT = REPO / "experiments/51-clip-attractor"
 CORPUS = WORK48 / "corpus/probe_items_v2.jsonl"
 
 
@@ -112,7 +112,7 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     env_control(items)
 
-    # The anchors, copied in so rung 49 owns every byte it scores.
+    # The anchors, copied in so rung 51 owns every byte it scores.
     for m in ANCHORS:
         src = WORK48 / "runs" / m / "predictions_v2_full.csv"
         if not src.exists():

@@ -1,4 +1,4 @@
-"""Rung 49b driver — the specular/metallic hypothesis, on rung 19b ep4's own eval."""
+"""Rung 51b driver — the specular/metallic hypothesis, on rung 19b ep4's own eval."""
 from __future__ import annotations
 
 import os
@@ -7,7 +7,7 @@ from pathlib import Path
 
 STORAGE = Path("/mnt/storage/uaq_user")
 REPO = STORAGE / "repo_rod"
-OUT = REPO / "experiments/49-clip-attractor"
+OUT = REPO / "experiments/51-clip-attractor"
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")

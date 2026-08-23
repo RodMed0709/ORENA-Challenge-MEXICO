@@ -1,4 +1,4 @@
-"""Rung 49b — is the spurious `Clip` triggered by SPECULAR / METALLIC brightness?
+"""Rung 51b — is the spurious `Clip` triggered by SPECULAR / METALLIC brightness?
 
 Three `Sigma-5` false positives were opened and looked at before this was written (the
 `RULES` habit that caught the Voxel51 mismatch). Two things stood out and neither is a clip:

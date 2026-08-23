@@ -3,7 +3,7 @@ question: How big is the `fo_class` Clip front really, what shape is the defect,
 verdict: The quoted +0.0702 is a LOOSE CEILING — it counts every error that *involves* Clip or Sponge, which is 90.7% of all `fo_class` errors, so it says little more than "fix fo_class". The attractor's own mass is +0.0387, still over the ship bar. But it is not a Clip-vs-Sponge pair (Needle loses 24.6% of its rows to Clip against Sponge's 13.3%) and it is not a global class prior — HALF of it sits in 2-3 of 38 videos, with `0024-Heico-Sigma-5` the worst offender in all six arms measured, so it cannot clear a video-clustered CI. External positives (rung 19b) have no attributable effect: a2, with zero CholecT50 rows, lands within 0.008 of the arm built to move the number
 status: MEASURED
 date: 2026-08-22
-measured_in: experiments/49-clip-attractor/ — RESULTS_fo_class_headroom.json · RESULTS_fo_class_per_class.csv · RESULTS_clip_fp_by_video.csv · RESULTS_clip_fp_anatomy_49.csv · RESULTS_specular_summary.json
+measured_in: experiments/51-clip-attractor/ — RESULTS_fo_class_headroom.json · RESULTS_fo_class_per_class.csv · RESULTS_clip_fp_by_video.csv · RESULTS_clip_fp_anatomy_49.csv · RESULTS_specular_summary.json
 ---
 
 # Decision: the Clip front is half its advertised size, and it is two rooms
@@ -75,7 +75,7 @@ videos. ⇒ it is the Sigma domain shift seen from the emission side, not a new 
 📌 Also: the FP rate is **4× higher** on questions asking for a *combination* of classes (0.410)
 than on ones presupposing a single object (0.108). Being asked for a set is part of the trigger.
 
-## 🔴 External positives do not move it (rung 49c)
+## 🔴 External positives do not move it (rung 51c)
 
 Rung 19b ep4 on rung 48's 1,332 provable negatives: `fp_rate` **0.8619** vs rung 47's 0.9024 —
 **−0.0405, missing the pre-registered 0.05 line by 0.0095**; −0.0730 on the clean `gap>300`
@@ -99,7 +99,7 @@ flat**, against 0.85–0.95 climbing on CholecT50. **Underpowered — 190 rows o
 recorded as such, NOT as a refutation.** But the negative-supervision arm was sized against a
 rate ~4× the one we are scored on. **Do not fund it on rung 48's number.**
 
-## Closed cheaply: the specular / metallic hypothesis (49b)
+## Closed cheaply: the specular / metallic hypothesis (51b)
 
 Three `Sigma-5` false positives were opened by eye first and suggested brightness — specular
 highlights, or the large metallic stapler shaft that a cholecystectomy-heavy training set never

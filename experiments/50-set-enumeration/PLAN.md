@@ -118,8 +118,8 @@ it, while it does apply to (and kills) an oversampling arm.
 
 🔴 **And it is the OPPOSITE sign to rung 22's planned variable.** Rung 22 proposed per-SAMPLE
 normalisation, which equalises rows and therefore *removes* gradient from long answers — i.e.
-from exactly the multi-class rows rung 49 identified as the deficit. **Rung 22's variable is
-contraindicated by rung 49 and is not revived here.**
+from exactly the multi-class rows rung 51 identified as the deficit. **Rung 22's variable is
+contraindicated by rung 51 and is not revived here.**
 
 ### Gates before the GPU (arm B)
 | | gate | dies if |
@@ -138,8 +138,8 @@ ep4 through `frame.metrics`, CI clustered on **VIDEO** (`RULES` §13).
 **Both buckets, always.** `object_recognition` AND `aggregation`, reported side by side. An arm
 that lifts one and drops the other by a comparable amount is a **WASH** and is recorded as one.
 
-**Mechanism check, not a promotion signal:** re-run rung 49a's anatomy
-(`experiments/49-clip-attractor/_tools/fo_class_anatomy.py`) on the arm. **The cardinality curve
+**Mechanism check, not a promotion signal:** re-run rung 51a's anatomy
+(`experiments/51-clip-attractor/_tools/fo_class_anatomy.py`) on the arm. **The cardinality curve
 (0.801 / 0.616 / 0.175 / 0.000) must flatten.** If the headline moves and the curve does not,
 the arm won for some other reason and the reason is unknown.
 

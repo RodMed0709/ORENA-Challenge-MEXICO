@@ -1,7 +1,7 @@
-# Rung 49 — the `Clip` attractor: how big is it, and does external data move it?
+# Rung 51 — the `Clip` attractor: how big is it, and does external data move it?
 
-> **Status: 49c RUNNING** (2026-08-22, UNAM `tmux rod-rung49c`, GPU 0).
-> Pre-registered before the GPU. Heavy artifacts in `/mnt/storage/uaq_user/rung49/`.
+> **Status: 49c RUNNING** (2026-08-22, UNAM `tmux rod-rung51c`, GPU 0).
+> Pre-registered before the GPU. Heavy artifacts in `/mnt/storage/uaq_user/rung51/`.
 
 ## Why this rung exists
 
@@ -29,7 +29,7 @@ worlds and they choose different next moves.
 | 19b | `--dataset`: + 5,718 Strasbourg **positives** | 47 ep4 | trained; **wash** on the headline |
 | **49c (this)** | *nothing trained* — 19b read through rung 48's probe | 42 / 47 anchors | **running** |
 
-## 49c — the pre-registered question and its readings
+## 51c — the pre-registered question and its readings
 
 **Does adding external recognition POSITIVES move the phase attractor?**
 Scored on rung 48's v2 probe, 4,890 items over the 15 held-out CholecT50 videos, through
@@ -61,7 +61,7 @@ does not. Reported as such.
 
 ---
 
-# 49a — MEASURED 2026-08-22. The `+0.0702` was a ceiling, and the defect is not a PAIR.
+# 51a — MEASURED 2026-08-22. The `+0.0702` was a ceiling, and the defect is not a PAIR.
 
 Zero GPU. Six arms (rung 19b ep3–5, rung 47 ep3–5), the full 6,252-question eval, every
 number through `frame.metrics.stratified_report`. `RESULTS_fo_class_anatomy.csv`,
@@ -224,7 +224,7 @@ being the default filler once the model has decided to name more than one thing.
 
 ---
 
-# 49b — the specular / metallic hypothesis is a FAITHFUL NEGATIVE
+# 51b — the specular / metallic hypothesis is a FAITHFUL NEGATIVE
 
 Three `Sigma-5` false positives were opened and looked at first. Two things stood out, neither
 a clip: one frame is dominated by a large metallic instrument shaft — **sigmoid resection uses
@@ -264,7 +264,7 @@ brightness because it explains the **per-video concentration** that brightness c
 
 ---
 
-# 49c — SCORED 2026-08-22. No attributable effect, and the anchor is what says so.
+# 51c — SCORED 2026-08-22. No attributable effect, and the anchor is what says so.
 
 Two arms × 4,890 items, 24.8 min each, GPU 0. `env control: agreement 1.0` on 20 re-answered
 r42 items, so the anchors' env is not a confound. `RESULTS_clip_fp_anatomy_49.csv`,
@@ -329,11 +329,11 @@ Its pre-registered map said a flat `fp_rate` licenses *"negative supervision is 
 remaining data route"*. That reading stands on this rung's own axis — **but 49a says the axis
 is wrong**: on the data we are actually scored on, the attractor is 0.14–0.25 and lives in two
 videos, not 0.86 across a corpus. **Do not fund the negative-supervision arm on this result.**
-The open question is 49a's: *what is different about `Sigma-5`*.
+The open question is 51a's: *what is different about `Sigma-5`*.
 
 ---
 
-# 49d — the bigger lever is NOT the attractor. It is the multi-class gold.
+# 51d — the bigger lever is NOT the attractor. It is the multi-class gold.
 
 Zero GPU, same six arms. Found while testing an alternative explanation for `Sigma-5`, and it
 outgrew it.
@@ -401,7 +401,7 @@ nothing on the 2,065 single-class rows, which currently score 0.801.
 
 ---
 
-# 49e — `fo_class` and `number` fail on the SAME FRAMES. They are one front.
+# 51e — `fo_class` and `number` fail on the SAME FRAMES. They are one front.
 
 Zero GPU. 364 frames carry both an `fo_class` and a `number` question, which makes the
 co-occurrence directly measurable on rung 19b ep4's own eval.
