@@ -1,0 +1,13 @@
+arm,kind,gsize,size,acc
+control_rung47_ep4,enumeration,1,703,0.7752
+control_rung47_ep4,enumeration,2,547,0.6234
+control_rung47_ep4,enumeration,3,57,0.2105
+control_rung47_ep4,enumeration,4,6,0.3333
+50a_countprefix_v1,enumeration,1,703,0.7809
+50a_countprefix_v1,enumeration,2,547,0.6015
+50a_countprefix_v1,enumeration,3,57,0.1404
+50a_countprefix_v1,enumeration,4,6,0.0
+50b_contweight_v1,enumeration,1,703,0.8208
+50b_contweight_v1,enumeration,2,547,0.5978
+50b_contweight_v1,enumeration,3,57,0.2632
+50b_contweight_v1,enumeration,4,6,0.1667
