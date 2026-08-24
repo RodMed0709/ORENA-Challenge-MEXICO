@@ -1,0 +1,2 @@
+notebook,rung,metric_primary,probe_train_accuracy,probe_ood_accuracy,model_ood_accuracy,delta_probe_minus_model,n_id_fit,n_ood_read,n_videos_total,verdict
+00_cardinality_probe.ipynb,55,cardinality_accuracy,0.7419962335216572,0.8849104859335039,0.850383631713555,0.0345268542199489,531,782,38,POSITIVE
