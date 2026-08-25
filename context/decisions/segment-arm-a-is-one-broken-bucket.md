@@ -2,6 +2,8 @@
 question: What does the SEGMENT arm that was trained and never read actually score, and how far is it from the bar?
 verdict: 0.4964 `bucket_mean` against a 0.5118 bar — 0.0154 short, and the ENTIRE shortfall is one bucket answering with a constant. `temporal_grounding` scores 0.0351 (ID) and 0.0457 (OOD) against trivial floors of 0.4392 and 0.3299: 72.5 % of its raw outputs are the literal string `00:00:00`. Lifting that bucket to its own FLOOR — no skill, just not answering zero — adds +0.0688 and puts the arm at 0.565, clear of the bar. Meanwhile `object_recognition` beats its floor in BOTH halves (+0.029 ID, +0.064 OOD), so the FRAME expertise transfers. The arm is not weak; it is nine working buckets and one broken one.
 status: MEASURED
+status_note: mechanism PARTIALLY RETRACTED 2026-08-25 — the bucket and its
+  arithmetic stand; the zero-attractor explanation and the rung it licensed do not
 date: 2026-08-17
 measured_in: experiments_segment/01-viability/RESULTS_armA_stratified.json (6,254 test rows, A100 80 GB, ~1.6 h, ~$2)
 question_derived: false
@@ -93,3 +95,73 @@ not stranded by the track change.
   deflation factor for every SEGMENT number after it.
 - 🔴 **Do not read the three small red buckets as capability.** `aggregation_ID` is 22 questions;
   its −0.277 is six answers.
+
+---
+
+## 🔻 CORRECTION 2026-08-25 — the mechanism is refuted, and with it the rung it licensed
+
+- **Measured by:** `experiments_segment/01-viability/_tools/probe_time_target.py` →
+  `RESULTS_time_target_premise.json`. Pure pandas over the two `segment` parquets, **zero GPU**,
+  no model and no predictions. Run before spending the 12 h this note licensed.
+
+**What this note claimed:** *"`corpus` rewrites the gold to an offset from clip start; that
+concentrated the target near zero and the model learned the mode instead of the value.
+Training-side defect."* And on that mechanism it licensed one rung: `ExportConfig.relative_time
+= False`.
+
+**🔴 The premise is false. There is no near-zero concentration.** The `2a` relative target,
+with `2b` elapsed spans separated out by the module's own markers:
+
+| | train (5,014 `2a` single-gold) | test (2,229) |
+|---|---:|---:|
+| median offset | **44.0 s** | **47.0 s** |
+| p25 / p75 | 18 / 92 s | 18 / 90 s |
+| offset **exactly 0** | **1.08 %** | 1.62 % |
+| offset within 10 s | 14.0 % | 13.8 % |
+| outside `[0, duration]` | **0** | **0** |
+
+The target is spread cleanly over the clip, never violates its bounds, and its mode is nowhere
+near zero. **`relative_time = False` removes an attractor that was never there.** It would also
+trade a bounded `[0, 299 s]` target for an absolute one spread over hours, which is a plausible
+regression and not a fix.
+
+**🔴 And `00:00:00` is not the target's mode — it is barely a strategy.** Answering that one
+constant for every question scores **2.56 %**; the clip midpoint scores 3.63 %. Arm A scores
+**3.51 % (ID) / 4.57 % (OOD)**. The arm sits **one to two points above answering a constant**.
+That is not a model that learned an attractor; it is a model that cannot localise in time and
+emits something because it must emit something.
+
+⇒ The failure is **capability**, not target format. Changing what the head is asked to *say* has
+no measured reason to fix it — the same shape [[enumeration-is-not-fixed-by-output-format]] found
+on the FRAME side, arrived at independently.
+
+### 🔻 An intermediate claim made during this probe, retracted in the same pass
+
+It was briefly concluded that the K≤36 frame grid is **structurally** too coarse: the sampling
+interval exceeds the acceptance window in **76.5 %** of test rows (median spacing 4.58 s against
+a 2.32 s threshold). **The statistic is right and the inference from it was wrong.** The distance
+to the *nearest* grid point is at most half the spacing, and `share_half_spacing_gt_threshold` is
+**0.0000** — a clairvoyant oracle that picks the nearest grid point reaches the gold in
+**2,229 of 2,229** rows. `frames_for` is dimensioned for exactly this and the cap does not break it.
+
+The honest ceiling is the one already in the source, not a new one: `corpus.py:66-70` records
+that at coverage density a perfect detector still scores only **~0.51**, because it must name a
+point with no error budget. Against floors of 0.4392 / 0.3299 the **+0.0688 stays reachable in
+principle** — with much less room than this note implied.
+
+### What survives, and what does not
+
+🟢 **Survives, untouched:** the bucket is 2,436 questions / 39 % of the corpus / 2/10 of the
+headline at ~4 %; the arithmetic that reaching its own floor is worth **+0.0688 → 0.565**, past
+the bar; that **0 predictions are malformed** so the harness is exonerated and this is
+training-side; and that `object_recognition` clears its floor on both halves.
+
+🔴 **Does not survive:** the zero-attractor mechanism, the analogy to
+[[zero-is-format-localized]] on this axis, and **the first bullet of "What this licenses"** —
+`relative_time = False`, target rebalancing and split `2a`/`2b` supervision were all reasons
+built on a concentration that does not exist. The two remaining bullets (submit arm A for
+calibration; do not read the three small red buckets as capability) are unaffected.
+
+⇒ **The bucket is still the right target and the named lever is not.** A rung here needs a
+hypothesis about temporal localisation with a mechanism, pre-registered with the diagnostic that
+would falsify it — not another rewrite of the answer string.
