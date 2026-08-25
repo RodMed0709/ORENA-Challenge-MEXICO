@@ -1,4 +1,4 @@
-"""Rung 14 (appearance augmentation) against its own control, on the CENTRE ruler.
+"""One probed model against another on the CENTRE ruler, jackknifed over the 15 videos.
 
 WHY THIS FILE EXISTS AND `probe_v2_report` DOES NOT ANSWER IT
 `probe_v2_report.MODELS` is the four anchored models, and its jackknife asks one question:
@@ -6,10 +6,10 @@ does a cell reproduce the three PLATFORM anchors 15/15? r14 has no platform scor
 will, so adding it there would change the anchor test into something else. This asks the
 narrower question r14 exists to answer, with the SAME scorer imported, never reimplemented.
 
-THE PAIR
-r14's `args.json` records lr 2e-5, r8/a32, freeze_aligner=true, target_modules=[all-linear],
-seed 42 -- rung 06's recipe exactly, differing only in `--dataset` (train_aug.jsonl). So r06
-is the control by construction, and the delta is the augmentation.
+THE PAIR IS THE CALLER'S PROBLEM, AND IT HAS TO BE A REAL ONE
+This reports a delta; it cannot check that the two models differ in one variable. Pass a pair
+whose `args.json` files differ in exactly the thing being read -- e.g. r14 vs r06 (identical
+recipe, only `--dataset` moves), or two epochs of ONE run (only the checkpoint moves).
 
 WHY LEAVE-ONE-VIDEO-OUT
 `RULES` 13 clusters on video. A full-set delta of a hundredth over 15 videos can be one
@@ -24,17 +24,16 @@ import pandas as pd
 
 import probe_v2_report as R          # the scorer, imported not copied
 
-ARM, CONTROL = "r14", "r06"
 
 
-def compare(runs: Path, corpus: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+def compare(runs: Path, corpus: Path, ARM: str, CONTROL: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     # `R.load` iterates `R.MODELS`, the four anchored models. Widen that list for this
     # call only, so the join, the item parsing and the scorer stay R's and just one more
     # model rides through them. Restored afterwards: leaving it widened would silently
     # change the anchor test the next caller of `R.report` runs.
     saved = R.MODELS
     try:
-        R.MODELS = list(saved) + [ARM]
+        R.MODELS = list(dict.fromkeys(list(saved) + [ARM, CONTROL]))
         d = R.load(runs, corpus)
     finally:
         R.MODELS = saved
@@ -51,8 +50,8 @@ def compare(runs: Path, corpus: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
         s = {m: R.score(d[m][d[m].video != v]) for m in (CONTROL, ARM)}
         rows.append({
             "dropped": v,
-            "bag_f1_r06": s[CONTROL]["bag_f1"],
-            "bag_f1_r14": s[ARM]["bag_f1"],
+            "bag_f1_control": s[CONTROL]["bag_f1"],
+            "bag_f1_arm": s[ARM]["bag_f1"],
             "delta": s[ARM]["bag_f1"] - s[CONTROL]["bag_f1"],
             "arm_wins": s[ARM]["bag_f1"] > s[CONTROL]["bag_f1"],
         })
@@ -61,7 +60,8 @@ def compare(runs: Path, corpus: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 if __name__ == "__main__":
     runs, corpus = Path(sys.argv[1]), Path(sys.argv[2])
-    full, folds = compare(runs, corpus)
+    ARM, CONTROL = sys.argv[3], sys.argv[4]
+    full, folds = compare(runs, corpus, ARM, CONTROL)
     print(full.to_string())
     d = full.loc[ARM, "bag_f1"] - full.loc[CONTROL, "bag_f1"]
     print(f"\nTHE RULER  bag_f1: {full.loc[CONTROL,'bag_f1']:.4f} -> "
@@ -70,5 +70,5 @@ if __name__ == "__main__":
           f"(delta min {folds.delta.min():+.4f}, max {folds.delta.max():+.4f})")
     print()
     print(folds.round(4).to_string(index=False))
-    if len(sys.argv) > 3:
-        folds.to_csv(Path(sys.argv[3]) / "RESULTS_r14_vs_r06_jackknife.csv", index=False)
+    if len(sys.argv) > 5:
+        folds.to_csv(Path(sys.argv[5]) / f"RESULTS_{ARM}_vs_{CONTROL}_jackknife.csv", index=False)
