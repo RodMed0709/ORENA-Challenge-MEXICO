@@ -1,0 +1,6 @@
+arm,eval_set,epoch,ckpt,minutes,aggregation_ID,object_recognition_ID,aggregation_OOD,object_recognition_OOD,bucket_mean,acc_ID,acc_OOD,margin_ID,margin_OOD
+"19b_external (A2 + 5,718 Strasbourg)",full 6252 (38 videos),1,checkpoint-1259,37.8,0.399,0.6134,0.4992,0.6744,0.5465,0.5222,0.5923,0.1852,0.1325
+"19b_external (A2 + 5,718 Strasbourg)",full 6252 (38 videos),2,checkpoint-2518,36.8,0.423,0.6273,0.5883,0.7421,0.5952,0.5404,0.67,0.2034,0.2103
+"19b_external (A2 + 5,718 Strasbourg)",full 6252 (38 videos),3,checkpoint-3777,36.4,0.4733,0.7137,0.5936,0.7478,0.6321,0.6115,0.6755,0.2744,0.2157
+"19b_external (A2 + 5,718 Strasbourg)",full 6252 (38 videos),4,checkpoint-5036,36.3,0.5005,0.7377,0.5845,0.7689,0.6479,0.6372,0.6825,0.3002,0.2228
+"19b_external (A2 + 5,718 Strasbourg)",full 6252 (38 videos),5,checkpoint-6295,36.4,0.5068,0.7299,0.6021,0.784,0.6557,0.635,0.6987,0.298,0.239

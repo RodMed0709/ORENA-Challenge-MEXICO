@@ -1,0 +1,25 @@
+comparison,cell,n,videos,delta,ci_low,ci_high,excludes_0
+19b ep3 - 47 ep3,aggregation_ID,955,28,-0.0019,-0.0462,0.0451,False
+19b ep3 - 47 ep3,object_recognition_ID,1296,28,-0.0171,-0.0573,0.0206,False
+19b ep3 - 47 ep3,temporal_grounding_ID,1,1,0.0,0.0,0.0,False
+19b ep3 - 47 ep3,ALL_ID,2252,28,-0.0049,-0.0328,0.0244,False
+19b ep3 - 47 ep3,aggregation_OOD,1875,10,-0.0024,-0.0299,0.0256,False
+19b ep3 - 47 ep3,object_recognition_OOD,2125,10,-0.0235,-0.0569,0.0077,False
+19b ep3 - 47 ep3,temporal_grounding_OOD,0,0,,,,False
+19b ep3 - 47 ep3,ALL_OOD,4000,10,-0.0107,-0.0338,0.012,False
+19b ep4 - 47 ep4,aggregation_ID,955,28,-0.0249,-0.0636,0.0155,False
+19b ep4 - 47 ep4,object_recognition_ID,1296,28,-0.0027,-0.0369,0.0309,False
+19b ep4 - 47 ep4,temporal_grounding_ID,1,1,-1.0,-1.0,-1.0,True
+19b ep4 - 47 ep4,ALL_ID,2252,28,-0.0089,-0.0347,0.0171,False
+19b ep4 - 47 ep4,aggregation_OOD,1875,10,0.0116,-0.0177,0.0406,False
+19b ep4 - 47 ep4,object_recognition_OOD,2125,10,0.0031,-0.0205,0.0288,False
+19b ep4 - 47 ep4,temporal_grounding_OOD,0,0,,,,False
+19b ep4 - 47 ep4,ALL_OOD,4000,10,0.0075,-0.0113,0.0258,False
+19b ep5 - 47 ep5,aggregation_ID,955,28,-0.0212,-0.0596,0.0171,False
+19b ep5 - 47 ep5,object_recognition_ID,1296,28,0.0029,-0.029,0.0333,False
+19b ep5 - 47 ep5,temporal_grounding_ID,1,1,0.0,0.0,0.0,False
+19b ep5 - 47 ep5,ALL_ID,2252,28,-0.0058,-0.0299,0.0195,False
+19b ep5 - 47 ep5,aggregation_OOD,1875,10,0.0042,-0.0265,0.0332,False
+19b ep5 - 47 ep5,object_recognition_OOD,2125,10,-0.0153,-0.0369,0.0076,False
+19b ep5 - 47 ep5,temporal_grounding_OOD,0,0,,,,False
+19b ep5 - 47 ep5,ALL_OOD,4000,10,-0.0047,-0.0213,0.0125,False
