@@ -71,10 +71,15 @@ def answer_items(model_path: Path | str, items: pd.DataFrame, frames_dir: Path |
         cfg.temperature = temperature
 
     if vote_mode is not None:
-        from focus.foreign_objects import FOType
+        # `_load_fotype` and NOT `from focus.foreign_objects import FOType`: that direct
+        # import is exactly what the loader exists to work around — `focus/__init__.py`
+        # eagerly pulls transformers/datasets, so the package import dies anywhere the
+        # heavy deps are absent while the module itself loads fine. RULES §8b also
+        # forbids hard-coding the accepted set, and the loader is the one reader of it.
+        from frame.metrics import _load_fotype
         from frame.vote import vote_fo_class
 
-        valid_names = tuple(FOType.names())
+        valid_names = tuple(_load_fotype().names())
 
     eng = QwenFrameEngine(cfg)
     eng.load()
