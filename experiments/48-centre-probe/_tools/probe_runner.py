@@ -18,6 +18,7 @@ import logging
 import math
 import re
 import time
+from bisect import bisect_left
 from collections import defaultdict
 from pathlib import Path
 from typing import Literal
@@ -52,13 +53,20 @@ def answer_items(model_path: Path | str, items: pd.DataFrame, frames_dir: Path |
     if vote_mode == "sample" and temperature <= 0:
         raise ValueError("temperature must be positive in sample mode")
 
-    temporal_index: dict[str, list[tuple[int, Path]]] = defaultdict(list)
+    temporal_entries: dict[str, list[tuple[int, Path]]] = defaultdict(list)
+    temporal_index: dict[str, tuple[tuple[int, ...], tuple[Path, ...]]] = {}
     if vote_mode == "temporal":
         pattern = re.compile(r"^cholect50__(.+)__(\d{6})\.jpg$")
         for path in frames_dir.glob("cholect50__*.jpg"):
             match = pattern.match(path.name)
             if match:
-                temporal_index[match.group(1)].append((int(match.group(2)), path))
+                temporal_entries[match.group(1)].append((int(match.group(2)), path))
+        for video, entries in temporal_entries.items():
+            entries.sort(key=lambda entry: entry[0])
+            temporal_index[video] = (
+                tuple(frame for frame, _ in entries),
+                tuple(path for _, path in entries),
+            )
 
     from frame.config import BaselineConfig
     from frame.engine import QwenFrameEngine
@@ -108,14 +116,28 @@ def answer_items(model_path: Path | str, items: pd.DataFrame, frames_dir: Path |
                        "vote_counts": json.dumps(counts, ensure_ascii=False,
                                                  separators=(",", ":"))}
             else:
-                candidates = temporal_index.get(r.video, [])
-                if not any(frame == r.frame for frame, _ in candidates):
+                frame_numbers, frame_paths = temporal_index.get(r.video, ((), ()))
+                owned_index = bisect_left(frame_numbers, r.frame)
+                if owned_index == len(frame_numbers) or frame_numbers[owned_index] != r.frame:
                     raise FileNotFoundError(f"{fp} — the cache does not cover the probe")
-                selected = sorted(
-                    candidates, key=lambda candidate: (abs(candidate[0] - r.frame), candidate[0])
-                )[:vote_k]
+                selected_paths = [frame_paths[owned_index]]
+                left = owned_index - 1
+                right = owned_index + 1
+                while len(selected_paths) < min(vote_k, len(frame_numbers)):
+                    if left < 0:
+                        selected_paths.append(frame_paths[right])
+                        right += 1
+                    elif right >= len(frame_numbers):
+                        selected_paths.append(frame_paths[left])
+                        left -= 1
+                    elif r.frame - frame_numbers[left] <= frame_numbers[right] - r.frame:
+                        selected_paths.append(frame_paths[left])
+                        left -= 1
+                    else:
+                        selected_paths.append(frame_paths[right])
+                        right += 1
                 raw_answers = []
-                for _, selected_path in selected:
+                for selected_path in selected_paths:
                     with Image.open(selected_path) as im:
                         raw_answers.append(eng.predict(im.convert("RGB"), r.question))
                 pred, counts = vote_fo_class(raw_answers, valid_names, threshold)

@@ -212,6 +212,33 @@ def test_temporal_indexes_once_and_uses_lower_frame_on_equal_distance(
     assert out.loc[0, "n_votes_used"] == 3
 
 
+def test_temporal_reuses_one_prepared_sorted_index_for_multiple_items(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for frame in (110, 90, 105, 95, 100):
+        _write_frame(tmp_path, "VID01", frame)
+    items = pd.concat([_item(frame=100), _item(frame=105)], ignore_index=True)
+    sort_calls = 0
+    builtin_sorted = sorted
+
+    def counted_sorted(*args, **kwargs):
+        nonlocal sort_calls
+        sort_calls += 1
+        return builtin_sorted(*args, **kwargs)
+
+    monkeypatch.setattr(probe_runner, "sorted", counted_sorted, raising=False)
+
+    out = probe_runner.answer_items(
+        "model", items, tmp_path, device="cpu", vote_mode="temporal", vote_k=3
+    )
+
+    assert sort_calls == 0, "temporal candidates must be prepared once, not sorted per item"
+    assert FakeQwenFrameEngine.instances[0].seen_pixels == pytest.approx(
+        [100, 95, 105, 105, 100, 110], abs=2
+    )
+    assert out.n_votes_used.tolist() == [3, 3]
+
+
 def test_temporal_reports_actual_k_at_video_boundary(tmp_path: Path) -> None:
     for frame in (100, 110):
         _write_frame(tmp_path, "VID01", frame)
