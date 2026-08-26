@@ -1,0 +1,20 @@
+# Pasos 10-14 del Dockerfile original, encadenados sobre la capa ya construida.
+#
+# POR QUE EXISTE ESTE FICHERO: el build completo pide ~145 GB de pico (el
+# `pip install` de vLLM+torch se come ~76 GB transitorios) y la raiz local tiene
+# 144. Falló dos veces por espacio el 2026-08-25. Pero los pasos que faltan son
+# COPY y ENV -- no ejecutan nada, asi que no tienen coste transitorio. Partiendo
+# de la capa del paso 9 ya commiteada (`orena-04-pipcache:keep`, 26.4 GB), el
+# unico coste es la capa de pesos.
+#
+# Se intentó construir entero en UNAM (15 TB libres, pesos ya alli) y NO se
+# puede: SELinux en Enforcing bloquea execmod dentro de contenedores para
+# uaq_user, asi que buildah no puede correr ningun paso RUN. Los COPY si.
+FROM orena-04-pipcache:keep
+
+COPY --chown=user:user resources/ /opt/app/resources/
+COPY --chown=user:user inference.py /opt/app/
+
+ENV PATH=/home/user/.local/bin:$PATH
+ENV ENABLE_THINKING=0
+ENTRYPOINT ["python", "inference.py"]

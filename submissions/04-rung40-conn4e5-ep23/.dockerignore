@@ -4,3 +4,11 @@
 *.tar.gz
 test/
 __pycache__/
+
+# _artifacts/ holds the 17 GB broken image tar AND a hardlinked twin of
+# resources/model. The legacy builder streams the WHOLE context to the daemon
+# before step 1, so without this the build ships 53.28 GB of context in order to
+# copy 34 GB of weights -- and that overhead is what filled the root partition
+# twice on 2026-08-25.
+_artifacts/
+*.tar
