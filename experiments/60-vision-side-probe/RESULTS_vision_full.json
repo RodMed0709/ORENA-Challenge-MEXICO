@@ -1,0 +1,118 @@
+{
+ "model_exact_OOD": 0.6752,
+ "last_prompt_best_rung59b": 0.5243,
+ "n_fit": 531,
+ "n_read": 782,
+ "rows": [
+  {
+   "read_point": "encoder[max]",
+   "layer": null,
+   "probe_exact_OOD": 0.266
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 0,
+   "probe_exact_OOD": 0.2673
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 4,
+   "probe_exact_OOD": 0.344
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 8,
+   "probe_exact_OOD": 0.3414
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 12,
+   "probe_exact_OOD": 0.3491
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 16,
+   "probe_exact_OOD": 0.4501
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 20,
+   "probe_exact_OOD": 0.4693
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 24,
+   "probe_exact_OOD": 0.5281
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 28,
+   "probe_exact_OOD": 0.5652
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 32,
+   "probe_exact_OOD": 0.4258
+  },
+  {
+   "read_point": "visual[max]",
+   "layer": 36,
+   "probe_exact_OOD": 0.509
+  },
+  {
+   "read_point": "encoder[mean]",
+   "layer": null,
+   "probe_exact_OOD": 0.078
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 0,
+   "probe_exact_OOD": 0.2276
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 4,
+   "probe_exact_OOD": 0.2698
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 8,
+   "probe_exact_OOD": 0.266
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 12,
+   "probe_exact_OOD": 0.289
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 16,
+   "probe_exact_OOD": 0.3286
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 20,
+   "probe_exact_OOD": 0.4847
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 24,
+   "probe_exact_OOD": 0.3926
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 28,
+   "probe_exact_OOD": 0.4514
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 32,
+   "probe_exact_OOD": 0.4616
+  },
+  {
+   "read_point": "visual[mean]",
+   "layer": 36,
+   "probe_exact_OOD": 0.4182
+  }
+ ]
+}
