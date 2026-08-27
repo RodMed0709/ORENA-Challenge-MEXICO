@@ -1,0 +1,5 @@
+floor,exact_set_OOD
+constant_Clip,0.234
+modal_set_from_fit,0.0205
+empty_set,0.0
+per_class_majority,0.0026
