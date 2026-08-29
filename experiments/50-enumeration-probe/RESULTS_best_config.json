@@ -1,0 +1,25 @@
+{
+  "counting": {
+    "layer": 34,
+    "kind": "ordinal",
+    "C": 0.01,
+    "cv_exact_acc": 0.8108941418293937
+  },
+  "fo_class": {
+    "layer": 24,
+    "C": 0.01,
+    "cv_exact_set_acc": 0.9223965090222903,
+    "vocab": [
+      "Clip",
+      "External drain",
+      "Gallstone",
+      "Needle",
+      "Silicone loop",
+      "Specimen",
+      "Specimen bag",
+      "Sponge"
+    ]
+  },
+  "pca_n_components": 128,
+  "seed": 0
+}
