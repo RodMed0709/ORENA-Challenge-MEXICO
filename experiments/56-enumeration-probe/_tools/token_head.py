@@ -1,4 +1,4 @@
-"""Rung 50 -- the token head's OWN confidence, read two different ways for the two tasks.
+"""Rung 56 -- the token head's OWN confidence, read two different ways for the two tasks.
 
 `number`: rung 33's exact mechanism, reused unchanged in spirit -- proper P(value=1..12),
 with the "1" vs "10/11/12" continuation split, not naive first-token logits (which would

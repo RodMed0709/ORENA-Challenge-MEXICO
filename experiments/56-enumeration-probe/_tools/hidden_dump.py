@@ -1,4 +1,4 @@
-"""Rung 50 -- dump hidden states at the last-prompt-token position, for a manifest that mixes
+"""Rung 56 -- dump hidden states at the last-prompt-token position, for a manifest that mixes
 `number` and `fo_class` rows. Generalizes rung 34's `dump()` (same mechanism, proven on the
 pod) to: (a) a caller-supplied manifest instead of one hardcoded `inspect.csv`, (b) rung 42's
 own merged checkpoint instead of a PEFT adapter on base, (c) both answer formats in one pass

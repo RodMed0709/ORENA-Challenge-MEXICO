@@ -1,4 +1,4 @@
-"""Rung 50 -- classifier variants for the counting probe: plain multinomial, class-weighted,
+"""Rung 56 -- classifier variants for the counting probe: plain multinomial, class-weighted,
 and ordinal (Frank & Hall decomposition). PCA dimensionality reduction shared by all three,
 fit on the training fold only -- same discipline rung 34 established after its first probe
 memorised a 768-row/4096-dim fit perfectly and transferred at 0.25-0.43.

@@ -1,4 +1,4 @@
-# Rung 50 — the enumeration probe: counting AND fo_class, from the same hidden states
+# Rung 56 — the enumeration probe: counting AND fo_class, from the same hidden states
 
 > **Status: BUILT and locally verified (manifests, folds, classifiers, CV/read plumbing all
 > exercised against real data or label-correlated synthetic dumps). GPU-dependent steps

@@ -1,4 +1,4 @@
-"""Rung 50 -- resolve manifest rows to their frame_cache path. No copying: RULES §-- the
+"""Rung 56 -- resolve manifest rows to their frame_cache path. No copying: RULES §-- the
 shared `/workspace/frames_cache/` is the single-source, identity-keyed frame store; a frame
 is called from there, never re-copied per experiment (unlike rung 49's flip pairs, which
 were genuinely NEW derived images and had to be materialized).

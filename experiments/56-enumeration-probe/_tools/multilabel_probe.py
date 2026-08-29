@@ -1,4 +1,4 @@
-"""Rung 50 -- multi-label probe for fo_class: predict the SET of classes present from the
+"""Rung 56 -- multi-label probe for fo_class: predict the SET of classes present from the
 hidden state, one binary one-vs-rest logistic regression per class, same PCA-reduction
 discipline as `ordinal_probe.py` (imported, not duplicated).
 

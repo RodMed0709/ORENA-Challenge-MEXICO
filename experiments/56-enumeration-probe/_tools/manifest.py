@@ -1,4 +1,4 @@
-"""Rung 50 -- fit/final-read manifests for the two-task hidden-state probe (counting + fo_class).
+"""Rung 56 -- fit/final-read manifests for the two-task hidden-state probe (counting + fo_class).
 
 Folder-private glue. Importable; a notebook builds the pools and calls `freeze()`. Never a
 launcher.
