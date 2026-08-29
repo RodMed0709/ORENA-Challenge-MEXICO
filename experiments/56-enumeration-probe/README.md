@@ -1,9 +1,9 @@
 # Rung 56 — the enumeration probe: counting AND fo_class, from the same hidden states
 
-> **Status: BUILT and locally verified (manifests, folds, classifiers, CV/read plumbing all
-> exercised against real data or label-correlated synthetic dumps). GPU-dependent steps
-> (`02`'s hidden-state dump, `03`'s CV sweep, `04`'s final read and token-head baselines) have
-> NOT been run yet — that happens on the pod. Nothing in this README is a result.**
+> **Status: MEASURED — faithful negative on both tasks. Neither probe beats the model's own
+> token output on the true 8-video held-out set (counting 0.4462 vs 0.4613; `fo_class`
+> full-set-identity 0.8143 vs 0.8690), despite 0.8109/0.9224 accuracy in-fold on the 122-video
+> fit pool. Decision note: [[layer-24-edge-does-not-clear-a-fresh-holdout]].**
 
 ## Ladder
 
@@ -12,7 +12,8 @@
 | 34-hidden-state-probe | linear probe on hidden states, ID-fit → OOD-read, established the PCA/scaler discipline | rung 33's token argmax | 🟢 THESIS CONFIRMED — probe beats the head at layers 18–24 |
 | 42-merged-corpus | promoted 30 of 38 test videos into training | 21 A2 | shipped — the checkpoint every probe since reads |
 | 49-flip-equivariance | same checkpoint, horizontal-flip tracking probe | — | closed, decision note filed |
-| **50 (this)** | rung 34's method, extended to TWO tasks (`number` counting + `fo_class` multi-label) on a bigger fit pool | rung 34 (counting only, 92-video ID/OOD split) | built, GPU steps pending |
+| 55-cardinality-probe | layer-24 probe on `fo_class` cardinality, A2 ep3 adapter, ID(lapchole)→OOD(heico) | model's own emitted set size | 🟢 POSITIVE, CI excludes zero |
+| **56 (this)** | rung 34's method, extended to TWO tasks (`number` counting + `fo_class` full set identity) on rung 42 ep4 **merged**, 122-video fit pool → fresh 8-video held-out | rung 34 (counting only, 92-video ID/OOD split) + rung 55 (cardinality only) | ⚠️ MEASURED — both tasks lose to the token head on the true held-out set |
 
 ## Why this rung exists
 
@@ -24,6 +25,23 @@ of the campaign (`[[fo-class-and-number-are-one-front]]`) found `fo_class` and `
 for **both** fronts at once, on the larger pool, and adds one thing rung 34 never had a second
 task to ask: **if the model's hidden state already encodes which classes are present, does
 counting "how many different classes" reduce to `len(that set)`?**
+
+## Result
+
+| task | CV (122-video fit pool) | held-out (8 videos) | held-out token-head | probe wins? |
+|---|---:|---:|---:|---|
+| counting (`number`, exact value) | 0.8109 (layer **34**, ordinal) | 0.4462 [0.318, 0.585] | 0.4613 [0.343, 0.584] | NO |
+| `fo_class` (full set identity) | 0.9224 (layer **24**, C=0.01) | 0.8143 [0.759, 0.871] | 0.8690 [0.807, 0.926] | NO |
+
+Both CV numbers were markedly optimistic relative to the held-out read (36-point and 11-point
+drops) — video-grouped CV within one fit pool guards against frame-level leakage, not against the
+fit pool being an easier population than genuinely fresh videos. The counting probe's own winning
+layer moved from 24 (rung 34/55's peak) to 34, on the same architecture. A small aggregation
+comparison (20 exact-frame pairs where an `n_classes` question and an `fo_class` question share
+the same frame) hints that `len(fo_class-probe's predicted set)` may recover the count better than
+a dedicated counting probe (0.55 vs 0.50, 70% agreement) — consistent in direction with rung 55's
+cardinality framing, but n=20 is too small to lean on. Full writeup:
+[[layer-24-edge-does-not-clear-a-fresh-holdout]].
 
 ## Design decisions (already settled, do not re-litigate)
 
@@ -65,23 +83,26 @@ Frank & Hall ordinal decomposition), `multilabel_probe.py` (fo_class — one-vs-
 mechanism for `number`; a documented simplification — joint sequence log-prob — for `fo_class`),
 `resolve_frames.py` (manifest row → shared `frames_cache` path, no copying).
 
-`01` has been run for real (`RESULTS_fit_number_v1.csv`, `RESULTS_fit_foclass_v1.csv`,
-`RESULTS_final_read_v1.csv` are live, sha256-sidecarred outputs: 18,717 fit rows / 122 videos,
-5,838 `number` / 8,479 `fo_class`, 1,283 final-read rows / 8 videos, zero fold leakage). `02`–`04`
-are built and verified as far as possible without a GPU (real-data dry runs up to the
-model-loading boundary, plus full end-to-end runs against fabricated label-correlated hidden
-states to exercise every join, CV loop, and score computation) — run them on the pod next, in
-order, each with `SMOKE`/a small row count first.
+All four notebooks have been run for real. `01`: `RESULTS_fit_number_v1.csv`,
+`RESULTS_fit_foclass_v1.csv`, `RESULTS_final_read_v1.csv` (18,717 fit rows / 122 videos, 5,838
+`number` / 8,479 `fo_class`, 1,283 final-read rows / 8 videos, zero fold leakage). `02`: dumped to
+`runs/50_hidden_v1/` (gitignored, pod-local). `03`: `RESULTS_probe_number_cv.csv`,
+`RESULTS_probe_foclass_cv.csv`, `RESULTS_best_config.json`. `04`: `RESULTS_final_read.json` +
+two per-row detail CSVs — the 8-video held-out set, touched exactly once.
 
 ## Running on the pod
 
+Actually used (rung 42 ep4's merged checkpoint lives under rung 49's own run directory, not a
+flat `/workspace/models/...` path):
+
 ```
 papermill 02_dump_hidden_states.ipynb 02_out.ipynb \
-  -p MODEL_PATH /workspace/models/rung42_ep4_merged \
-  -p DATA_ROOT /workspace/orena-data -p FRAMES_CACHE /workspace/frames_cache   # SMOKE=True first
+  -p MODEL_PATH /workspace/repo_yyy/experiments/49-flip-equivariance/runs/49_flip_pair_v1/merged/checkpoint-4848 \
+  -p DATA_ROOT /workspace/orena-data -p FRAMES_CACHE /workspace/frames_cache   # SMOKE=True first, then SMOKE=False
 papermill 03_fit_probes.ipynb 03_out.ipynb \
-  -p HIDDEN_DIR .../runs/50_hidden_v1                                          # after the full dump
+  -p HIDDEN_DIR /workspace/repo_yyy/experiments/56-enumeration-probe/runs/50_hidden_v1
 papermill 04_final_read.ipynb 04_out.ipynb \
-  -p HIDDEN_DIR .../runs/50_hidden_v1 -p MODEL_PATH /workspace/models/rung42_ep4_merged \
+  -p HIDDEN_DIR /workspace/repo_yyy/experiments/56-enumeration-probe/runs/50_hidden_v1 \
+  -p MODEL_PATH /workspace/repo_yyy/experiments/49-flip-equivariance/runs/49_flip_pair_v1/merged/checkpoint-4848 \
   -p DATA_ROOT /workspace/orena-data -p FRAMES_CACHE /workspace/frames_cache   # touches the 8 videos ONCE
 ```
