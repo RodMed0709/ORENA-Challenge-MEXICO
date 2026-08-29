@@ -86,3 +86,7 @@ submissions/*/__pycache__/
 # They are REPRODUCIBLE (buildah on UNAM + a 32 s re-quantization from the 323 MB adapter),
 # and 50 GB of binaries in a git history is not a mistake you undo.
 submissions/*/_artifacts/
+
+# local agent scratch — never repo content
+.claude/worktrees/
+.codex/

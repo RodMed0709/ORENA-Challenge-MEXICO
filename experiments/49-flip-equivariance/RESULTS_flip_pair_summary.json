@@ -1,0 +1,8 @@
+{
+  "checkpoint": "rung 42 ep4 (checkpoint-4848, submission 03)",
+  "n_rows": 175,
+  "accuracy_original": 0.9085714285714286,
+  "accuracy_flipped": 0.9028571428571428,
+  "literal_equivariance_rate": 0.8717948717948718,
+  "literal_equivariance_n": 78
+}

@@ -1,0 +1,16 @@
+{
+ "n_changed": 6294,
+ "n_bad_round_trip": 0,
+ "n_rows_touched_elsewhere": 0,
+ "n_rows": 14415,
+ "n_fo_class": 6294,
+ "cardinality": {
+  "1": 4370,
+  "2": 1480,
+  "3": 399,
+  "4": 45
+ },
+ "sha256": "267e70c0160b67fbc30358b3788b621c6cb7c7f3843797d9cae962c972755eba",
+ "src_sha256": "374c2a236c08e6d5b7b17c978f6c1a2cef3cedd33667691751588257d97dc9e2",
+ "dst": "/mnt/storage/uaq_user/rung50/corpus/train_countprefix.jsonl"
+}

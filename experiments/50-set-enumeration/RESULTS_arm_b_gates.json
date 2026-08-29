@@ -1,0 +1,39 @@
+{
+ "n_separator_ids": 843,
+ "continuation_weight": 2.0,
+ "cases": {
+  "multi": {
+   "answer": "Clip, Sponge",
+   "n_answer_tokens": 3,
+   "distinct_weights": [
+    0.75,
+    1.5
+   ],
+   "mean_weight": 1.0,
+   "is_identity": false
+  },
+  "multi3": {
+   "answer": "Clip, Sponge, Needle",
+   "n_answer_tokens": 5,
+   "distinct_weights": [
+    0.625,
+    1.25
+   ],
+   "mean_weight": 1.0,
+   "is_identity": false
+  },
+  "single": {
+   "answer": "Clip",
+   "n_answer_tokens": 1,
+   "distinct_weights": [
+    1.0
+   ],
+   "mean_weight": 1.0,
+   "is_identity": true
+  }
+ },
+ "legacy_at_batch1": {
+  "row_group_weights_is_identity": true,
+  "segment_weights_is_identity": true
+ }
+}

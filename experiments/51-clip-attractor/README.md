@@ -1,7 +1,7 @@
-# Rung 49 — the `Clip` attractor: how big is it, and does external data move it?
+# Rung 51 — the `Clip` attractor: how big is it, and does external data move it?
 
-> **Status: 49c RUNNING** (2026-08-22, UNAM `tmux rod-rung49c`, GPU 0).
-> Pre-registered before the GPU. Heavy artifacts in `/mnt/storage/uaq_user/rung49/`.
+> **Status: 49c RUNNING** (2026-08-22, UNAM `tmux rod-rung51c`, GPU 0).
+> Pre-registered before the GPU. Heavy artifacts in `/mnt/storage/uaq_user/rung51/`.
 
 ## Why this rung exists
 
@@ -29,7 +29,7 @@ worlds and they choose different next moves.
 | 19b | `--dataset`: + 5,718 Strasbourg **positives** | 47 ep4 | trained; **wash** on the headline |
 | **49c (this)** | *nothing trained* — 19b read through rung 48's probe | 42 / 47 anchors | **running** |
 
-## 49c — the pre-registered question and its readings
+## 51c — the pre-registered question and its readings
 
 **Does adding external recognition POSITIVES move the phase attractor?**
 Scored on rung 48's v2 probe, 4,890 items over the 15 held-out CholecT50 videos, through
@@ -61,7 +61,7 @@ does not. Reported as such.
 
 ---
 
-# 49a — MEASURED 2026-08-22. The `+0.0702` was a ceiling, and the defect is not a PAIR.
+# 51a — MEASURED 2026-08-22. The `+0.0702` was a ceiling, and the defect is not a PAIR.
 
 Zero GPU. Six arms (rung 19b ep3–5, rung 47 ep3–5), the full 6,252-question eval, every
 number through `frame.metrics.stratified_report`. `RESULTS_fo_class_anatomy.csv`,
@@ -224,7 +224,7 @@ being the default filler once the model has decided to name more than one thing.
 
 ---
 
-# 49b — the specular / metallic hypothesis is a FAITHFUL NEGATIVE
+# 51b — the specular / metallic hypothesis is a FAITHFUL NEGATIVE
 
 Three `Sigma-5` false positives were opened and looked at first. Two things stood out, neither
 a clip: one frame is dominated by a large metallic instrument shaft — **sigmoid resection uses
@@ -264,7 +264,7 @@ brightness because it explains the **per-video concentration** that brightness c
 
 ---
 
-# 49c — SCORED 2026-08-22. No attributable effect, and the anchor is what says so.
+# 51c — SCORED 2026-08-22. No attributable effect, and the anchor is what says so.
 
 Two arms × 4,890 items, 24.8 min each, GPU 0. `env control: agreement 1.0` on 20 re-answered
 r42 items, so the anchors' env is not a confound. `RESULTS_clip_fp_anatomy_49.csv`,
@@ -329,11 +329,11 @@ Its pre-registered map said a flat `fp_rate` licenses *"negative supervision is 
 remaining data route"*. That reading stands on this rung's own axis — **but 49a says the axis
 is wrong**: on the data we are actually scored on, the attractor is 0.14–0.25 and lives in two
 videos, not 0.86 across a corpus. **Do not fund the negative-supervision arm on this result.**
-The open question is 49a's: *what is different about `Sigma-5`*.
+The open question is 51a's: *what is different about `Sigma-5`*.
 
 ---
 
-# 49d — the bigger lever is NOT the attractor. It is the multi-class gold.
+# 51d — the bigger lever is NOT the attractor. It is the multi-class gold.
 
 Zero GPU, same six arms. Found while testing an alternative explanation for `Sigma-5`, and it
 outgrew it.
@@ -401,7 +401,7 @@ nothing on the 2,065 single-class rows, which currently score 0.801.
 
 ---
 
-# 49e — `fo_class` and `number` fail on the SAME FRAMES. They are one front.
+# 51e — `fo_class` and `number` fail on the SAME FRAMES. They are one front.
 
 Zero GPU. 364 frames carry both an `fo_class` and a `number` question, which makes the
 co-occurrence directly measurable on rung 19b ep4's own eval.
@@ -481,3 +481,53 @@ throughout and its size tracks the checkpoint — not that it is absent in one.
 
 ⇒ The claim that survives: **scene multiplicity costs both formats, in every arm measured, and
 the effect is not carried by any single checkpoint or corpus.**
+
+---
+
+# 51f — the cardinality curve, cleaned of SELECTION questions. It survives.
+
+Prompted by rung 53's audit, which found the 24 "inconsistent" gold pairs were **not** label
+noise: 18 of them ask *"which object is closest to the centre?"* and 6 ask *"what class is in the
+bottom/left?"*. Those are **selection** questions — they request exactly one object, so their gold
+is size 1 **by construction**, whatever the frame holds.
+
+🔴 That put §51d's headline curve at risk, because it pooled two populations. **66 % of the
+gold-size-1 bucket is selection.** If selection is simply easier, "accuracy falls with gold size"
+would partly restate "picking is easier than listing" — a different claim, and one that would NOT
+license rung 50 arm A, which was already 5 h into training when this was checked.
+
+| curve | gold 1 | gold 2 | gold 3 | gold 4 |
+|---|---:|---:|---:|---:|
+| pooled — **as published in §51d** | 0.8010 (n=2065) | 0.6161 | 0.1754 | 0.000 |
+| **enumeration templates only** | **0.7624** (n=703) | 0.6161 | 0.1754 | 0.000 |
+
+🟢 **It survives.** The size-1 point falls **0.801 → 0.7624**, and nothing else moves — gold 2/3/4
+are enumeration-only already, since a selection question cannot have a multi-class gold. The
+collapse **0.762 → 0.616 → 0.175 → 0.000** is now measured across questions that all ask the same
+thing, so cardinality is the variable and not the template.
+
+📌 **The `multiclass_gold` headroom (+0.0421) is untouched**: it flips rows whose gold has ≥2
+classes, and every such row is enumeration by construction.
+
+🔻 **Correction to §51d as published.** The pooled size-1 figure of **0.801 overstates by
++0.0386**. The honest curve starts at **0.7624**. The conclusion does not change; the number
+does, and the number was quoted in a decision note.
+
+## 🔑 And the sharper statement of the deficit
+
+Same format, same classes, same frames — the only difference is whether the answer is a **set**
+or a **single pick**:
+
+| question kind | n | accuracy |
+|---|---:|---:|
+| **selection** — *"closest to the centre"*, *"in the bottom/left"*, *"there is one object"* | 1,362 | **0.8209** |
+| **enumeration** — *"list all"*, *"which combination"* | 1,313 | **0.6725** |
+| | | **−0.1484** |
+
+**Asking the model to LIST costs 0.148 against asking it to PICK.** It is not failing to see the
+objects — at 0.82 it sees them. It fails to **produce the set**. That is
+[[fo-class-and-number-are-one-front]] stated without needing a cardinality curve at all, and it is
+the cleanest single number this rung has produced.
+
+⚠️ Not a controlled comparison: the two populations are different questions on different frames,
+so scene difficulty is not held fixed. It bounds nothing — it points.

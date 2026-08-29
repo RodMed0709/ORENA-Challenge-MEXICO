@@ -1,6 +1,8 @@
 # Rung 19b — does EXTERNAL recognition data buy what rung 47 could not?
 
-> **Status: TRAINING.** Launched 2026-08-19 23:17, UNAM `tmux leo-rung19b`, GPU 0.
+> **Status: CLOSED — FAITHFUL NEGATIVE (wash).** Trained 2026-08-19 23:17 → 2026-08-21 03:32
+> (28.25 h), chained eval finished 2026-08-21 06:42. External recognition data buys **nothing**
+> readable: the pre-registered cell straddles zero in both halves.
 > Five gates passed before any GPU spend. Heavy artifacts in `/mnt/storage/uaq_user/rung19b/`.
 
 ## Ladder
@@ -10,7 +12,46 @@
 | 42-merged-corpus | promoted 30 test videos into training | 21 A2 | shipped — 0.5809 on the platform |
 | 47-epochs-vs-corpus | `--num_train_epochs 3→5`, A2's own corpus | 21 A2 | done — does not ship |
 | 48-centre-probe | *nothing trained* — a second, external eval axis | — | scored; `bag_f1` is the ruler |
-| **19b (this)** | **`--dataset`: + 5,718 Strasbourg rows** | **47 ep4** | **training** |
+| **19b (this)** | **`--dataset`: + 5,718 Strasbourg rows** | **47 ep4** | **done — wash, does not ship** |
+
+## Verdict — a wash, and it does not ship
+
+**The pre-registered cell** (`19b ep4 − 47 ep4`, paired, clustered on video, `frame.metrics`):
+
+| cell | n | videos | delta | CI | excludes 0 |
+|---|---|---|---|---|---|
+| `ALL_ID` | 2,252 | 28 | **−0.0089** | [−0.0347, +0.0171] | no |
+| `ALL_OOD` | 4,000 | 10 | **+0.0075** | [−0.0113, +0.0258] | no |
+
+Neither excludes zero, and the two point estimates point opposite ways. **5,718 Strasbourg rows
+bought nothing readable.** The arm's best epoch (ep5, `bucket_mean` **0.6557**) never reaches
+rung 42 ep4's **0.6744**, so there is nothing here to ship either.
+
+**The epoch curve** (`RESULTS_epochs_full6252.csv`), 36–38 min per epoch:
+
+| epoch | ckpt | bucket_mean | acc_ID | acc_OOD | object_recognition_ID | object_recognition_OOD |
+|---|---|---|---|---|---|---|
+| 1 | `checkpoint-1259` | 0.5465 | 0.5222 | 0.5923 | 0.6134 | 0.6744 |
+| 2 | `checkpoint-2518` | 0.5952 | 0.5404 | 0.6700 | 0.6273 | 0.7421 |
+| 3 | `checkpoint-3777` | 0.6321 | 0.6115 | 0.6755 | 0.7137 | 0.7478 |
+| 4 | `checkpoint-5036` | 0.6479 | 0.6372 | 0.6825 | 0.7377 | 0.7689 |
+| **5** | `checkpoint-6295` | **0.6557** | 0.6350 | **0.6987** | 0.7299 | 0.7840 |
+
+⚠️ `best = ep5` is a POINT estimate. Within-arm, **`ep5 − ep4` straddles zero everywhere**
+(`ALL_ID` +0.0022, `ALL_OOD` −0.0162) — the same shape rung 47 had, and the reason the ladder
+reads the CI and not the `max`.
+
+🔴 **The curve gets WORSE before it recovers, significantly.** `ep2 − ep1` is **−0.0777**
+[−0.1175, −0.0385] on `ALL_OOD` and `ep3 − ep2` is **−0.0710** [−0.1007, −0.0408] on `ALL_ID`,
+both excluding zero. A run read at one epoch would have reported a different sign for this arm.
+
+📌 `temporal_grounding_ID` has **n = 1** in this eval set; its ±1.0 rows are one question
+flipping, not a result. Read `ALL_*` and the two owned groups.
+
+**Artifacts** — `RESULTS_epochs_full6252.csv` (the curve), `RESULTS_corpus_vs_r47_paired_ci.csv`
+(the rung's question), `RESULTS_epoch_curve_paired_ci.csv` (within-arm). Written by the chain at
+06:42 into `repo_leo` on the UNAM box, where they sat uncommitted for four days — the verdict
+reached `context/NOW.md` on 08-22 before the artifacts behind it reached git.
 
 ## The arm
 

@@ -1,0 +1,28 @@
+{
+ "max_frames": 36,
+ "train": {
+  "n_2a_single_gold": 5014,
+  "offset_median_s": 44.0,
+  "offset_p25_s": 18.0,
+  "offset_p75_s": 92.0,
+  "share_offset_exactly_0": 0.0108,
+  "share_offset_within_10s": 0.1404,
+  "n_outside_clip_bounds": 0
+ },
+ "test": {
+  "n_2a_single_gold": 2229,
+  "offset_median_s": 47.0,
+  "offset_p25_s": 18.0,
+  "offset_p75_s": 90.0,
+  "share_offset_exactly_0": 0.0162,
+  "share_offset_within_10s": 0.1382,
+  "n_outside_clip_bounds": 0,
+  "const_00_00_00_accuracy": 0.0256,
+  "const_midpoint_accuracy": 0.0363,
+  "oracle_nearest_grid_point": 1.0,
+  "share_spacing_gt_threshold": 0.7649,
+  "share_half_spacing_gt_threshold": 0.0,
+  "spacing_median_s": 4.58,
+  "threshold_median_s": 2.32
+ }
+}

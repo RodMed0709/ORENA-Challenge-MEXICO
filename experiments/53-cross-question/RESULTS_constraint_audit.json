@@ -1,0 +1,49 @@
+{
+ "frames_in_corpus": 8661,
+ "frames_with_fo_class": 5574,
+ "fo_class_AND_n_classes": 218,
+ "fo_class_AND_n_instances": 303,
+ "perclass_AND_n_instances": 260,
+ "gold_consistent": 194,
+ "gold_inconsistent": 24,
+ "gold_unparsed": 0,
+ "inconsistency_rate": 0.1101,
+ "disagreement_sizes": {
+  "-2": 2,
+  "-1": 22
+ },
+ "examples": [
+  {
+   "fo_gold": "External drain",
+   "set_size": 1,
+   "n_class_gold": 2
+  },
+  {
+   "fo_gold": "Silicone loop",
+   "set_size": 1,
+   "n_class_gold": 3
+  },
+  {
+   "fo_gold": "Sponge",
+   "set_size": 1,
+   "n_class_gold": 2
+  },
+  {
+   "fo_gold": "Needle",
+   "set_size": 1,
+   "n_class_gold": 3
+  },
+  {
+   "fo_gold": "Silicone loop",
+   "set_size": 1,
+   "n_class_gold": 2
+  },
+  {
+   "fo_gold": "Silicone loop",
+   "set_size": 1,
+   "n_class_gold": 2
+  }
+ ],
+ "perclass_within_total": 260,
+ "perclass_exceeds_total": 0
+}

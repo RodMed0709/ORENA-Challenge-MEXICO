@@ -1,0 +1,79 @@
+qID,rule,orig_prediction,flip_prediction,expected_if_equivariant,literally_equivariant
+heico__2244532,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+heico__2244558,all_object_positions,1. Sponge: bottom/left,1. Clip: bottom/left 2. Clip: bottom/left,1. Sponge: bottom/right,False
+heico__2244559,all_object_positions,1. Sponge: bottom/right,1. Sponge: bottom/left,1. Sponge: bottom/left,True
+heico__2244592,all_object_positions,1. Clip: top/left,1. Clip: top/left,1. Clip: top/right,False
+heico__2244595,all_object_positions,1. Clip: top/right 2. Clip: top/right,1. Clip: top/left 2. Clip: top/left,1. Clip: top/left 2. Clip: top/left,True
+heico__2244620,all_object_positions,1. Clip: bottom/left,1. Clip: bottom/right,1. Clip: bottom/right,True
+heico__2244629,all_object_positions,1. Clip: bottom/left,1. Clip: bottom/right,1. Clip: bottom/right,True
+heico__2244724,all_object_positions,1. Sponge: bottom/right,1. Sponge: bottom/left,1. Sponge: bottom/left,True
+heico__2244739,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/left,1. Sponge: bottom/right,False
+heico__2244740,all_object_positions,1. External drain: top/left,1. External drain: top/right,1. External drain: top/right,True
+heico__2267080,object_center_quadrant,top/left,top/right,top/right,True
+heico__2267081,object_center_quadrant,top/left,top/right,top/right,True
+heico__2267082,object_center_quadrant,top/left,top/right,top/right,True
+heico__2561928,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+heico__2561930,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+heico__2561969,all_object_positions,1. Clip: bottom/left 2. Clip: bottom/left,1. Sponge: bottom/right,1. Clip: bottom/right 2. Clip: bottom/right,False
+heico__2561999,all_object_positions,1. Sponge: bottom/right,1. Sponge: bottom/left,1. Sponge: bottom/left,True
+heico__2562105,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+heico__2562123,all_object_positions,1. Sponge: top/left,1. Sponge: top/right,1. Sponge: top/right,True
+heico__2562128,all_object_positions,1. Sponge: top/right,1. Sponge: top/left,1. Sponge: top/left,True
+heico__2562129,all_object_positions,1. Sponge: bottom/right,1. Sponge: bottom/left,1. Sponge: bottom/left,True
+heico__2562144,all_object_positions,1. Clip: bottom/left,1. Clip: bottom/right,1. Clip: bottom/right,True
+heico__2562156,all_object_positions,1. Sponge: bottom/right,1. Sponge: bottom/left,1. Sponge: bottom/left,True
+heico__2562159,all_object_positions,1. Needle: bottom/right,1. Needle: bottom/left,1. Needle: bottom/left,True
+heico__2562180,all_object_positions,1. Needle: top/left,1. Needle: top/right,1. Needle: top/right,True
+heico__2562186,all_object_positions,1. Needle: top/left,1. Needle: top/right,1. Needle: top/right,True
+heico__2595413,object_center_quadrant,top/right,top/left,top/left,True
+heico__2595414,object_center_quadrant,top/left,top/right,top/right,True
+heico__2595415,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+heico__2595416,object_center_quadrant,bottom/right,top/right,bottom/left,False
+lapchole__1316103,all_object_positions,1. Clip: bottom/right,1. Clip: bottom/left,1. Clip: bottom/left,True
+lapchole__1316176,all_object_positions,1. Clip: bottom/right 2. Clip: bottom/right,1. Clip: bottom/left 2. Clip: bottom/left,1. Clip: bottom/left 2. Clip: bottom/left,True
+lapchole__5026815,all_object_positions,1. Clip: bottom/right,1. Clip: bottom/left,1. Clip: bottom/left,True
+lapchole__1334974,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__1334996,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__1334997,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__1334998,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__1726841,all_object_positions,1. Clip: bottom/left 2. Clip: bottom/left,1. Clip: bottom/right 2. Clip: bottom/right,1. Clip: bottom/right 2. Clip: bottom/right,True
+lapchole__1726850,all_object_positions,1. Clip: top/right,1. Clip: top/left,1. Clip: top/left,True
+lapchole__1726863,all_object_positions,1. Clip: bottom/left,1. Clip: bottom/right,1. Clip: bottom/right,True
+lapchole__1811347,all_object_positions,1. Clip: top/left,1. Clip: top/right,1. Clip: top/right,True
+lapchole__1811349,all_object_positions,1. Clip: bottom/left,1. Clip: bottom/right,1. Clip: bottom/right,True
+lapchole__1822111,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__1822112,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__1811363,all_object_positions,1. Specimen: bottom/left,1. Specimen: bottom/right,1. Specimen: bottom/right,True
+lapchole__1822113,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__1822114,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__1822115,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__1822116,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__1811369,all_object_positions,1. Specimen: top/right,1. Specimen: top/left,1. Specimen: top/left,True
+lapchole__1822118,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__1822121,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+lapchole__1822122,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+lapchole__1822123,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+lapchole__1822125,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+lapchole__1822126,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__1822127,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__2561926,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__2536701,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+lapchole__2536836,all_object_positions,1. Sponge: bottom/left,1. Sponge: bottom/right,1. Sponge: bottom/right,True
+lapchole__2562075,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__2562099,object_center_quadrant,bottom/left,bottom/right,bottom/right,True
+lapchole__2562168,object_center_quadrant,bottom/right,bottom/left,bottom/left,True
+lapchole__2562182,object_center_quadrant,bottom/right,top/left,bottom/left,False
+lapchole__2562202,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__2562203,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__2562199,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__2675722,all_object_positions,1. Clip: top/left,1. Clip: top/right 2. Clip: top/right,1. Clip: top/right,False
+lapchole__2675760,all_object_positions,1. Clip: bottom/right 2. Clip: bottom/right 3. Clip: bottom/right 4. Clip: bottom/right,1. Clip: bottom/left 2. Clip: bottom/left 3. Clip: bottom/left,1. Clip: bottom/left 2. Clip: bottom/left 3. Clip: bottom/left 4. Clip: bottom/left,False
+lapchole__2675771,all_object_positions,1. Clip: bottom/right 2. Clip: bottom/right,1. Clip: bottom/left 2. Clip: bottom/right,1. Clip: bottom/left 2. Clip: bottom/left,False
+lapchole__2688953,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__2688957,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__4669577,all_object_positions,1. Clip: top/right,1. Clip: bottom/left 2. Clip: bottom/right 3. Clip: bottom/right,1. Clip: top/left,False
+lapchole__4669589,all_object_positions,1. Clip: bottom/right 2. Clip: bottom/right 3. Clip: bottom/right,1. Clip: bottom/left 2. Clip: bottom/left 3. Clip: bottom/left,1. Clip: bottom/left 2. Clip: bottom/left 3. Clip: bottom/left,True
+lapchole__4684997,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__4684998,object_center_quadrant,top/left,top/right,top/right,True
+lapchole__4684995,object_center_quadrant,top/right,top/left,top/left,True
+lapchole__4684996,object_center_quadrant,top/right,top/left,top/left,True

@@ -1,0 +1,5 @@
+rule,literally_equivariant,mean,count
+all_object_positions,False,0.8,10
+all_object_positions,True,1.0,36
+object_center_quadrant,False,0.0,2
+object_center_quadrant,True,1.0,45

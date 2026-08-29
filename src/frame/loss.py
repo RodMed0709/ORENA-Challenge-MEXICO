@@ -162,6 +162,48 @@ def segment_weights(labels, answer_spans: Sequence[tuple[int, int]], answer_weig
     return normalise_weights(w, labels, ignore_index=ignore_index) if normalise else w
 
 
+def continuation_weights(labels, separator_ids, continuation_weight: float, *,
+                         ignore_index: int = IGNORE_INDEX, normalise: bool = True):
+    """Up-weight the tokens AFTER the first separator in each answer — rung 50 arm B.
+
+    🔴 **This exists because the two weight functions above are ARITHMETIC IDENTITIES in our
+    configuration, and that — not "the trigger never fired" — is how rung 22 died.**
+    ``normalise_weights`` rescales so the mean weight over supervised tokens is exactly 1.0. At
+    ``per_device_train_batch_size=1`` every supervised token in the batch belongs to one row, so
+    ``row_group_weights`` gives them all the same weight and normalisation returns ones; and with
+    the prompt masked, the supervised tokens *are* the answer span, so ``segment_weights``
+    collapses the same way. **A weight that reallocates BETWEEN rows or between prompt and answer
+    cannot bite at batch size 1.** This one varies *inside* the answer, so it can.
+
+    What it is for: ``fo_class`` answers are comma-separated sets, and rung 49 measured that the
+    model names the first class and stops — **123 rows of ``missed_a_class`` on rung 19b ep4** —
+    while filling the rest with ``Clip``. Tokens at or before the first separator keep weight 1.0;
+    everything after it gets ``continuation_weight``. A row with no separator (a single-class
+    answer, and 4,370 of 6,294 are) is left uniform, which after normalisation is exactly the
+    control — **the arm touches only the rows whose failure it is aimed at.**
+
+    ``separator_ids`` is the set of token ids whose surface form contains the separator; it is
+    passed in rather than guessed, because it is tokenizer-dependent and a wrong id would silently
+    weight nothing. Derive it from the tokenizer and gate on how many rows a separator was found
+    in — a miss is a FINDING, not a default.
+    """
+    torch = _torch()
+    if continuation_weight < 0:
+        raise ValueError("continuation_weight must be >= 0; a negative weight reverses the gradient")
+    sep = torch.as_tensor(sorted(separator_ids), device=labels.device, dtype=labels.dtype)
+    if sep.numel() == 0:
+        raise ValueError("separator_ids is empty; the split point could never be found")
+
+    supervised = labels.ne(ignore_index)
+    is_sep = torch.isin(labels, sep) & supervised
+    # position of the FIRST separator per row; rows with none get a sentinel past the end
+    idx = torch.arange(labels.shape[1], device=labels.device).unsqueeze(0).expand_as(labels)
+    big = labels.shape[1]
+    first = torch.where(is_sep, idx, torch.full_like(idx, big)).min(dim=1, keepdim=True).values
+    w = torch.where(idx > first, float(continuation_weight), 1.0).to(torch.float32)
+    return normalise_weights(w, labels, ignore_index=ignore_index) if normalise else w
+
+
 def scale_schedule(step: int, total_steps: int, *, w_start: float, w_end: float) -> float:
     """SCALe's cosine anneal of the answer weight: reasoning-heavy first, answer-heavy later.
 
@@ -323,6 +365,7 @@ def make_compute_loss_func(weight_fn=None, *, enabled: bool = False,
 
 
 __all__ = [
-    "IGNORE_INDEX", "make_compute_loss_func", "normalise_weights", "row_group_weights",
+    "IGNORE_INDEX", "continuation_weights", "make_compute_loss_func", "normalise_weights",
+    "row_group_weights",
     "ntl_was", "scale_schedule", "segment_weights", "weighted_ce",
 ]

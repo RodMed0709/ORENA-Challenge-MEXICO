@@ -4,7 +4,7 @@
 
 Everything here is on `main` (`80fa0e1`…). Two decision notes:
 [[clip-attractor-is-two-videos]] and [[fo-class-and-number-are-one-front]]. Rung
-`experiments/49-clip-attractor/`. **49a/49b/49d/49e cost zero GPU; 49c cost ~50 min on one card.**
+`experiments/51-clip-attractor/`. **49a/49b/49d/49e cost zero GPU; 49c cost ~50 min on one card.**
 
 **1. 🟢 Rung 19b FINISHED on 2026-08-21 and its result had not been read.** 28.25 h, five
 epochs, chained eval complete. **It is a WASH:** `ALL_ID` −0.0089, `ALL_OOD` +0.0075 against
@@ -24,7 +24,7 @@ overall. Under `RULES` §13's video clustering that is effective n = 2–3 ⇒ *
 fragile as a claim.** It is also not a Clip↔Sponge pair: **`Needle` loses 24.6 %** of its rows to
 Clip against Sponge's 13.3 %.
 
-**4. 🔴 Rung 19b's external positives do NOT move it (49c).** `fp_rate` 0.8619 vs rung 47's
+**4. 🔴 Rung 19b's external positives do NOT move it (51c).** `fp_rate` 0.8619 vs rung 47's
 0.9024 — **−0.0405, missing the pre-registered 0.05 line**; −0.0730 on the clean band, which would
 clear it. Both recorded, threshold not moved. Moot anyway: **`a2`, with zero CholecT50 rows, lands
 within 0.008 of the arm built for this.** `Clip` recall is **1.0000 on all six models** at

@@ -1,0 +1,203 @@
+qID,dataset,video,answer_format
+heico__1008170,heico,0008 - Heico - Prokto - 9.avi,open_ended
+heico__1018769,heico,0008 - Heico - Prokto - 9.avi,fo_class
+heico__1018924,heico,0008 - Heico - Prokto - 9.avi,fo_class
+heico__1018963,heico,0008 - Heico - Prokto - 9.avi,fo_class
+heico__1019129,heico,0008 - Heico - Prokto - 9.avi,fo_class
+heico__102532,heico,0000 - Heico - Prokto - 1.avi,fo_class
+heico__102534,heico,0000 - Heico - Prokto - 1.avi,fo_class
+heico__102535,heico,0000 - Heico - Prokto - 1.avi,fo_class
+heico__102543,heico,0000 - Heico - Prokto - 1.avi,fo_class
+heico__1052291,heico,0008 - Heico - Prokto - 9.avi,multiple_choice
+heico__1052318,heico,0008 - Heico - Prokto - 9.avi,multiple_choice
+heico__1070526,heico,0019 - Heico - Rektum - 10.avi,open_ended
+heico__1070552,heico,0019 - Heico - Rektum - 10.avi,open_ended
+heico__1072827,heico,0019 - Heico - Rektum - 10.avi,fo_class
+heico__1072830,heico,0019 - Heico - Rektum - 10.avi,fo_class
+heico__1072837,heico,0019 - Heico - Rektum - 10.avi,fo_class
+heico__1072842,heico,0019 - Heico - Rektum - 10.avi,fo_class
+heico__1151872,heico,0010 - Heico - Rektum - 1.avi,open_ended
+heico__1162751,heico,0010 - Heico - Rektum - 1.avi,fo_class
+heico__1162803,heico,0010 - Heico - Rektum - 1.avi,fo_class
+heico__1162900,heico,0010 - Heico - Rektum - 1.avi,fo_class
+heico__1195258,heico,0010 - Heico - Rektum - 1.avi,multiple_choice
+heico__1257944,heico,0011 - Heico - Rektum - 2.avi,open_ended
+heico__1258075,heico,0011 - Heico - Rektum - 2.avi,open_ended
+heico__1267524,heico,0011 - Heico - Rektum - 2.avi,fo_class
+heico__1267526,heico,0011 - Heico - Rektum - 2.avi,fo_class
+heico__1267535,heico,0011 - Heico - Rektum - 2.avi,fo_class
+heico__1296320,heico,0011 - Heico - Rektum - 2.avi,multiple_choice
+heico__1393510,heico,0012 - Heico - Rektum - 3.avi,fo_class
+heico__1393649,heico,0012 - Heico - Rektum - 3.avi,fo_class
+heico__1393678,heico,0012 - Heico - Rektum - 3.avi,fo_class
+heico__1393693,heico,0012 - Heico - Rektum - 3.avi,fo_class
+heico__1434600,heico,0012 - Heico - Rektum - 3.avi,multiple_choice
+heico__1480374,heico,0013 - Heico - Rektum - 4.avi,open_ended
+heico__1486227,heico,0013 - Heico - Rektum - 4.avi,fo_class
+heico__1486296,heico,0013 - Heico - Rektum - 4.avi,fo_class
+heico__1486533,heico,0013 - Heico - Rektum - 4.avi,fo_class
+heico__1486562,heico,0013 - Heico - Rektum - 4.avi,fo_class
+heico__1486674,heico,0013 - Heico - Rektum - 4.avi,fo_class
+heico__151529,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__151597,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__151612,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__151615,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__151616,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__151720,heico,0001 - Heico - Prokto - 2.avi,open_ended
+heico__155751,heico,0001 - Heico - Prokto - 2.avi,fo_class
+heico__1565337,heico,0014 - Heico - Rektum - 5.avi,open_ended
+heico__1574284,heico,0014 - Heico - Rektum - 5.avi,fo_class
+heico__1574331,heico,0014 - Heico - Rektum - 5.avi,fo_class
+heico__1574580,heico,0014 - Heico - Rektum - 5.avi,fo_class
+heico__1574581,heico,0014 - Heico - Rektum - 5.avi,fo_class
+heico__1600337,heico,0014 - Heico - Rektum - 5.avi,multiple_choice
+heico__1649851,heico,0015 - Heico - Rektum - 6.avi,open_ended
+heico__1650047,heico,0015 - Heico - Rektum - 6.avi,open_ended
+heico__1656340,heico,0015 - Heico - Rektum - 6.avi,fo_class
+heico__1656552,heico,0015 - Heico - Rektum - 6.avi,fo_class
+heico__1675369,heico,0015 - Heico - Rektum - 6.avi,multiple_choice
+heico__1675386,heico,0015 - Heico - Rektum - 6.avi,multiple_choice
+heico__1675405,heico,0015 - Heico - Rektum - 6.avi,multiple_choice
+heico__172215,heico,0001 - Heico - Prokto - 2.avi,multiple_choice
+heico__172225,heico,0001 - Heico - Prokto - 2.avi,multiple_choice
+heico__172234,heico,0001 - Heico - Prokto - 2.avi,multiple_choice
+heico__1775750,heico,0016 - Heico - Rektum - 7.avi,fo_class
+heico__1775777,heico,0016 - Heico - Rektum - 7.avi,fo_class
+heico__1775797,heico,0016 - Heico - Rektum - 7.avi,fo_class
+heico__1776031,heico,0016 - Heico - Rektum - 7.avi,fo_class
+heico__1810658,heico,0016 - Heico - Rektum - 7.avi,multiple_choice
+heico__1810686,heico,0016 - Heico - Rektum - 7.avi,multiple_choice
+heico__1854877,heico,0017 - Heico - Rektum - 8.avi,open_ended
+heico__1855106,heico,0017 - Heico - Rektum - 8.avi,open_ended
+heico__1861480,heico,0017 - Heico - Rektum - 8.avi,fo_class
+heico__1861517,heico,0017 - Heico - Rektum - 8.avi,fo_class
+heico__1861518,heico,0017 - Heico - Rektum - 8.avi,fo_class
+heico__1861562,heico,0017 - Heico - Rektum - 8.avi,fo_class
+heico__1876821,heico,0017 - Heico - Rektum - 8.avi,multiple_choice
+heico__1936845,heico,0018 - Heico - Rektum - 9.avi,fo_class
+heico__1936907,heico,0018 - Heico - Rektum - 9.avi,fo_class
+heico__1936935,heico,0018 - Heico - Rektum - 9.avi,fo_class
+heico__1936969,heico,0018 - Heico - Rektum - 9.avi,fo_class
+heico__1956136,heico,0018 - Heico - Rektum - 9.avi,multiple_choice
+heico__1956149,heico,0018 - Heico - Rektum - 9.avi,multiple_choice
+heico__1956214,heico,0018 - Heico - Rektum - 9.avi,multiple_choice
+heico__304500,heico,0002 - Heico - Prokto - 3.avi,fo_class
+heico__304624,heico,0002 - Heico - Prokto - 3.avi,fo_class
+heico__304963,heico,0002 - Heico - Prokto - 3.avi,fo_class
+heico__353248,heico,0002 - Heico - Prokto - 3.avi,multiple_choice
+heico__353251,heico,0002 - Heico - Prokto - 3.avi,multiple_choice
+heico__353302,heico,0002 - Heico - Prokto - 3.avi,multiple_choice
+heico__42231,heico,0009 - Heico - Prokto - 10.avi,open_ended
+heico__42234,heico,0009 - Heico - Prokto - 10.avi,open_ended
+heico__423177,heico,0003 - Heico - Prokto - 4.avi,open_ended
+heico__433615,heico,0003 - Heico - Prokto - 4.avi,fo_class
+heico__433616,heico,0003 - Heico - Prokto - 4.avi,fo_class
+heico__433637,heico,0003 - Heico - Prokto - 4.avi,fo_class
+heico__466829,heico,0003 - Heico - Prokto - 4.avi,multiple_choice
+heico__47514,heico,0009 - Heico - Prokto - 10.avi,fo_class
+heico__47545,heico,0009 - Heico - Prokto - 10.avi,fo_class
+heico__47549,heico,0009 - Heico - Prokto - 10.avi,fo_class
+heico__47550,heico,0009 - Heico - Prokto - 10.avi,fo_class
+heico__536287,heico,0004 - Heico - Prokto - 5.avi,open_ended
+heico__546327,heico,0004 - Heico - Prokto - 5.avi,fo_class
+heico__546473,heico,0004 - Heico - Prokto - 5.avi,fo_class
+heico__546593,heico,0004 - Heico - Prokto - 5.avi,fo_class
+heico__580146,heico,0004 - Heico - Prokto - 5.avi,multiple_choice
+heico__580184,heico,0004 - Heico - Prokto - 5.avi,multiple_choice
+heico__649559,heico,0005 - Heico - Prokto - 6.avi,open_ended
+heico__660111,heico,0005 - Heico - Prokto - 6.avi,fo_class
+heico__660137,heico,0005 - Heico - Prokto - 6.avi,fo_class
+heico__660168,heico,0005 - Heico - Prokto - 6.avi,fo_class
+heico__660170,heico,0005 - Heico - Prokto - 6.avi,fo_class
+heico__689649,heico,0005 - Heico - Prokto - 6.avi,multiple_choice
+heico__775590,heico,0006 - Heico - Prokto - 7.avi,fo_class
+heico__775614,heico,0006 - Heico - Prokto - 7.avi,fo_class
+heico__775754,heico,0006 - Heico - Prokto - 7.avi,fo_class
+heico__806329,heico,0006 - Heico - Prokto - 7.avi,multiple_choice
+heico__806343,heico,0006 - Heico - Prokto - 7.avi,multiple_choice
+heico__806357,heico,0006 - Heico - Prokto - 7.avi,multiple_choice
+heico__900114,heico,0007 - Heico - Prokto - 8.avi,fo_class
+heico__900157,heico,0007 - Heico - Prokto - 8.avi,fo_class
+heico__900201,heico,0007 - Heico - Prokto - 8.avi,fo_class
+heico__900202,heico,0007 - Heico - Prokto - 8.avi,fo_class
+heico__934805,heico,0007 - Heico - Prokto - 8.avi,multiple_choice
+heico__934807,heico,0007 - Heico - Prokto - 8.avi,multiple_choice
+heico__934841,heico,0007 - Heico - Prokto - 8.avi,multiple_choice
+heico__97999,heico,0000 - Heico - Prokto - 1.avi,open_ended
+heico__98001,heico,0000 - Heico - Prokto - 1.avi,open_ended
+heico__98342,heico,0000 - Heico - Prokto - 1.avi,open_ended
+lapchole__109383,lapchole,0002 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1240139,lapchole,0029 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1286514,lapchole,0030 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__1286525,lapchole,0030 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__1286572,lapchole,0030 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__1421170,lapchole,0034 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1480427,lapchole,0036 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1513214,lapchole,0037 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1565344,lapchole,0039 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1621697,lapchole,0040 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__1654114,lapchole,0041 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1696994,lapchole,0042 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__1770243,lapchole,0044 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__1970361,lapchole,0050 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__2090742,lapchole,0052 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__2111560,lapchole,0053 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__2150635,lapchole,0054 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__2192122,lapchole,0055 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__2250061,lapchole,0056 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__230349,lapchole,0005 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__2337412,lapchole,0057 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__2377281,lapchole,0058 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__2395363,lapchole,0059 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__2606745,lapchole,0062 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__2649855,lapchole,0063 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__2784747,lapchole,0068 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__2879207,lapchole,0071 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3006699,lapchole,0073 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__311189,lapchole,0007 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__3129691,lapchole,0076 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3258217,lapchole,0081 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3294955,lapchole,0082 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__3328894,lapchole,0083 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3328990,lapchole,0083 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__336883,lapchole,0008 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3396035,lapchole,0086 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__3488161,lapchole,0092 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__3579197,lapchole,0094 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3650336,lapchole,0096 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3709064,lapchole,0097 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__3739909,lapchole,0099 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__377421,lapchole,0009 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__3854081,lapchole,0101 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__3882096,lapchole,0102 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__3926996,lapchole,0105 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__3969560,lapchole,0106 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4032678,lapchole,0107 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4094919,lapchole,0108 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4134591,lapchole,0114 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4194001,lapchole,0115 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4266027,lapchole,0128 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4342288,lapchole,0129 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__439638,lapchole,0010 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__4414496,lapchole,0133 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__4466163,lapchole,0137 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4514776,lapchole,0138 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4546462,lapchole,0144 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4596762,lapchole,0146 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4634080,lapchole,0147 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__465683,lapchole,0011 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4755570,lapchole,0160 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4774510,lapchole,0167 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__4817478,lapchole,0169 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4851551,lapchole,0180 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__4888353,lapchole,0182 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__5001049,lapchole,0184 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__5026584,lapchole,0006 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__5026785,lapchole,0049 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__510683,lapchole,0013 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__576010,lapchole,0014 - Laparoscopic Cholecystectomy.mp4,multiple_choice
+lapchole__70489,lapchole,0001 - Laparoscopic Cholecystectomy.mp4,fo_class
+lapchole__707319,lapchole,0018 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__836913,lapchole,0020 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__917386,lapchole,0023 - Laparoscopic Cholecystectomy.mp4,open_ended
+lapchole__981546,lapchole,0024 - Laparoscopic Cholecystectomy.mp4,fo_class

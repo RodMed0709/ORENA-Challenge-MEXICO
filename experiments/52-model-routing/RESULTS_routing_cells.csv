@@ -1,0 +1,5 @@
+format,dataset,n,acc_27B,acc_8B,delta_27B_minus_8B,only_27B_right,only_8B_right,both_right,neither
+fo_class,heico,321,0.6885,0.8287,-0.1402,12,57,209,43
+fo_class,lapchole,169,0.7929,0.8639,-0.071,9,21,125,14
+number,heico,333,0.2943,0.3393,-0.045,23,38,75,197
+number,lapchole,185,0.3838,0.5027,-0.1189,20,42,51,72

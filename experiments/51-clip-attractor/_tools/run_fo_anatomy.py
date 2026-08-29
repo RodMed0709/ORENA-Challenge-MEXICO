@@ -1,4 +1,4 @@
-"""Rung 49a driver — run `fo_class_anatomy` over every arm whose per-question eval survives.
+"""Rung 51a driver — run `fo_class_anatomy` over every arm whose per-question eval survives.
 
 Config lives here, inline, the way `19b/_tools/train_merged_ep5.py` carries rung 19b's.
 Zero GPU: it reads `inspect.csv` files that already exist and scores through `frame.metrics`.
@@ -17,7 +17,7 @@ import pandas as pd
 
 STORAGE = Path("/mnt/storage/uaq_user")
 REPO = STORAGE / "repo_rod"
-OUT = REPO / "experiments/49-clip-attractor"
+OUT = REPO / "experiments/51-clip-attractor"
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
 os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")

@@ -1,0 +1,38 @@
+{
+ "base": "/workspace/repo_rodri/experiments/42-merged-corpus/runs/42_merged_v1/train.jsonl",
+ "base_sha256": "71143c547ad444c5596fb8cfcebf6fa2030251226152327a5e25d4d862850e1a",
+ "n_rows_in": 19384,
+ "count_target": true,
+ "appearance_aug": true,
+ "seed": 42,
+ "count_target_gate": {
+  "n_targets": 3792,
+  "round_trip": true,
+  "labels": [
+   "Absorbable hemostatic agents",
+   "Clips",
+   "External drains",
+   "Gallstones",
+   "Meshes",
+   "Needles",
+   "Silicone loops",
+   "Specimen bags",
+   "Specimens",
+   "Sponges",
+   "different foreign object classes",
+   "different foreign object instances"
+  ],
+  "n_rows": 19384,
+  "n_rewritten": 3792,
+  "n_untouched_and_byte_identical": 15592
+ },
+ "appearance_gate": {
+  "n_rows": 19384,
+  "identity_share": 0.0689,
+  "deterministic_sample": 200,
+  "aug_dir": "/workspace/rung54/corpus/aug_frames"
+ },
+ "out": "/workspace/rung54/corpus/train_stack.jsonl",
+ "out_sha256": "2b2fc29e9006f8b31a71f80f433e31b70a799b90b03fc35b816e418c2a984564",
+ "n_rows_out": 19384
+}

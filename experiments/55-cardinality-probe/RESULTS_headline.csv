@@ -1,0 +1,2 @@
+checkpoint,layer,pooling,n_id_fit,n_id_videos,n_ood_read,n_ood_videos,n_enumeration_total,n_videos_total,probe_train_accuracy,probe_ood_accuracy,model_ood_accuracy,model_parser_none_outputs,rung34_number_n_id_fit
+/mnt/storage/uaq_user/rung48/adapters/a2_ep3,24,last_prompt_token,531,28,782,10,1313,38,0.7419962335216572,0.8849104859335039,0.850383631713555,0,768

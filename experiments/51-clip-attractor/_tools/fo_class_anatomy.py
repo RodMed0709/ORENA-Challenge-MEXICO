@@ -1,4 +1,4 @@
-"""Rung 49a — the `fo_class` error anatomy, as a COMMITTED artifact.
+"""Rung 51a — the `fo_class` error anatomy, as a COMMITTED artifact.
 
 The campaign has quoted *"78.3 % of `fo_class` errors involve Clip or Sponge; fixing that
 confusion is +0.0702 headline"* since 2026-08-10. Rung 36's README says plainly that the
