@@ -1,0 +1,16 @@
+{
+ "cooccur_like": {
+  "parse_rate": 0.939,
+  "says_no_when_absent": 0.1562,
+  "says_no_when_present": 0.0,
+  "margin": 0.1562,
+  "n": 164
+ },
+ "visible": {
+  "parse_rate": 1.0,
+  "says_no_when_absent": 0.125,
+  "says_no_when_present": 0.0,
+  "margin": 0.125,
+  "n": 164
+ }
+}

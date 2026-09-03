@@ -71,3 +71,31 @@ Nothing to train — `checkpoint-6060` exists on the volume and merges in minute
 of us and rank 3 is **0.0026** ahead. At that spacing a real but small gain is decisive, which
 is the argument for spending the slot; the absence of cardinal calibration is the argument
 against. That is a team call, not a measurement.
+
+---
+
+## 🔻 CORRECTED 2026-09-02 — ep5 is NOT the candidate, and ep2 would have been a bad slot
+
+This note ranked **ep5** for a submission slot on `bag_f1`. Rung 58 answered the same 4,890
+centre items with **exact-set match** — the notion the platform actually scores, not a proxy —
+and added the ID control this note never had:
+
+| | centre exact-set vs ep4 | ID (`fo_class`, 8 held-out videos) |
+|---|---|---|
+| ep2 | **+0.0168**, 15/15 | **−0.0898** |
+| ep4 — shipped | — | 0.8408 |
+| ep5 | **−0.0106**, 0/15 | −0.0082 |
+
+**`bag_f1` and exact-set disagree on ep5's sign.** `bag_f1` put ep5 above ep4 in 15/15 folds;
+exact-set puts it below in 15/15. Both are centre rulers on the same items, so this is not an
+ID/OOD tension — it is the proxy failing to resolve a signal 23× smaller than the one that
+licensed it, exactly as the section above warned it might.
+
+⇒ **No alternative epoch of rung 42 beats ep4 on both axes.** ep2's centre gain is real and its
+ID cost is five times larger; shipping it alone — which was under active consideration on
+2026-09-02 — would have spent a slot on a worse model. ep5 survives only *inside* the pair
+([[checkpoint-pair-shorter-list-ships]]), where it is the only arm positive on both axes
+(+0.0041 ID at 8/8, +0.0016 centre) and also the smallest.
+
+The general lesson stands and is now sharper: **read the epoch axis on the metric you are
+scored on, and always with the ID control beside it.**

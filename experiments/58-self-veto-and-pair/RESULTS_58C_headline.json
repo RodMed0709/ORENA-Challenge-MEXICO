@@ -1,0 +1,18 @@
+{
+ "run_name": "58C_r42_ep4",
+ "n_questions": 1283,
+ "bucket_mean": 0.6721777263658064,
+ "acc_ID": 0.7267080745341615,
+ "acc_OOD": 0.61125,
+ "pre_evaluation_score": 0.6721777263658064,
+ "pre_evaluation_score_reference": 0.6721777263658064,
+ "overall_mean_accuracy": 0.6979706790123457,
+ "raw_accuracy": 0.6547155105222136,
+ "n_timed_out": 0,
+ "judge_model": "Qwen/Qwen3-4B",
+ "aggregation_ID": 0.592274678111588,
+ "object_recognition_ID": 0.852,
+ "proxy_leaderboard": 0.7221373390557939,
+ "minutes": 7.7,
+ "results_csv": "/mnt/storage/uaq_user/rung58/headline/58C_r42_ep4/results.csv"
+}

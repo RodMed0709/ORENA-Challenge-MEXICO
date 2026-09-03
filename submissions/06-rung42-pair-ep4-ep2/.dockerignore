@@ -1,0 +1,10 @@
+# The legacy builder streams the WHOLE context to the daemon before step 1. The 27B build
+# shipped 53 GB of context to copy 34 GB of weights and filled the root partition twice.
+# resources/ MUST stay (it is COPYied); everything below is dead weight.
+_artifacts/
+*.tar
+*.tar.gz
+test/output/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

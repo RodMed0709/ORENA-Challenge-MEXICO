@@ -1,5 +1,45 @@
 # context/NOW.md — what is happening RIGHT NOW
 
+## 🚀 2026-09-02 — SUBMISSION 06 IS BUILT AND VERIFIED: two checkpoints, the shorter class list wins
+
+Rung `experiments/58-self-veto-and-pair/`. Three decision notes:
+[[checkpoint-pair-shorter-list-ships]], [[self-veto-is-a-centre-only-gain]],
+[[unam-can-build-containers]]. **No training. ~1 GPU-hour total on UNAM.**
+
+**1. 🟢 What ships.** `submissions/06-rung42-pair-ep4-ep2/` — submission 03's container with a
+second checkpoint (rung 42 **ep2**) inside. Model A answers; where the answer parses ENTIRELY as
+legal class names, B answers too and **the shorter list wins**. Centre **+0.0221, 15/15 folds,
+never negative**; ID `fo_class` −0.0041; `bucket_mean` 0.6722 → **0.6698**. Tar at
+`/home/legokna/orena-frame-06-rung42-pair-ep4-ep2.tar.gz` (31 GB, integrity checked).
+
+**2. 🔴 The self-veto is dead, and it looked like the big win.** The shipped checkpoint is
+correct on **0 of 2,445** centre items whose gold is `none`. Asking it in yes/no form to delete
+its own classes buys **+0.0380** on centre — and costs **−0.0653 on ID**. Killed by the control.
+Its premise also failed re-measurement: [[zero-is-format-localized]]'s 0.82 is rung 06 on
+CO-OCCURRENCE binaries; on r42, single-class presence reads **0.156**.
+
+**3. 🔻 Rung 48's ep5 recommendation is corrected.** On exact-set match over the same 4,890
+items, **ep5 is WORSE than ep4** (−0.0106) and **ep2 alone loses 0.0898 in ID** — it was under
+active consideration for a slot that night. No alternative epoch beats ep4 on both axes; ep5
+survives only inside the pair. `bag_f1` and exact-set disagree on ep5's SIGN, on the same items.
+
+**4. 🔻 "UNAM cannot build containers" is false.** `buildah bud --isolation chroot` runs RUN
+steps with SELinux still Enforcing. The August claim sent a 34 GB build onto a 144 GB partition
+that filled twice. The real constraint is that UNAM's docker has no daemon.
+
+**5. 📌 Three container defects found locally, all introduced while building this** — a
+`NameError` at import, a `@torch.no_grad()` split from its function, and checkpoints merged with
+`transformers 5.12` for a container pinned to 4.57.6. The local cycle cost hours; submission 04
+skipped it and paid 12 hours and a slot. `submissions/06-*/test_arbitrate.py` now asserts the
+SHIPPED `arbitrate()` still reproduces 0.3838 and 0.8367, read out of `inference.py` by AST.
+
+⚠️ **The bet, unhedged:** the arm needs the platform's OOD half to behave like CholecT50. If the
+centre gain does not transfer, the cost is 0.0023. It does NOT reach the +0.0226 the top-10 bar
+needs (0.5809 → 0.6035).
+
+---
+
+
 ## 🎯 2026-08-22 — FOR THE TEAM: rung 19b is a wash, the `fo_class` front is half its price, and the real lever is ENUMERATION
 
 Everything here is on `main` (`80fa0e1`…). Two decision notes:

@@ -1,0 +1,57 @@
+{
+ "n_items": 490,
+ "n_videos": 8,
+ "minutes": 18.7,
+ "arms": {
+  "r42 (enviado)": {
+   "exact": 0.8408,
+   "delta": 0.0,
+   "exact_ID": 0.8408,
+   "exact_OOD": null,
+   "folds_won": 0,
+   "n_folds": 8,
+   "fold_min": 0.0,
+   "fold_max": 0.0
+  },
+  "r42+veto": {
+   "exact": 0.7755,
+   "delta": -0.0653,
+   "exact_ID": 0.7755,
+   "exact_OOD": null,
+   "folds_won": 0,
+   "n_folds": 8,
+   "fold_min": -0.0693,
+   "fold_max": -0.0588
+  },
+  "conjunto 5 (mas corta)": {
+   "exact": 0.8367,
+   "delta": -0.0041,
+   "exact_ID": 0.8367,
+   "exact_OOD": null,
+   "folds_won": 1,
+   "n_folds": 8,
+   "fold_min": -0.01,
+   "fold_max": 0.0022
+  },
+  "conjunto 5 + veto": {
+   "exact": 0.7673,
+   "delta": -0.0735,
+   "exact_ID": 0.7673,
+   "exact_OOD": null,
+   "folds_won": 0,
+   "n_folds": 8,
+   "fold_min": -0.0779,
+   "fold_max": -0.061
+  },
+  "r42+veto luego conjunto": {
+   "exact": 0.7673,
+   "delta": -0.0735,
+   "exact_ID": 0.7673,
+   "exact_OOD": null,
+   "folds_won": 0,
+   "n_folds": 8,
+   "fold_min": -0.0779,
+   "fold_max": -0.061
+  }
+ }
+}

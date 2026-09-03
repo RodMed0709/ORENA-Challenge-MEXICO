@@ -1,0 +1,13 @@
+{
+ "bucket_mean_ARM": 0.6698373569726666,
+ "bucket_mean_CONTROL_58C": 0.6721777263658064,
+ "delta": -0.0023,
+ "proxy_leaderboard": 0.7161373390557939,
+ "rule_fired_on": 509,
+ "answers_changed": 7,
+ "acc_ID": 0.7204968944099379,
+ "acc_OOD": 0.6125,
+ "object_recognition_ID": 0.84,
+ "aggregation_ID": 0.592274678111588,
+ "minutes": 10.4
+}
