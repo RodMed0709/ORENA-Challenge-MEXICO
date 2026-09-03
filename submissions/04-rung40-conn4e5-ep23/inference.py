@@ -78,7 +78,11 @@ log = logging.getLogger(__name__)
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 RESOURCES_PATH = Path(__file__).parent / "resources"
-MODEL_PATH = RESOURCES_PATH / "model"   # merged rung-06 checkpoint (Qwen3-VL-8B + ViT-LoRA)
+MODEL_PATH = RESOURCES_PATH / "model"   # rung 40 arm B `conn4e5` ep2+3, Qwen3.6-27B FP8
+# 🔻 Corrected 2026-08-27: this comment said "merged rung-06 checkpoint (Qwen3-VL-8B +
+# ViT-LoRA)", copied from submission 02 and wrong for every byte in this image. The
+# 2026-08-25 audit of rung 54 found rung 06 weights sitting in a submission working
+# directory; a stale comment is how that becomes invisible.
 INPUT_PATH = Path("/input")
 OUTPUT_PATH = Path("/output")
 FRAME_DIR = INPUT_PATH / "frames"               # template / README layout
@@ -206,22 +210,46 @@ def _index_of(root: Path) -> dict[str, Path]:
     return index
 
 
-def _extract_zip() -> Path | None:
-    """Unpack the frames archive into /tmp. Returns the directory, or None on failure.
+def zip_candidates() -> list[Path]:
+    """Every archive under /input, the DOCUMENTED name first.
+
+    🔴 RESTORED 2026-08-27 from submission 03. This file carried submission **02**'s input
+    handling, and its README said so approvingly — but 02 is the OLDER one: it looked only
+    for ``batch-frames.zip``. The algorithm-interface page declares that name today;
+    assuming the NAME is the same class of bug as assuming the directory, and it is the bug
+    that cost submission 01 a slot. A rename ships a perfectly valid archive that a
+    hard-coded path never opens, and the last-resort sweep cannot help because the images
+    are still inside the archive.
+    """
+    named = [FRAMES_ZIP] if FRAMES_ZIP.is_file() else []
+    others = sorted(p for p in INPUT_PATH.glob("*.zip")
+                    if p.is_file() and p != FRAMES_ZIP)
+    if others:
+        log.info("Frames: %d other archive(s) under %s: %s",
+                 len(others), INPUT_PATH, [p.name for p in others])
+    return named + others
+
+
+def _extract_zip(archive: Path) -> Path | None:
+    """Unpack a frames archive into /tmp. Returns the directory, or None on failure.
 
     Guarded: a BadZipFile, an encrypted archive or a full /tmp used to propagate out of
     ``run()`` and produce NO answer.json at all. Failing here must degrade to the next
     layout candidate, not end the run.
+
+    Each archive extracts to its OWN subdirectory: two archives sharing a stem would
+    otherwise overwrite each other and the index would silently describe the wrong one.
     """
+    dest = FRAMES_EXTRACT_DIR / archive.stem
     try:
         log.info("Frames: extracting %s (%d bytes) -> %s",
-                 FRAMES_ZIP, FRAMES_ZIP.stat().st_size, FRAMES_EXTRACT_DIR)
-        FRAMES_EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(FRAMES_ZIP) as zf:
-            zf.extractall(FRAMES_EXTRACT_DIR)
-        return FRAMES_EXTRACT_DIR
+                 archive, archive.stat().st_size, dest)
+        dest.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(dest)
+        return dest
     except Exception:
-        log.exception("Frames: could not extract %s", FRAMES_ZIP)
+        log.exception("Frames: could not extract %s", archive)
         return None
 
 
@@ -229,19 +257,36 @@ def build_frame_index(manifest: dict | None = None) -> dict[str, Path]:
     """Map qID -> still-frame path.
 
     Order of authority:
-      1. ``batch.json``'s ``layout.frames`` (e.g. ``"frames/<qID>.png"``) — the platform
-         telling us directly. Only the directory part is used; the filename is matched by
-         stem so a suffix disagreement cannot zero the run.
+      1. EVERY string value in ``batch.json``'s ``layout`` (e.g. ``"frames/<qID>.png"``) —
+         the platform telling us directly. A key named ``frames`` is tried first; the rest
+         follow, because the key name is the platform's to change and not ours to assume.
+         Only the directory part is used; the filename is matched by stem so a suffix
+         disagreement cannot zero the run.
       2. The plain ``frames/`` directory (template + README).
-      3. ``batch-frames.zip`` (the algorithm interface's declaration).
+      3. Any ``/input/*.zip``, ``batch-frames.zip`` first (the interface's declaration).
       4. A last-resort sweep of every image anywhere under /input, so a layout nobody
          documented still produces answers instead of a silent zero.
     """
     manifest = manifest or {}
     layout = manifest.get("layout") or {}
-    declared = layout.get("frames") if isinstance(layout, dict) else None
+    # 🔴 ITERATE THE KEYS. This file read `layout["frames"]` — that key is FRAME's, and the
+    # SEGMENT track declares `plain`/`overlayed` with no `frames` key at all. A layout this
+    # container does not recognise must degrade to a warning, never to an empty index.
+    # A key literally called `frames` still wins, so FRAME's behaviour is unchanged.
+    declared_paths: list[str] = []
+    if isinstance(layout, dict):
+        preferred = [v for k, v in layout.items()
+                     if str(k).lower() == "frames" and isinstance(v, str) and v]
+        rest = [v for k, v in layout.items()
+                if str(k).lower() != "frames" and isinstance(v, str) and v]
+        declared_paths = preferred + rest
+        if rest:
+            log.info("Frames: layout declares %d non-`frames` key(s): %s",
+                     len(rest), [k for k in layout if str(k).lower() != "frames"])
+    elif isinstance(layout, str) and layout:
+        declared_paths = [layout]
 
-    if isinstance(declared, str) and declared:
+    for declared in declared_paths:
         # "frames/<qID>.png" -> the "frames" directory. A bare "<qID>.png" means /input.
         rel_dir = Path(declared).parent
         root = INPUT_PATH if str(rel_dir) in (".", "") else INPUT_PATH / rel_dir
@@ -251,8 +296,8 @@ def build_frame_index(manifest: dict | None = None) -> dict[str, Path]:
                 log.info("Frames: %d from DECLARED layout %r -> %s", len(index), declared, root)
                 return index
             log.warning("Frames: declared layout %r -> %s holds no image", declared, root)
-        elif root.suffix.lower() == ".zip" or FRAMES_ZIP.is_file():
-            pass  # fall through to the archive branch
+        elif root.suffix.lower() == ".zip" or zip_candidates():
+            continue  # fall through to the archive branch
         else:
             log.warning("Frames: declared layout %r -> %s does not exist", declared, root)
 
@@ -263,14 +308,14 @@ def build_frame_index(manifest: dict | None = None) -> dict[str, Path]:
             return index
         log.warning("Frames: %s exists but holds no image", FRAME_DIR)
 
-    if FRAMES_ZIP.is_file():
-        extracted = _extract_zip()
+    for archive in zip_candidates():
+        extracted = _extract_zip(archive)
         if extracted is not None:
             index = _index_of(extracted)
             if index:
-                log.info("Frames: %d from the archive", len(index))
+                log.info("Frames: %d from the archive %s", len(index), archive.name)
                 return index
-            log.warning("Frames: %s extracted but holds no image", FRAMES_ZIP)
+            log.warning("Frames: %s extracted but holds no image", archive)
 
     if INPUT_PATH.is_dir():
         index = _index_of(INPUT_PATH)
@@ -316,6 +361,21 @@ def load_model():
       activations and vLLM's profiling pass, and the default OOMs AFTER loading -- a model
       that fits and still will not start. Real prompts measure 1244 tokens, so 2048 is the
       floor, not a choice.
+    * `gpu_memory_utilization=0.90`. 🔻 RAISED from 0.82 on 2026-08-27, and the direction is
+      the counter-intuitive part: on a SMALLER card this number must go UP, because it is a
+      fraction of the total and the weights are a fixed 33.46 GiB. 0.82 was measured on
+      `hpclab-RTXA6000` (`card_total_gib` 47.4); the L40S is ~45 GiB, so the same fraction
+      buys ~2 GiB less of the one resource that was already scarce. Measured on this
+      checkpoint, 20 real questions each, `experiments/44-fp8-deployability/`:
+
+          gpu_memory_utilization   KV cache        tokens    s/question
+          0.82  (as shipped)       2.45 GiB        17,408    0.496
+          0.778 (= L40S at 0.82)   0.46 GiB         3,072    0.592
+
+      3,072 tokens at `max_model_len=2048` is 1.5 sequences: vLLM cannot fill its own
+      `max_num_seqs=8`, and latency rose 19 %. Neither run OOMed and both answered 20/20 --
+      this is starvation, not failure, which is exactly why it would have shipped unnoticed.
+      0.90 is the value rung 44's serve test already validated on this hardware.
     """
     if not MODEL_PATH.is_dir():
         raise FileNotFoundError(
@@ -368,14 +428,105 @@ def load_model():
              MODEL_PATH, ENABLE_THINKING)
     t0 = time.monotonic()
     llm = LLM(model=str(MODEL_PATH), tensor_parallel_size=1,
-              gpu_memory_utilization=0.82, max_model_len=2048, max_num_seqs=8,
+              gpu_memory_utilization=0.90, max_model_len=2048, max_num_seqs=8,
               limit_mm_per_prompt={"image": 1}, enforce_eager=True,
               trust_remote_code=True)
     log.info("vLLM up in %.1f s", time.monotonic() - t0)
     return llm, None
 
 
-def answer_batch(llm, requests, frames: dict, system_prompt: str) -> tuple[list[str], float]:
+# ── answer post-processing ────────────────────────────────────────────────────
+# 🔴 RESTORED 2026-08-27. These three were present in submissions 02 and 03 — both of
+# which SCORED — and absent from this file, which did not. `normalize_answer` was still
+# CALLED in `answer_batch`, so every batch raised NameError after the vLLM call returned,
+# the blanket `except` in `run()` turned twenty good answers into twenty empty strings,
+# and the circuit breaker exited 3. The platform reported "failed on one or more cases"
+# for all 100 of them. Ported verbatim from `submissions/03-rung42-connector-ood`.
+
+_TRAILING_DOT_INT = re.compile(r"^(\d+)\s*\.$")
+_TRAILING_DOT_YESNO = re.compile(r"^(yes|no)\s*\.$", re.I)
+
+
+def normalize_answer(text: str) -> str:
+    """Strip a trailing period that would make an otherwise-correct answer auto-incorrect.
+
+    🔴 Why this exists. The SDK's exact-match verifiers are unforgiving, and we can read the
+    exact gates (`vendor/orena-focus/src/focus/data/formats.py`):
+
+        Number.verify  -> ``text.strip().isdigit()``            so ``"1."``   is INCORRECT
+        Binary.verify  -> ``text.strip().lower() in (yes, no)`` so ``"Yes."`` is INCORRECT
+
+    Probe 16a measured the fine-tuned checkpoint emitting ``"1."`` — with the period — on
+    **86.7% (ID) / 87.5% (OOD)** of `number` questions phrased outside the corpus's own
+    templates. The base model's rate on the same probe is **0.0000**: our fine-tuning created
+    this. It is not a counting error; it is a scored formatting error.
+
+    ⚠️ **The container cannot know the answer format.** `Request` carries no `answer_format`
+    (that lives on `Reference`, which a participant never sees), so this is deliberately
+    format-AGNOSTIC and as narrow as it can be: it fires only when the *entire* answer is
+    digits-then-period or yes/no-then-period. Everything else is returned byte-identical.
+    """
+    s = (text or "").strip()
+    m = _TRAILING_DOT_INT.match(s)
+    if m:
+        return m.group(1)
+    m = _TRAILING_DOT_YESNO.match(s)
+    if m:
+        return m.group(1).lower()
+    return s
+
+
+def legal_class_names() -> dict[str, str]:
+    """The accepted `fo_class` vocabulary, READ AT RUNTIME from the SDK we are scored by.
+
+    🔴 Never hard-code this list (RULES §8b). The 10-item list the organizers paste INSIDE
+    the prompt and the 10-item list the scorer registers **disagree on their 10th element**
+    (`foreign object` vs `Absorbable Hemostatic Agent`), so a container that ships a literal
+    copy of either one is shipping a guess about which document the scorer follows.
+    Returns lowercase -> canonical, matching `FOClass.verify`'s own case-insensitive map.
+    """
+    from focus.foreign_objects import FOType
+
+    names = tuple(FOType.names())
+    log.info("fo_class vocabulary read from the SDK at runtime: %d names %s", len(names), names)
+    return {n.lower(): n for n in names}
+
+
+def clamp_class_tokens(text: str, legal: dict[str, str]) -> str:
+    """Drop `fo_class` tokens the scorer does not recognise. NO-OP on every other answer.
+
+    🔴 Why this is not cosmetic. `FOClass.verify` (`focus/data/formats.py:175`) splits on
+    commas and **RAISES** on any part outside the registry — an unrecognised token does not
+    merely score 0 for itself, it takes the whole answer down. Dropping the illegal parts
+    can only ever turn a guaranteed-wrong answer into a possibly-right one.
+
+    Deliberately conservative, and each clause is a way it could do harm:
+      * it fires ONLY when at least one part IS a legal class name, so a `number`, a
+        `binary` or an `open_ended` answer can never enter this path;
+      * if every part is illegal it returns the text UNCHANGED — there is nothing to
+        salvage and inventing a class would be a guess, not a repair;
+      * `"none"` combined with real classes also raises, so `"none"` is the part dropped:
+        the model naming a concrete object is the stronger claim of the two;
+      * casing is left alone — `verify` is already case-insensitive.
+
+    ⚠️ A2 ep3 emitted **0** illegal tokens across the whole corpus, so like
+    `normalize_answer` this is insurance against the HIDDEN test, not a repair of ours.
+    """
+    parts = [p.strip() for p in (text or "").split(",") if p.strip()]
+    if len(parts) < 2 and not (parts and parts[0].lower() in legal):
+        return text
+    keep = [p for p in parts if p.lower() in legal or p.lower() == "none"]
+    if not any(p.lower() in legal for p in keep):
+        return text                      # nothing legal to salvage — leave it alone
+    if len(keep) > 1:
+        keep = [p for p in keep if p.lower() != "none"]   # "none" + a class always raises
+    if len(keep) == len(parts):
+        return text                      # already legal: byte-identical, the common case
+    return ", ".join(keep)
+
+
+def answer_batch(llm, requests, frames: dict, system_prompt: str,
+                 legal_classes: dict[str, str] | None = None) -> tuple[list[str], float]:
     """Answer the WHOLE batch in one vLLM call. Deliberately not one-at-a-time.
 
     🔴 A per-question loop here would throw away the only reason vLLM is in this image.
@@ -427,6 +578,15 @@ def answer_batch(llm, requests, frames: dict, system_prompt: str) -> tuple[list[
             idx = raw.rfind("</think>")
             raw = raw[idx + len("</think>"):].strip() if idx != -1 else ""
         fixed = normalize_answer(raw)
+        if legal_classes:
+            clamped = clamp_class_tokens(fixed, legal_classes)
+            if clamped != fixed:
+                # RULES §8b: an unrecognised class token RAISES in verify() and takes the
+                # whole answer with it. Loud, because if this fires the model learned a
+                # vocabulary the scorer does not have — an upstream bug, not a container one.
+                log.warning("qID=%s ILLEGAL fo_class token dropped %r -> %r",
+                            qid, fixed, clamped)
+            fixed = clamped
         if fixed != raw:
             log.info("qID=%s normalised %r -> %r", qid, raw, fixed)
         by_qid[qid] = fixed[:ANSWER_CHAR_CAP]
@@ -465,13 +625,35 @@ def run() -> int:
         log.error("%d of %d qID(s) have no frame, e.g. %s",
                   len(missing), len(requests), missing[:5])
     if len(missing) > len(requests) * MAX_FAILED_FRACTION:
-        # Do NOT load 17 GB of weights to answer nothing. Bail before the expensive part.
-        log.error("ABORT: %d of %d qID(s) unindexed (> %.0f%%) — the frame layout is not what "
-                  "this container expects. Failing loudly instead of writing empty answers.",
+        # 🔻 Changed 2026-08-27: this used to `return 2`. On the platform's 100-case harness
+        # a non-zero exit is not a loud failure, it is a SILENT one — the run is reported as
+        # "failed on one or more cases" with no logs, no partial score and nothing to read.
+        # A batch that scores its answerable half tells us more than a batch that scores
+        # nothing, so the breaker now shouts in the log and keeps going.
+        log.error("DEGRADED: %d of %d qID(s) unindexed (> %.0f%%) — the frame layout is not "
+                  "what this container expects. Answering the rest anyway.",
                   len(missing), len(requests), MAX_FAILED_FRACTION * 100)
-        return 2
+    if not frames:
+        # Nothing to look at: do NOT spend ~130 s loading 33 GB to answer nothing. Write one
+        # empty response per qID (a MISSING answer is a malformed submission) and exit 0.
+        log.error("No frame indexed at all — writing %d empty answer(s) without loading the "
+                  "model. This scores zero for this batch and costs the run nothing else.",
+                  len(requests))
+        OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+        save_items([Response(qID=r.qID, content="", latency=0.0) for r in requests],
+                   OUTPUT_PATH / "answer.json")
+        return 0
 
     system_prompt = SYSTEM_PROMPT_PREFIX + load_fo_definitions()
+
+    # RULES §8b: read the fo_class registry from the SDK we are scored by, never a literal
+    # copy. Done before the weight load so an SDK-side surprise surfaces in seconds.
+    try:
+        legal_classes = legal_class_names()
+    except Exception:
+        log.exception("could not read the fo_class vocabulary from the SDK — "
+                      "clamping is DISABLED for this run, answers pass through unchanged")
+        legal_classes = None
 
     llm, _ = load_model()
     # 🔻 Corregido 2026-08-25: esta linea leia `model`, un nombre que NO SE ASIGNA
@@ -495,7 +677,7 @@ def run() -> int:
     responses = []
     t_batch = time.monotonic()
     try:
-        answers, wall = answer_batch(llm, requests, frames, system_prompt)
+        answers, wall = answer_batch(llm, requests, frames, system_prompt, legal_classes)
     except Exception:
         # A failed batch must still produce one Response per qID: an empty answer scores
         # incorrect, a MISSING answer is a malformed submission.
@@ -529,11 +711,15 @@ def run() -> int:
     log.info("=== done in %.2f s total ===", time.monotonic() - t_start)
 
     if n_failed > len(requests) * MAX_FAILED_FRACTION:
-        log.error("ABORT: %d of %d question(s) failed (> %.0f%%). A schema-valid answer.json "
-                  "full of empty answers scores zero and looks like a model that knows "
-                  "nothing — exiting non-zero so the cause is visible.",
+        # 🔻 Changed 2026-08-27: this used to `return 3`, and that exit is what the platform
+        # reported on 2026-08-25 for ALL 100 cases. The cause was a NameError on
+        # `normalize_answer` (restored above); the exit code is what made it undiagnosable.
+        # A zero we can see beats a failure we cannot: the score's SHAPE — which buckets,
+        # which formats — is the only telemetry this platform gives us.
+        log.error("DEGRADED: %d of %d question(s) came back empty (> %.0f%%). answer.json is "
+                  "written and this exits 0 so the batch still scores; read the traceback "
+                  "above for the cause.",
                   n_failed, len(requests), MAX_FAILED_FRACTION * 100)
-        return 3
     return 0
 
 

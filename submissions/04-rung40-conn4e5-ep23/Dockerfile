@@ -71,6 +71,45 @@ assert 'qwen3_5' in CONFIG_MAPPING_NAMES, f'transformers {transformers.__version
 assert shutil.which('ninja'), 'ninja is not on PATH - vLLM EngineCore fails at RUNTIME with an opaque FileNotFoundError';\
 print('gate OK: cuda + qwen3_5 + ninja + vllm')"
 
+# 🔴 REMOVE torchcodec. Added 2026-09-01, after it broke `from vllm import LLM` in the
+# built image. It is a TRANSITIVE dependency of vllm 0.26.0 — never named in
+# requirements.txt — and pip resolved 0.16.0, whose only wheel links CUDA 13:
+#
+#     ldd torchcodec/libtorchcodec_image.so
+#       libnvrtc.so.13  => not found
+#       libcudart.so.13 => not found
+#
+# So the deliberate cu128 pin covered torch and torchvision and MISSED the one package
+# that reaches CUDA through a compiled .so. vLLM imports it unconditionally on the
+# `vllm.multimodal.__init__ -> hasher -> media -> connector -> video` chain, and its own
+# guard at `vllm/multimodal/video.py:34` catches `(ImportError, RuntimeError)` — while
+# this raises **OSError**. One exception class is the whole bug.
+#
+# Removing it makes that import raise ImportError, which the guard DOES catch and
+# replaces with a PlaceholderModule. torchcodec is a video-decoding backend; this
+# container is handed PNG frames and never decodes video, so nothing we use is lost.
+# (The alternative — LD_LIBRARY_PATH to the bundled nvidia/cu13/lib — also works, and was
+# rejected: it puts a CUDA 13 runtime in the same process as a cu128 torch, on a host
+# whose driver we have never seen. That is the exact risk the cu128 pin was chosen to avoid.)
+RUN python -c "\
+import shutil, glob, site, os;\
+bases = site.getsitepackages() + [site.getusersitepackages()];\
+pats = ['torchcodec', 'torchcodec.libs', 'torchcodec-*.dist-info', 'torchcodec-*.egg-info'];\
+hits = [p for b in bases for pat in pats for p in glob.glob(os.path.join(b, pat))];\
+[shutil.rmtree(p, ignore_errors=True) for p in hits];\
+print('torchcodec removed:', hits or '(not installed)')"
+
+# 🔴 `from vllm import LLM`, not `import vllm`. Added 2026-09-01. The gate above imported
+# the vllm PACKAGE, which succeeds, and never touched the SYMBOL, which is what
+# `load_model()` actually needs — and which died on the torchcodec/CUDA-13 mismatch. The
+# package import does not walk `vllm.multimodal`; the symbol import does. This one line is
+# the difference between catching that at build time and shipping a container that loads
+# 33 GB of weights and then answers nothing.
+RUN python -c "\
+from vllm import LLM, SamplingParams;\
+import vllm.multimodal.video as _v;\
+print('gate OK: vllm LLM symbol imports, video backend =', type(_v.VideoDecoder).__name__)"
+
 # ── Model definition + weights ────────────────────────────────────────────────
 # resources/model/ holds the MERGED full checkpoint written by
 #   swift export --adapters <ckpt> --merge_lora true --output_dir resources/model

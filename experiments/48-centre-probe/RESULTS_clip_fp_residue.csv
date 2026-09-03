@@ -1,0 +1,7 @@
+residue,n,share
+"Clip was the WHOLE answer, gold is not empty",1074,53.1%
+FIXED by removing Clip,453,22.4%
+still MISSING 1 class(es),383,18.9%
+disjoint / swapped classes,78,3.9%
+still has EXTRA class(es) besides Clip,34,1.7%
+still MISSING 2 class(es),1,0.0%
