@@ -8,7 +8,7 @@ Ordered by how much damage it does if left open.
 
 ---
 
-## 🔴 1. The final submitted model is not in this repository — **BLOCKING**
+## 1. The final submitted model is not in this repository — **BLOCKING**
 
 **Owner: Leo.**
 
@@ -32,14 +32,14 @@ Needed, to write §4 and §5 truthfully:
 - [ ] Push all of it to `main` as `submissions/05-<slug>/`, matching the structure of
       `submissions/03-*`. That folder's README is the template — it is genuinely excellent.
 
-⚠️ **Also worth deciding now:** submission 03's `inference.py:553` logs the *wrong rung name* at
+**Also worth deciding now:** submission 03's `inference.py:553` logs the *wrong rung name* at
 startup. It is a label only, but the same README calls that log line "the ONLY artifact you get
 back from a run that dies early". If the ensemble reused that file, fix the string before the
 test-phase submission.
 
 ---
 
-## 🔴 2. Figure 1 does not exist — **BLOCKING FOR AWARDS**
+## 2. Figure 1 does not exist — **BLOCKING FOR AWARDS**
 
 **Owner: Yingyu (draft), Rodrigo + Leo (review).**
 
@@ -49,7 +49,7 @@ content and layout are fully specified in `05_FIGURES.md`; someone has to draw i
 
 ---
 
-## 🟡 3. Optimizer, warmup and weight decay are not written down anywhere
+## 3. Optimizer, warmup and weight decay are not written down anywhere
 
 **Owner: whoever can reach the training box.**
 
@@ -65,7 +65,7 @@ box where the run lives.
 
 ---
 
-## 🟡 4. Total GPU-hours is an estimate with a ±30 % range
+## 4. Total GPU-hours is an estimate with a ±30 % range
 
 **Owner: Rodrigo** (holds the RunPod account) **and Leo** (UNAM job accounting).
 
@@ -77,7 +77,7 @@ Worth twenty minutes. An estimate that is 40 % wrong is worse than a slightly aw
 
 ---
 
-## 🟡 5. Author metadata
+## 5. Author metadata
 
 **Owner: each author, for themselves.**
 
@@ -105,7 +105,7 @@ Plus:
 
 ---
 
-## 🟡 6. Team logo
+## 6. Team logo
 
 **Owner: team.**
 
@@ -115,7 +115,7 @@ safe path: make a small original mark for "Mexico-Oxford_TEAM".
 
 ---
 
-## 🟡 7. Total human hours invested, and surgical-domain experience count
+## 7. Total human hours invested, and surgical-domain experience count
 
 **Owner: team.**
 
@@ -129,7 +129,7 @@ Two integers the form demands and no repository can supply:
 
 ---
 
-## 🟢 8. Consistency checks to run before submitting
+## 8. Consistency checks to run before submitting
 
 Not blockers, but each is a place where the form could contradict itself.
 
@@ -146,7 +146,7 @@ Not blockers, but each is a place where the form could contradict itself.
 
 ---
 
-## 🔵 9. Housekeeping outside the form
+## 9. Housekeeping outside the form
 
 - [ ] **Rotate the GitHub PAT.** It is stored in cleartext inside this repository's git remote
       URL (`git remote -v` prints it). If repository access is shared with a new collaborator,

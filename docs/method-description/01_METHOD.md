@@ -32,14 +32,14 @@ LoRA is applied to **three** module families, not the usual one:
 
 Source: `submissions/03-rung42-connector-ood/README.md:12-16`.
 
-🔑 **Why the explicit naming is load-bearing, not decoration.** We measured that the conventional
+**Why the explicit naming is load-bearing, not decoration.** We measured that the conventional
 `all-linear` target specification reaches the connector in **neither ms-swift nor Unsloth** —
 `experiments/32-aligner-unfreeze/RESULTS_reachability.csv:2-3` counts 720 adapted tensors as
 504 LLM + 216 ViT + **0 aligner**. A team that writes `--target_modules all-linear` and believes
 it is training the connector is not training it. Decision note:
 `context/decisions/the-merger-is-unreachable-by-default.md`.
 
-⚠️ This is version-dependent, not a universal claim: under `transformers` 5.12.1 the same flag
+This is version-dependent, not a universal claim: under `transformers` 5.12.1 the same flag
 does reach eight modules (`context/decisions/aligner-flag-reads-reachable-but-measured-zero.md:22-26`).
 Our shipped stack is 4.57, where it reaches zero.
 
@@ -188,7 +188,7 @@ byte-identical.
 part — an illegal token does not merely score zero for itself, **it takes the entire answer
 down**.
 
-🔑 The vocabulary is read from the SDK **at runtime**, never hard-coded, because the 10-item list
+The vocabulary is read from the SDK **at runtime**, never hard-coded, because the 10-item list
 the organizers paste inside the prompt and the 10-item list the scorer registers **disagree on
 their tenth element**: `foreign object` versus **`Absorbable Hemostatic Agent`**. A container
 shipping a literal copy of either list is shipping a guess about which document the scorer
@@ -234,6 +234,6 @@ Facts to compress, in priority order:
 5. Single frame, greedy, ≤64 new tokens: **0.515 s/question**, about 7.8 % of the allowed
    compute budget (`context/NOW.md:148-155`).
 
-⚠️ Point 5 is a double-edged fact. Rank 1 spends **2.45×** more compute than we do. If we frame
+Point 5 is a double-edged fact. Rank 1 spends **2.45×** more compute than we do. If we frame
 low latency as an achievement, we invite the observation that we left the budget unspent.
 Recommend framing it as headroom that the final ensemble partly uses.

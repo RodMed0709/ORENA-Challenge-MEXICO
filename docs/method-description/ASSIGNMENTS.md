@@ -13,7 +13,7 @@ methods work was ours; we supply verified facts, review, and the numbers only we
 
 | item | form section | input she needs |
 |---|---|---|
-| **Fig. 1 — main architecture** ⚠️ blocking for awards | §6 | `05_FIGURES.md` has the full layout spec |
+| **Fig. 1 — main architecture** blocking for awards | §6 | `05_FIGURES.md` has the full layout spec |
 | Fig. 2 — training/data pipeline | §6 | `05_FIGURES.md`, `02_TRAINING.md` |
 | Method Abstract & Novelty (200 words) | §4.1 | `01_METHOD.md` §8 |
 | Prompting / input strategy | §4.5 | `01_METHOD.md` §4 — prompt is already verbatim |
@@ -38,7 +38,7 @@ methods work was ours; we supply verified facts, review, and the numbers only we
 
 | item | why him |
 |---|---|
-| **The final model's full description (`07_OPEN_ITEMS.md` #1)** ⚠️ blocking | only he has it |
+| **The final model's full description (`07_OPEN_ITEMS.md` #1)** blocking | only he has it |
 | Push `submissions/05-<slug>/` to `main`, matching the structure of `submissions/03-*` | — |
 | UNAM job accounting for the GPU-hours figure | — |
 | Confirm the UNAM one-GPU-vs-two rule (#8) | — |
@@ -54,7 +54,7 @@ methods work was ours; we supply verified facts, review, and the numbers only we
 | Sep 7–8 | Rodrigo closes open items #3, #4, #5, #6 | Rodrigo |
 | **Sep 8–11** | Yingyu drafts §4 and §5 and produces **Fig. 1** | Yingyu |
 | Sep 9–10 | Rodrigo produces Figs. 3 and 4 | Rodrigo |
-| **Sep 11** | 🚩 **Checkpoint: Fig. 1 must exist.** If it does not, it becomes everyone's only job | all |
+| **Sep 11** | **Checkpoint: Fig. 1 must exist.** If it does not, it becomes everyone's only job | all |
 | Sep 12–13 | Full team review pass on the Overleaf document; reconcile every number against this dossier | all |
 | Sep 14 | Export figures as `Mexico-Oxford_TEAM_fig_<X>.pdf`; assemble the supplementary PDF | Yingyu |
 | **Sep 15** | Fill and submit the form. **One day of slack, deliberately** | Rodrigo |
@@ -62,20 +62,24 @@ methods work was ours; we supply verified facts, review, and the numbers only we
 
 ---
 
-## Rules for writing this document
+## Constraints
 
-1. **Every number gets a citation.** These files carry `file:line` for a reason. Keep it in the
-   Markdown; strip it only in the final LaTeX.
-2. **Never state an estimate as a measurement.** `04_INFRA.md` labels its estimates `ESTIMATE`
-   and shows the arithmetic. Preserve that distinction.
-3. **Report the negatives.** Twenty-odd families of lever failed, each with a measured artifact.
-   That is the most credible part of our submission, not an embarrassment — and the form asks
-   for it directly.
-4. **Do not publish challenge-derived annotations.** `02_TRAINING.md` §6.4. They go to the
-   organizers privately.
-5. **Two facts that are easy to get wrong and will be checked:** the shipped OOD numbers describe
-   *unseen video of a seen procedure*, not unseen procedure; and our local evaluation is ordinal,
-   not cardinal, so a local `bucket_mean` must never be quoted as a leaderboard prediction.
+Structure and wording are the writer's call. These are the few things that are not.
+
+1. **The DUA.** Challenge-derived annotations cannot be published — they go to the organizers
+   privately and become public when LapChole-FOCUS is released. `02_TRAINING.md` §6.4.
+2. **An estimate is never a measurement.** `04_INFRA.md` labels its estimates and shows the
+   arithmetic; only peak VRAM is measured.
+3. **A local `bucket_mean` is not a leaderboard prediction.** The instrument is ordinal — three
+   of three submissions kept the sign, zero of three the magnitude.
+4. **The shipped OOD numbers mean *unseen video of a seen procedure*.** Saying
+   "out-of-distribution" without that qualifier misrepresents the result.
+5. **Keep citations while drafting.** These files carry `file:line` so three people can write one
+   document without re-verifying each other. Strip them in the final LaTeX, not before.
+
+And one thing worth knowing rather than obeying: the negative results are usable material. About
+twenty families of lever were closed, each with a measured artifact, and the form asks for them
+directly.
 
 ---
 

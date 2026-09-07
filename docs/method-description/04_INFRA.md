@@ -2,7 +2,7 @@
 
 Feeds the **form §3 hardware questions** and the deployment part of **§5**.
 
-⚠️ Three of the four numbers the form demands are **not directly recorded** in this repository.
+Three of the four numbers the form demands are **not directly recorded** in this repository.
 Each is given below as an `ESTIMATE` with its arithmetic shown, and each is listed in
 `07_OPEN_ITEMS.md` with the exact command that would turn it into a measurement. **Do not submit
 an estimate as a measurement.**
@@ -35,7 +35,7 @@ paper.
 
 ---
 
-## 2. Wall-clock training time of the final model — 🟡 ESTIMATE
+## 2. Wall-clock training time of the final model — ESTIMATE
 
 The final submitted model is the two-epoch ensemble, whose training log is not in this repo
 (`07_OPEN_ITEMS.md` item 1). For **submission 03** (rung 42, 5 epochs on 19,384 rows):
@@ -57,7 +57,7 @@ roughly `19.4 × 2/5 ≈ 8 h` per arm.
 
 ---
 
-## 3. Total GPU-hours for the FRAME track — 🟡 ESTIMATE, and the weakest number in the dossier
+## 3. Total GPU-hours for the FRAME track — ESTIMATE, and the weakest number in the dossier
 
 Recorded fragments, each cited:
 
@@ -83,7 +83,7 @@ evaluation passes.
 total                            ≈  385 GPU-hours     ← ESTIMATE, range 300–500
 ```
 
-🔴 **This is the least defensible number in the dossier.** The real figure is recoverable from
+**This is the least defensible number in the dossier.** The real figure is recoverable from
 the RunPod billing history and the UNAM cluster's job accounting, and Rodrigo has the RunPod
 account. See `07_OPEN_ITEMS.md` item 4. Spend twenty minutes on this rather than submitting a
 guess.
@@ -100,7 +100,7 @@ guess.
 Sources: `HANDOFF.md` (RunPod volume and pod recipe), `context/NOW.md:1047` (the 52.64 GiB
 measurement), `context/NOW.md:291-337` (UNAM operations).
 
-⚠️ **Team constraint, recorded:** `uaq_user` on UNAM is **one tenant, not one card per person**.
+**Team constraint, recorded:** `uaq_user` on UNAM is **one tenant, not one card per person**.
 The standing rule in the project memory is *one GPU at a time on UNAM*. This is a coordination
 rule, not a hardware limit — worth confirming with Rodrigo before it appears in the paper.
 
@@ -128,13 +128,13 @@ rank 1                               42.10 s   = 19.1 %
 ⇒ At 0.515 s/q we have room for roughly **19.7 extra forward passes per question**, and k=15
 self-consistency fits inside the budget, measured (`context/NOW.md:148-160`).
 
-🔻 **This corrects a claim the project made for weeks.** Several levers — self-consistency,
+**This corrects a claim the project made for weeks.** Several levers — self-consistency,
 `max_pixels`, resolution — were closed on a *cost* that turns out not to exist. They are not
 refuted, but their premise changed. Do not write "we could not afford X because of latency"
 without checking this table; the honest statement is that we left 92 % of the compute budget
 unspent.
 
-⚠️ Capping at 80 % of the allowance matters because `saturation_fraction = 0.2` forfeits the
+Capping at 80 % of the allowance matters because `saturation_fraction = 0.2` forfeits the
 **whole batch** on a 20 % overrun.
 
 ---

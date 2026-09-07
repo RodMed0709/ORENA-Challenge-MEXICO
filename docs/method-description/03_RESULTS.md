@@ -16,7 +16,7 @@ claim in the write-up.
 
 Sources for 01–03: `context/decisions/submission-01-rung06.md:5,15,43`,
 `context/NOW.md:1790-1802`, `context/NOW.md:640-648`.
-🔴 Submission 04 is **not recorded in this repository** — see `07_OPEN_ITEMS.md` item 1.
+Submission 04 is **not recorded in this repository** — see `07_OPEN_ITEMS.md` item 1.
 
 **Both official baselines are beaten.** The baselines are a frontier VLM applied zero-shot and an
 open-source VLM fine-tuned by the organizers, and they are labelled as such on the leaderboard
@@ -40,20 +40,20 @@ Check every box below. Each has a measured artifact.
 
 | checkbox | tested? | evidence |
 |---|---|---|
-| New annotations/datasets beyond official train sets | ✅ | rung 18 minted zeros; rung 19/19b CholecT50; rung 42 promoted public test videos |
-| In-depth investigation of the train set | ✅ | rung 08 data card: 6,252 questions, 4,486 frames, 38 videos, per-template trivial floors |
-| Optimizing data input (frame rate, resolution, VQA re-phrasing) | ✅ | rungs 11, 12, 14, 24, 26, 56 |
-| Try-out of different base models | ✅ | rungs 23, 38, 40, 45, 52 — Qwen3.6-27B, 35B-A3B FP8 |
-| Modification of the base model architecture | ✅ | rung 32 aligner reachability; rung 39 connector LoRA; rung 61 specialist head (designed, unrun) |
-| Frame selection approaches | ➖ | SEGMENT/PROCEDURE only per the form; we did test it (rung 56) |
-| Thorough hyperparameter optimization | ✅ | rung 21 sweep: LR ×2, rank, `vit_lr`, gradient clipping; plus a 5-epoch sweep |
-| Multi-stage pipeline | ✅ | rung 43 trace extractor; rung 46 cross-model debate; rung 52 routing |
-| Model ensembling | ✅ | rung 10 self-consistency; rung 46 debate; **the final submission is a two-epoch ensemble** |
-| Reinforcement learning | ✅ | rung 30 — GRPO on the `number` format |
-| Loss function adaptation | ✅ | rung 35 NTL-WAS ordinal loss; rung 50 continuation-loss weighting; rung 22 loss-mass audit |
-| PEFT methods (LoRA) | ✅ | the entire project |
+| New annotations/datasets beyond official train sets | done | rung 18 minted zeros; rung 19/19b CholecT50; rung 42 promoted public test videos |
+| In-depth investigation of the train set | done | rung 08 data card: 6,252 questions, 4,486 frames, 38 videos, per-template trivial floors |
+| Optimizing data input (frame rate, resolution, VQA re-phrasing) | done | rungs 11, 12, 14, 24, 26, 56 |
+| Try-out of different base models | done | rungs 23, 38, 40, 45, 52 — Qwen3.6-27B, 35B-A3B FP8 |
+| Modification of the base model architecture | done | rung 32 aligner reachability; rung 39 connector LoRA; rung 61 specialist head (designed, unrun) |
+| Frame selection approaches | n/a | SEGMENT/PROCEDURE only per the form; we did test it (rung 56) |
+| Thorough hyperparameter optimization | done | rung 21 sweep: LR ×2, rank, `vit_lr`, gradient clipping; plus a 5-epoch sweep |
+| Multi-stage pipeline | done | rung 43 trace extractor; rung 46 cross-model debate; rung 52 routing |
+| Model ensembling | done | rung 10 self-consistency; rung 46 debate; **the final submission is a two-epoch ensemble** |
+| Reinforcement learning | done | rung 30 — GRPO on the `number` format |
+| Loss function adaptation | done | rung 35 NTL-WAS ordinal loss; rung 50 continuation-loss weighting; rung 22 loss-mass audit |
+| PEFT methods (LoRA) | done | the entire project |
 | Full fine-tuning | ❌ | never attempted — LoRA throughout |
-| Distillation | ⚠️ | rung 17 probed a 32B teacher; it **failed the blind gate** (0.080 vs a 0.295 floor) so distillation was never built. Check only if you describe it as abandoned |
+| Distillation | check | rung 17 probed a 32B teacher; it **failed the blind gate** (0.080 vs a 0.295 floor) so distillation was never built. Check only if you describe it as abandoned |
 | Multi-task learning | ❌ | not attempted as such |
 
 ---
@@ -72,7 +72,7 @@ worth more than a long one a reviewer can puncture.
 | **In-depth investigation of the train set** | The data card's per-template trivial floors are what made every later number readable; without them, several "wins" were below the floor |
 | **Model ensembling** | The final submitted model is a two-epoch ensemble (+0.0004 on the platform over submission 03) — small, but it is what shipped |
 
-### ⚠️ Defensible only with a caveat — decide as a team
+### Defensible only with a caveat — decide as a team
 
 | checkbox | the honest position |
 |---|---|
@@ -199,7 +199,7 @@ Public judge, submission 03:
 **The gap to rank 1 was 84 questions, and 67 of them were object recognition** — 36 OOD and 31
 ID. Aggregation contributed only 17 (`context/NOW.md:130-143`).
 
-🔑 **We are not bad at recognition — we are brittle.** Holding the procedure constant, a change
+**We are not bad at recognition — we are brittle.** Holding the procedure constant, a change
 of centre costs `object_recognition` **−0.164** and `aggregation` only **−0.052**. Generalisation
 across centres, not counting, is our real deficit.
 
@@ -237,6 +237,6 @@ verdict and `file:line` citation) was compiled on 2026-09-07 and is preserved ve
 `docs/method-description/_ledger/FULL_LEDGER.md`. Use it when you need a specific number; use the
 grouped tables above when you are writing prose.
 
-⚠️ `RESULTS.md` at the repo root is **auto-generated and incomplete** — it declares only 24 runs
+`RESULTS.md` at the repo root is **auto-generated and incomplete** — it declares only 24 runs
 with canonical stratified data and its table effectively stops at rung 24/40. It is not the
 exhaustive ledger. Prefer the appendix and the per-experiment `RESULTS*.csv` files.

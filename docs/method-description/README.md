@@ -33,7 +33,7 @@ status:
 
 - **✅ ANSWERED** — the answer is written out, with citations. Copy, polish, done.
 - **✍️ DRAFT NEEDED** — the facts are here; someone has to write the prose.
-- **🔴 BLOCKED** — the information does not exist in this repo. See `07_OPEN_ITEMS.md`.
+- **BLOCKED** — the information does not exist in this repo. See `07_OPEN_ITEMS.md`.
 
 Then open only the section file you are writing:
 
@@ -74,7 +74,7 @@ ensemble** built by Leo. This repository's last content commit is 2026-08-27, an
 artifact it documents is **submission 03** — rung 42, epoch 4, which scored **0.5809**.
 
 Everything in this dossier is written against submission 03, because that is what is verifiable.
-Every place where the ensemble's own details are required is marked 🔴 and listed in
+Every place where the ensemble's own details are required is marked and listed in
 `07_OPEN_ITEMS.md`. **Leo owns those.** The delta between the two models is +0.0004, so the
 method description is ~99 % identical — but the form asks for exact checkpoints, exact training
 time and an exact architecture figure, and those must describe what was actually submitted.
@@ -92,4 +92,4 @@ time and an exact architecture figure, and those must describe what was actually
 | `experiments/NN-<slug>/` | one folder per experiment ("rung"), with its own README and RESULTS |
 | `submissions/NN-<slug>/` | one folder per leaderboard submission: Dockerfile, `inference.py`, README |
 | `src/frame/` | the single importable package; `frame.metrics` is the canonical scorer |
-| `RESULTS.md` | auto-generated results ledger (⚠️ incomplete — see `03_RESULTS.md`) |
+| `RESULTS.md` | auto-generated results ledger (incomplete — see `03_RESULTS.md`) |

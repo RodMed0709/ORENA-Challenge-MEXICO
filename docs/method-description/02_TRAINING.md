@@ -13,7 +13,7 @@ for what the 2026-09-02 ensemble changes.
 | Method | **LoRA** (PEFT) — not full fine-tuning, not QLoRA | `submissions/03-rung42-connector-ood/README.md:17` |
 | Merge for serving | `swift export --merge_lora true` → single merged checkpoint | ibid.:145-152 |
 
-⚠️ **Do not write `--train_type lora` in the paper.** That flag does not exist in ms-swift; the
+**Do not write `--train_type lora` in the paper.** That flag does not exist in ms-swift; the
 correct parameter is **`--tuner_type`** (default `'lora'`). Zero occurrences of `train_type` in
 the installed package. Cite `swift.readthedocs.io/en/v4.4/`, not `/en/latest/`. Source:
 `CLAUDE.md`, "Fine-tuning framework" note.
@@ -48,7 +48,7 @@ Batch/accumulation/checkpointing source: `experiments/21-recipe-sweep/RESULTS_vr
 Step counts: `context/decisions/rung42-gain-was-epochs-not-corpus.md` (19,384 rows → 1,212
 steps/epoch).
 
-🔴 **Optimizer identity (AdamW vs other) and warmup ratio / weight decay are NOT recorded in
+**Optimizer identity (AdamW vs other) and warmup ratio / weight decay are NOT recorded in
 prose anywhere in this repo.** They are in the run's `args.json` on the training box. See
 `07_OPEN_ITEMS.md` item 3 — this is a one-command fix, not a research question.
 
@@ -72,7 +72,7 @@ Rung 21 (`experiments/21-recipe-sweep/`) is the sweep.
 Sources: `experiments/21-recipe-sweep/RESULTS_A_lr.csv:4`, `RESULTS_A2_lr.csv:4`,
 `RESULTS_A3_vitlr.csv:4`, `RESULTS_B_rank.csv:4`, `RESULTS_D_clip.csv:4`.
 
-🔑 **The single finding: the learning rate is the only recipe axis that moves the score.**
+**The single finding: the learning rate is the only recipe axis that moves the score.**
 Together the two LR steps are worth **+0.0776 `bucket_mean`** — larger than any data lever we
 found. Rank, gradient clipping and a decoupled ViT learning rate are all null or harmful.
 Decision note: `context/decisions/recipe-axis-is-the-learning-rate.md`.
@@ -109,7 +109,7 @@ Source: `experiments/42-merged-corpus/RESULTS.csv:2-6`,
 
 **Epoch 5 falls on both halves while training accuracy climbs.** Epoch 4 ships.
 
-🟢 A result worth reporting: **macro-F1 rose with exact-match** (0.8670 → 0.9117 on every cell).
+A result worth reporting: **macro-F1 rose with exact-match** (0.8670 → 0.9117 on every cell).
 That is not the default — we have a decision note documenting SFT *crushing* class-balanced F1
 while exact-match rises (`context/decisions/class-balanced-f1-is-mandatory.md`), which is why we
 report both.
@@ -271,7 +271,7 @@ Sources: `experiments/12-image-processing/RESULTS.csv:2-9`, `RESULTS.md:49-50`,
 `experiments/49-flip-equivariance/README.md:204-218`,
 `experiments/37-attention-vs-masks/README.md:3-12`.
 
-🔴 One methodological finding worth reporting on its own, because it is transferable: **any
+One methodological finding worth reporting on its own, because it is transferable: **any
 inference-only test of an input-side intervention is biased toward the negative** on a model
 fine-tuned without that intervention (`context/decisions/inference-only-input-tests-biased.md`).
 Several of the rows above are inference-only tests and are therefore weaker evidence than they

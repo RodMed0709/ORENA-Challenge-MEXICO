@@ -15,7 +15,7 @@ identifiers already verified in the index. Cite in the form as `[1]`, `[2]`, …
 |---|---|---|
 | 1 | Maier-Hein, Wagner, Roß et al., **Heidelberg Colorectal (HeiCo) data set for surgical data science in the sensor OR**, *Scientific Data*, 2021. https://www.nature.com/articles/s41597-021-00882-2 | The dataset. The 30 HeiCo videos are the public core of the training data (CC BY-NC-SA) |
 | 2 | Hu et al., **LoRA: Low-Rank Adaptation of Large Language Models**, 2021. arXiv:2106.09685 | Our only fine-tuning method |
-| 3 | Qwen Team, **Qwen2.5-VL Technical Report**, 2025. arXiv:2502.13923 | The backbone family; dynamic resolution is what `max_pixels` controls. ⚠️ We use **Qwen3-VL-8B-Instruct**; cite the Qwen3-VL model card in addition |
+| 3 | Qwen Team, **Qwen2.5-VL Technical Report**, 2025. arXiv:2502.13923 | The backbone family; dynamic resolution is what `max_pixels` controls. We use **Qwen3-VL-8B-Instruct**; cite the Qwen3-VL model card in addition |
 | 4 | Rofin et al., **Vote'n'rank: Revision of benchmarking with social choice theory**, EACL 2023. arXiv:2210.05769 | The **Copeland** ranking the challenge scores with — it is why we optimise the worst bucket, not the mean |
 | 5 | Maier-Hein, Reinke, Godau et al., **Metrics Reloaded**, *Nature Methods*, 2024. arXiv:2206.01653 | The framework behind the challenge's per-question metrics; justifies our internal eval design |
 | 6 | Zheng et al., **Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena**, 2023. arXiv:2306.05685 | The LLM-as-judge paradigm used to score open-ended answers; the source of the position/verbosity biases our answer-canon guards against |
