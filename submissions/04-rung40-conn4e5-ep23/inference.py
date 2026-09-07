@@ -474,7 +474,12 @@ def run() -> int:
     system_prompt = SYSTEM_PROMPT_PREFIX + load_fo_definitions()
 
     llm, _ = load_model()
-    dev = getattr(model, "device", "cpu")
+    # 🔻 Corregido 2026-08-25: esta linea leia `model`, un nombre que NO SE ASIGNA
+    # en ningun sitio del fichero (comprobado por AST: 1 lectura, 0 asignaciones).
+    # Reventaba con NameError justo despues de cargar los 33 GB y antes de la
+    # primera respuesta -- en la ruta con GPU tambien, no solo bajo ALLOW_CPU.
+    # Lo caza el humo de cableado del contenedor; no lo caza ninguna prueba del modelo.
+    dev = getattr(llm, "device", "cpu")
     log.info("Model ready on %s (setup %.2f s)", dev, time.monotonic() - t_start)
 
     # ── warm-up: pay the cold start inside the 120 s SETUP allowance, not inside the

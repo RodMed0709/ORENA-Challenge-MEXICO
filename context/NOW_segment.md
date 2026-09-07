@@ -69,12 +69,22 @@ Diagnosed on the archived predictions, zero GPU:
 
 ## NEXT — in order
 
-1. **🔨 Kill the zero attractor on `time`.** Cheapest candidates, none of them "train more":
-   `ExportConfig.relative_time = False` (**the flag already exists** and is byte-identical
-   passthrough — absolute golds remove the near-zero concentration outright); or rebalance the
-   relative target; or supervise the two `time` leaves separately — `2a` localisation (2,283 test
-   rows) and `2b` elapsed span (87) are one format with two semantics.
-   Cost: rebuild corpus + 1 epoch ≈ **12 h / ~$17**.
+1. 🔻 **RETRACTED 2026-08-25 — there is no zero attractor to kill.** This item read *"kill the
+   zero attractor on `time`"* and named `ExportConfig.relative_time = False` as the cheapest
+   candidate. Measured before spending the 12 h
+   (`experiments_segment/01-viability/RESULTS_time_target_premise.json`, zero GPU): the `2a`
+   relative target has **median offset 44 s**, only **1.1 %** of golds are exactly zero, and
+   **0** fall outside `[0, duration]`. The concentration the item was built on does not exist.
+
+   And `00:00:00` is not the target's mode: that constant scores **2.56 %** while arm A scores
+   3.51 / 4.57 % — the arm is **one to two points above answering a constant**. The failure is
+   **temporal localisation**, not the target format, so no rewrite of the answer string is
+   licensed. See [[segment-arm-a-is-one-broken-bucket]] §CORRECTION.
+
+   🎯 **The bucket is still the right target** — 39 % of the corpus, +0.0688 to reach its own
+   floor, and the ceiling `corpus.py:66-70` records (~0.51 at coverage density) leaves room.
+   **What it needs is a hypothesis about localisation with a mechanism**, pre-registered with the
+   diagnostic that would falsify it. There is no costed rung here right now.
 2. **📤 Submit arm A for calibration** — decided 2026-08-17, image built (below). We hold **zero**
    SEGMENT calibration points, and FRAME's local eval overstated the judge by **+0.12** and
    *inverted* on OOD. One of ten slots buys the deflation factor for every number after it.
