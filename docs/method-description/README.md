@@ -28,6 +28,9 @@ the baseline bar. The form is what converts eligibility into the credit.
 
 ## How to read this dossier
 
+**If you are Yingyu: open `FOR_YINGYU.md` first.** It is the short version of this page
+plus the four factual traps and the one open question that blocks two form fields.
+
 Start with `00_FORM_CHECKLIST.md`. It is the form itself, question by question, each with a
 status:
 
@@ -46,6 +49,7 @@ Then open only the section file you are writing:
 | `05_FIGURES.md` | §6 Figures — **Fig. 1 is mandatory; missing it disqualifies us for awards** |
 | `06_REFERENCES.md` | §6 References |
 | `07_OPEN_ITEMS.md` | everything nobody can answer from the repo alone |
+| `QUESTIONS_FOR_LEO.md` | the exact questions that close the final-model gap |
 | `ASSIGNMENTS.md` | who writes what, and by when |
 
 ---

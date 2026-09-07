@@ -213,20 +213,51 @@ everything after it, because the recipe sweep (rung 21) that *did* win was run o
 **Do not claim these annotations improved the score.** They did not, measured. What they did was
 give the recipe sweep a stable corpus.
 
-### 6.4 Publication obligation — read this before promising the organizers anything
+### 6.4 The exact structural format — this is a mandatory form field
 
-The two obligations have **disjoint scope**
-(`context/decisions/external-data-policy.md`, §Data usage agreement, p.9):
+The form is explicit: for FRAME, if you generated extra annotations you **must** describe *both*
+the generation approach (§6.1–6.2 above) *and* **the exact structural format**. Ours is
+ms-swift's multimodal messages format, one JSON object per line:
 
-| annotations created on… | obligation |
+```json
+{
+  "messages": [
+    {"role": "system",    "content": "<system prompt + FO class definitions>"},
+    {"role": "user",      "content": "<image>\nHow many Clips appear in this frame? Please provide a number."},
+    {"role": "assistant", "content": "0"}
+  ],
+  "images": ["/workspace/frames_cache/<frame_key>.png"]
+}
+```
+
+- `messages` — exactly three turns, system / user / assistant, in that order.
+- The user turn begins with the literal `<image>` token, then a newline, then the question text.
+- `images` — a list with exactly one absolute path into the shared frame cache.
+- The assistant turn is the gold answer as a bare string, in whatever format the question
+  requests (`"0"`, `"yes"`, `"Clip, Sponge"`).
+
+Verified in `experiments/14-appearance-aug/_models/aug_export.py:221-229,282` and
+`experiments/15-count-target/_models/count_target.py:352-383`; the minted-zero question template
+is `experiments/18-count-aug/_models/mint_zeros.py:74`.
+
+### 6.5 Publication obligation — and it splits by source, which is easy to get wrong
+
+The form asks for **an accessible link to a public folder** containing the supplementary
+annotations, *and then* carves out an exception for LapChole-FOCUS. The two do not conflict,
+because our annotations have two different sources:
+
+| annotations derived from… | obligation |
 |---|---|
-| third-party **public** datasets | **must be published** with the submission |
-| **challenge** data (`heico` / `lapchole`) | **must NOT be published** — DUA clause 3 forbids it |
+| third-party **public** datasets | must be **published** with the submission |
+| **HeiCo** (`heico` qIDs) | already public under CC BY-NC-SA, so these **can** be published — the repo's own plan is CC BY-NC-SA for them (`context/decisions/external-data-policy.md`, §Data usage agreement) |
+| **LapChole-FOCUS** (`lapchole` qIDs) | **privately to the organizers now**, public once they release LapChole-FOCUS. The form says this in as many words |
 
-**Our self-made annotations are derived from challenge data.** So the correct action is the one
-the form itself specifies: *provide them privately to the organizers now, and make them public
-once LapChole-FOCUS is released.* Do **not** put them on a public Google Drive or Hugging Face
-repository.
+So the answer to the form's data-references field is not "here is a link" and not "we cannot
+share" — it is **both**: a public link for the HeiCo-derived rows, and a private transfer for the
+LapChole-derived ones, with the split stated.
+
+Splitting the corpus by qID prefix is a one-line filter, and the split has to be done before
+anything is uploaded anywhere.
 
 ---
 

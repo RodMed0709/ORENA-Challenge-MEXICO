@@ -141,8 +141,14 @@ Not blockers, but each is a place where the form could contradict itself.
 - [ ] **The UNAM GPU rule.** Project memory records "one GPU, never both" as a standing team
       rule; the 2026-09-06 chat says both may be used. Reconcile before the paper states a
       hardware configuration.
-- [ ] **Where the self-made annotations go.** Privately to the organizers now, public after
-      LapChole-FOCUS is released — **not** a public Drive link. See `02_TRAINING.md` §6.4.
+- [ ] **Where the self-made annotations go — it splits by source.** HeiCo-derived rows can be
+      published (HeiCo is already public, CC BY-NC-SA); LapChole-derived rows go to the
+      organizers privately and become public when they release LapChole-FOCUS. The form asks for
+      a public folder link *and* states the LapChole carve-out, so the answer is both. Splitting
+      the corpus by qID prefix has to happen before anything is uploaded. `02_TRAINING.md` §6.5.
+- [ ] **Somebody has to actually create the public folder** (Drive or Hugging Face) for the
+      HeiCo-derived half, and arrange the private transfer of the LapChole half with
+      `orena-support@dkfz.de`. Not started.
 
 ---
 

@@ -103,7 +103,7 @@ did and it is the part a reviewer will find credible.
 | # | question | status | source |
 |---|---|---|---|
 | 5.1 | External datasets used? (or "no") | ready | effectively **no** for the shipped model; CholecT50 disclosed as tested-and-rejected — `02_TRAINING.md` §7 |
-| 5.2 | Links to public datasets and to any supplementary annotations | care needed | our self-made annotations derive from challenge data, so the DUA forbids publishing them now — they go to the organizers privately. Read `02_TRAINING.md` §6.4 before writing any link |
+| 5.2 | Links to public datasets, plus the **generation approach AND exact structural format** of any annotations we created | to write | the JSON schema is in `02_TRAINING.md` §6.4; the publish-vs-private split by data source is §6.5. This field is one of the form's stated mandatory requirements for FRAME |
 | 5.3 | Training strategy in detail | ready | `02_TRAINING.md` §§2–5 |
 | 5.4 | Max frames at inference | ready | **1** |
 | 5.5 | How the frame count is chosen (multi-select) | ready | **Standardized frame rate (fixed number of frames)** — the platform supplies exactly one frame per question |
