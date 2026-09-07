@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-07-09)
 Phase: 1 of 7 (Foundation & Eval Harness)
 Plan: 0 of 4 in current phase
 Status: Ready to plan
-Last activity: 2026-08-17 — Completed quick task 260817-bnh: recorded the trace-extractor NO-GO and two pending corrections
+Last activity: 2026-09-07 — Completed quick task 260907-d89: the method-description dossier and the Overleaf skeleton, ahead of the 2026-09-16 form deadline
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -73,6 +73,7 @@ None yet.
 | 260808-h0l | The rung-30 SFT control trained on a GRPO-format corpus with no assistant turn — loss identically 0.0 | 2026-08-08 | f5aec95 | Complete — 1h20 of GPU produced an adapter that learned nothing; materializer + pre-flight + `grad_norm` post-run guard; smoke 10/10 steps with gradient, full relaunched | [260808-h0l-fix-rung-30-sft-control-dataset-has-no-a](./quick/260808-h0l-fix-rung-30-sft-control-dataset-has-no-a/) |
 | 260813-hxs | Pre-register rung 39 — train the ViT→LLM connector — and build the self-closing chain | 2026-08-13 | 21b0919 + c798849 | Complete — pre-registration committed BEFORE the code (zero rung-39 numbers); splat fix proven with no GPU; `_as_map` splat-drop verified and corrected in a local copy, never edited; **gate NOT run, arm NOT run, nothing pushed** | [260813-hxs-pre-register-rung-39-train-the-vit-llm-c](./quick/260813-hxs-pre-register-rung-39-train-the-vit-llm-c/) |
 | 260817-bnh | Record the trace-extractor NO-GO and two pending corrections | 2026-08-17 | dff447d | Complete — the 83 % was an oracle recall with no denominator; median 3 candidates, trivial rules = chance (0.219), 24-38 % flips on correct answers. Branch closed for $0 | [260817-bnh-record-the-trace-extractor-no-go-and-two](./quick/260817-bnh-record-the-trace-extractor-no-go-and-two/) |
+| 260907-d89 | The method-description dossier (`docs/method-description/`) + the Overleaf LaTeX skeleton | 2026-09-07 | a30736a | Complete — 11 files, English, every claim cited `file:line`; Overleaf `d7a6628`. **Blocking open item: the 2026-09-02 submission that scored 0.5813 is a two-epoch ensemble that exists nowhere in this repo — Leo owns it.** Form due 2026-09-16 | [260907-d89-create-docs-method-description-dossier-f](./quick/260907-d89-create-docs-method-description-dossier-f/) |
 
 ## Session Continuity
 
