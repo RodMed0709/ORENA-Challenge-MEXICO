@@ -14,34 +14,48 @@ here, the prose is not) · **blocked** (the information does not exist in this r
 | # | field | status | answer / where it comes from |
 |---|---|---|---|
 | 1.1 | Team Name (must match the platform) | ready | **Mexico-Oxford_TEAM** |
-| 1.2 | Title of the Proposed Method | to write | proposals below |
-| 1.3 | Short Algorithm / Model Name | to write | proposals below |
+| 1.2 | Title of the Proposed Method | to write | short list below — Rodrigo picks |
+| 1.3 | Short Algorithm / Model Name | ready | **Qwen3VL 8B Finetune** (Rodrigo, 2026-09-07) |
 | 1.4 | Team Logo (image, ≤10 MB, we must hold the rights) | blocked | nobody has made one — `07_OPEN_ITEMS.md` #6 |
 
-**Method-title proposals** — starting points, not a decision:
+**Method title — short list.** The form's own example is `<ShortName>: <what it technically is>`
+("SurgVLM-LongContext: Temporal Cross-Attention VLM for Foreign Object Retrieval"). A plain,
+descriptive title is the right call here; the method is a careful fine-tune, not a new
+architecture, and a grand title would invite a comparison we would lose.
 
-- *"Connector-Aware LoRA for Surgical Foreign-Object VQA"* — the ViT→LLM connector is the module
-  the frameworks do not reach by default, and naming it is our one real architectural
-  contribution.
-- *"Reaching the Merger: Full-Stack LoRA Adaptation of Qwen3-VL for Foreign-Object VQA"*
-- Short names: `FOCUS-CLoRA`, `Qwen3VL-ConnLoRA`.
+1. **"Qwen3VL 8B Finetune: Vision-Encoder and Connector-Inclusive LoRA Adaptation for Surgical
+   Foreign-Object VQA"** — plainest, and it names the one thing we did that most teams did not.
+2. **"Qwen3VL 8B Finetune: Full-Stack LoRA Adaptation of a Vision-Language Model for Foreign
+   Object Recognition in Laparoscopic Surgery"** — "full-stack" = ViT + connector + LLM.
+3. **"Qwen3VL 8B Finetune: LoRA Fine-Tuning of Qwen3-VL for Foreign Object Visual Question
+   Answering"** — the most basic option, no claim at all beyond what we did.
 
-Whatever is chosen should be reconcilable with the platform's algorithm name,
-"Qwen3VL 8B FT ViT LLM".
+All three keep the short name intact, so the form, the leaderboard entry
+("Qwen3VL 8B FT ViT LLM") and the paper stay reconcilable.
 
 ---
 
 ## Section 2 — Team Members & Authorship
 
+**Author order, as it goes on the form** (Rodrigo, 2026-09-07):
+
+| # | full name | affiliation | platform username | email | ORCID | Scholar |
+|---|---|---|---|---|---|---|
+| 1 | **Rodrigo Medellin-Robles** | Universidad Autónoma de Querétaro, Mexico | — | `rmedellin07@alumnos.uaq.mx` | `0009-0008-4288-8622` | — |
+| 2 | **Leonardo D. Villanueva-Medina** | Universidad Autónoma de Querétaro, Mexico | `Legokna` | pending | pending | — |
+| 3 | **Yingyu Liang** | University of Oxford, United Kingdom | — | pending | pending | — |
+
 | # | field | status | note |
 |---|---|---|---|
-| 2.1 | Per author: full name, platform username, email, affiliation(s), ORCID, Google Scholar ID, funding, conflicts of interest | blocked | `07_OPEN_ITEMS.md` #5 |
-| 2.2 | Corresponding author email | to write | team decision |
-| 2.3 | Three co-author nominations for the joint publication | ready | we are exactly three and the cap is three (`context/decisions/external-data-policy.md`, §Publication policy p.8) |
+| 2.1 | Per author: full name, platform username, email, affiliation(s), ORCID, Google Scholar ID, funding, conflicts of interest | partial | names, order and affiliations settled; Rodrigo's ORCID and email in; Leo's and Yingyu's pending — `07_OPEN_ITEMS.md` #5 |
+| 2.2 | Corresponding author email | ready | `rmedellin07@alumnos.uaq.mx` (Rodrigo) unless the team decides otherwise |
+| 2.3 | Three co-author nominations for the joint publication | ready | the three above — we are exactly three and the cap is three (`context/decisions/external-data-policy.md`, §Publication policy p.8) |
 
-Known: platform usernames include `Legokna` (Leo). Author **order** is a team decision — the form
-records it for authorship, the website and the certificates, so settle it before filling the form
-rather than by whoever types it in.
+Still needed per person: Google Scholar ID, funding sources, conflicts of interest. Leo's and
+Yingyu's email and ORCID. Nobody can supply another person's ORCID or funding acknowledgements.
+
+Note the affiliation split is real and worth getting right on the form: **two authors at UAQ
+(Mexico), one at Oxford (UK)** — which is where the team name comes from.
 
 ---
 

@@ -81,27 +81,25 @@ Worth twenty minutes. An estimate that is 40 % wrong is worse than a slightly aw
 
 **Owner: each author, for themselves.**
 
-Per person, in the official author order:
+Settled 2026-09-07: names, order, affiliations, corresponding author, and the three co-author
+nominations. What remains is per-person metadata only.
 
-| field | Rodrigo | Leo | Yingyu |
+| field | 1. Rodrigo Medellin-Robles | 2. Leonardo D. Villanueva-Medina | 3. Yingyu Liang |
 |---|---|---|---|
-| Full name | | Leonardo Villanueva | |
-| Platform username | | `Legokna` | |
-| Email | | | |
-| Affiliation(s) — institution, department, country | | | |
-| ORCID | | | |
-| Google Scholar ID | | | |
-| Funding sources | | | |
-| Conflicts of interest | | | |
+| Affiliation | Universidad Autónoma de Querétaro, Mexico | Universidad Autónoma de Querétaro, Mexico | University of Oxford, UK |
+| Platform username | — | `Legokna` | — |
+| Email | `rmedellin07@alumnos.uaq.mx` | **pending** | **pending** |
+| ORCID | `0009-0008-4288-8622` | **pending** | **pending** |
+| Google Scholar ID | **pending** | **pending** | **pending** |
+| Funding sources | **pending** | **pending** | **pending** |
+| Conflicts of interest | **pending** | **pending** | **pending** |
 
-Plus:
+Corresponding author: **Rodrigo**, `rmedellin07@alumnos.uaq.mx`.
 
-- [ ] **Author order.** The form records it for authorship, the website and the certificates.
-      Decide it explicitly rather than by whoever fills the form.
-- [ ] **Corresponding author** (one email).
-- [ ] The three co-author nominations for the joint publication — we are exactly three and the
-      cap is three, so this is automatic *provided all three are eligible* (nobody may be a
-      member of an organizer's lab).
+- [ ] Leo and Yingyu: email, ORCID.
+- [ ] All three: Google Scholar ID, funding sources, conflicts of interest.
+- [ ] One eligibility check, once: no team member may be a member of an organizer's lab, or the
+      team is not eligible for awards.
 
 ---
 
