@@ -1,0 +1,41 @@
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)
+
+APPLIES TO: the released model weights (LoRA adapters and merged checkpoints)
+produced by this project, wherever they are distributed.
+
+DOES NOT APPLY TO: the source code, notebooks, configuration and documentation
+in this repository, which are licensed under Apache-2.0 (see LICENSE).
+
+Full legal text:  https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+Human summary:    https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+--------------------------------------------------------------------------------
+Why this licence, and not Apache-2.0 like the code
+--------------------------------------------------------------------------------
+
+The weights are a derivative of two things with different terms, and the more
+restrictive one governs:
+
+  Qwen3-VL-8B-Instruct   Apache-2.0            permissive, no constraint added
+  ORENA FRAME / HeiCo    CC BY-NC-SA 4.0       non-commercial + share-alike
+
+Because the fine-tuning data is CC BY-NC-SA, the resulting weights inherit
+NonCommercial and ShareAlike. Releasing them under Apache-2.0 would claim
+permissions we were never granted.
+
+This is compatible with the ORENA SAVE FOCUS Challenge open-source requirement:
+the requirement is that the model be released openly and documented, not that it
+be released permissively.
+
+--------------------------------------------------------------------------------
+What you must do if you use the weights
+--------------------------------------------------------------------------------
+
+  Attribution   Credit this project and the ORENA SAVE FOCUS Challenge / HeiCo
+                dataset authors, and link back to this repository.
+  NonCommercial No commercial use. Research, teaching and evaluation are fine.
+  ShareAlike    Distribute any derivative model under CC BY-NC-SA 4.0.
+
+These weights are a research artifact from a benchmark challenge. They are NOT a
+medical device and must not be used for clinical decision-making.

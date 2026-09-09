@@ -8,8 +8,8 @@ PROPUESTA-LEO.md
 PROPUESTA-LEO.docx
 NEGOCIO/
 
-# Literature — versioned PDFs (PRIVATE repo; a teammate needs them to reproduce).
-# All redistributable: 19 arXiv + 2 Nature open-access (CC). INDEX + FICHAS too.
+# Literature — INDEX.md + FICHAS.md are tracked; the PDFs themselves are not.
+# See the two literature blocks below.
 
 # Data / weights / checkpoints (live on RunPod, not here)
 data/
@@ -53,8 +53,11 @@ wandb/
 # 100 MB hard reject. Git-LFS is worse: its free tier is 1 GB storage + 1 GB/month
 # bandwidth, so three clones exhaust the quota in month one. Every catalogued paper
 # carries an arXiv/PMC link and a byte-verified status column, so the PDFs are
-# reconstructible on demand. The 21 PDFs already tracked in literature/pdfs/ stay —
-# rewriting history to evict 146 MB is not worth the breakage.
+# reconstructible on demand.
+# 🔻 Updated 2026-09-09: the 21 PDFs in literature/pdfs/ used to be tracked, on the
+# reasoning that this was a PRIVATE repo and a teammate needed them. The repo is now
+# public, so they are untracked too (see the PUBLIC REPO block at the bottom). They
+# remain in the git HISTORY — evicting them needs a force-push the whole team agrees to.
 literature/preprocessing/pdfs/
 literature/vlm-techniques/pdfs/
 
@@ -90,3 +93,39 @@ submissions/*/_artifacts/
 # local agent scratch — never repo content
 .claude/worktrees/
 .codex/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PUBLIC REPO (since 2026-09) — everything below is on disk but NOT exposed.
+# Untracked with `git rm --cached`: the files stay on every machine, git just
+# stops publishing them. Nothing here is needed to read the method.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Personal working vault (legokna). It is an INDEPENDENT git repository with its
+# own history, deliberately isolated from this one — its contents were never at
+# risk of being versioned here. This line is belt-and-braces: it was excluded via
+# .git/info/exclude, which is per-clone and does not travel, so a clone elsewhere
+# could still record an accidental gitlink. Now it cannot.
+local/
+
+# Agent instructions — tooling for how we worked, not the method itself.
+AGENTS.md
+
+# Superseded handoff note, kept on disk for the record.
+HANDOFF_RUNG19.md
+
+# Dead planning phase (GSD). Superseded by context/decisions/ + experiments/.
+# Also carried a teammate's personal email in two files.
+.planning/
+
+# Third-party papers. The catalogue (INDEX.md / FICHAS.md) IS the artifact and
+# stays tracked; every entry carries an arXiv/PMC link. Redistributing 146 MB of
+# other people's PDFs from a public repo is not ours to do.
+literature/pdfs/
+
+# Every PDF in the tree: the organizers' challenge documents (theirs to distribute,
+# not ours) and the three literature corpora. Catalogues stay, PDFs do not.
+*.pdf
+
+# Frames from the challenge corpus. Patient-derived surgical imagery under the
+# ORENA DUA — a public repo is not a permitted redistribution channel.
+_presentation_frames/
