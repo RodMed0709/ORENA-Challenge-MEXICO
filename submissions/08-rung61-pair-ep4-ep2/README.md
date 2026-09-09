@@ -86,3 +86,45 @@ shapes. So the eleven config/tokenizer/processor files were copied **verbatim fr
 - **`do_save.sh` writes the tar beside itself.** The image is ~74 GB uncompressed.
 - UNAM cannot run `do_build.sh`: `buildah bud --isolation chroot` works there, but there is no
   docker daemon ([[unam-can-build-containers]]).
+
+## Build record — 2026-09-08
+
+    image        frame-algorithm:latest · 73.8 GB · 12 layers
+    tar          frame-algorithm_2026-09-08T19-44-40.938322999-06-00.tar.gz · 30 GB
+    sha256       b3f8000e46f0dae9d8b117df8ad51534bdee9ea375473c2bac685467ebd92100
+    gzip test    pigz -t -> OK
+    built in     /home/legokna/orena-build/08-rung61-pair-ep4-ep2/
+
+Version gate inside the build (the Dockerfile's own assertions):
+
+    torch 2.5.1+cu124 cuda 12.4 · torchvision 0.20.1+cu124 · transformers 4.57.6
+    numpy 1.26.4 · orena-focus 0.3.4
+
+### The check that mattered, run inside the shipping image
+
+The config/tokenizer/processor files are submission 07's; the weights are rung 61's. If those
+disagreed, `from_pretrained` is where it would show. Both checkpoints, under the container's own
+`transformers 4.57.6`, on CPU:
+
+| | `resources/model` (ep4) | `resources/model_b` (ep2) |
+|---|---|---|
+| architecture | `Qwen3VLForConditionalGeneration` | idem |
+| rope | `rope_theta 5000000` + 4.57-shaped `rope_scaling` | idem |
+| processor | `Qwen3VLProcessor` loads | idem |
+| weights | **0 missing · 0 unexpected · 0 mismatched · 8.77 B** | idem |
+
+Weight identity was checked too, because a prefix hash is NOT a valid identity test for
+safetensors — the first 200 MB of `model-00001` is byte-identical across r61 ep4, r61 ep2 **and
+r42**, three different training runs. All eight full shard hashes differ between A and B.
+
+⚠️ Both checkpoints emit transformers' `fix_mistral_regex` tokenizer warning. It is **inherited,
+not introduced**: those tokenizer files come verbatim from submission 07, which the platform
+admitted and scored at 0.5524.
+
+### What was NOT exercised locally, and why that is acceptable here
+
+`do_test_run.sh`'s forward pass needs a GPU and this box has none. The stubbed control-flow
+rehearsal that submission 06 ran (input parsing, frame index, `arbitrate()`, `answer.json`
+schema) was not repeated: that code is **byte-identical** to submission 06, which passed the
+rehearsal *and* then ran on the platform. The delta in this submission is the weights, and the
+weights are what the table above verifies.
