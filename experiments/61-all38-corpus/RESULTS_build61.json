@@ -1,0 +1,13 @@
+{
+ "rows": 20667,
+ "base_rows": 19384,
+ "new_rows": 1283,
+ "sha256": "3c062f56e636ca43f4e537e9d6bf7b65b37f8f4652408e7f2581d94765fb15d6",
+ "test_videos_promoted": 38,
+ "gate1_reproduces_shipped": true,
+ "gate2_frames_present": true,
+ "gate3_no_duplicate_rows": true,
+ "gate4_covers_38_videos": true,
+ "source_base": "/mnt/storage/uaq_user/rung57/corpus/train_19384_mntpaths.jsonl",
+ "source_split": "/mnt/storage/uaq_user/repo_rod/experiments/42-merged-corpus/RESULTS_split_42.json"
+}

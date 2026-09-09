@@ -1,0 +1,23 @@
+{
+ "arm": "C",
+ "model": "/mnt/storage/uaq_user/hf_cache/hub/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+ "n_rows": 40,
+ "smoke": true,
+ "minutes": 1.1,
+ "p1": {
+  "emit_rate": 0.45,
+  "acc_points_all": 0.1111,
+  "acc_own_all": 0.0,
+  "mean_points": 1.444,
+  "mean_gold": 5.35,
+  "collapsed_to_one": 0.8889
+ },
+ "p2": {
+  "emit_rate": 0.55,
+  "acc_points_all": 0.0909,
+  "acc_own_all": 0.0,
+  "mean_points": 1.5,
+  "mean_gold": 5.35,
+  "collapsed_to_one": 0.7727
+ }
+}

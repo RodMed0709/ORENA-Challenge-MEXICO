@@ -1,0 +1,23 @@
+{
+ "arm": "B",
+ "model": "/mnt/storage/uaq_user/rung58/merged_r42",
+ "n_rows": 40,
+ "smoke": true,
+ "minutes": 4.2,
+ "p1": {
+  "emit_rate": 1.0,
+  "acc_points_all": 0.125,
+  "acc_own_all": 0.0,
+  "mean_points": 4.275,
+  "mean_gold": 5.35,
+  "collapsed_to_one": 0.275
+ },
+ "p2": {
+  "emit_rate": 1.0,
+  "acc_points_all": 0.075,
+  "acc_own_all": 0.0,
+  "mean_points": 4.5,
+  "mean_gold": 5.35,
+  "collapsed_to_one": 0.25
+ }
+}

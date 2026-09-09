@@ -1,0 +1,10 @@
+{
+ "--dataset": [
+  [
+   "/mnt/storage/uaq_user/rung57/corpus/train_19384_mntpaths.jsonl"
+  ],
+  [
+   "/mnt/storage/uaq_user/rung61/corpus/train_all38.jsonl"
+  ]
+ ]
+}
