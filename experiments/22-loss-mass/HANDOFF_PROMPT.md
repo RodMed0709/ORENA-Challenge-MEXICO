@@ -19,7 +19,7 @@ Rama: `task/r3-rung16`, todo commiteado y pusheado.
 ## POD
 
 ```
-ssh -p [redacted-port] root@[redacted-host]
+ssh pod          # host/port en el ~/.ssh/config personal, no en el repo
 repo:   /workspace/repo
 python: /workspace/envs/infer/bin/python
 GPU:    RTX 5090, 32 GB     frames: /workspace/frames_cache (15,213)
