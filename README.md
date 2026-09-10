@@ -40,15 +40,18 @@ Hosted on Hugging Face. Each repository holds the **full merged model at its roo
 directly, no extra step — plus the LoRA adapter alone under `adapter/` for anyone who prefers to
 apply it themselves.
 
-> ⏳ **The four repositories are uploaded but still private while we review them.** The links
-> below are their final URLs and will resolve as soon as they are flipped to public.
-
 | Model | What it is | Platform score | Link |
 |---|---|---|---|
-| **`frame-qwen3vl-8b-r42-ep4`** | rung 42 corpus (19,384 rows / 122 videos), epoch 4 — **our best measured checkpoint** | **0.5809** | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep4) |
-| `frame-qwen3vl-8b-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — (pair: **0.58128**) | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep2) |
-| `frame-qwen3vl-8b-r61-ep4` | the same recipe on the full released corpus (20,667 rows / 130 videos) — the final test entry, model A | not published | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep4) |
-| `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | not published | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep2) |
+| **`frame-qwen3vl-8b-r42-ep4`** | rung 42 corpus (19,384 rows / 122 videos), epoch 4 — **our best measured checkpoint** | **0.5809** | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep4) |
+| `frame-qwen3vl-8b-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — (pair: **0.58128**) | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep2) |
+| `frame-qwen3vl-8b-r61-ep4` | the same recipe on the full released corpus (20,667 rows / 130 videos) — the final test entry, model A | not published | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep4) |
+| `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | _no score published_ | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep2) |
+
+**They are meant to be run in pairs** — `ep4` as model A, `ep2` as model B of the same run. A
+answers; where its answer parses entirely as legal class names, B is asked the same question and
+**the shorter list wins**. Taking the union instead costs −0.1562, so the direction is the whole
+lever. Either checkpoint alone is also valid: that is what submission 03 did, at 0.5809. Each
+model card carries the rule and links to its partner.
 
 🔴 **Start with `r42-ep4` if you want a checkpoint with a verified number.** The two `r61`
 checkpoints carry none: they are the final-test entry, trained on the full released corpus, and
