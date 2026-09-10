@@ -1,12 +1,12 @@
 # ORENA-Challenge-MEXICO 🇲🇽 — `Mexico-Oxford_TEAM`
 
-Entry for the **[ORENA SAVE FOCUS Challenge](https://orena-focus-challenge.org/) — FRAME track**
+Entry for the **[ORENA SAVE FOCUS Challenge — FRAME track](https://frame.orena-focus-challenge.org/)**
 (MICCAI 2026): visual question answering over laparoscopic surgical video. Given a clip and a
 natural-language question about foreign objects in the scene, the model returns a short text
 answer.
 
-Three-person team — two at the Universidad Autónoma de Querétaro (Mexico), one at the University
-of Oxford (UK), which is where the team name comes from.
+> 📌 **TODO — team description.** Members, affiliations and roles go here.
+> _(placeholder: to be completed by the team)_
 
 Our approach is a **LoRA fine-tune of Qwen3-VL-8B-Instruct** served offline in a Docker
 container, with an inference-time rule that arbitrates between two checkpoints of the same run.
@@ -83,11 +83,15 @@ surgical datasets — all of them closed as measured negatives, and none of them
 |---|---|
 | **ORENA SAVE FOCUS — FRAME** ([`heico-focus-vqa`](https://huggingface.co/datasets/orena-dkfz/heico-focus-vqa), [`lapchole-focus-vqa`](https://huggingface.co/datasets/orena-dkfz/lapchole-focus-vqa)) | the entire training corpus of every shipped model |
 
+🔒 **Both dataset repositories are gated — you must request access on Hugging Face and be granted
+it by the organizers.** The links resolve to the request form, not to the files. We cannot grant
+access and cannot redistribute the data; the terms are the organizers' to set.
+
 The `heico` partition is built on the **Heidelberg Colorectal (HeiCo)** data set —
 Maier-Hein et al., *Scientific Data* 8, 101 (2021),
 [doi:10.1038/s41597-021-00882-2](https://doi.org/10.1038/s41597-021-00882-2). The challenge
 itself, its taxonomy and its evaluation SDK are the work of the **IMSY group at DKFZ**:
-[orena-focus-challenge.org](https://orena-focus-challenge.org/) ·
+[frame.orena-focus-challenge.org](https://frame.orena-focus-challenge.org/) ·
 [IMSY-DKFZ/orena-focus](https://github.com/IMSY-DKFZ/orena-focus) (MIT, vendored under
 `vendor/orena-focus/` with its licence intact).
 
@@ -269,3 +273,6 @@ obtain them.
 ## Team
 
 `Mexico-Oxford_TEAM` — run as personal research, independent of any employer.
+
+> 📌 **TODO — team members.** Names, affiliations, ORCIDs and roles.
+> _(placeholder: to be completed by the team)_
