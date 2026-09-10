@@ -51,16 +51,14 @@ apply it themselves.
 | `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | not published | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep2) |
 
 🔴 **Start with `r42-ep4` if you want a checkpoint with a verified number.** The two `r61`
-checkpoints have none, and cannot honestly have one: they were trained on the full released
-corpus, which includes the videos this campaign held out for evaluation, so any local metric on
-those videos is a memorisation readout. They are published because they are what we submitted,
-not because they are known to be better.
+checkpoints carry none: they are the final-test entry, trained on the full released corpus, and
+that leaderboard was not public when they were uploaded. They are published because they are what
+we submitted, not because they are known to be better.
 
-**The config files shipped in each repository are the ones the challenge platform accepted** —
-the `transformers` **4.57** shape (`rope_scaling` + hoisted `rope_theta`). 5.x writes
-`rope_parameters` instead, which 4.57 cannot read; that mismatch cost us a debugging cycle, so
-the validated shape is what we publish. The weight index was verified tensor by tensor against
-the shards of all four checkpoints: 750 tensors, 4 shards, exact match.
+**Every repository ships the config files the challenge platform accepted**, i.e. the
+`transformers` **4.57** layout, and each model card carries the exact dependency pins the
+submission container ran with. The weight index was verified tensor by tensor against the shards
+of all four checkpoints: 750 tensors, 4 shards, exact match.
 
 The Docker inference image is **not** published: it is 30 GB compressed and adds nothing over the
 `Dockerfile` in `submissions/08-rung61-pair-ep4-ep2/` plus these weights.
