@@ -8,6 +8,7 @@ parsing outright.
 
 from __future__ import annotations
 
+import gc
 import logging
 
 import torch
@@ -196,5 +197,12 @@ class QwenFrameEngine:
     def unload(self) -> None:
         self.model = None
         self.processor = None
+        # 🔴 `nn.Module` trees hold internal parent<->child reference cycles, so dropping
+        # the LAST name-based reference above does not make CPython's immediate refcounting
+        # free the underlying CUDA tensors -- that needs a cycle-detection GC pass FIRST.
+        # Without it, `empty_cache()` (which only returns memory that is ALREADY
+        # unreferenced) finds nothing to release, and a second `load()` in the same process
+        # OOMs against a model that "unloaded" but never actually left the GPU.
+        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()

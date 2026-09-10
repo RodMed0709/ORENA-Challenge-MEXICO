@@ -1,0 +1,71 @@
+{
+  "headline": {
+    "counting": {
+      "probe": {
+        "mean": 0.4461935555716612,
+        "ci_low": 0.31828999602791264,
+        "ci_high": 0.5845515487748496,
+        "n_rows": 518,
+        "n_videos": 8
+      },
+      "token_head": {
+        "mean": 0.4612797755559681,
+        "ci_low": 0.3427188780886474,
+        "ci_high": 0.5837719832251083,
+        "n_rows": 518,
+        "n_videos": 8
+      },
+      "probe_beats_token_head": false
+    },
+    "fo_class": {
+      "probe": {
+        "mean": 0.8143456253545318,
+        "ci_low": 0.758631382233341,
+        "ci_high": 0.8709118638203548,
+        "n_rows": 490,
+        "n_videos": 8
+      },
+      "token_head": {
+        "mean": 0.8689763158081842,
+        "ci_low": 0.8066156140369406,
+        "ci_high": 0.9260905640805294,
+        "n_rows": 490,
+        "n_videos": 8
+      },
+      "probe_beats_token_head": false
+    }
+  },
+  "aggregation_comparison": {
+    "n_pairs": 20,
+    "counting_probe_acc_on_pairs": 0.5,
+    "aggregated_fo_class_acc_on_pairs": 0.55,
+    "probe_agg_agreement_rate": 0.7
+  },
+  "best_config": {
+    "counting": {
+      "layer": 34,
+      "kind": "ordinal",
+      "C": 0.01,
+      "cv_exact_acc": 0.8108941418293937
+    },
+    "fo_class": {
+      "layer": 24,
+      "C": 0.01,
+      "cv_exact_set_acc": 0.9223965090222903,
+      "vocab": [
+        "Clip",
+        "External drain",
+        "Gallstone",
+        "Needle",
+        "Silicone loop",
+        "Specimen",
+        "Specimen bag",
+        "Sponge"
+      ]
+    },
+    "pca_n_components": 128,
+    "seed": 0
+  },
+  "n_boot": 1000,
+  "seed": 42
+}
