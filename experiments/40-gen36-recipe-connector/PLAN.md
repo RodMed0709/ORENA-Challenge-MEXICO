@@ -40,7 +40,7 @@ It is a question about a **code path**, not about an architecture and not about 
 |---|---|
 | model | **`Qwen/Qwen3.5-2B`** — already complete on UNAM (4.3 GB), **nothing to download** |
 | data | **synthetic**: generated noise images + invented Q/A pairs, ours, written fresh |
-| host | **UNAM** `hpclab-RTXA6000` — 2× RTX 6000 Ada 48 GB, both idle; env `orena-unsloth` |
+| host | the university GPU box — 2× RTX 6000 Ada 48 GB, both idle; env `orena-unsloth` |
 | steps | 20 |
 
 **Why the 2B is a valid proxy** — verified 2026-08-13 by reading the model on UNAM:

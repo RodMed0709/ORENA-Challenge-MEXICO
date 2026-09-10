@@ -61,10 +61,9 @@ wandb/
 literature/preprocessing/pdfs/
 literature/vlm-techniques/pdfs/
 
-# UNAM HPC cluster access — SSH public keys sent to the sysadmin for the ENES
-# Juriquilla server. Personal access material, not project code: the keys are
-# per-person, they grant nothing on their own, and a teammate has their own pair.
-# Nothing here is reproducible from the repo, so nothing here belongs in it.
+# University cluster access — personal SSH material, not project code. The keys
+# are per-person, they grant nothing on their own, and a teammate has their own
+# pair. Nothing here is reproducible from the repo, so nothing here belongs in it.
 UNAM/
 
 # Junk

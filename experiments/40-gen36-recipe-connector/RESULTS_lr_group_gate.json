@@ -28,7 +28,7 @@
     "ratio_tolerance": 0.35
   },
   "versions": {
-    "host": "hpclab-RTXA6000",
+    "host": "university-gpu-box",
     "python": "3.11.15",
     "unsloth": "2026.8.15",
     "unsloth_zoo": "2026.8.10",

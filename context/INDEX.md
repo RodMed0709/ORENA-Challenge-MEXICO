@@ -17,7 +17,6 @@
   - **Rodrigo** → MLOps consistency system + **R1 CoA-format SFT** — see [[next-move-rodrigo-coa-format]].
 
 ## COMPUTE — where things may run
-[redacted]
 
 ## NEXT — the forward plan
 - **`context/NEXT_STEPS.md`** — 🆕 **what we do next and in what order**, for legokna's lane, after rung 37 died and the SAM block closed left it empty (2026-08-12 pm). The axis is **fine-tuning**; the first rung is **38, the fine-tuned gen-3.6 screen**, gated by a ~1 h zero-GPU `G-VIABILITY`. Behind it a **recipe queue** (connector → epochs → `vit_lr` 5e-4 → rank) that is **obligatory in both branches**, because **the A2 recipe is not known-good on another backbone** — so the screen measures a floor, and the verdict picks the *subject*, not the list. 🔴 Nothing in it is measured: it is a plan, not a verdict, and may not be cited as evidence.

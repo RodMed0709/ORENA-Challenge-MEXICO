@@ -168,7 +168,7 @@ the container could find; this one not even that.
 | `check_undefined_names.py` | **new build gate.** Fails the build if `inference.py` reads a name it never binds. Verified both ways: passes on the fixed file, fails on the shipped one naming `normalize_answer` at line 429. Wired into `do_build.sh`, pure stdlib, no GPU. |
 
 🔻 **`gpu_memory_utilization` 0.82 → 0.90, and it WAS measured.** This paragraph used to say
-"still not measured". It was calibrated on `hpclab-RTXA6000` (`card_total_gib` **47.4**); an L40S
+"still not measured". It was calibrated on `university-gpu-box` (`card_total_gib` **47.4**); an L40S
 is ~45 GiB, and the counter-intuitive part is that on a *smaller* card this number must go **up**,
 because it is a fraction of the total while the weights are a fixed 33.46 GiB. Measured on this
 checkpoint, 20 real questions each:

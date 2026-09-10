@@ -49,7 +49,7 @@ with a number. **The claim under test is the optimistic one, and it is ours.**
 
 ## Why UNAM is the right machine, and better than the pod for this
 
-`hpclab-RTXA6000`: 2× **RTX 6000 Ada**, 49 GB each, **CC (8, 9)**.
+`university-gpu-box`: 2× **RTX 6000 Ada**, 49 GB each, **CC (8, 9)**.
 
 🔑 **CC 8.9 is the L40S exactly** — the same Ada generation with native FP8 w8a8 that the
 whole serving plan assumes (`CLAUDE.md` §Quantization). The rented pods are Blackwell

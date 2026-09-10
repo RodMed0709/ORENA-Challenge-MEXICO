@@ -352,7 +352,7 @@ was collapsing into the answer and the whole framing needs re-reading.
   `answer_char_cap`; do not touch how the engine decodes.
 
   ✅ **Confirmed against a REAL tokenizer**, not just the JSON — `Qwen/Qwen3.5-2B` on the
-  UNAM box (`hpclab-RTXA6000`), which carries **the same `<think>`/`</think>` ids
+  UNAM box (`university-gpu-box`), which carries **the same `<think>`/`</think>` ids
   (248068 / 248069) as Qwen3.6-27B**, so it is a faithful proxy for the template and decode
   path. Read-only, no GPU, nothing written to that shared machine:
 

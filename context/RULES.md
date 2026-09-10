@@ -247,14 +247,6 @@ S8. **Multiplicity is asymmetric — one cell may WIN, every cell may VETO.** On
     reasoning + retroactive flag (this session leaked annotations to DeepSeek via MCP):
     [[no-external-api-for-challenge-data]].
 
-[redacted]
-    Staged there 2026-08-17 by the lead's explicit decision, with `drwx------` and a team-only
-    account as the mitigations; the agreement requested 2026-08-12 has not arrived. This changes
-    **nothing** about §14 — UNAM is our own secure environment, not a third party, and no frame or
-    annotation may leave either machine for an external API. It is recorded here so the next
-    person does not read `UNAM_SERVER.md`'s prohibition as the current state, and so the open
-[redacted]
-
 ## EXTERNAL DATA — permitted, with three obligations (BINDING, challenge rules)
 
 Source of truth is the tracked PDF at the repo root,

@@ -561,10 +561,7 @@ repo is built for it yet — every rung 00–46 is FRAME. Build starts now.
 
 **2. 🔻 UNAM IS STOOD DOWN by the lead's decision (2026-08-17).** Work moves to **RunPod + local**
 only. The box was never ours alone: `uaq_user` is shared with legokna, and the other six accounts
-see one tenant. Everything produced there is pulled into the repo before it is dropped. The
-[redacted]
-[redacted]
-close that, it makes deleting the data the natural next step.
+see one tenant. Everything produced there is pulled into the repo before it is dropped.
 
 **3. 🟢🔴 Rung 46 — the two-model debate WORKS and the roles are BACKWARDS.**
 [[debate-works-and-the-roles-are-backwards]]. On rung 42's 8 held-out videos (1,283 questions):
@@ -1163,7 +1160,7 @@ is concentrated **OOD**, which is what the generation buys and a 9B buys too.
    to target it. ⇒ **rung 32's null now has a mechanism, switching framework does not unlock the
    connector, and rung 39 must pre-register an explicit `target_modules` plus a blocking
    reachability gate.**
-5. 🟢 **Second machine online: `hpclab-RTXA6000` (UNAM).** 2× RTX 6000 Ada 48 GB, 96 cores, 502 GB
+5. 🟢 **Second machine online: `university-gpu-box` (UNAM).** 2× RTX 6000 Ada 48 GB, 96 cores, 502 GB
    RAM, 17 TB. 🔑 **Compute capability 8.9 — the same architecture as the eval L40S**, so the two
    things the Blackwell dev pod could not do become possible: **FP8 kernels build**, and there is
    finally a **p99 proxy** for the item `THE_MAP.md:252` calls *"the only item BOTH documents

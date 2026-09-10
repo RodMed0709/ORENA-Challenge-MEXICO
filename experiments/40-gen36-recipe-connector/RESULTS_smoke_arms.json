@@ -24,7 +24,7 @@
     "merge_check": null,
     "model_class": "Qwen3_5ForConditionalGeneration",
     "versions": {
-      "host": "hpclab-RTXA6000",
+      "host": "university-gpu-box",
       "python": "3.11.15",
       "unsloth": "2026.8.15",
       "unsloth_zoo": "2026.8.10",
@@ -106,7 +106,7 @@
     },
     "model_class": "Qwen3_5ForConditionalGeneration",
     "versions": {
-      "host": "hpclab-RTXA6000",
+      "host": "university-gpu-box",
       "python": "3.11.15",
       "unsloth": "2026.8.15",
       "unsloth_zoo": "2026.8.10",

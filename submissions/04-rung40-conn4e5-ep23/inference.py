@@ -364,7 +364,7 @@ def load_model():
     * `gpu_memory_utilization=0.90`. 🔻 RAISED from 0.82 on 2026-08-27, and the direction is
       the counter-intuitive part: on a SMALLER card this number must go UP, because it is a
       fraction of the total and the weights are a fixed 33.46 GiB. 0.82 was measured on
-      `hpclab-RTXA6000` (`card_total_gib` 47.4); the L40S is ~45 GiB, so the same fraction
+      `university-gpu-box` (`card_total_gib` 47.4); the L40S is ~45 GiB, so the same fraction
       buys ~2 GiB less of the one resource that was already scarce. Measured on this
       checkpoint, 20 real questions each, `experiments/44-fp8-deployability/`:
 
