@@ -1,8 +1,12 @@
-# ORENA-Challenge-MEXICO 🇲🇽
+# ORENA-Challenge-MEXICO 🇲🇽 — `Mexico-Oxford_TEAM`
 
-Mexican team entry for the **ORENA SAVE FOCUS Challenge — FRAME track** (MICCAI 2026):
-visual question answering over laparoscopic surgical video. Given a clip and a natural-language
-question about foreign objects in the scene, the model returns a short text answer.
+Entry for the **[ORENA SAVE FOCUS Challenge](https://orena-focus-challenge.org/) — FRAME track**
+(MICCAI 2026): visual question answering over laparoscopic surgical video. Given a clip and a
+natural-language question about foreign objects in the scene, the model returns a short text
+answer.
+
+Three-person team — two at the Universidad Autónoma de Querétaro (Mexico), one at the University
+of Oxford (UK), which is where the team name comes from.
 
 Our approach is a **LoRA fine-tune of Qwen3-VL-8B-Instruct** served offline in a Docker
 container, with an inference-time rule that arbitrates between two checkpoints of the same run.
@@ -125,19 +129,6 @@ The weights are a research artifact from a benchmark challenge. **They are not a
 and must not be used for clinical decision-making.**
 
 ---
-
-## ⚠️ The git history was rewritten on 2026-09-09
-
-Every commit hash changed. **If you cloned this repository before that date, re-clone it** —
-`git pull` will refuse, and `git reset --hard origin/main` is only safe if you have nothing
-unpushed.
-
-The rewrite removed material this project has no right to redistribute from a public URL:
-third-party papers, the organizers' challenge documents, frames from the challenge corpus
-(patient-derived imagery under the ORENA data-use agreement), and a third party's server
-connection details. `git rm` alone was not enough — it clears the current tip and leaves every
-earlier commit downloadable. The reasoning is in
-[`the-history-was-rewritten`](context/decisions/the-history-was-rewritten.md).
 
 ## 🧭 How to read this repository
 
@@ -264,4 +255,4 @@ obtain them.
 
 ## Team
 
-Three-person team, run as personal research and independent of any employer.
+`Mexico-Oxford_TEAM` — run as personal research, independent of any employer.
