@@ -13,9 +13,15 @@ call is not.
 
 from __future__ import annotations
 
+import json
 import logging
+import math
+import re
 import time
+from bisect import bisect_left
+from collections import defaultdict
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 from PIL import Image
@@ -25,21 +31,63 @@ log = logging.getLogger(__name__)
 
 def answer_items(model_path: Path | str, items: pd.DataFrame, frames_dir: Path | str,
                  *, max_pixels: int = 1280 * 720, device: str = "cuda",
-                 limit: int | None = None, log_every: int = 250) -> pd.DataFrame:
+                 limit: int | None = None, log_every: int = 250,
+                 vote_mode: Literal["sample", "temporal"] | None = None,
+                 vote_k: int = 1, vote_threshold: int | None = None,
+                 temperature: float = 0.7) -> pd.DataFrame:
     """One row per item: the model's raw answer, and its latency. RAISES on a missing frame.
 
     ``limit`` is for the smoke only. A full run must answer every item — a probe that
     silently skips frames reports a recall it did not measure.
     """
-    from frame.config import BaselineConfig
-    from frame.engine import QwenFrameEngine
-
     frames_dir = Path(frames_dir)
     work = items if limit is None else items.head(limit)
+
+    if vote_mode not in (None, "sample", "temporal"):
+        raise ValueError(f"unknown vote_mode {vote_mode!r}")
+    if vote_k < 1:
+        raise ValueError("vote_k must be at least 1")
+    threshold = math.ceil(vote_k / 2) if vote_threshold is None else vote_threshold
+    if not 1 <= threshold <= vote_k:
+        raise ValueError("vote_threshold must be between 1 and vote_k")
+    if vote_mode == "sample" and temperature <= 0:
+        raise ValueError("temperature must be positive in sample mode")
+
+    temporal_entries: dict[str, list[tuple[int, Path]]] = defaultdict(list)
+    temporal_index: dict[str, tuple[tuple[int, ...], tuple[Path, ...]]] = {}
+    if vote_mode == "temporal":
+        pattern = re.compile(r"^cholect50__(.+)__(\d{6})\.jpg$")
+        for path in frames_dir.glob("cholect50__*.jpg"):
+            match = pattern.match(path.name)
+            if match:
+                temporal_entries[match.group(1)].append((int(match.group(2)), path))
+        for video, entries in temporal_entries.items():
+            entries.sort(key=lambda entry: entry[0])
+            temporal_index[video] = (
+                tuple(frame for frame, _ in entries),
+                tuple(path for _, path in entries),
+            )
+
+    from frame.config import BaselineConfig
+    from frame.engine import QwenFrameEngine
 
     cfg = BaselineConfig(max_pixels=max_pixels)
     cfg.model_path = str(model_path)
     cfg.device = device
+    if vote_mode == "sample":
+        cfg.n_samples = vote_k
+        cfg.temperature = temperature
+
+    if vote_mode is not None:
+        # `_load_fotype` and NOT `from focus.foreign_objects import FOType`: that direct
+        # import is exactly what the loader exists to work around — `focus/__init__.py`
+        # eagerly pulls transformers/datasets, so the package import dies anywhere the
+        # heavy deps are absent while the module itself loads fine. RULES §8b also
+        # forbids hard-coding the accepted set, and the loader is the one reader of it.
+        from frame.metrics import _load_fotype
+        from frame.vote import vote_fo_class
+
+        valid_names = tuple(_load_fotype().names())
 
     eng = QwenFrameEngine(cfg)
     eng.load()
@@ -51,10 +99,56 @@ def answer_items(model_path: Path | str, items: pd.DataFrame, frames_dir: Path |
             if not fp.exists():
                 raise FileNotFoundError(f"{fp} — the cache does not cover the probe")
             t = time.perf_counter()
-            with Image.open(fp) as im:
-                pred = eng.predict(im.convert("RGB"), r.question)
-            rows.append({"qID": r.qID, "video": r.video, "frame": r.frame,
-                         "prediction": pred, "latency": time.perf_counter() - t})
+            if vote_mode is None:
+                with Image.open(fp) as im:
+                    pred = eng.predict(im.convert("RGB"), r.question)
+                row = {"qID": r.qID, "video": r.video, "frame": r.frame,
+                       "prediction": pred, "latency": time.perf_counter() - t}
+            elif vote_mode == "sample":
+                with Image.open(fp) as im:
+                    raw_answers = eng.predict_samples(im.convert("RGB"), r.question)
+                pred, counts = vote_fo_class(raw_answers, valid_names, threshold)
+                row = {"qID": r.qID, "video": r.video, "frame": r.frame,
+                       "prediction": pred, "latency": time.perf_counter() - t,
+                       "n_votes_used": len(raw_answers),
+                       "raw_answers": json.dumps(list(raw_answers), ensure_ascii=False,
+                                                 separators=(",", ":")),
+                       "vote_counts": json.dumps(counts, ensure_ascii=False,
+                                                 separators=(",", ":"))}
+            else:
+                frame_numbers, frame_paths = temporal_index.get(r.video, ((), ()))
+                owned_index = bisect_left(frame_numbers, r.frame)
+                if owned_index == len(frame_numbers) or frame_numbers[owned_index] != r.frame:
+                    raise FileNotFoundError(f"{fp} — the cache does not cover the probe")
+                selected_paths = [frame_paths[owned_index]]
+                left = owned_index - 1
+                right = owned_index + 1
+                while len(selected_paths) < min(vote_k, len(frame_numbers)):
+                    if left < 0:
+                        selected_paths.append(frame_paths[right])
+                        right += 1
+                    elif right >= len(frame_numbers):
+                        selected_paths.append(frame_paths[left])
+                        left -= 1
+                    elif r.frame - frame_numbers[left] <= frame_numbers[right] - r.frame:
+                        selected_paths.append(frame_paths[left])
+                        left -= 1
+                    else:
+                        selected_paths.append(frame_paths[right])
+                        right += 1
+                raw_answers = []
+                for selected_path in selected_paths:
+                    with Image.open(selected_path) as im:
+                        raw_answers.append(eng.predict(im.convert("RGB"), r.question))
+                pred, counts = vote_fo_class(raw_answers, valid_names, threshold)
+                row = {"qID": r.qID, "video": r.video, "frame": r.frame,
+                       "prediction": pred, "latency": time.perf_counter() - t,
+                       "n_votes_used": len(raw_answers),
+                       "raw_answers": json.dumps(raw_answers, ensure_ascii=False,
+                                                 separators=(",", ":")),
+                       "vote_counts": json.dumps(counts, ensure_ascii=False,
+                                                 separators=(",", ":"))}
+            rows.append(row)
             if i % log_every == 0:
                 log.info("%d/%d · %.3f s/item", i, len(work), (time.perf_counter() - t0) / i)
     finally:

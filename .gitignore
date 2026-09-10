@@ -107,15 +107,10 @@ submissions/*/_artifacts/
 # could still record an accidental gitlink. Now it cannot.
 local/
 
-# Agent instructions — tooling for how we worked, not the method itself.
-AGENTS.md
 
 # Superseded handoff note, kept on disk for the record.
 HANDOFF_RUNG19.md
 
-# Dead planning phase (GSD). Superseded by context/decisions/ + experiments/.
-# Also carried a teammate's personal email in two files.
-.planning/
 
 # Third-party papers. The catalogue (INDEX.md / FICHAS.md) IS the artifact and
 # stays tracked; every entry carries an arXiv/PMC link. Redistributing 146 MB of

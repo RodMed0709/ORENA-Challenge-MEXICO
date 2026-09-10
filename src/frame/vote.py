@@ -27,6 +27,7 @@ import numpy as np
 import pandas as pd
 
 from frame.parsing import parse_number
+from frame.metrics import _FO_NONE
 
 __all__ = [
     "diversity",
@@ -36,6 +37,7 @@ __all__ = [
     "pass_at_k",
     "per_question",
     "t0_diversity",
+    "vote_fo_class",
     "vote_number",
     "zero_advantage",
 ]
@@ -90,6 +92,33 @@ def vote_number(samples: Sequence[str]) -> float:
     counts = Counter(values)
     best = max(counts.values())
     return min(v for v, c in counts.items() if c == best)
+
+
+def vote_fo_class(
+    samples: Sequence[str],
+    valid_names: Sequence[str],
+    threshold: int,
+) -> tuple[str, dict[str, int]]:
+    """Threshold-vote canonical fo_class sets; illegal samples stay in k."""
+    if not samples:
+        raise ValueError("samples must not be empty")
+    if threshold < 1:
+        raise ValueError("threshold must be at least 1")
+
+    valid_lower = {name.lower(): name for name in valid_names}
+    counts: Counter[str] = Counter()
+    for raw in samples:
+        parsed = key_fo_class(raw, valid_lower)
+        if parsed is not None:
+            counts.update(parsed)
+
+    ordered_counts = {name: counts[name] for name in valid_names if counts[name] > 0}
+    if counts[_FO_NONE] > 0:
+        ordered_counts[_FO_NONE] = counts[_FO_NONE]
+
+    winners = [name for name in valid_names if counts[name] >= threshold]
+    answer = ", ".join(winners) if winners else _FO_NONE
+    return answer, ordered_counts
 
 
 # ── spread ────────────────────────────────────────────────────────────────────────

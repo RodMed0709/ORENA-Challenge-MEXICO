@@ -1,0 +1,1070 @@
+{
+ "verdict": {
+  "n_fit": 531,
+  "n_read": 782,
+  "n_videos_read": 10,
+  "model_exact_OOD": 0.6752,
+  "best": {
+   "layer": 26,
+   "probe_exact_OOD": 0.5243,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1509,
+   "per_class": {
+    "Sponge": {
+     "tp": 334,
+     "fp": 52,
+     "fn": 27,
+     "f1": 0.8942
+    },
+    "Clip": {
+     "tp": 311,
+     "fp": 157,
+     "fn": 59,
+     "f1": 0.7422
+    },
+    "Specimen Bag": {
+     "tp": 22,
+     "fp": 5,
+     "fn": 5,
+     "f1": 0.8148
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 221,
+     "fn": 2,
+     "f1": 0.5567
+    },
+    "Needle": {
+     "tp": 52,
+     "fp": 7,
+     "fn": 89,
+     "f1": 0.52
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 31,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 7,
+     "fp": 13,
+     "fn": 11,
+     "f1": 0.3684
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  }
+ },
+ "layers": [
+  {
+   "layer": 0,
+   "probe_exact_OOD": 0.0,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.6752,
+   "per_class": {
+    "Sponge": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 361,
+     "f1": 0.0
+    },
+    "Clip": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 370,
+     "f1": 0.0
+    },
+    "Specimen Bag": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 27,
+     "f1": 0.0
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 0,
+     "f1": NaN
+    },
+    "Specimen": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 18,
+     "f1": 0.0
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 2,
+   "probe_exact_OOD": 0.2404,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4348,
+   "per_class": {
+    "Sponge": {
+     "tp": 308,
+     "fp": 178,
+     "fn": 53,
+     "f1": 0.7273
+    },
+    "Clip": {
+     "tp": 207,
+     "fp": 169,
+     "fn": 163,
+     "f1": 0.555
+    },
+    "Specimen Bag": {
+     "tp": 10,
+     "fp": 4,
+     "fn": 17,
+     "f1": 0.4878
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 22,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 8,
+     "fp": 53,
+     "fn": 10,
+     "f1": 0.2025
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 4,
+   "probe_exact_OOD": 0.1867,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4885,
+   "per_class": {
+    "Sponge": {
+     "tp": 239,
+     "fp": 120,
+     "fn": 122,
+     "f1": 0.6639
+    },
+    "Clip": {
+     "tp": 244,
+     "fp": 214,
+     "fn": 126,
+     "f1": 0.5894
+    },
+    "Specimen Bag": {
+     "tp": 1,
+     "fp": 0,
+     "fn": 26,
+     "f1": 0.0714
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 9,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 13,
+     "fp": 136,
+     "fn": 5,
+     "f1": 0.1557
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 6,
+   "probe_exact_OOD": 0.2545,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4207,
+   "per_class": {
+    "Sponge": {
+     "tp": 102,
+     "fp": 33,
+     "fn": 259,
+     "f1": 0.4113
+    },
+    "Clip": {
+     "tp": 336,
+     "fp": 327,
+     "fn": 34,
+     "f1": 0.6505
+    },
+    "Specimen Bag": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 27,
+     "f1": 0.0
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 6,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 9,
+     "fp": 77,
+     "fn": 9,
+     "f1": 0.1731
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 8,
+   "probe_exact_OOD": 0.055,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.6202,
+   "per_class": {
+    "Sponge": {
+     "tp": 151,
+     "fp": 38,
+     "fn": 210,
+     "f1": 0.5491
+    },
+    "Clip": {
+     "tp": 76,
+     "fp": 44,
+     "fn": 294,
+     "f1": 0.3102
+    },
+    "Specimen Bag": {
+     "tp": 11,
+     "fp": 20,
+     "fn": 16,
+     "f1": 0.3793
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 5,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 13,
+     "fp": 130,
+     "fn": 5,
+     "f1": 0.1615
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 10,
+   "probe_exact_OOD": 0.1777,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4974,
+   "per_class": {
+    "Sponge": {
+     "tp": 305,
+     "fp": 254,
+     "fn": 56,
+     "f1": 0.663
+    },
+    "Clip": {
+     "tp": 222,
+     "fp": 183,
+     "fn": 148,
+     "f1": 0.5729
+    },
+    "Specimen Bag": {
+     "tp": 4,
+     "fp": 4,
+     "fn": 23,
+     "f1": 0.2286
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 53,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 2,
+     "fp": 22,
+     "fn": 16,
+     "f1": 0.0952
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 12,
+   "probe_exact_OOD": 0.2327,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4425,
+   "per_class": {
+    "Sponge": {
+     "tp": 318,
+     "fp": 277,
+     "fn": 43,
+     "f1": 0.6653
+    },
+    "Clip": {
+     "tp": 364,
+     "fp": 387,
+     "fn": 6,
+     "f1": 0.6494
+    },
+    "Specimen Bag": {
+     "tp": 3,
+     "fp": 1,
+     "fn": 24,
+     "f1": 0.1935
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 45,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 1,
+     "fp": 6,
+     "fn": 17,
+     "f1": 0.08
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 14,
+   "probe_exact_OOD": 0.1662,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.509,
+   "per_class": {
+    "Sponge": {
+     "tp": 326,
+     "fp": 276,
+     "fn": 35,
+     "f1": 0.6771
+    },
+    "Clip": {
+     "tp": 364,
+     "fp": 378,
+     "fn": 6,
+     "f1": 0.6547
+    },
+    "Specimen Bag": {
+     "tp": 4,
+     "fp": 3,
+     "fn": 23,
+     "f1": 0.2353
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 185,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 1,
+     "fp": 5,
+     "fn": 17,
+     "f1": 0.0833
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 16,
+   "probe_exact_OOD": 0.2455,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.4297,
+   "per_class": {
+    "Sponge": {
+     "tp": 320,
+     "fp": 206,
+     "fn": 41,
+     "f1": 0.7215
+    },
+    "Clip": {
+     "tp": 356,
+     "fp": 323,
+     "fn": 14,
+     "f1": 0.6787
+    },
+    "Specimen Bag": {
+     "tp": 12,
+     "fp": 5,
+     "fn": 15,
+     "f1": 0.5455
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 142,
+     "f1": 0.0
+    },
+    "Needle": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 141,
+     "f1": 0.0
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 144,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 1,
+     "fp": 10,
+     "fn": 17,
+     "f1": 0.069
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 18,
+   "probe_exact_OOD": 0.3555,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.3197,
+   "per_class": {
+    "Sponge": {
+     "tp": 312,
+     "fp": 52,
+     "fn": 49,
+     "f1": 0.8607
+    },
+    "Clip": {
+     "tp": 326,
+     "fp": 177,
+     "fn": 44,
+     "f1": 0.7468
+    },
+    "Specimen Bag": {
+     "tp": 23,
+     "fp": 117,
+     "fn": 4,
+     "f1": 0.2754
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 112,
+     "fp": 3,
+     "fn": 30,
+     "f1": 0.8716
+    },
+    "Needle": {
+     "tp": 1,
+     "fp": 18,
+     "fn": 140,
+     "f1": 0.0125
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 161,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 10,
+     "fp": 12,
+     "fn": 8,
+     "f1": 0.5
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 20,
+   "probe_exact_OOD": 0.4118,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.2634,
+   "per_class": {
+    "Sponge": {
+     "tp": 319,
+     "fp": 61,
+     "fn": 42,
+     "f1": 0.861
+    },
+    "Clip": {
+     "tp": 315,
+     "fp": 157,
+     "fn": 55,
+     "f1": 0.7482
+    },
+    "Specimen Bag": {
+     "tp": 23,
+     "fp": 48,
+     "fn": 4,
+     "f1": 0.4694
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 136,
+     "fp": 85,
+     "fn": 6,
+     "f1": 0.7493
+    },
+    "Needle": {
+     "tp": 25,
+     "fp": 9,
+     "fn": 116,
+     "f1": 0.2857
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 172,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 10,
+     "fp": 10,
+     "fn": 8,
+     "f1": 0.5263
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 22,
+   "probe_exact_OOD": 0.4795,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1957,
+   "per_class": {
+    "Sponge": {
+     "tp": 324,
+     "fp": 33,
+     "fn": 37,
+     "f1": 0.9025
+    },
+    "Clip": {
+     "tp": 311,
+     "fp": 170,
+     "fn": 59,
+     "f1": 0.7309
+    },
+    "Specimen Bag": {
+     "tp": 22,
+     "fp": 8,
+     "fn": 5,
+     "f1": 0.7719
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 137,
+     "fn": 2,
+     "f1": 0.6683
+    },
+    "Needle": {
+     "tp": 24,
+     "fp": 13,
+     "fn": 117,
+     "f1": 0.2697
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 148,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 10,
+     "fp": 15,
+     "fn": 8,
+     "f1": 0.4651
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 24,
+   "probe_exact_OOD": 0.5026,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1726,
+   "per_class": {
+    "Sponge": {
+     "tp": 327,
+     "fp": 36,
+     "fn": 34,
+     "f1": 0.9033
+    },
+    "Clip": {
+     "tp": 306,
+     "fp": 149,
+     "fn": 64,
+     "f1": 0.7418
+    },
+    "Specimen Bag": {
+     "tp": 22,
+     "fp": 7,
+     "fn": 5,
+     "f1": 0.7857
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 175,
+     "fn": 2,
+     "f1": 0.6127
+    },
+    "Needle": {
+     "tp": 41,
+     "fp": 8,
+     "fn": 100,
+     "f1": 0.4316
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 111,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 7,
+     "fp": 16,
+     "fn": 11,
+     "f1": 0.3415
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 26,
+   "probe_exact_OOD": 0.5243,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1509,
+   "per_class": {
+    "Sponge": {
+     "tp": 334,
+     "fp": 52,
+     "fn": 27,
+     "f1": 0.8942
+    },
+    "Clip": {
+     "tp": 311,
+     "fp": 157,
+     "fn": 59,
+     "f1": 0.7422
+    },
+    "Specimen Bag": {
+     "tp": 22,
+     "fp": 5,
+     "fn": 5,
+     "f1": 0.8148
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 221,
+     "fn": 2,
+     "f1": 0.5567
+    },
+    "Needle": {
+     "tp": 52,
+     "fp": 7,
+     "fn": 89,
+     "f1": 0.52
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 31,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 7,
+     "fp": 13,
+     "fn": 11,
+     "f1": 0.3684
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 28,
+   "probe_exact_OOD": 0.4974,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1777,
+   "per_class": {
+    "Sponge": {
+     "tp": 341,
+     "fp": 116,
+     "fn": 20,
+     "f1": 0.8337
+    },
+    "Clip": {
+     "tp": 313,
+     "fp": 158,
+     "fn": 57,
+     "f1": 0.7444
+    },
+    "Specimen Bag": {
+     "tp": 21,
+     "fp": 4,
+     "fn": 6,
+     "f1": 0.8077
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 227,
+     "fn": 2,
+     "f1": 0.5501
+    },
+    "Needle": {
+     "tp": 64,
+     "fp": 12,
+     "fn": 77,
+     "f1": 0.5899
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 5,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 5,
+     "fp": 7,
+     "fn": 13,
+     "f1": 0.3333
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 30,
+   "probe_exact_OOD": 0.5153,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1598,
+   "per_class": {
+    "Sponge": {
+     "tp": 341,
+     "fp": 118,
+     "fn": 20,
+     "f1": 0.8317
+    },
+    "Clip": {
+     "tp": 310,
+     "fp": 156,
+     "fn": 60,
+     "f1": 0.7416
+    },
+    "Specimen Bag": {
+     "tp": 22,
+     "fp": 4,
+     "fn": 5,
+     "f1": 0.8302
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 184,
+     "fn": 2,
+     "f1": 0.6009
+    },
+    "Needle": {
+     "tp": 93,
+     "fp": 8,
+     "fn": 48,
+     "f1": 0.7686
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 12,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 6,
+     "fp": 6,
+     "fn": 12,
+     "f1": 0.4
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 32,
+   "probe_exact_OOD": 0.5205,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1547,
+   "per_class": {
+    "Sponge": {
+     "tp": 342,
+     "fp": 122,
+     "fn": 19,
+     "f1": 0.8291
+    },
+    "Clip": {
+     "tp": 313,
+     "fp": 158,
+     "fn": 57,
+     "f1": 0.7444
+    },
+    "Specimen Bag": {
+     "tp": 20,
+     "fp": 5,
+     "fn": 7,
+     "f1": 0.7692
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 139,
+     "fp": 170,
+     "fn": 3,
+     "f1": 0.6164
+    },
+    "Needle": {
+     "tp": 104,
+     "fp": 9,
+     "fn": 37,
+     "f1": 0.8189
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 13,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 8,
+     "fp": 6,
+     "fn": 10,
+     "f1": 0.5
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 34,
+   "probe_exact_OOD": 0.5051,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1701,
+   "per_class": {
+    "Sponge": {
+     "tp": 341,
+     "fp": 126,
+     "fn": 20,
+     "f1": 0.8237
+    },
+    "Clip": {
+     "tp": 316,
+     "fp": 167,
+     "fn": 54,
+     "f1": 0.7409
+    },
+    "Specimen Bag": {
+     "tp": 19,
+     "fp": 5,
+     "fn": 8,
+     "f1": 0.7451
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 142,
+     "fp": 185,
+     "fn": 0,
+     "f1": 0.6055
+    },
+    "Needle": {
+     "tp": 114,
+     "fp": 19,
+     "fn": 27,
+     "f1": 0.8321
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 13,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 9,
+     "fp": 4,
+     "fn": 9,
+     "f1": 0.5806
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  },
+  {
+   "layer": 36,
+   "probe_exact_OOD": 0.5128,
+   "model_exact_OOD": 0.6752,
+   "delta": -0.1624,
+   "per_class": {
+    "Sponge": {
+     "tp": 337,
+     "fp": 97,
+     "fn": 24,
+     "f1": 0.8478
+    },
+    "Clip": {
+     "tp": 320,
+     "fp": 200,
+     "fn": 50,
+     "f1": 0.7191
+    },
+    "Specimen Bag": {
+     "tp": 19,
+     "fp": 3,
+     "fn": 8,
+     "f1": 0.7755
+    },
+    "Silicone Loop": null,
+    "External Drain": {
+     "tp": 140,
+     "fp": 148,
+     "fn": 2,
+     "f1": 0.6512
+    },
+    "Needle": {
+     "tp": 110,
+     "fp": 18,
+     "fn": 31,
+     "f1": 0.8178
+    },
+    "Gallstone": {
+     "tp": 0,
+     "fp": 14,
+     "fn": 0,
+     "f1": 0.0
+    },
+    "Specimen": {
+     "tp": 9,
+     "fp": 2,
+     "fn": 9,
+     "f1": 0.6207
+    },
+    "Mesh": null,
+    "Absorbable Hemostatic Agent": null
+   }
+  }
+ ]
+}
