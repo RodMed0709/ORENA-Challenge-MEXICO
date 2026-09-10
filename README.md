@@ -126,6 +126,19 @@ and must not be used for clinical decision-making.**
 
 ---
 
+## ⚠️ The git history was rewritten on 2026-09-09
+
+Every commit hash changed. **If you cloned this repository before that date, re-clone it** —
+`git pull` will refuse, and `git reset --hard origin/main` is only safe if you have nothing
+unpushed.
+
+The rewrite removed material this project has no right to redistribute from a public URL:
+third-party papers, the organizers' challenge documents, frames from the challenge corpus
+(patient-derived imagery under the ORENA data-use agreement), and a third party's server
+connection details. `git rm` alone was not enough — it clears the current tip and leaves every
+earlier commit downloadable. The reasoning is in
+[`the-history-was-rewritten`](context/decisions/the-history-was-rewritten.md).
+
 ## 🧭 How to read this repository
 
 | Path | What |
