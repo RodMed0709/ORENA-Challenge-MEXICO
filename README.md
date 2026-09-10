@@ -36,25 +36,40 @@ numbers we published in our first month were misleading, and that section is the
 
 ## 📦 Released models
 
-> **Status: not yet uploaded.** The weights below exist and are reproducible from this
-> repository; the public hosting locations are still being set up and this table will carry the
-> links when they are.
+Hosted on Hugging Face. Each repository holds the **full merged model at its root** — load it
+directly, no extra step — plus the LoRA adapter alone under `adapter/` for anyone who prefers to
+apply it themselves.
 
-| Model | What it is | Score | Where |
+> ⏳ **The four repositories are uploaded but still private while we review them.** The links
+> below are their final URLs and will resolve as soon as they are flipped to public.
+
+| Model | What it is | Platform score | Link |
 |---|---|---|---|
-| `frame-r42-ep4` | Qwen3-VL-8B-Instruct + LoRA, rung 42 corpus (19,384 rows), epoch 4 | 0.5809 | _pending_ |
-| `frame-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — | _pending_ |
-| `frame-r61-ep4` / `ep2` | the same recipe on the full released corpus (20,667 rows) — the final test entry | _pending_ | _pending_ |
-| `frame-algorithm` (Docker image) | the offline inference container, transformers 4.57.6 + torch 2.5.1+cu124 | — | _pending_ |
+| **`frame-qwen3vl-8b-r42-ep4`** | rung 42 corpus (19,384 rows / 122 videos), epoch 4 — **our best measured checkpoint** | **0.5809** | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep4) |
+| `frame-qwen3vl-8b-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — (pair: **0.58128**) | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep2) |
+| `frame-qwen3vl-8b-r61-ep4` | the same recipe on the full released corpus (20,667 rows / 130 videos) — the final test entry, model A | not published | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep4) |
+| `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | not published | [🤗](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep2) |
 
-Each entry will ship its LoRA adapter, the merged checkpoint, and the exact `swift export`
-command that produced it. Until then, `submissions/<id>/README.md` documents how to regenerate
-every artifact from the training config in `experiments/<rung>/`.
+🔴 **Start with `r42-ep4` if you want a checkpoint with a verified number.** The two `r61`
+checkpoints have none, and cannot honestly have one: they were trained on the full released
+corpus, which includes the videos this campaign held out for evaluation, so any local metric on
+those videos is a memorisation readout. They are published because they are what we submitted,
+not because they are known to be better.
+
+**The config files shipped in each repository are the ones the challenge platform accepted** —
+the `transformers` **4.57** shape (`rope_scaling` + hoisted `rope_theta`). 5.x writes
+`rope_parameters` instead, which 4.57 cannot read; that mismatch cost us a debugging cycle, so
+the validated shape is what we publish. The weight index was verified tensor by tensor against
+the shards of all four checkpoints: 750 tensors, 4 shards, exact match.
+
+The Docker inference image is **not** published: it is 30 GB compressed and adds nothing over the
+`Dockerfile` in `submissions/08-rung61-pair-ep4-ep2/` plus these weights.
 
 **Reproducing a checkpoint** needs the challenge data (access via the organizers, see below), one
-80 GB GPU, and the recipe recorded in the owning experiment: LoRA `r 8`, `α 32`, lr `2e-4`
-cosine, batch 1 × grad-accum 16, 5 epochs, seed 42, nine target modules including the three
-`deepstack` mergers, trained with **ms-swift 4.4**.
+80 GB GPU, and the recipe recorded in the owning experiment: LoRA `r 8`, `α 32`, dropout `0.1`,
+lr `2e-4` cosine, warmup `0.03`, weight decay `0.1`, batch 1 × grad-accum 16, 5 epochs, seed 42,
+`bfloat16`, nine target modules including the three `deepstack` mergers, and **no vision freeze**
+(`freeze_vit: false`, `freeze_aligner: false`), trained with **ms-swift 4.4**.
 
 ---
 
