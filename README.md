@@ -42,10 +42,10 @@ apply it themselves.
 
 | Model | What it is | Platform score | Link |
 |---|---|---|---|
-| **`frame-qwen3vl-8b-r42-ep4`** | rung 42 corpus (19,384 rows / 122 videos), epoch 4 — **our best measured checkpoint** | **0.5809** | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep4) |
-| `frame-qwen3vl-8b-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — (pair: **0.58128**) | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r42-ep2) |
-| `frame-qwen3vl-8b-r61-ep4` | the same recipe on the full released corpus (20,667 rows / 130 videos) — the final test entry, model A | not published | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep4) |
-| `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | _no score published_ | [🤗 open](https://huggingface.co/LeOkna/frame-qwen3vl-8b-r61-ep2) |
+| **`frame-qwen3vl-8b-r42-ep4`** | rung 42 corpus (19,384 rows / 122 videos), epoch 4 — **our best measured checkpoint** | **0.5809** | [🤗 open](https://huggingface.co/Mexico-Oxford-TEAM/frame-qwen3vl-8b-r42-ep4) |
+| `frame-qwen3vl-8b-r42-ep2` | the same run at epoch 2 — model B of the arbitration pair | — (pair: **0.58128**) | [🤗 open](https://huggingface.co/Mexico-Oxford-TEAM/frame-qwen3vl-8b-r42-ep2) |
+| `frame-qwen3vl-8b-r61-ep4` | the same recipe on the full released corpus (20,667 rows / 130 videos) — the final test entry, model A | not published | [🤗 open](https://huggingface.co/Mexico-Oxford-TEAM/frame-qwen3vl-8b-r61-ep4) |
+| `frame-qwen3vl-8b-r61-ep2` | the same run at epoch 2 — model B | _no score published_ | [🤗 open](https://huggingface.co/Mexico-Oxford-TEAM/frame-qwen3vl-8b-r61-ep2) |
 
 **They are meant to be run in pairs** — `ep4` as model A, `ep2` as model B of the same run. A
 answers; where its answer parses entirely as legal class names, B is asked the same question and
